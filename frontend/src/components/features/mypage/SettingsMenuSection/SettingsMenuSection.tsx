@@ -1,7 +1,7 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
-import { Card, ListItem } from '@/src/components/common';
-import { colors, radii } from '@/src/theme/tokens';
+import { StyleSheet } from "react-native";
+import { Card } from "@/src/components/common/Card/Card";
+import { ListItem } from "@/src/components/common/ListItem/ListItem";
+import { colors, radii } from "@/src/theme/tokens";
 
 export type SettingsMenuItem = {
   id: string;
@@ -29,6 +29,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radii.card,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
 });

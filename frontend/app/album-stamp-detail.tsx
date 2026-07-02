@@ -2,10 +2,10 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet";
+import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
 import { colors, radii, spacing } from "@/src/theme/tokens";
-import { StampDetailPhoto } from "@/src/components/features/album/detail/StampDetailPhoto";
-import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard";
+import { StampDetailPhoto } from "@/src/components/features/album/detail/StampDetailPhoto/StampDetailPhoto";
+import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
 
 export default function StampDetailScreen() {
   const router = useRouter();

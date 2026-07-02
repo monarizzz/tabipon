@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-native";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { fn } from "storybook/test";
+import { Palette } from "lucide-react-native";
 
 import { CommonButton } from "./CommonButton";
 import { colors } from "@/src/theme/tokens";
@@ -42,6 +43,6 @@ export const WithIcon: Story = {
   args: {
     variant: "secondary",
     label: "デザインを変更する",
-    icon: <Text style={{ color: colors.secondary, fontSize: 14 }}>🎨</Text>,
+    icon: <Palette size={14} color={colors.secondary} />,
   },
 };

@@ -1,6 +1,6 @@
 import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { NavBar } from "@/src/components/common";
+import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
 import { colors } from "@/src/theme/tokens";
 
 export default function HelpScreen() {

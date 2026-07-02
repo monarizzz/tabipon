@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Stamp, CommonButton } from "@/src/components/common";
+import { Palette } from "lucide-react-native";
+import { Stamp } from "@/src/components/common/Stamp/Stamp";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
@@ -21,7 +23,7 @@ export function StampDetailPhoto({
         label="デザインを変更する"
         onPress={onPressDesignChange}
         variant="secondary"
-        icon={<Text style={styles.icon}>🎨</Text>}
+        icon={<Palette size={14} color={colors.secondary} />}
       />
       <Text style={styles.spotName}>{spotName}</Text>
     </View>
@@ -33,9 +35,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xxl,
     paddingVertical: spacing.l,
-  },
-  icon: {
-    fontSize: 14,
   },
   spotName: {
     fontSize: typography.sectionHeading.fontSize,

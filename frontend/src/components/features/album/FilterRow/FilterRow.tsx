@@ -1,6 +1,6 @@
 import { View, StyleSheet } from "react-native";
 import { spacing } from "@/src/theme/tokens";
-import { FilterChip } from "@/src/components/features/album/FilterChip";
+import { FilterChip } from "@/src/components/features/album/FilterChip/FilterChip";
 
 export type FilterOption = {
   id: string;
