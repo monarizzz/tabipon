@@ -46,7 +46,7 @@
     "web": "expo start --web",
     "storybook:ios": "cross-env STORYBOOK_ENABLED=true expo start --ios",
     "storybook:android": "cross-env STORYBOOK_ENABLED=true expo start --android",
-    "storybook:web": "cross-env STORYBOOK_ENABLED=true expo start --web"
+    "storybook:web": "cross-env STORYBOOK_ENABLED=true expo start --web --port 6006"
   },
   "private": true
 }
