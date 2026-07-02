@@ -1,19 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
 
-import { Header } from './Header';
+import { Header } from "./Header";
 
 const meta = {
-  title: 'common/Header',
   component: Header,
   decorators: [
     (Story) => (
-      <View style={{ flex: 1, alignItems: 'stretch', padding: 16 }}>
+      <View style={{ flex: 1, alignItems: "stretch", padding: 16 }}>
         <Story />
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Header>;
 
 export default meta;
@@ -21,9 +20,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: { title: 'アルバム' },
+  args: { title: "アルバム" },
 };
 
 export const WithSubtitle: Story = {
-  args: { title: 'アルバム', subtitle: 'スタンプ 12枚' },
+  args: { title: "アルバム", subtitle: "スタンプ 12枚" },
 };

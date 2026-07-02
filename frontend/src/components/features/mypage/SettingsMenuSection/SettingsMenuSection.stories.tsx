@@ -1,17 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
-import { fn } from 'storybook/test';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
+import { fn } from "storybook/test";
 
-import { SettingsMenuSection, type SettingsMenuItem } from './SettingsMenuSection';
+import {
+  SettingsMenuSection,
+  type SettingsMenuItem,
+} from "./SettingsMenuSection";
 
 const ITEMS: SettingsMenuItem[] = [
-  { id: 'notifications', label: '通知設定', onPress: fn() },
-  { id: 'privacy', label: 'プライバシー', onPress: fn() },
-  { id: 'help', label: 'ヘルプ', onPress: fn() },
+  { id: "notifications", label: "通知設定", onPress: fn() },
+  { id: "privacy", label: "プライバシー", onPress: fn() },
+  { id: "help", label: "ヘルプ", onPress: fn() },
 ];
 
 const meta = {
-  title: 'features/mypage/SettingsMenuSection',
   component: SettingsMenuSection,
   decorators: [
     (Story) => (
@@ -20,7 +22,7 @@ const meta = {
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: { items: ITEMS },
 } satisfies Meta<typeof SettingsMenuSection>;
 

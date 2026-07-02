@@ -5,7 +5,6 @@ import { StampHelp } from "./StampHelp";
 import { colors } from "@/src/theme/tokens";
 
 const meta = {
-  title: "features/camera/InstructionSheet",
   component: StampHelp,
   decorators: [
     (Story) => (

@@ -1,21 +1,20 @@
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
-import { fn } from 'storybook/test';
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
+import { fn } from "storybook/test";
 
-import { Toggle } from './Toggle';
+import { Toggle } from "./Toggle";
 
 const meta = {
-  title: 'common/Toggle',
   component: Toggle,
   decorators: [
     (Story) => (
-      <View style={{ flex: 1, alignItems: 'flex-start', padding: 16 }}>
+      <View style={{ flex: 1, alignItems: "flex-start", padding: 16 }}>
         <Story />
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: { value: false, onValueChange: fn() },
 } satisfies Meta<typeof Toggle>;
 

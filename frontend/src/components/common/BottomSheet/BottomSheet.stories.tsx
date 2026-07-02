@@ -1,14 +1,13 @@
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { fn } from 'storybook/test';
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { fn } from "storybook/test";
 
-import { BottomSheet } from './BottomSheet';
-import { colors } from '@/src/theme/tokens';
+import { BottomSheet } from "./BottomSheet";
+import { colors } from "@/src/theme/tokens";
 
 const meta = {
-  title: 'common/BottomSheet',
   component: BottomSheet,
   decorators: [
     (Story) => (
@@ -17,7 +16,7 @@ const meta = {
       </GestureHandlerRootView>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: { onClose: fn() },
 } satisfies Meta<typeof BottomSheet>;
 
@@ -33,7 +32,11 @@ export const Interactive: Story = {
       <View style={{ flex: 1, padding: 16 }}>
         <TouchableOpacity
           onPress={() => setVisible(true)}
-          style={{ padding: 12, backgroundColor: colors.surface, borderRadius: 12 }}
+          style={{
+            padding: 12,
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+          }}
         >
           <Text style={{ color: colors.textPrimary }}>Open sheet</Text>
         </TouchableOpacity>
@@ -45,7 +48,13 @@ export const Interactive: Story = {
             setVisible(false);
           }}
         >
-          <Text style={{ color: colors.textPrimary, fontSize: 13, fontWeight: '600' }}>
+          <Text
+            style={{
+              color: colors.textPrimary,
+              fontSize: 13,
+              fontWeight: "600",
+            }}
+          >
             デザインを変更する
           </Text>
         </BottomSheet>

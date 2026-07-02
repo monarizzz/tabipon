@@ -1,14 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { Text } from 'react-native';
-import { fn } from 'storybook/test';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { Text } from "react-native";
+import { fn } from "storybook/test";
 
-import { ListItem } from './ListItem';
+import { ListItem } from "./ListItem";
 
 const meta = {
-  title: 'common/ListItem',
   component: ListItem,
-  tags: ['autodocs'],
-  args: { label: 'List item', onPress: fn() },
+  tags: ["autodocs"],
+  args: { label: "List item", onPress: fn() },
 } satisfies Meta<typeof ListItem>;
 
 export default meta;

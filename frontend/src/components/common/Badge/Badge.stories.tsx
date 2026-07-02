@@ -1,20 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
 
-import { Badge } from './Badge';
+import { Badge } from "./Badge";
 
 const meta = {
-  title: 'common/Badge',
   component: Badge,
   decorators: [
     (Story) => (
-      <View style={{ flex: 1, alignItems: 'flex-start', padding: 16 }}>
+      <View style={{ flex: 1, alignItems: "flex-start", padding: 16 }}>
         <Story />
       </View>
     ),
   ],
-  tags: ['autodocs'],
-  args: { label: 'Badge' },
+  tags: ["autodocs"],
+  args: { label: "Badge" },
 } satisfies Meta<typeof Badge>;
 
 export default meta;
@@ -24,5 +23,5 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const CustomColor: Story = {
-  args: { color: '#16A34A' },
+  args: { color: "#16A34A" },
 };

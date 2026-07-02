@@ -1,18 +1,17 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
-import { fn } from 'storybook/test';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
+import { fn } from "storybook/test";
 
-import { StampGrid, type StampGridItem } from './StampGrid';
+import { StampGrid, type StampGridItem } from "./StampGrid";
 
 const STAMPS: StampGridItem[] = [
-  { id: '1', name: 'スカイツリー', date: '2026.06.28', obtained: true },
-  { id: '2', name: '浅草寺', obtained: false },
-  { id: '3', name: '皇居', date: '2026.06.25', obtained: true },
-  { id: '4', name: '東京タワー', obtained: false },
+  { id: "1", name: "スカイツリー", date: "2026.06.28", obtained: true },
+  { id: "2", name: "浅草寺", obtained: false },
+  { id: "3", name: "皇居", date: "2026.06.25", obtained: true },
+  { id: "4", name: "東京タワー", obtained: false },
 ];
 
 const meta = {
-  title: 'features/album/stamp-rally/StampGrid',
   component: StampGrid,
   decorators: [
     (Story) => (
@@ -21,7 +20,7 @@ const meta = {
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
     onPressStamp: fn(),
   },

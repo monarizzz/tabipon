@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Stamp, CommonButton } from '@/src/components/common';
-import { colors, typography, spacing } from '@/src/theme/tokens';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Stamp, CommonButton } from "@/src/components/common";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
   spotName: string;
@@ -9,7 +9,11 @@ type Props = {
   onPressDesignChange: () => void;
 };
 
-export function StampDetailPhoto({ spotName, imageUri, onPressDesignChange }: Props) {
+export function StampDetailPhoto({
+  spotName,
+  imageUri,
+  onPressDesignChange,
+}: Props) {
   return (
     <View style={styles.wrap}>
       <Stamp imageUri={imageUri} />
@@ -26,7 +30,7 @@ export function StampDetailPhoto({ spotName, imageUri, onPressDesignChange }: Pr
 
 const styles = StyleSheet.create({
   wrap: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: spacing.xxl,
     paddingVertical: spacing.l,
   },

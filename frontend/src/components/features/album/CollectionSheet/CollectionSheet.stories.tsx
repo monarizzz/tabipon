@@ -8,7 +8,6 @@ import { CollectionSheet } from "./CollectionSheet";
 import { colors } from "@/src/theme/tokens";
 
 const meta = {
-  title: "features/album/stamp-rally/CollectionSheet",
   component: CollectionSheet,
   decorators: [
     (Story) => (
