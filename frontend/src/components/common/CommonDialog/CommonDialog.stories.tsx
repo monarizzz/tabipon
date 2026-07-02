@@ -3,10 +3,10 @@ import { useState } from "react";
 import { View } from "react-native";
 import { fn } from "storybook/test";
 
-import { ConfirmDialog } from "./ConfirmDialog";
+import { CommonDialog } from "./CommonDialog";
 
 const meta = {
-  component: ConfirmDialog,
+  component: CommonDialog,
   decorators: [
     (Story) => (
       <View style={{ flex: 1 }}>
@@ -23,7 +23,7 @@ const meta = {
     onCancel: fn(),
     onConfirm: fn(),
   },
-} satisfies Meta<typeof ConfirmDialog>;
+} satisfies Meta<typeof CommonDialog>;
 
 export default meta;
 
@@ -34,7 +34,7 @@ export const Default: Story = {
     const [visible, setVisible] = useState(args.visible);
 
     return (
-      <ConfirmDialog
+      <CommonDialog
         {...args}
         visible={visible}
         onCancel={() => {
