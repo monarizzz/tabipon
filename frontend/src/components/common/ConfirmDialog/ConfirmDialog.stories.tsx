@@ -1,12 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { useState } from 'react';
-import { View } from 'react-native';
-import { fn } from 'storybook/test';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { useState } from "react";
+import { View } from "react-native";
+import { fn } from "storybook/test";
 
-import { ConfirmDialog } from './ConfirmDialog';
+import { ConfirmDialog } from "./ConfirmDialog";
 
 const meta = {
-  title: 'common/ConfirmDialog',
   component: ConfirmDialog,
   decorators: [
     (Story) => (
@@ -15,12 +14,12 @@ const meta = {
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
     visible: true,
-    title: '編集内容を破棄しますか？',
-    message: 'タブを切り替えると、現在の編集内容が失われます。',
-    confirmLabel: '破棄する',
+    title: "編集内容を破棄しますか？",
+    message: "タブを切り替えると、現在の編集内容が失われます。",
+    confirmLabel: "破棄する",
     onCancel: fn(),
     onConfirm: fn(),
   },

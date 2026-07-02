@@ -1,17 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
-import { fn } from 'storybook/test';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
+import { fn } from "storybook/test";
 
-import { RecentCollectionsSection, type RecentCollectionItem } from './RecentCollectionsSection';
+import {
+  RecentCollectionsSection,
+  type RecentCollectionItem,
+} from "./RecentCollectionsSection";
 
 const ITEMS: RecentCollectionItem[] = [
-  { id: '1', name: '浅草寺' },
-  { id: '2', name: 'スカイツリー' },
-  { id: '3', name: '皇居' },
+  { id: "1", name: "浅草寺" },
+  { id: "2", name: "スカイツリー" },
+  { id: "3", name: "皇居" },
 ];
 
 const meta = {
-  title: 'features/mypage/RecentCollectionsSection',
   component: RecentCollectionsSection,
   decorators: [
     (Story) => (
@@ -20,7 +22,7 @@ const meta = {
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
     items: ITEMS,
     onPressSeeAll: fn(),

@@ -1,19 +1,18 @@
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
-import { fn } from 'storybook/test';
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
+import { fn } from "storybook/test";
 
-import { FilterRow, type FilterOption } from './FilterRow';
+import { FilterRow, type FilterOption } from "./FilterRow";
 
 const FILTERS: FilterOption[] = [
-  { id: 'all', label: 'すべて' },
-  { id: 'tokyo', label: '東京旅行' },
-  { id: 'kyoto', label: '京都' },
-  { id: 'walk', label: '散歩' },
+  { id: "all", label: "すべて" },
+  { id: "tokyo", label: "東京旅行" },
+  { id: "kyoto", label: "京都" },
+  { id: "walk", label: "散歩" },
 ];
 
 const meta = {
-  title: 'features/album/stamp-rally/FilterRow',
   component: FilterRow,
   decorators: [
     (Story) => (
@@ -22,10 +21,10 @@ const meta = {
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
     filters: FILTERS,
-    selectedFilterId: 'all',
+    selectedFilterId: "all",
     onSelectFilter: fn(),
     onAddPress: fn(),
   },

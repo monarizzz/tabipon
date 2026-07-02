@@ -1,19 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View, Text } from 'react-native';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View, Text } from "react-native";
 
-import { Card } from './Card';
+import { Card } from "./Card";
 
 const meta = {
-  title: 'common/Card',
   component: Card,
   decorators: [
     (Story) => (
-      <View style={{ flex: 1, alignItems: 'flex-start', padding: 16 }}>
+      <View style={{ flex: 1, alignItems: "flex-start", padding: 16 }}>
         <Story />
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Card>;
 
 export default meta;

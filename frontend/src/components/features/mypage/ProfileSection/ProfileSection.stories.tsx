@@ -1,10 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
 
-import { ProfileSection } from './ProfileSection';
+import { ProfileSection } from "./ProfileSection";
 
 const meta = {
-  title: 'features/mypage/ProfileSection',
   component: ProfileSection,
   decorators: [
     (Story) => (
@@ -13,10 +12,10 @@ const meta = {
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
-    name: 'たびすたんぷ太郎',
-    registeredDate: '2025.02.16',
+    name: "たびすたんぷ太郎",
+    registeredDate: "2025.02.16",
   },
 } satisfies Meta<typeof ProfileSection>;
 

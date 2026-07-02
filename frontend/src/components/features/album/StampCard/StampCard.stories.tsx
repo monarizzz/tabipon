@@ -1,10 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
 
-import { StampCard } from './StampCard';
+import { StampCard } from "./StampCard";
 
 const meta = {
-  title: 'features/album/stamp-rally/StampCard',
   component: StampCard,
   decorators: [
     (Story) => (
@@ -13,8 +12,8 @@ const meta = {
       </View>
     ),
   ],
-  tags: ['autodocs'],
-  args: { name: 'スカイツリー' },
+  tags: ["autodocs"],
+  args: { name: "スカイツリー" },
 } satisfies Meta<typeof StampCard>;
 
 export default meta;
@@ -22,7 +21,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Obtained: Story = {
-  args: { obtained: true, date: '2026.06.28' },
+  args: { obtained: true, date: "2026.06.28" },
 };
 
 export const Unobtained: Story = {

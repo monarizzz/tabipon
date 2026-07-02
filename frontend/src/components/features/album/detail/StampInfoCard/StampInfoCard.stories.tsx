@@ -1,10 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
 
-import { StampInfoCard } from './StampInfoCard';
+import { StampInfoCard } from "./StampInfoCard";
 
 const meta = {
-  title: 'features/album/stamp-rally/StampInfoCard',
   component: StampInfoCard,
   decorators: [
     (Story) => (
@@ -13,11 +12,11 @@ const meta = {
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
-    date: '2026.06.28',
-    location: '東京・墨田区',
-    memo: '晴れた日に行ってきた！展望台からの眺めが最高だった。',
+    date: "2026.06.28",
+    location: "東京・墨田区",
+    memo: "晴れた日に行ってきた！展望台からの眺めが最高だった。",
   },
 } satisfies Meta<typeof StampInfoCard>;
 

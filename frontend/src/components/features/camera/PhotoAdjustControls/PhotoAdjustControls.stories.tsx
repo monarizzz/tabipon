@@ -1,13 +1,12 @@
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { fn } from 'storybook/test';
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { fn } from "storybook/test";
 
-import { PhotoAdjustControls } from './PhotoAdjustControls';
+import { PhotoAdjustControls } from "./PhotoAdjustControls";
 
 const meta = {
-  title: 'features/camera/PhotoAdjustControls',
   component: PhotoAdjustControls,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
     onConfirm: fn(),
     onChangeZoom: fn(),

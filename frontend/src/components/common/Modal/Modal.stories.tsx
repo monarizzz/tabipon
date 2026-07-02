@@ -1,13 +1,12 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { Text } from 'react-native';
-import { fn } from 'storybook/test';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { Text } from "react-native";
+import { fn } from "storybook/test";
 
-import { Modal } from './Modal';
+import { Modal } from "./Modal";
 
 const meta = {
-  title: 'common/Modal',
   component: Modal,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: { onClose: fn() },
 } satisfies Meta<typeof Modal>;
 

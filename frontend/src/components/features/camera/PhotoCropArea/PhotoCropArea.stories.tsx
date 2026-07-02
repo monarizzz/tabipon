@@ -1,10 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
 
-import { PhotoCropArea } from './PhotoCropArea';
+import { PhotoCropArea } from "./PhotoCropArea";
 
 const meta = {
-  title: 'features/camera/PhotoCropArea',
   component: PhotoCropArea,
   decorators: [
     (Story) => (
@@ -13,7 +12,7 @@ const meta = {
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof PhotoCropArea>;
 
 export default meta;
@@ -23,5 +22,5 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const WithPhoto: Story = {
-  args: { imageUri: 'https://picsum.photos/seed/crop/400/600' },
+  args: { imageUri: "https://picsum.photos/seed/crop/400/600" },
 };

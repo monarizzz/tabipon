@@ -1,11 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
-import { fn } from 'storybook/test';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
+import { fn } from "storybook/test";
 
-import { FilterChip } from './FilterChip';
+import { FilterChip } from "./FilterChip";
 
 const meta = {
-  title: 'features/album/stamp-rally/FilterChip',
   component: FilterChip,
   decorators: [
     (Story) => (
@@ -14,8 +13,8 @@ const meta = {
       </View>
     ),
   ],
-  tags: ['autodocs'],
-  args: { label: 'すべて', onPress: fn() },
+  tags: ["autodocs"],
+  args: { label: "すべて", onPress: fn() },
 } satisfies Meta<typeof FilterChip>;
 
 export default meta;
@@ -29,5 +28,5 @@ export const Selected: Story = {
 };
 
 export const Add: Story = {
-  args: { label: '+', variant: 'add' },
+  args: { label: "+", variant: "add" },
 };

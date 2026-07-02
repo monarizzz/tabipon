@@ -1,19 +1,25 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
 
-import { Stamp } from './Stamp';
+import { Stamp } from "./Stamp";
 
 const meta = {
-  title: 'common/Stamp',
   component: Stamp,
   decorators: [
     (Story) => (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 16,
+        }}
+      >
         <Story />
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof Stamp>;
 
 export default meta;
@@ -28,7 +34,7 @@ export const Small: Story = {
 
 export const WithImage: Story = {
   args: {
-    imageUri: 'https://picsum.photos/seed/skytree/260/260',
+    imageUri: "https://picsum.photos/seed/skytree/260/260",
   },
 };
 

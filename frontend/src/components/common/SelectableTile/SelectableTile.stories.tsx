@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
-import { fn } from 'storybook/test';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
+import { fn } from "storybook/test";
 
-import { SelectableTile } from './SelectableTile';
-import { colors } from '@/src/theme/tokens';
+import { SelectableTile } from "./SelectableTile";
+import { colors } from "@/src/theme/tokens";
 
 const Thumb = ({ color = colors.textPlaceholder }: { color?: string }) => (
   <View
@@ -18,17 +18,16 @@ const Thumb = ({ color = colors.textPlaceholder }: { color?: string }) => (
 );
 
 const meta = {
-  title: 'common/SelectableTile',
   component: SelectableTile,
   decorators: [
     (Story) => (
-      <View style={{ flex: 1, alignItems: 'flex-start', padding: 16 }}>
+      <View style={{ flex: 1, alignItems: "flex-start", padding: 16 }}>
         <Story />
       </View>
     ),
   ],
-  tags: ['autodocs'],
-  args: { label: 'クラシック', onPress: fn(), children: <Thumb /> },
+  tags: ["autodocs"],
+  args: { label: "クラシック", onPress: fn(), children: <Thumb /> },
 } satisfies Meta<typeof SelectableTile>;
 
 export default meta;
@@ -43,7 +42,7 @@ export const Selected: Story = {
 
 export const Row: Story = {
   render: (args) => (
-    <View style={{ flexDirection: 'row', gap: 10 }}>
+    <View style={{ flexDirection: "row", gap: 10 }}>
       <SelectableTile {...args} label="クラシック" selected>
         <Thumb color={colors.textMuted} />
       </SelectableTile>

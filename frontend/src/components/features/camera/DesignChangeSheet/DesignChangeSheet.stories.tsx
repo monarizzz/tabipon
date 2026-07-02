@@ -1,11 +1,11 @@
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { fn } from 'storybook/test';
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { fn } from "storybook/test";
 
-import { DesignChangeSheet, type FrameStyleOption } from './DesignChangeSheet';
-import { colors } from '@/src/theme/tokens';
+import { DesignChangeSheet, type FrameStyleOption } from "./DesignChangeSheet";
+import { colors } from "@/src/theme/tokens";
 
 const Thumb = ({ color = colors.textMuted }: { color?: string }) => (
   <View
@@ -20,15 +20,26 @@ const Thumb = ({ color = colors.textMuted }: { color?: string }) => (
 );
 
 const FRAME_STYLES: FrameStyleOption[] = [
-  { id: 'classic', label: 'クラシック', preview: <Thumb color={colors.textMuted} /> },
-  { id: 'vintage', label: 'ヴィンテージ', preview: <Thumb /> },
-  { id: 'minimal', label: 'ミニマル', preview: <Thumb /> },
+  {
+    id: "classic",
+    label: "クラシック",
+    preview: <Thumb color={colors.textMuted} />,
+  },
+  { id: "vintage", label: "ヴィンテージ", preview: <Thumb /> },
+  { id: "minimal", label: "ミニマル", preview: <Thumb /> },
 ];
 
-const COLOR_OPTIONS = ['#333333', '#ff6b6b', '#fcc06d', '#6de8b9', '#6bc1ff', '#be91fa', '#ff94dd'];
+const COLOR_OPTIONS = [
+  "#333333",
+  "#ff6b6b",
+  "#fcc06d",
+  "#6de8b9",
+  "#6bc1ff",
+  "#be91fa",
+  "#ff94dd",
+];
 
 const meta = {
-  title: 'features/camera/DesignChangeSheet',
   component: DesignChangeSheet,
   decorators: [
     (Story) => (
@@ -37,7 +48,7 @@ const meta = {
       </GestureHandlerRootView>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
     frameStyles: FRAME_STYLES,
     colorOptions: COLOR_OPTIONS,
@@ -56,23 +67,31 @@ type Story = StoryObj<typeof meta>;
 export const Interactive: Story = {
   args: {
     visible: false,
-    selectedFrameStyleId: 'classic',
-    selectedColor: '#333333',
+    selectedFrameStyleId: "classic",
+    selectedColor: "#333333",
     showLandmarkName: true,
   },
   render: function Render(args) {
     const [visible, setVisible] = React.useState(false);
     const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
-      args.selectedFrameStyleId
+      args.selectedFrameStyleId,
     );
-    const [selectedColor, setSelectedColor] = React.useState(args.selectedColor);
-    const [showLandmarkName, setShowLandmarkName] = React.useState(args.showLandmarkName);
+    const [selectedColor, setSelectedColor] = React.useState(
+      args.selectedColor,
+    );
+    const [showLandmarkName, setShowLandmarkName] = React.useState(
+      args.showLandmarkName,
+    );
 
     return (
       <View style={{ flex: 1, padding: 16 }}>
         <TouchableOpacity
           onPress={() => setVisible(true)}
-          style={{ padding: 12, backgroundColor: colors.surface, borderRadius: 12 }}
+          style={{
+            padding: 12,
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+          }}
         >
           <Text style={{ color: colors.textPrimary }}>デザインを変更する</Text>
         </TouchableOpacity>

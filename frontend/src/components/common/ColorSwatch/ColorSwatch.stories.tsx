@@ -1,21 +1,20 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
-import { fn } from 'storybook/test';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
+import { fn } from "storybook/test";
 
-import { ColorSwatch } from './ColorSwatch';
+import { ColorSwatch } from "./ColorSwatch";
 
 const meta = {
-  title: 'common/ColorSwatch',
   component: ColorSwatch,
   decorators: [
     (Story) => (
-      <View style={{ flex: 1, alignItems: 'flex-start', padding: 16 }}>
+      <View style={{ flex: 1, alignItems: "flex-start", padding: 16 }}>
         <Story />
       </View>
     ),
   ],
-  tags: ['autodocs'],
-  args: { color: '#3d9c77', onPress: fn() },
+  tags: ["autodocs"],
+  args: { color: "#3d9c77", onPress: fn() },
 } satisfies Meta<typeof ColorSwatch>;
 
 export default meta;
@@ -30,7 +29,7 @@ export const Selected: Story = {
 
 export const Row: Story = {
   render: (args) => (
-    <View style={{ flexDirection: 'row', gap: 12 }}>
+    <View style={{ flexDirection: "row", gap: 12 }}>
       <ColorSwatch {...args} color="#333333" selected />
       <ColorSwatch {...args} color="#ff6b6b" />
       <ColorSwatch {...args} color="#fcc06d" />

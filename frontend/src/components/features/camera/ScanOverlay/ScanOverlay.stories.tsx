@@ -1,27 +1,26 @@
-import type { Meta, StoryObj } from '@storybook/react-native';
-import { View } from 'react-native';
+import type { Meta, StoryObj } from "@storybook/react-native";
+import { View } from "react-native";
 
-import { ScanOverlay } from './ScanOverlay';
+import { ScanOverlay } from "./ScanOverlay";
 
 const meta = {
-  title: 'features/camera/ScanOverlay',
   component: ScanOverlay,
   decorators: [
     (Story) => (
       <View
         style={{
           flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
+          alignItems: "center",
+          justifyContent: "center",
           padding: 16,
-          backgroundColor: '#000000',
+          backgroundColor: "#000000",
         }}
       >
         <Story />
       </View>
     ),
   ],
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof ScanOverlay>;
 
 export default meta;
