@@ -1,6 +1,5 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, typography, spacing } from '@/src/theme/tokens';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export type RecentCollectionItem = {
   id: string;
@@ -14,7 +13,11 @@ type Props = {
   onPressItem?: (item: RecentCollectionItem) => void;
 };
 
-export function RecentCollectionsSection({ items, onPressSeeAll, onPressItem }: Props) {
+export function RecentCollectionsSection({
+  items,
+  onPressSeeAll,
+  onPressItem,
+}: Props) {
   return (
     <View style={styles.wrap}>
       <View style={styles.header}>
@@ -33,7 +36,9 @@ export function RecentCollectionsSection({ items, onPressSeeAll, onPressItem }: 
             activeOpacity={0.8}
           >
             <View style={styles.thumb}>
-              {item.imageUri ? <Image source={{ uri: item.imageUri }} style={styles.image} /> : null}
+              {item.imageUri ? (
+                <Image source={{ uri: item.imageUri }} style={styles.image} />
+              ) : null}
             </View>
             <Text style={styles.name} numberOfLines={1}>
               {item.name}
@@ -50,13 +55,13 @@ const styles = StyleSheet.create({
     gap: spacing.xxl,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
     fontSize: typography.body.fontSize,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.textPrimary,
   },
   seeAll: {
@@ -64,26 +69,26 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: spacing.m,
   },
   item: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     gap: spacing.s,
   },
   thumb: {
-    width: '100%',
+    width: "100%",
     aspectRatio: 1,
     borderRadius: 999,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   name: {
     fontSize: typography.caption.fontSize,

@@ -1,6 +1,6 @@
-import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Card, Stamp } from "@/src/components/common";
+import { Card } from "@/src/components/common/Card/Card";
+import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {

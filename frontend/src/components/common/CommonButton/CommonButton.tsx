@@ -38,8 +38,6 @@ export function CommonButton({
 
 const styles = StyleSheet.create({
   base: {
-    paddingVertical: spacing.l,
-    paddingHorizontal: spacing.xxxl,
     borderRadius: radii.button,
     alignItems: 'center',
     justifyContent: 'center',
@@ -50,14 +48,20 @@ const styles = StyleSheet.create({
     gap: spacing.s,
   },
   primary: {
+    paddingVertical: spacing.l,
+    paddingHorizontal: spacing.xxxl,
     backgroundColor: colors.primary,
   },
   secondary: {
-    backgroundColor: colors.white,
+    paddingVertical: spacing.m,
+    paddingHorizontal: spacing.xl,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.border,
   },
   ghost: {
+    paddingVertical: spacing.l,
+    paddingHorizontal: spacing.xxxl,
     backgroundColor: 'transparent',
   },
   disabled: {
@@ -71,7 +75,7 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   secondaryLabel: {
-    color: colors.primary,
+    color: colors.secondary,
   },
   ghostLabel: {
     color: colors.textPrimary,

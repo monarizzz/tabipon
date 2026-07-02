@@ -1,6 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { BottomSheet, SelectableTile, ColorSwatch, Toggle, CommonButton } from '@/src/components/common';
+import { BottomSheet } from '@/src/components/common/BottomSheet/BottomSheet';
+import { SelectableTile } from '@/src/components/common/SelectableTile/SelectableTile';
+import { ColorSwatch } from '@/src/components/common/ColorSwatch/ColorSwatch';
+import { Toggle } from '@/src/components/common/Toggle/Toggle';
+import { CommonButton } from '@/src/components/common/CommonButton/CommonButton';
 import { colors, typography, spacing } from '@/src/theme/tokens';
 
 export type FrameStyleOption = {

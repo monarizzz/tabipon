@@ -1,6 +1,5 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import { colors, typography, spacing } from '@/src/theme/tokens';
+import { View, Text, Image, StyleSheet } from "react-native";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
   name: string;
@@ -26,7 +25,7 @@ export function ProfileSection({ name, registeredDate, avatarUri }: Props) {
 
 const styles = StyleSheet.create({
   wrap: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: spacing.m,
   },
   avatar: {
@@ -36,13 +35,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
   },
   avatarImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   avatarGlyph: {
     fontSize: 32,

@@ -1,8 +1,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { CommonButton, NavBar, Stamp } from "@/src/components/common";
-import { StampHelp } from "@/src/components/features/camera/StampHelp";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
+import { Stamp } from "@/src/components/common/Stamp/Stamp";
+import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export default function StampPressScreen() {

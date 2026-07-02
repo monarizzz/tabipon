@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
-import { Modal } from "@/src/components/common/Modal";
-import { CommonButton } from "@/src/components/common/CommonButton";
+import { Modal } from "@/src/components/common/Modal/Modal";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {

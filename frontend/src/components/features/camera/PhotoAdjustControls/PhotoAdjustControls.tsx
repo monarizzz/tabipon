@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, LayoutChangeEvent } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { CommonButton } from '@/src/components/common';
+import { CommonButton } from '@/src/components/common/CommonButton/CommonButton';
 import { colors, typography, spacing } from '@/src/theme/tokens';
 
 const THUMB_SIZE = 24;

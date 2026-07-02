@@ -1,1 +1,0 @@
-export { CommonDialog } from "./CommonDialog";

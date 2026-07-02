@@ -13,26 +13,21 @@ src/components/
     CommonButton/
       CommonButton.tsx
       CommonButton.stories.tsx  # CommonButton と同じフォルダに同居させる
-      index.ts                  # export { CommonButton } from './CommonButton'
     Card/
       Card.tsx
       Card.stories.tsx
-      index.ts
-    index.ts               # barrel export。他からは必ずここ経由でimportする
   features/
     <page>/                 # app/ 配下のページ（ルート）が属する機能ドメインに対応させる
       <domain>/             # ページ内をさらに機能単位で分けたい場合の中間フォルダ（任意。無くてもよい）
         StampCard/            # common/Card をラップし、スタンプ固有のロジックを持つ
           StampCard.tsx
           StampCard.stories.tsx
-          index.ts
       ScanOverlay/            # 中間フォルダを挟まず <page>/ 直下に置いてもよい
         ScanOverlay.tsx
         ScanOverlay.stories.tsx
-        index.ts
 ```
 
-`features/<page>/` 配下も `common/` と同じく、コンポーネントごとに専用フォルダ＋`index.ts`を作る。フォルダ直下に `.tsx` を裸で置かない（Stamp は common へ昇格済み。実体は `common/Stamp/` にある）。
+`features/<page>/` 配下も `common/` と同じく、コンポーネントごとに専用フォルダを作る。フォルダ直下に `.tsx` を裸で置かない（Stamp は common へ昇格済み。実体は `common/Stamp/` にある）。
 
 ### features配下とページの対応
 
@@ -52,7 +47,7 @@ src/components/
 
 - コンポーネントごとに `コンポーネント名/` フォルダを作る。**フォルダ名はコンポーネント名と同じPascalCase**（`Button/` であって `button/` ではない）にする
 - 本体ファイルと `*.stories.tsx` を同じフォルダに同居させる（story を別階層の `.rnstorybook/stories/` にまとめない）
-- フォルダ内に `index.ts` を置き `export { CommonButton } from './CommonButton';` の形でre-exportする。これにより親の `components/common/index.ts` からの `import from './CommonButton'` は変更不要になる
+- `index.ts` によるre-exportは置かない。他のファイルからは `import { CommonButton } from '@/src/components/common/CommonButton/CommonButton'` のように、コンポーネントファイルを直接importする
 - Storybook 側は `.rnstorybook/main.ts` の `stories` に `../src/components/**/*.stories.?(ts|tsx|js|jsx)` を指定し、この配置を自動検出する
 
 ### 分類基準
@@ -70,10 +65,10 @@ src/components/
 
 ## 新規UIコンポーネントを作成する前に必ず行う手順
 
-1. `components/common/index.ts` の一覧を確認する
+1. 本ドキュメント末尾の「既存コンポーネント カタログ」で一覧を確認する
 2. 同じ責務（見た目の役割）の既存コンポーネントが common にあるか確認する
 3. ある場合 → 新規作成せず、既存コンポーネントに `variant` / `size` などのpropsを追加して対応する
-4. ない場合 → 今回が最初の利用なら `features/<feature>/` に作る。すでに他の機能で似たものを features 側に作っていたなら、その時点で `common/` に引き上げて汎用化し、`index.ts` に登録する
+4. ない場合 → 今回が最初の利用なら `features/<feature>/` に作る。すでに他の機能で似たものを features 側に作っていたなら、その時点で `common/` に引き上げて汎用化し、末尾の「既存コンポーネント カタログ」に登録する
 5. common 側のファイルやpropsを機能名（例: `StampButton`）で汚さない
 
 ---
