@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { colors, typography, spacing } from '../../../../theme/tokens';
+import { colors, typography, spacing } from '@/src/theme/tokens';
 
 type Props = {
   name: string;

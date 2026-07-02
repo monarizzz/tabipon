@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { CommonButton } from '../../src/components/common';
-import { colors, typography, spacing } from '../../src/theme/tokens';
+import { CommonButton } from '@/src/components/common';
+import { colors, typography, spacing } from '@/src/theme/tokens';
 
 export default function CameraScreen() {
   const router = useRouter();

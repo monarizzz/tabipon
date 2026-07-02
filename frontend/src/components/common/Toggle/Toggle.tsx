@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Animated, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors } from '../../../theme/tokens';
+import { colors } from '@/src/theme/tokens';
 
 type Props = {
   value: boolean;

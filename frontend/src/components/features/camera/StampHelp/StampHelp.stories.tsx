@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-native";
 import { View } from "react-native";
 
 import { StampHelp } from "./StampHelp";
-import { colors } from "../../../../theme/tokens";
+import { colors } from "@/src/theme/tokens";
 
 const meta = {
   title: "features/camera/InstructionSheet",

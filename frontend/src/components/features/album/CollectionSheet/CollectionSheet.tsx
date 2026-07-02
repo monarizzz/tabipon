@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
-import { BottomSheet, CommonButton } from "../../../../common";
-import { colors, typography, radii, spacing } from "../../../../../theme/tokens";
+import { BottomSheet, CommonButton } from "@/src/components/common";
+import { colors, typography, radii, spacing } from "@/src/theme/tokens";
 
 type Props = {
   visible: boolean;

@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { fn } from 'storybook/test';
 
 import { DesignChangeSheet, type FrameStyleOption } from './DesignChangeSheet';
-import { colors } from '../../../../theme/tokens';
+import { colors } from '@/src/theme/tokens';
 
 const Thumb = ({ color = colors.textMuted }: { color?: string }) => (
   <View

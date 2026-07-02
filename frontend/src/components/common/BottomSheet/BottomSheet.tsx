@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import GorhomBottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
-import { colors, radii, spacing } from '../../../theme/tokens';
+import { colors, radii, spacing } from '@/src/theme/tokens';
 
 type Props = {
   visible: boolean;

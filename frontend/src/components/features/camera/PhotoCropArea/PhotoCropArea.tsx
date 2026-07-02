@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { colors, typography } from '../../../../theme/tokens';
+import { colors, typography } from '@/src/theme/tokens';
 
 type Props = {
   imageUri?: string;

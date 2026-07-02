@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from "react-native";
-import { Modal } from "../Modal";
-import { CommonButton } from "../CommonButton";
-import { colors, typography, spacing } from "../../../theme/tokens";
+import { Modal } from "@/src/components/common/Modal";
+import { CommonButton } from "@/src/components/common/CommonButton";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
   visible: boolean;

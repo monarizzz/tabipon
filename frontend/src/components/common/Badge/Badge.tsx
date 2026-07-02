@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, typography, radii, spacing } from '../../../theme/tokens';
+import { colors, typography, radii, spacing } from '@/src/theme/tokens';
 
 type Props = {
   label: string;

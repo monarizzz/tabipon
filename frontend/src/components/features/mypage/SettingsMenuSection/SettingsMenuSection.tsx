@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { Card, ListItem } from '../../../common';
-import { colors, radii } from '../../../../theme/tokens';
+import { Card, ListItem } from '@/src/components/common';
+import { colors, radii } from '@/src/theme/tokens';
 
 export type SettingsMenuItem = {
   id: string;

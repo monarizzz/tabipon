@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { CommonButton, NavBar, Stamp } from "../src/components/common";
-import { StampHelp } from "../src/components/features/camera/StampHelp";
-import { colors, typography, spacing } from "../src/theme/tokens";
+import { CommonButton, NavBar, Stamp } from "@/src/components/common";
+import { StampHelp } from "@/src/components/features/camera/StampHelp";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export default function StampPressScreen() {
   const router = useRouter();

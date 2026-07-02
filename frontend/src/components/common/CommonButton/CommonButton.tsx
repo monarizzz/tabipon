@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { colors, typography, radii, spacing } from '../../../theme/tokens';
+import { colors, typography, radii, spacing } from '@/src/theme/tokens';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
 

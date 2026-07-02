@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Card, Stamp } from '../../../../common';
-import { colors, typography, spacing } from '../../../../../theme/tokens';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Card, Stamp } from "@/src/components/common";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
   name: string;
@@ -11,11 +11,21 @@ type Props = {
   onPress?: () => void;
 };
 
-export function StampCard({ name, date, imageUri, obtained = false, onPress }: Props) {
+export function StampCard({
+  name,
+  date,
+  imageUri,
+  obtained = false,
+  onPress,
+}: Props) {
   const content = (
     <Card style={styles.card}>
       <View style={styles.circleArea}>
-        <Stamp size={100} imageUri={obtained ? imageUri : undefined} muted={!obtained} />
+        <Stamp
+          size={100}
+          imageUri={obtained ? imageUri : undefined}
+          muted={!obtained}
+        />
       </View>
       <Text style={styles.name} numberOfLines={1}>
         {name}
@@ -43,8 +53,8 @@ const styles = StyleSheet.create({
     padding: spacing.m,
   },
   circleArea: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: spacing.l,
   },
   name: {

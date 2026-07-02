@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { FilterRow, type FilterOption } from '../../src/components/features/album/stamp-rally/FilterRow';
-import { StampGrid, type StampGridItem } from '../../src/components/features/album/stamp-rally/StampGrid';
-import { CollectionSheet } from '../../src/components/features/album/stamp-rally/CollectionSheet';
-import { Header } from '../../src/components/common';
-import { colors } from '../../src/theme/tokens';
+import { FilterRow, type FilterOption } from '@/src/components/features/album/FilterRow';
+import { StampGrid, type StampGridItem } from '@/src/components/features/album/StampGrid';
+import { CollectionSheet } from '@/src/components/features/album/CollectionSheet';
+import { Header } from '@/src/components/common';
+import { colors } from '@/src/theme/tokens';
 
 const FILTERS: FilterOption[] = [
   { id: 'all', label: 'すべて' },

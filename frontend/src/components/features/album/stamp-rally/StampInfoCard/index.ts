@@ -1,1 +1,0 @@
-export { StampInfoCard } from './StampInfoCard';

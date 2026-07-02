@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Stamp, CommonButton } from '../../../../common';
-import { colors, typography, spacing } from '../../../../../theme/tokens';
+import { Stamp, CommonButton } from '@/src/components/common';
+import { colors, typography, spacing } from '@/src/theme/tokens';
 
 type Props = {
   spotName: string;

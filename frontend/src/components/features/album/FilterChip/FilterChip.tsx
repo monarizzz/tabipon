@@ -1,15 +1,20 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { colors, typography, radii } from '../../../../../theme/tokens';
+import React from "react";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { colors, typography, radii } from "@/src/theme/tokens";
 
 type Props = {
   label: string;
   selected?: boolean;
-  variant?: 'filter' | 'add';
+  variant?: "filter" | "add";
   onPress?: () => void;
 };
 
-export function FilterChip({ label, selected = false, variant = 'filter', onPress }: Props) {
+export function FilterChip({
+  label,
+  selected = false,
+  variant = "filter",
+  onPress,
+}: Props) {
   return (
     <TouchableOpacity
       style={[styles.chip, selected && styles.chipSelected]}
@@ -17,7 +22,10 @@ export function FilterChip({ label, selected = false, variant = 'filter', onPres
       activeOpacity={0.8}
     >
       <Text
-        style={[variant === 'add' ? styles.addLabel : styles.label, selected && styles.labelSelected]}
+        style={[
+          variant === "add" ? styles.addLabel : styles.label,
+          selected && styles.labelSelected,
+        ]}
         numberOfLines={2}
       >
         {label}
@@ -32,8 +40,8 @@ const styles = StyleSheet.create({
     height: 65,
     borderRadius: radii.tab,
     backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   chipSelected: {
     backgroundColor: colors.borderSub,
@@ -44,7 +52,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: typography.labelBold.fontWeight,
     color: colors.textPrimary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   labelSelected: {
     fontSize: typography.labelBold.fontSize,
@@ -52,7 +60,7 @@ const styles = StyleSheet.create({
   },
   addLabel: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.textPlaceholder,
   },
 });

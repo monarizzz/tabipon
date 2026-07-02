@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, LayoutChangeEvent } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { CommonButton } from '../../../common';
-import { colors, typography, spacing } from '../../../../theme/tokens';
+import { CommonButton } from '@/src/components/common';
+import { colors, typography, spacing } from '@/src/theme/tokens';
 
 const THUMB_SIZE = 24;
 const ZOOM_ICON_SIZE = 20;
@@ -26,7 +26,7 @@ export function PhotoAdjustControls({ zoom, onChangeZoom, onConfirm }: Props) {
     <View style={styles.wrap}>
       <Text style={styles.hint}>ピンチで拡大縮小・ドラッグで移動</Text>
       <View style={styles.sliderRow}>
-        <Image source={require('../../../../../assets/Min-Icon.png')} style={styles.zoomIcon} resizeMode="contain" />
+        <Image source={require('@/assets/Min-Icon.png')} style={styles.zoomIcon} resizeMode="contain" />
         <View style={styles.sliderTrack} onLayout={handleTrackLayout}>
           <Slider
             style={styles.slider}
@@ -43,7 +43,7 @@ export function PhotoAdjustControls({ zoom, onChangeZoom, onConfirm }: Props) {
             <View pointerEvents="none" style={[styles.thumbOutline, { left: thumbLeft }]} />
           )}
         </View>
-        <Image source={require('../../../../../assets/Max-Icon.png')} style={styles.zoomIcon} resizeMode="contain" />
+        <Image source={require('@/assets/Max-Icon.png')} style={styles.zoomIcon} resizeMode="contain" />
       </View>
       <CommonButton label="次へ" onPress={onConfirm} variant="primary" />
     </View>
