@@ -13,7 +13,7 @@ type Props = {
   onConfirm: () => void;
 };
 
-export function ConfirmDialog({
+export function CommonDialog({
   visible,
   title,
   message,
