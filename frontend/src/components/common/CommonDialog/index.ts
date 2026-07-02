@@ -1,1 +1,1 @@
-export { ConfirmDialog } from "./CommonDialog";
+export { CommonDialog } from "./CommonDialog";
