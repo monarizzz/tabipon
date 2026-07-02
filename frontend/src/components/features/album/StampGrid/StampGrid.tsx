@@ -1,7 +1,7 @@
-import React from 'react';
-import { FlatList, View, Text, StyleSheet } from 'react-native';
-import { StampCard } from '../StampCard';
-import { colors, typography, spacing } from '../../../../../theme/tokens';
+import React from "react";
+import { FlatList, View, Text, StyleSheet } from "react-native";
+import { StampCard } from "@/src/components/features/album/StampCard";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export type StampGridItem = {
   id: string;
@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
   },
   empty: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: spacing.xxxl,
   },
   emptyText: {

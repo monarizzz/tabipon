@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { fn } from "storybook/test";
 
 import { CollectionSheet } from "./CollectionSheet";
-import { colors } from "../../../../../theme/tokens";
+import { colors } from "@/src/theme/tokens";
 
 const meta = {
   title: "features/album/stamp-rally/CollectionSheet",

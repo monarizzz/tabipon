@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import { Camera, Image, User } from "lucide-react-native";
-import { TabBar, type TabBarIcon } from "../../src/components/common";
+import { TabBar, type TabBarIcon } from "@/src/components/common";
 
 const ICONS: Record<string, TabBarIcon> = {
   index: Camera,

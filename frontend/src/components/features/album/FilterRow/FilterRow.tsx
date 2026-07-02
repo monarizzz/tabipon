@@ -1,7 +1,6 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { spacing } from '../../../../../theme/tokens';
-import { FilterChip } from '../FilterChip';
+import { View, StyleSheet } from "react-native";
+import { spacing } from "@/src/theme/tokens";
+import { FilterChip } from "@/src/components/features/album/FilterChip";
 
 export type FilterOption = {
   id: string;
@@ -15,7 +14,12 @@ type Props = {
   onAddPress?: () => void;
 };
 
-export function FilterRow({ filters, selectedFilterId, onSelectFilter, onAddPress }: Props) {
+export function FilterRow({
+  filters,
+  selectedFilterId,
+  onSelectFilter,
+  onAddPress,
+}: Props) {
   return (
     <View style={styles.row}>
       {filters.map((filter) => (
@@ -26,14 +30,16 @@ export function FilterRow({ filters, selectedFilterId, onSelectFilter, onAddPres
           onPress={() => onSelectFilter(filter.id)}
         />
       ))}
-      {onAddPress ? <FilterChip label="+" variant="add" onPress={onAddPress} /> : null}
+      {onAddPress ? (
+        <FilterChip label="+" variant="add" onPress={onAddPress} />
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: spacing.s,
     paddingHorizontal: spacing.xl,
     paddingBottom: 12,

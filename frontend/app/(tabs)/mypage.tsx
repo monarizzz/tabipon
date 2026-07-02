@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { NavBar } from '../../src/components/common';
-import { ProfileSection } from '../../src/components/features/mypage/ProfileSection';
-import { RecentCollectionsSection } from '../../src/components/features/mypage/RecentCollectionsSection';
-import { SettingsMenuSection } from '../../src/components/features/mypage/SettingsMenuSection';
-import { colors, spacing } from '../../src/theme/tokens';
+import { NavBar } from '@/src/components/common';
+import { ProfileSection } from '@/src/components/features/mypage/ProfileSection';
+import { RecentCollectionsSection } from '@/src/components/features/mypage/RecentCollectionsSection';
+import { SettingsMenuSection } from '@/src/components/features/mypage/SettingsMenuSection';
+import { colors, spacing } from '@/src/theme/tokens';
 
 const RECENT_COLLECTIONS = [
   { id: 'asakusa', name: '浅草寺' },

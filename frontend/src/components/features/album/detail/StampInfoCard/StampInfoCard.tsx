@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { colors, typography, spacing } from '../../../../../theme/tokens';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
   date: string;
@@ -37,7 +37,7 @@ export function StampInfoCard({ date, location, memo }: Props) {
 
 const styles = StyleSheet.create({
   infoRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: spacing.xl,
   },
   cell: {

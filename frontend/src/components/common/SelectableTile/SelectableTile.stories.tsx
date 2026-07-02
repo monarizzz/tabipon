@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { fn } from 'storybook/test';
 
 import { SelectableTile } from './SelectableTile';
-import { colors } from '../../../theme/tokens';
+import { colors } from '@/src/theme/tokens';
 
 const Thumb = ({ color = colors.textPlaceholder }: { color?: string }) => (
   <View

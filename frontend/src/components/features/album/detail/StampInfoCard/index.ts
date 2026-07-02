@@ -1,0 +1,1 @@
+export { StampInfoCard } from "./StampInfoCard";

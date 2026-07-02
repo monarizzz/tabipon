@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { NavBar } from '../src/components/common';
-import { PhotoCropArea } from '../src/components/features/camera/PhotoCropArea';
-import { PhotoAdjustControls } from '../src/components/features/camera/PhotoAdjustControls';
-import { colors } from '../src/theme/tokens';
+import { NavBar } from '@/src/components/common';
+import { PhotoCropArea } from '@/src/components/features/camera/PhotoCropArea';
+import { PhotoAdjustControls } from '@/src/components/features/camera/PhotoAdjustControls';
+import { colors } from '@/src/theme/tokens';
 
 export default function PhotoAdjustScreen() {
   const router = useRouter();
