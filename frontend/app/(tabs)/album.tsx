@@ -36,7 +36,7 @@ export default function AlbumScreen() {
         onSelectFilter={setSelectedFilterId}
         onAddPress={() => setCollectionSheetVisible(true)}
       />
-      <StampGrid stamps={PLACEHOLDER_STAMPS} onPressStamp={() => router.push('/stamp-detail')} />
+      <StampGrid stamps={PLACEHOLDER_STAMPS} onPressStamp={() => router.push('/album-stamp-detail')} />
       <CollectionSheet
         visible={collectionSheetVisible}
         onClose={() => setCollectionSheetVisible(false)}

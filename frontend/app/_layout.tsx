@@ -9,7 +9,7 @@ export default function RootLayout() {
         <Stack>
           <Stack.Screen name="photo-adjust" options={{ headerShown: false }} />
           <Stack.Screen name="stamp-press" options={{ headerShown: false }} />
-          <Stack.Screen name="stamp-detail" options={{ headerShown: false }} />
+          <Stack.Screen name="album-stamp-detail" options={{ headerShown: false }} />
           <Stack.Screen name="stamp-done" options={{ title: 'スタンプを押しました' }} />
           <Stack.Screen name="mypage/notifications" options={{ headerShown: false }} />
           <Stack.Screen name="mypage/privacy" options={{ headerShown: false }} />

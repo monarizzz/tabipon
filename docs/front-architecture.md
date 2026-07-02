@@ -42,8 +42,8 @@ src/components/
 
 | `features/` 配下 | 対応する `app/` のページ |
 |---|---|
-| `features/camera/` | `app/(tabs)/index.tsx`（カメラ）、`app/photo-adjust.tsx`（写真調整）、`app/stamp-press.tsx`（スタンプを押す）、`app/stamp-detail.tsx` の一部（`DesignChangeSheet`） |
-| `features/album/stamp-rally/` | `app/(tabs)/album.tsx`、`app/stamp-detail.tsx` |
+| `features/camera/` | `app/(tabs)/index.tsx`（カメラ）、`app/photo-adjust.tsx`（写真調整）、`app/stamp-press.tsx`（スタンプを押す）、`app/album-stamp-detail.tsx` の一部（`DesignChangeSheet`） |
+| `features/album/stamp-rally/` | `app/(tabs)/album.tsx`、`app/album-stamp-detail.tsx` |
 | `features/mypage/` | `app/(tabs)/mypage.tsx` |
 
 `features/album/stamp-rally/` のように、ドメイン名（`stamp-rally`）を中間フォルダとして挟むかどうかは任意。挟む場合も挟まない場合も、コンポーネントは必ず「コンポーネント名のフォルダ」に入れる（下記参照）。新しいページを追加するときは、まずこの表に近いどのドメインに属するかを判断し、既存の `features/<page>/` があればそこに追記する。どのドメインにも当てはまらない新しいページなら新規に `features/<page>/` を作る。
