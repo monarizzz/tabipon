@@ -14,7 +14,7 @@ export default function PhotoAdjustScreen() {
   return (
     <View style={styles.container}>
       <NavBar title="写真を調整" onBack={() => router.back()} />
-      <PhotoCropArea imageUri={uri} />
+      <PhotoCropArea imageUri={uri} zoom={zoom} onChangeZoom={setZoom} />
       <PhotoAdjustControls
         zoom={zoom}
         onChangeZoom={setZoom}
