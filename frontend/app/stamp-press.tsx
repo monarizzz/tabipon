@@ -1,7 +1,17 @@
 import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Vibration } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+  withSpring,
+  cancelAnimation,
+  Easing,
+  runOnJS,
+} from "react-native-reanimated";
 import { Camera, Image, Palette, User } from "lucide-react-native";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
@@ -27,17 +37,56 @@ export default function StampPressScreen() {
   const [selectedColor, setSelectedColor] = React.useState(STAMP_COLOR_OPTIONS[0]);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const longPressTriggeredRef = React.useRef(false);
+  const stampScale = useSharedValue(1);
+
+  const stampAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: stampScale.value }],
+  }));
+
+  const goToStampDone = React.useCallback(() => {
+    router.push("/stamp-done");
+  }, [router]);
+
+  React.useEffect(() => () => Vibration.cancel(), []);
+
+  const handleStampPressIn = () => {
+    longPressTriggeredRef.current = false;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // 沈み込みに合わせて端末を振動させる(押し込み中はブーッと鳴らし続ける)
+    Vibration.vibrate(500);
+    cancelAnimation(stampScale);
+    // 長押し判定時間(500ms)にかけてゆっくり沈み込ませる
+    stampScale.value = withTiming(0.82, {
+      duration: 500,
+      easing: Easing.out(Easing.quad),
+    });
+  };
 
   const handleStampLongPress = () => {
     longPressTriggeredRef.current = true;
-    router.push("/stamp-done");
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // 押し込み中の振動を止めて、「ドン」と強めの二段振動を鳴らす
+    Vibration.cancel();
+    Vibration.vibrate([0, 40, 30, 80]);
+    cancelAnimation(stampScale);
+    stampScale.value = withSequence(
+      withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
+      withTiming(1.06, { duration: 150, easing: Easing.out(Easing.back(2)) }),
+      withTiming(1, { duration: 120 }, (finished) => {
+        if (finished) runOnJS(goToStampDone)();
+      }),
+    );
   };
 
   const handleStampPressOut = () => {
     if (longPressTriggeredRef.current) {
       longPressTriggeredRef.current = false;
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      return;
     }
+    // 長押し確定前に離した場合は振動を止めて元の大きさへ戻す
+    Vibration.cancel();
+    cancelAnimation(stampScale);
+    stampScale.value = withSpring(1, { damping: 14, stiffness: 180 });
   };
 
   return (
@@ -50,10 +99,13 @@ export default function StampPressScreen() {
       />
       <View style={styles.content}>
         <Pressable
+          onPressIn={handleStampPressIn}
           onLongPress={handleStampLongPress}
           onPressOut={handleStampPressOut}
         >
-          <Stamp />
+          <Animated.View style={stampAnimatedStyle}>
+            <Stamp />
+          </Animated.View>
         </Pressable>
         <Text style={styles.hint}>スマホを上下に振ってスタンプ！</Text>
         <CommonButton
