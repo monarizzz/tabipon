@@ -6,18 +6,20 @@ import { colors } from "@/src/theme/tokens";
 type Props = {
   facing: CameraType;
   flash: FlashMode;
-  size?: number;
+  guideSize?: number;
 };
 
 export const CameraPreview = React.forwardRef<CameraView, Props>(
-  ({ facing, flash, size = 296 }, ref) => {
+  ({ facing, flash, guideSize = 296 }, ref) => {
     return (
       <View style={styles.wrap}>
-        <CameraView
-          ref={ref}
-          style={[styles.circle, { width: size, height: size, borderRadius: size / 2 }]}
-          facing={facing}
-          flash={flash}
+        <CameraView ref={ref} style={styles.camera} facing={facing} flash={flash} />
+        <View
+          pointerEvents="none"
+          style={[
+            styles.guide,
+            { width: guideSize, height: guideSize, borderRadius: guideSize / 2 },
+          ]}
         />
       </View>
     );
@@ -26,12 +28,16 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
 
 const styles = StyleSheet.create({
   wrap: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
-  circle: {
+  camera: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  guide: {
     borderWidth: 2,
     borderColor: colors.white,
-    overflow: "hidden",
   },
 });
