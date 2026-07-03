@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, Text, View, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { colors, typography, radii, spacing } from '@/src/theme/tokens';
 
-type Variant = 'primary' | 'secondary' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'accent';
 
 type Props = {
   label: string;
@@ -66,6 +66,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xxxl,
     backgroundColor: 'transparent',
   },
+  accent: {
+    paddingVertical: spacing.m,
+    paddingHorizontal: spacing.xl,
+    backgroundColor: colors.borderSub,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
   disabled: {
     opacity: 0.4,
   },
@@ -81,5 +88,8 @@ const styles = StyleSheet.create({
   },
   ghostLabel: {
     color: colors.textPrimary,
+  },
+  accentLabel: {
+    color: colors.primary,
   },
 });

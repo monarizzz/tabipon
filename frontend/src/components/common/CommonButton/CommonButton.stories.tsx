@@ -35,6 +35,10 @@ export const Ghost: Story = {
   args: { variant: "ghost" },
 };
 
+export const Accent: Story = {
+  args: { variant: "accent", label: "アルバムへ" },
+};
+
 export const Disabled: Story = {
   args: { variant: "primary", disabled: true },
 };
