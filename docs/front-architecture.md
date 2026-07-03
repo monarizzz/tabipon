@@ -114,6 +114,9 @@ src/components/
 | StampInfoCard | 日付/場所セル+メモセクション（features/stamp-rally固有） | - | スタンプ詳細画面 |
 | PhotoCropArea | 円形クロップ枠+ドラッグハンドル（features/camera固有） | - | 写真調整画面 |
 | PhotoAdjustControls | ジェスチャーヒント+ズームスライダー+次へボタン（features/camera固有） | - | 写真調整画面 |
+| CameraHintBar | 撮影ガイドのヒントテキストバー（features/camera固有） | - | カメラ画面 |
+| CameraPreview | 全画面expo-cameraプレビュー＋円形ガイドオーバーレイ（features/camera固有） | - | カメラ画面 |
+| CameraControls | フラッシュ/シャッター/カメラ切替の下部コントロール行（features/camera固有） | - | カメラ画面 |
 | InstructionSheet | 手順バッジ付きのハウツーボトムシート（features/camera固有） | - | スタンプを押す画面（ヘルプ表示） |
 | ProfileSection | アバター+名前+登録日（features/mypage固有） | - | マイページ |
 | RecentCollectionsSection | 最近のコレクション見出し+サムネ行（features/mypage固有） | - | マイページ |

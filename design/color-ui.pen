@@ -351,54 +351,6 @@
               "strokeWidth": 2
             },
             {
-              "type": "ellipse",
-              "id": "xYNbX",
-              "x": 188,
-              "y": 78,
-              "name": "Handle N",
-              "fill": "#FFFFFF",
-              "width": 14,
-              "height": 14,
-              "stroke": "$wf-accent",
-              "strokeWidth": 1
-            },
-            {
-              "type": "ellipse",
-              "id": "PMifK",
-              "x": 188,
-              "y": 374,
-              "name": "Handle S",
-              "fill": "#FFFFFF",
-              "width": 14,
-              "height": 14,
-              "stroke": "$wf-accent",
-              "strokeWidth": 1
-            },
-            {
-              "type": "ellipse",
-              "id": "wiHgz",
-              "x": 336,
-              "y": 226,
-              "name": "Handle E",
-              "fill": "#FFFFFF",
-              "width": 14,
-              "height": 14,
-              "stroke": "$wf-accent",
-              "strokeWidth": 1
-            },
-            {
-              "type": "ellipse",
-              "id": "yCWXE",
-              "x": 40,
-              "y": 226,
-              "name": "Handle W",
-              "fill": "#FFFFFF",
-              "width": 14,
-              "height": 14,
-              "stroke": "$wf-accent",
-              "strokeWidth": 1
-            },
-            {
               "type": "text",
               "id": "W397I7",
               "x": 115,
