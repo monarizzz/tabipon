@@ -179,9 +179,11 @@
           "ref": "Izhj9",
           "x": 0,
           "y": 655,
+          "gap": 16,
           "descendants": {
             "YmPFD": {
-              "fill": "#33333315"
+              "fill": "#33333315",
+              "width": "fit_content"
             },
             "vAZbz": {
               "fill": "$wf-accent"
@@ -190,13 +192,27 @@
               "fill": "$wf-accent"
             },
             "sEsaW": {
-              "fill": []
+              "fill": [],
+              "width": 78,
+              "flipX": false,
+              "flipY": false,
+              "height": "fit_content",
+              "x": 156,
+              "y": 10
             },
             "ejr11": {
               "fill": "$wf-text-sub"
             },
             "K9ajmw": {
               "fill": "$wf-text-sub"
+            },
+            "jbbUa": {
+              "flipX": false,
+              "flipY": false,
+              "width": 78,
+              "height": "fit_content",
+              "x": 250,
+              "y": 10
             }
           }
         }

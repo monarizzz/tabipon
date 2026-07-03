@@ -7,8 +7,10 @@ export const colors = {
   bg: '#ffffff',
   surface: '#f0f2f1',
   border: '#c3d6cf',
+  borderSub: '#e6f0ec',
   activeOverlay: 'rgba(51,51,51,0.08)',
   white: '#ffffff',
+  selectedRing: '#333333',
 };
 
 export const typography = {
