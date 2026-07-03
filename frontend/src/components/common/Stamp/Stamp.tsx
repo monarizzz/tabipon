@@ -1,0 +1,93 @@
+import React from 'react';
+import { View, Text, Image, StyleSheet } from 'react-native';
+import { colors } from '@/src/theme/tokens';
+
+type Props = {
+  imageUri?: string;
+  size?: number;
+  muted?: boolean;
+};
+
+export function Stamp({ imageUri, size = 260, muted = false }: Props) {
+  const outerRingSize = size * 1.258;
+  const innerRingSize = size * 1.154;
+
+  return (
+    <View style={[styles.wrap, { width: size, height: size }]}>
+      <View
+        style={[
+          styles.ring,
+          {
+            width: outerRingSize,
+            height: outerRingSize,
+            borderRadius: outerRingSize / 2,
+            top: -(outerRingSize - size) / 2,
+            left: -(outerRingSize - size) / 2,
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.ring,
+          styles.innerRing,
+          {
+            width: innerRingSize,
+            height: innerRingSize,
+            borderRadius: innerRingSize / 2,
+            top: -(innerRingSize - size) / 2,
+            left: -(innerRingSize - size) / 2,
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.content,
+          { width: size, height: size, borderRadius: size / 2 },
+          muted && styles.contentMuted,
+        ]}
+      >
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.image} />
+        ) : muted ? null : (
+          <Text style={styles.placeholder}>[撮影した画像]</Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ring: {
+    position: 'absolute',
+    borderWidth: 3,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  innerRing: {
+    borderWidth: 1,
+    backgroundColor: 'transparent',
+  },
+  content: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  contentMuted: {
+    backgroundColor: colors.border,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholder: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: colors.textPlaceholder,
+    textAlign: 'center',
+    width: 200,
+  },
+});

@@ -1,22 +1,50 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import { ListItem } from '../../src/components/common';
-import { colors, typography, spacing } from '../../src/theme/tokens';
+import React from "react";
+import { View, ScrollView, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
+import { ProfileSection } from "@/src/components/features/mypage/ProfileSection/ProfileSection";
+import { RecentCollectionsSection } from "@/src/components/features/mypage/RecentCollectionsSection/RecentCollectionsSection";
+import { SettingsMenuSection } from "@/src/components/features/mypage/SettingsMenuSection/SettingsMenuSection";
+import { colors, spacing } from "@/src/theme/tokens";
+
+const RECENT_COLLECTIONS = [
+  { id: "asakusa", name: "浅草寺" },
+  { id: "skytree", name: "スカイツリー" },
+  { id: "palace", name: "皇居" },
+];
 
 export default function MypageScreen() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
-      <View style={styles.accountArea}>
-        <Text style={styles.accountName}>アカウント名</Text>
-      </View>
-      <View style={styles.menu}>
-        <ListItem label="通知設定" onPress={() => router.push('/mypage/notifications')} />
-        <ListItem label="プライバシー" onPress={() => router.push('/mypage/privacy')} />
-        <ListItem label="ヘルプ" onPress={() => router.push('/mypage/help')} />
-      </View>
+      <NavBar title="マイページ" />
+      <ScrollView contentContainerStyle={styles.content}>
+        <ProfileSection name="たびすたんぷ太郎" registeredDate="2025.02.16" />
+        <RecentCollectionsSection
+          items={RECENT_COLLECTIONS}
+          onPressSeeAll={() => {}}
+        />
+        <SettingsMenuSection
+          items={[
+            {
+              id: "notifications",
+              label: "通知設定",
+              onPress: () => router.push("/mypage/notifications"),
+            },
+            {
+              id: "privacy",
+              label: "プライバシー",
+              onPress: () => router.push("/mypage/privacy"),
+            },
+            {
+              id: "help",
+              label: "ヘルプ",
+              onPress: () => router.push("/mypage/help"),
+            },
+          ]}
+        />
+      </ScrollView>
     </View>
   );
 }
@@ -24,20 +52,10 @@ export default function MypageScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
   },
-  accountArea: {
-    backgroundColor: colors.white,
-    padding: spacing.xxl,
-    marginBottom: spacing.l,
-    alignItems: 'center',
-  },
-  accountName: {
-    fontSize: typography.navTitle.fontSize,
-    fontWeight: typography.navTitle.fontWeight,
-    color: colors.textPrimary,
-  },
-  menu: {
-    backgroundColor: colors.white,
+  content: {
+    gap: spacing.xxl,
+    padding: spacing.xl,
   },
 });

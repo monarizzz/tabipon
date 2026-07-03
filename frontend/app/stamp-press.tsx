@@ -1,16 +1,30 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Button } from '../src/components/common';
-import { colors, typography, spacing } from '../src/theme/tokens';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
+import { Stamp } from "@/src/components/common/Stamp/Stamp";
+import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export default function StampPressScreen() {
   const router = useRouter();
+  const [helpVisible, setHelpVisible] = React.useState(false);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>スタンプを押す画面</Text>
-      <Button label="押す" onPress={() => router.push('/stamp-done')} />
+      <NavBar
+        title="スタンプを押す"
+        onBack={() => router.back()}
+        rightIcon={<Text style={styles.helpIcon}>？</Text>}
+        onRightPress={() => setHelpVisible((visible) => !visible)}
+      />
+      <View style={styles.content}>
+        <Stamp />
+        <Text style={styles.hint}>スマホを上下に振ってスタンプ！</Text>
+        <CommonButton label="押す" onPress={() => router.push("/stamp-done")} />
+      </View>
+      <StampHelp visible={helpVisible} />
     </View>
   );
 }
@@ -18,14 +32,20 @@ export default function StampPressScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: colors.bg,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
     gap: spacing.xxl,
   },
-  title: {
-    fontSize: typography.screenTitle.fontSize,
-    fontWeight: typography.screenTitle.fontWeight,
-    color: colors.textPrimary,
+  hint: {
+    fontSize: typography.caption.fontSize,
+    color: colors.textMuted,
+  },
+  helpIcon: {
+    fontSize: 14,
+    color: colors.textMuted,
   },
 });
