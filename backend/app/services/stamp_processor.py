@@ -1,3 +1,5 @@
+from enum import Enum
+
 import cv2
 import numpy as np
 from fastapi import HTTPException
@@ -5,9 +7,24 @@ from fastapi import HTTPException
 from app.core.config import STAMP_IMAGE_SIZE
 
 
-def process_stamp_image(image_bytes: bytes) -> bytes:
+class StampColor(str, Enum):
+    red = "red"
+    blue = "blue"
+    black = "black"
+    green = "green"
+
+
+STAMP_COLORS: dict[StampColor, np.ndarray] = {
+    StampColor.red: np.array([30, 50, 220], dtype=np.uint8),
+    StampColor.blue: np.array([180, 60, 30], dtype=np.uint8),
+    StampColor.black: np.array([30, 30, 30], dtype=np.uint8),
+    StampColor.green: np.array([100, 130, 40], dtype=np.uint8),
+}
+
+
+def process_stamp_image(image_bytes: bytes, color: StampColor = StampColor.red) -> bytes:
     decoded_image = decode_image(image_bytes)
-    stamp_image = create_stamp_image(decoded_image)
+    stamp_image = create_stamp_image(decoded_image, STAMP_COLORS[color])
     return encode_png(stamp_image)
 
 
@@ -19,7 +36,7 @@ def decode_image(image_bytes: bytes) -> np.ndarray:
     return decoded_image
 
 
-def create_stamp_image(image: np.ndarray) -> np.ndarray:
+def create_stamp_image(image: np.ndarray, ink_color: np.ndarray) -> np.ndarray:
     square_image = crop_center_square(image)
     resized_image = cv2.resize(
         square_image,
@@ -42,7 +59,6 @@ def create_stamp_image(image: np.ndarray) -> np.ndarray:
     line_art = cv2.bitwise_and(thresholded_image, cv2.bitwise_not(edges))
     stamp_image = cv2.cvtColor(line_art, cv2.COLOR_GRAY2BGR)
 
-    ink_color = np.array([45, 63, 185], dtype=np.uint8)
     dark_pixels = (stamp_image[:, :, 0] < 180) & (stamp_image[:, :, 1] < 180) & (
         stamp_image[:, :, 2] < 180
     )
