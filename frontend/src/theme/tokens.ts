@@ -9,6 +9,7 @@ export const colors = {
   border: '#c3d6cf',
   borderSub: '#e6f0ec',
   activeOverlay: 'rgba(51,51,51,0.08)',
+  cropDimOverlay: 'rgba(0,0,0,0.55)',
   white: '#ffffff',
   selectedRing: '#333333',
 };

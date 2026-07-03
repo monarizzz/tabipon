@@ -8,6 +8,8 @@ type Props = {
   facing: CameraType;
   flash: FlashMode;
   guideSize?: number;
+  onZoomChange?: (value: number) => void;
+  onContainerSizeChange?: (size: { width: number; height: number }) => void;
 };
 
 const PINCH_SENSITIVITY = 1;
@@ -15,11 +17,11 @@ const PINCH_SENSITIVITY = 1;
 const DISPLAY_ZOOM_MIN = 0.5;
 const DISPLAY_ZOOM_MAX = 5;
 const DISPLAY_ZOOM_DEFAULT = 1;
-const DEFAULT_ZOOM =
+export const DEFAULT_ZOOM =
   (DISPLAY_ZOOM_DEFAULT - DISPLAY_ZOOM_MIN) / (DISPLAY_ZOOM_MAX - DISPLAY_ZOOM_MIN);
 
 export const CameraPreview = React.forwardRef<CameraView, Props>(
-  ({ facing, flash, guideSize = 296 }, ref) => {
+  ({ facing, flash, guideSize = 296, onZoomChange, onContainerSizeChange }, ref) => {
     const [zoom, setZoom] = useState(DEFAULT_ZOOM);
     const baseZoom = useRef(DEFAULT_ZOOM);
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -27,6 +29,7 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
     const handleLayout = (event: LayoutChangeEvent) => {
       const { width, height } = event.nativeEvent.layout;
       setContainerSize({ width, height });
+      onContainerSizeChange?.({ width, height });
     };
 
     const pinchGesture = Gesture.Pinch()
@@ -35,8 +38,9 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
         baseZoom.current = zoom;
       })
       .onUpdate((event) => {
-        const next = baseZoom.current + (event.scale - 1) * PINCH_SENSITIVITY;
-        setZoom(Math.min(1, Math.max(0, next)));
+        const next = Math.min(1, Math.max(0, baseZoom.current + (event.scale - 1) * PINCH_SENSITIVITY));
+        setZoom(next);
+        onZoomChange?.(next);
       });
 
     const effectiveGuideSize = Math.min(
