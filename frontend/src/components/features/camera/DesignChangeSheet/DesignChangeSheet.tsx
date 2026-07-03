@@ -10,7 +10,7 @@ import { colors, typography, spacing } from '@/src/theme/tokens';
 export type FrameStyleOption = {
   id: string;
   label: string;
-  preview: React.ReactNode;
+  preview: (selected: boolean) => React.ReactNode;
 };
 
 type Props = {
@@ -50,16 +50,19 @@ export function DesignChangeSheet({
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>フレーム</Text>
         <View style={styles.row}>
-          {frameStyles.map((style) => (
-            <SelectableTile
-              key={style.id}
-              label={style.label}
-              selected={style.id === selectedFrameStyleId}
-              onPress={() => onSelectFrameStyle(style.id)}
-            >
-              {style.preview}
-            </SelectableTile>
-          ))}
+          {frameStyles.map((style) => {
+            const selected = style.id === selectedFrameStyleId;
+            return (
+              <SelectableTile
+                key={style.id}
+                label={style.label}
+                selected={selected}
+                onPress={() => onSelectFrameStyle(style.id)}
+              >
+                {style.preview(selected)}
+              </SelectableTile>
+            );
+          })}
         </View>
       </View>
 

@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useRouter, type Href } from "expo-router";
+import * as Haptics from "expo-haptics";
 import { Camera, Image, Palette, User } from "lucide-react-native";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
@@ -9,6 +10,10 @@ import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog"
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
+import {
+  FRAME_STYLE_OPTIONS,
+  STAMP_COLOR_OPTIONS,
+} from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export default function StampPressScreen() {
@@ -16,6 +21,24 @@ export default function StampPressScreen() {
   const [helpVisible, setHelpVisible] = React.useState(false);
   const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
+  const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
+    FRAME_STYLE_OPTIONS[0].id,
+  );
+  const [selectedColor, setSelectedColor] = React.useState(STAMP_COLOR_OPTIONS[0]);
+  const [showLandmarkName, setShowLandmarkName] = React.useState(true);
+  const longPressTriggeredRef = React.useRef(false);
+
+  const handleStampLongPress = () => {
+    longPressTriggeredRef.current = true;
+    router.push("/stamp-done");
+  };
+
+  const handleStampPressOut = () => {
+    if (longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false;
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -26,7 +49,12 @@ export default function StampPressScreen() {
         onRightPress={() => setHelpVisible((visible) => !visible)}
       />
       <View style={styles.content}>
-        <Stamp />
+        <Pressable
+          onLongPress={handleStampLongPress}
+          onPressOut={handleStampPressOut}
+        >
+          <Stamp />
+        </Pressable>
         <Text style={styles.hint}>スマホを上下に振ってスタンプ！</Text>
         <CommonButton
           label="デザインを変更する"
@@ -64,14 +92,14 @@ export default function StampPressScreen() {
       <DesignChangeSheet
         visible={designSheetVisible}
         onClose={() => setDesignSheetVisible(false)}
-        frameStyles={[]}
-        selectedFrameStyleId=""
-        onSelectFrameStyle={() => {}}
-        colorOptions={[]}
-        selectedColor=""
-        onSelectColor={() => {}}
-        showLandmarkName
-        onToggleShowLandmarkName={() => {}}
+        frameStyles={FRAME_STYLE_OPTIONS}
+        selectedFrameStyleId={selectedFrameStyleId}
+        onSelectFrameStyle={setSelectedFrameStyleId}
+        colorOptions={STAMP_COLOR_OPTIONS}
+        selectedColor={selectedColor}
+        onSelectColor={setSelectedColor}
+        showLandmarkName={showLandmarkName}
+        onToggleShowLandmarkName={setShowLandmarkName}
         onConfirm={() => setDesignSheetVisible(false)}
       />
       <CommonDialog
