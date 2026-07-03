@@ -13,7 +13,7 @@ export function Stamp({ imageUri, size = 260, muted = false }: Props) {
   const innerRingSize = size * 1.154;
 
   return (
-    <View style={[styles.wrap, { width: size, height: size }]}>
+    <View style={[styles.wrap, { width: outerRingSize, height: outerRingSize }]}>
       <View
         style={[
           styles.ring,
@@ -21,8 +21,8 @@ export function Stamp({ imageUri, size = 260, muted = false }: Props) {
             width: outerRingSize,
             height: outerRingSize,
             borderRadius: outerRingSize / 2,
-            top: -(outerRingSize - size) / 2,
-            left: -(outerRingSize - size) / 2,
+            top: 0,
+            left: 0,
           },
         ]}
       />
@@ -34,8 +34,8 @@ export function Stamp({ imageUri, size = 260, muted = false }: Props) {
             width: innerRingSize,
             height: innerRingSize,
             borderRadius: innerRingSize / 2,
-            top: -(innerRingSize - size) / 2,
-            left: -(innerRingSize - size) / 2,
+            top: (outerRingSize - innerRingSize) / 2,
+            left: (outerRingSize - innerRingSize) / 2,
           },
         ]}
       />
