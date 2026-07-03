@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import GorhomBottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radii, spacing } from '@/src/theme/tokens';
 
 type Props = {
@@ -9,8 +10,9 @@ type Props = {
   snapPoints?: (string | number)[];
 };
 
-export function BottomSheet({ visible, onClose, children, snapPoints = ['50%'] }: Props) {
+export function BottomSheet({ visible, onClose, children, snapPoints }: Props) {
   const sheetRef = useRef<React.ElementRef<typeof GorhomBottomSheet>>(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (visible) {
@@ -25,6 +27,7 @@ export function BottomSheet({ visible, onClose, children, snapPoints = ['50%'] }
       ref={sheetRef}
       index={-1}
       snapPoints={snapPoints}
+      enableDynamicSizing={!snapPoints}
       enablePanDownToClose
       onClose={onClose}
       backdropComponent={(props) => (
@@ -41,7 +44,12 @@ export function BottomSheet({ visible, onClose, children, snapPoints = ['50%'] }
         height: 4,
       }}
     >
-      <BottomSheetView style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.xxl }}>
+      <BottomSheetView
+        style={{
+          paddingHorizontal: spacing.xl,
+          paddingBottom: spacing.xxl + insets.bottom,
+        }}
+      >
         {children}
       </BottomSheetView>
     </GorhomBottomSheet>

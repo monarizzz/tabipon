@@ -41,7 +41,7 @@ export function DesignChangeSheet({
   onConfirm,
 }: Props) {
   return (
-    <BottomSheet visible={visible} onClose={onClose}>
+    <BottomSheet visible={visible} onClose={onClose} snapPoints={['50%']}>
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>フレーム</Text>
         <View style={styles.row}>

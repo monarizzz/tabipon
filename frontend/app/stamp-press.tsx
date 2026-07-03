@@ -60,7 +60,7 @@ export default function StampPressScreen() {
           },
         ]}
       />
-      <StampHelp visible={helpVisible} />
+      <StampHelp visible={helpVisible} onClose={() => setHelpVisible(false)} />
       <DesignChangeSheet
         visible={designSheetVisible}
         onClose={() => setDesignSheetVisible(false)}

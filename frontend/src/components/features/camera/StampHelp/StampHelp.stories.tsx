@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-native";
 import { View } from "react-native";
+import { fn } from "storybook/test";
 
 import { StampHelp } from "./StampHelp";
 import { colors } from "@/src/theme/tokens";
@@ -20,7 +21,7 @@ const meta = {
     ),
   ],
   tags: ["autodocs"],
-  args: { visible: true },
+  args: { visible: true, onClose: fn() },
 } satisfies Meta<typeof StampHelp>;
 
 export default meta;

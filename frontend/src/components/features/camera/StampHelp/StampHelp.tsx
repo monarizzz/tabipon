@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
-import { colors, typography, radii, spacing } from "@/src/theme/tokens";
+import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Step = {
   number: number;
@@ -14,49 +15,35 @@ const STEPS: Step[] = [
 
 type Props = {
   visible: boolean;
+  onClose: () => void;
   title?: string;
 };
 
-export function StampHelp({ visible, title = "スタンプの押し方" }: Props) {
-  if (!visible) {
-    return null;
-  }
-
+export function StampHelp({ visible, onClose, title = "スタンプの押し方" }: Props) {
   return (
-    <View style={styles.wrap}>
-      <View style={styles.handle} />
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-      </View>
-      <View style={styles.divider} />
-      {STEPS.map((step) => (
-        <View key={step.number} style={styles.step}>
-          <View style={styles.badge}>
-            <Text style={styles.badgeLabel}>{step.number}</Text>
-          </View>
-          <Text style={styles.description}>{step.description}</Text>
+    <BottomSheet visible={visible} onClose={onClose}>
+      <View style={styles.wrap}>
+        <View style={styles.header}>
+          <Text style={styles.title}>{title}</Text>
         </View>
-      ))}
-    </View>
+        <View style={styles.divider} />
+        {STEPS.map((step) => (
+          <View key={step.number} style={styles.step}>
+            <View style={styles.badge}>
+              <Text style={styles.badgeLabel}>{step.number}</Text>
+            </View>
+            <Text style={styles.description}>{step.description}</Text>
+          </View>
+        ))}
+      </View>
+    </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: radii.button,
-    borderTopRightRadius: radii.button,
-    paddingHorizontal: spacing.xl,
     paddingTop: spacing.l,
-    paddingBottom: spacing.xxl,
     gap: spacing.l,
-  },
-  handle: {
-    alignSelf: "center",
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
   },
   header: {
     alignItems: "center",
