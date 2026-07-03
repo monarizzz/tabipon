@@ -92,7 +92,7 @@ src/components/
 
 | コンポーネント | 役割 | variant | 使用箇所 |
 |---|---|---|---|
-| CommonButton | 汎用ボタン | primary / secondary / ghost（icon prop対応） | - |
+| CommonButton | 汎用ボタン | primary / secondary / ghost / accent（icon prop対応） | - |
 | Card | 汎用カード | - | - |
 | Badge | - | - | - |
 | Modal | - | - | - |
@@ -118,6 +118,9 @@ src/components/
 | CameraPreview | 全画面expo-cameraプレビュー＋円形ガイドオーバーレイ（features/camera固有） | - | カメラ画面 |
 | CameraControls | フラッシュ/シャッター/カメラ切替の下部コントロール行（features/camera固有） | - | カメラ画面 |
 | InstructionSheet | 手順バッジ付きのハウツーボトムシート（features/camera固有） | - | スタンプを押す画面（ヘルプ表示） |
+| StampResultHeader | 獲得バッジ+タイトル+日付の結果ヘッダー（features/camera固有） | - | スタンプを押しました画面 |
+| StampShowcase | Stamp+共有ボタンのショーケース（features/camera固有） | - | スタンプを押しました画面 |
+| StampDoneActions | メモ入力欄+続けて撮影/アルバムへボタン行（features/camera固有） | - | スタンプを押しました画面 |
 | ProfileSection | アバター+名前+登録日（features/mypage固有） | - | マイページ |
 | RecentCollectionsSection | 最近のコレクション見出し+サムネ行（features/mypage固有） | - | マイページ |
 | SettingsMenuSection | Card+ListItemの設定メニュー（features/mypage固有） | - | マイページ |
