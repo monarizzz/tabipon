@@ -2,6 +2,7 @@
 
 # Python
 backend/.venv/
+backend/storage/
 __pycache__/
 *.py[cod]
 *.egg-info/
