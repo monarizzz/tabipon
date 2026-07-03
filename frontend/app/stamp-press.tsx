@@ -47,9 +47,13 @@ export default function StampPressScreen() {
     router.push("/stamp-done");
   }, [router]);
 
+  React.useEffect(() => () => Vibration.cancel(), []);
+
   const handleStampPressIn = () => {
     longPressTriggeredRef.current = false;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // 沈み込みに合わせて端末を振動させる(押し込み中はブーッと鳴らし続ける)
+    Vibration.vibrate(500);
     cancelAnimation(stampScale);
     // 長押し判定時間(500ms)にかけてゆっくり沈み込ませる
     stampScale.value = withTiming(0.82, {
@@ -61,7 +65,9 @@ export default function StampPressScreen() {
   const handleStampLongPress = () => {
     longPressTriggeredRef.current = true;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    // 押し込み切った「ドン」という感触を出してから遷移する
+    // 押し込み中の振動を止めて、「ドン」と強めの二段振動を鳴らす
+    Vibration.cancel();
+    Vibration.vibrate([0, 40, 30, 80]);
     cancelAnimation(stampScale);
     stampScale.value = withSequence(
       withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
@@ -77,7 +83,8 @@ export default function StampPressScreen() {
       longPressTriggeredRef.current = false;
       return;
     }
-    // 長押し確定前に離した場合は元の大きさへ戻す
+    // 長押し確定前に離した場合は振動を止めて元の大きさへ戻す
+    Vibration.cancel();
     cancelAnimation(stampScale);
     stampScale.value = withSpring(1, { damping: 14, stiffness: 180 });
   };
