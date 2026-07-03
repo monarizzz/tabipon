@@ -9,7 +9,7 @@ from app.services.landmark_detector import (
     LandmarkNotFoundError,
     detect_primary_landmark,
 )
-from app.services.stamp_processor import StampColor, decode_image, process_stamp_image
+from app.services.stamp_processor import StampColor, StampFrame, decode_image, process_stamp_image
 
 router = APIRouter()
 
@@ -18,13 +18,14 @@ router = APIRouter()
 async def create_stamp_image_endpoint(
     image: Annotated[UploadFile, File()],
     color: StampColor = StampColor.red,
+    frame: StampFrame = StampFrame.classic,
 ):
     image_bytes = await image.read()
     validate_upload(image, image_bytes)
     validate_image_data(image_bytes)
     validate_landmark(image_bytes)
 
-    png_bytes = process_stamp_image(image_bytes, color)
+    png_bytes = process_stamp_image(image_bytes, color, frame)
 
     return Response(content=png_bytes, media_type="image/png")
 
