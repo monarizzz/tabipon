@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions, type CameraType, type FlashMode } from "expo-camera";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { CameraHintBar } from "@/src/components/features/camera/CameraHintBar/CameraHintBar";
@@ -10,6 +11,7 @@ import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export default function CameraScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [permission, requestPermission] = useCameraPermissions();
   const [facing, setFacing] = React.useState<CameraType>("back");
   const [flash, setFlash] = React.useState<FlashMode>("off");
@@ -32,14 +34,18 @@ export default function CameraScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraHintBar />
       <CameraPreview ref={cameraRef} facing={facing} flash={flash} />
-      <CameraControls
-        flashOn={flash === "on"}
-        onToggleFlash={() => setFlash((prev) => (prev === "on" ? "off" : "on"))}
-        onCapture={handleCapture}
-        onFlipCamera={() => setFacing((prev) => (prev === "back" ? "front" : "back"))}
-      />
+      <View style={[styles.hintBarWrap, { top: insets.top + spacing.m }]}>
+        <CameraHintBar />
+      </View>
+      <View style={[styles.controlsWrap, { paddingBottom: spacing.xl }]}>
+        <CameraControls
+          flashOn={flash === "on"}
+          onToggleFlash={() => setFlash((prev) => (prev === "on" ? "off" : "on"))}
+          onCapture={handleCapture}
+          onFlipCamera={() => setFacing((prev) => (prev === "back" ? "front" : "back"))}
+        />
+      </View>
     </View>
   );
 }
@@ -48,8 +54,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
-    justifyContent: "space-between",
-    paddingVertical: spacing.xl,
+  },
+  hintBarWrap: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  controlsWrap: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   permissionContainer: {
     flex: 1,
