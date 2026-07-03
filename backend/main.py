@@ -1,8 +1,23 @@
+import os
+import psycopg2
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+from app.api.routes import health, stamp_image
+from app.core.config import load_env_file
 
+load_env_file()
+conn = psycopg2.connect(os.environ["DATABASE_URL"])
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+app = FastAPI(title="Oogishima Stamp API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(health.router)
+app.include_router(stamp_image.router)
