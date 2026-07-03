@@ -8,9 +8,16 @@ type Props = {
   onClose: () => void;
   children: React.ReactNode;
   snapPoints?: (string | number)[];
+  contentPaddingBottom?: number;
 };
 
-export function BottomSheet({ visible, onClose, children, snapPoints }: Props) {
+export function BottomSheet({
+  visible,
+  onClose,
+  children,
+  snapPoints,
+  contentPaddingBottom = spacing.xxl,
+}: Props) {
   const sheetRef = useRef<React.ElementRef<typeof GorhomBottomSheet>>(null);
   const insets = useSafeAreaInsets();
 
@@ -47,7 +54,7 @@ export function BottomSheet({ visible, onClose, children, snapPoints }: Props) {
       <BottomSheetView
         style={{
           paddingHorizontal: spacing.xl,
-          paddingBottom: spacing.xxl + insets.bottom,
+          paddingBottom: contentPaddingBottom + insets.bottom,
         }}
       >
         {children}

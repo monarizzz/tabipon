@@ -40,7 +40,7 @@ export function FilterRow({
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
-    gap: spacing.s,
+    gap: 8,
     paddingHorizontal: spacing.xl,
     paddingBottom: 12,
   },

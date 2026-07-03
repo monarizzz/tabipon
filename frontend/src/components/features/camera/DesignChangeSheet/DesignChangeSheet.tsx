@@ -41,7 +41,12 @@ export function DesignChangeSheet({
   onConfirm,
 }: Props) {
   return (
-    <BottomSheet visible={visible} onClose={onClose} snapPoints={['50%']}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      snapPoints={['50%']}
+      contentPaddingBottom={spacing.xxxl}
+    >
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>フレーム</Text>
         <View style={styles.row}>
@@ -60,7 +65,7 @@ export function DesignChangeSheet({
 
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>カラー</Text>
-        <View style={styles.row}>
+        <View style={styles.colorRow}>
           {colorOptions.map((color) => (
             <ColorSwatch
               key={color}
@@ -77,18 +82,24 @@ export function DesignChangeSheet({
         <Toggle value={showLandmarkName} onValueChange={onToggleShowLandmarkName} />
       </View>
 
-      <CommonButton label="このデザインにする" onPress={onConfirm} variant="primary" />
+      <CommonButton
+        label="このデザインにする"
+        onPress={onConfirm}
+        variant="primary"
+        style={styles.confirmButton}
+        textStyle={styles.confirmLabel}
+      />
     </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
   section: {
-    gap: spacing.m,
+    gap: 12,
     marginBottom: spacing.xl,
   },
   sectionLabel: {
-    fontSize: typography.labelBold.fontSize,
+    fontSize: 13,
     fontWeight: typography.labelBold.fontWeight,
     color: colors.textPrimary,
   },
@@ -96,18 +107,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.m,
   },
+  colorRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: spacing.l,
-    backgroundColor: colors.surface,
-    borderRadius: spacing.m,
+    paddingVertical: 14,
+    paddingHorizontal: spacing.l,
     marginBottom: spacing.xl,
   },
   toggleLabel: {
-    fontSize: typography.labelBold.fontSize,
+    fontSize: 13,
     fontWeight: typography.labelBold.fontWeight,
     color: colors.textPrimary,
+  },
+  confirmButton: {
+    height: 52,
+    borderRadius: 26,
+  },
+  confirmLabel: {
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
