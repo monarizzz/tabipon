@@ -37,7 +37,6 @@ export function PhotoAdjustControls({ zoom, onChangeZoom, onConfirm }: Props) {
             minimumTrackTintColor={colors.primary}
             maximumTrackTintColor={colors.border}
             thumbTintColor="transparent"
-            thumbSize={THUMB_SIZE}
           />
           {trackWidth > 0 && (
             <View pointerEvents="none" style={[styles.thumbOutline, { left: thumbLeft }]} />
