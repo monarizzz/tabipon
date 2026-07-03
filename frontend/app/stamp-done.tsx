@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Share } from "react-native";
+import { View, StyleSheet, Share, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { Camera, Image, User } from "lucide-react-native";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
@@ -17,7 +17,10 @@ export default function StampDoneScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
+      <KeyboardAvoidingView
+        style={styles.content}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <StampResultHeader date={formattedDate} />
         <StampShowcase onShare={() => Share.share({ message: "スタンプを獲得しました！" })} />
         <StampDoneActions
@@ -26,7 +29,7 @@ export default function StampDoneScreen() {
           onContinueShooting={() => router.replace("/(tabs)")}
           onGoToAlbum={() => router.push("/(tabs)/album")}
         />
-      </View>
+      </KeyboardAvoidingView>
       <TabBar
         items={[
           {
