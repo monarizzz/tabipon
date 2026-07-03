@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { TouchableOpacity, Text, View, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { colors, typography, radii, spacing } from '@/src/theme/tokens';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
@@ -11,6 +11,7 @@ type Props = {
   disabled?: boolean;
   icon?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
 export function CommonButton({
@@ -20,6 +21,7 @@ export function CommonButton({
   disabled = false,
   icon,
   style,
+  textStyle,
 }: Props) {
   return (
     <TouchableOpacity
@@ -30,7 +32,7 @@ export function CommonButton({
     >
       <View style={styles.content}>
         {icon}
-        <Text style={[styles.label, styles[`${variant}Label`]]}>{label}</Text>
+        <Text style={[styles.label, styles[`${variant}Label`], textStyle]}>{label}</Text>
       </View>
     </TouchableOpacity>
   );

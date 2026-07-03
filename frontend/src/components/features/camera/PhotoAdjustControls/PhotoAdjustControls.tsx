@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, LayoutChangeEvent } from 'react-native';
+import { View, Text, StyleSheet, LayoutChangeEvent } from 'react-native';
 import Slider from '@react-native-community/slider';
+import { Minimize2, Maximize2 } from 'lucide-react-native';
 import { CommonButton } from '@/src/components/common/CommonButton/CommonButton';
 import { colors, typography, spacing } from '@/src/theme/tokens';
 
-const THUMB_SIZE = 24;
-const ZOOM_ICON_SIZE = 20;
+const THUMB_SIZE = 20;
+const ZOOM_ICON_SIZE = 16;
 
 type Props = {
   zoom: number;
@@ -26,7 +27,7 @@ export function PhotoAdjustControls({ zoom, onChangeZoom, onConfirm }: Props) {
     <View style={styles.wrap}>
       <Text style={styles.hint}>ピンチで拡大縮小・ドラッグで移動</Text>
       <View style={styles.sliderRow}>
-        <Image source={require('@/assets/Min-Icon.png')} style={styles.zoomIcon} resizeMode="contain" />
+        <Minimize2 size={ZOOM_ICON_SIZE} color={colors.textMuted} />
         <View style={styles.sliderTrack} onLayout={handleTrackLayout}>
           <Slider
             style={styles.slider}
@@ -42,9 +43,15 @@ export function PhotoAdjustControls({ zoom, onChangeZoom, onConfirm }: Props) {
             <View pointerEvents="none" style={[styles.thumbOutline, { left: thumbLeft }]} />
           )}
         </View>
-        <Image source={require('@/assets/Max-Icon.png')} style={styles.zoomIcon} resizeMode="contain" />
+        <Maximize2 size={ZOOM_ICON_SIZE} color={colors.textMuted} />
       </View>
-      <CommonButton label="次へ" onPress={onConfirm} variant="primary" />
+      <CommonButton
+        label="次へ"
+        onPress={onConfirm}
+        variant="primary"
+        style={styles.confirmButton}
+        textStyle={styles.confirmButtonLabel}
+      />
     </View>
   );
 }
@@ -81,8 +88,13 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.white,
   },
-  zoomIcon: {
-    width: ZOOM_ICON_SIZE,
-    height: ZOOM_ICON_SIZE,
+  confirmButton: {
+    paddingVertical: 0,
+    height: 48,
+    borderRadius: 24,
+  },
+  confirmButtonLabel: {
+    fontSize: 16,
+    fontWeight: '700',
   },
 });
