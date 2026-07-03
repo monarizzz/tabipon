@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import cv2
 import numpy as np
@@ -16,6 +16,10 @@ os.environ.setdefault("DATABASE_URL", "postgresql://test:test@localhost/test")
 sys.modules.setdefault("psycopg2", MagicMock(connect=MagicMock()))
 
 from app.core.config import MAX_IMAGE_BYTES  # noqa: E402
+from app.services.landmark_detector import (  # noqa: E402
+    LandmarkDetectionServiceError,
+    LandmarkNotFoundError,
+)
 from main import app  # noqa: E402
 
 
@@ -42,7 +46,8 @@ class HealthApiTest(unittest.TestCase):
 
 
 class StampImageApiTest(unittest.TestCase):
-    def test_stamp_image_accepts_jpeg_and_returns_png(self):
+    @patch("app.api.routes.stamp_image.detect_primary_landmark")
+    def test_stamp_image_accepts_jpeg_and_returns_png(self, _detect_landmark):
         image_bytes = create_jpeg_bytes()
 
         response = client.post(
@@ -53,6 +58,37 @@ class StampImageApiTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers["content-type"], "image/png")
         self.assertGreater(len(response.content), 0)
+
+    @patch("app.api.routes.stamp_image.detect_primary_landmark")
+    def test_stamp_image_rejects_image_without_landmark(self, detect_landmark):
+        detect_landmark.side_effect = LandmarkNotFoundError("No landmark found")
+        image_bytes = create_jpeg_bytes()
+
+        response = client.post(
+            "/stamp-image",
+            files={"image": ("test.jpg", image_bytes, "image/jpeg")},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"detail": "No landmark found"})
+
+    @patch("app.api.routes.stamp_image.detect_primary_landmark")
+    def test_stamp_image_returns_server_error_when_landmark_detection_fails(
+        self,
+        detect_landmark,
+    ):
+        detect_landmark.side_effect = LandmarkDetectionServiceError(
+            "Failed to detect landmark",
+        )
+        image_bytes = create_jpeg_bytes()
+
+        response = client.post(
+            "/stamp-image",
+            files={"image": ("test.jpg", image_bytes, "image/jpeg")},
+        )
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json(), {"detail": "Failed to detect landmark"})
 
     def test_stamp_image_rejects_empty_file(self):
         response = client.post(
