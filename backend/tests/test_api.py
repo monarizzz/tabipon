@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import cv2
 import numpy as np
@@ -12,10 +12,12 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-os.environ.setdefault("DATABASE_URL", "postgresql://test:test@localhost/test")
-sys.modules.setdefault("psycopg2", MagicMock(connect=MagicMock()))
+os.environ.setdefault("SUPABASE_URL", "https://test.supabase.co")
+os.environ.setdefault("SUPABASE_KEY", "test-key")
 
+from app.clients.vision_client import Landmark  # noqa: E402
 from app.core.config import MAX_IMAGE_BYTES  # noqa: E402
+from app.repositories.stamp_repository import StampRepositoryError  # noqa: E402
 from app.services.landmark_detector import (  # noqa: E402
     LandmarkDetectionServiceError,
     LandmarkNotFoundError,
@@ -45,9 +47,31 @@ class HealthApiTest(unittest.TestCase):
         self.assertEqual(response.json(), {"status": "ok"})
 
 
+TEST_LANDMARK = Landmark(
+    name="Tokyo Tower",
+    score=0.98,
+    latitude=35.6586,
+    longitude=139.7454,
+)
+TEST_IMAGE_URL = "https://test.supabase.co/storage/v1/object/public/stamps/test.png"
+
+
 class StampImageApiTest(unittest.TestCase):
+    @patch("app.api.routes.stamp_image.create_stamp")
+    @patch("app.api.routes.stamp_image.find_or_create_spot")
+    @patch("app.api.routes.stamp_image.upload_stamp_image")
     @patch("app.api.routes.stamp_image.detect_primary_landmark")
-    def test_stamp_image_accepts_jpeg_and_returns_png(self, _detect_landmark):
+    def test_stamp_image_saves_stamp_and_returns_json(
+        self,
+        detect_landmark,
+        upload_stamp_image,
+        find_or_create_spot,
+        create_stamp,
+    ):
+        detect_landmark.return_value = TEST_LANDMARK
+        upload_stamp_image.return_value = TEST_IMAGE_URL
+        find_or_create_spot.return_value = 1
+        create_stamp.return_value = {"id": 10, "image_url": TEST_IMAGE_URL}
         image_bytes = create_jpeg_bytes()
 
         response = client.post(
@@ -56,8 +80,35 @@ class StampImageApiTest(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.headers["content-type"], "image/png")
-        self.assertGreater(len(response.content), 0)
+        self.assertEqual(
+            response.json(),
+            {
+                "id": 10,
+                "landmark_name": "Tokyo Tower",
+                "image_url": TEST_IMAGE_URL,
+            },
+        )
+        find_or_create_spot.assert_called_once_with("Tokyo Tower", 35.6586, 139.7454)
+        create_stamp.assert_called_once_with(1, TEST_IMAGE_URL)
+
+    @patch("app.api.routes.stamp_image.upload_stamp_image")
+    @patch("app.api.routes.stamp_image.detect_primary_landmark")
+    def test_stamp_image_returns_server_error_when_save_fails(
+        self,
+        detect_landmark,
+        upload_stamp_image,
+    ):
+        detect_landmark.return_value = TEST_LANDMARK
+        upload_stamp_image.side_effect = StampRepositoryError("upload failed")
+        image_bytes = create_jpeg_bytes()
+
+        response = client.post(
+            "/stamp-image",
+            files={"image": ("test.jpg", image_bytes, "image/jpeg")},
+        )
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json(), {"detail": "Failed to save stamp"})
 
     @patch("app.api.routes.stamp_image.detect_primary_landmark")
     def test_stamp_image_rejects_image_without_landmark(self, detect_landmark):
