@@ -78,6 +78,7 @@ export default function StampPressScreen() {
   const swingUpTimestampRef = React.useRef(0);
   const swingDownPeakRef = React.useRef(0);
   const chosenScratchLevelRef = React.useRef(0);
+  const [debugAccel, setDebugAccel] = React.useState({ y: 0, peak: 0, scratch: 0 });
 
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
@@ -177,6 +178,7 @@ export default function StampPressScreen() {
   React.useEffect(() => {
     Accelerometer.setUpdateInterval(100);
     const subscription = Accelerometer.addListener(({ y }) => {
+      setDebugAccel((prev) => ({ ...prev, y: Math.round(y * 100) / 100, peak: Math.round(swingDownPeakRef.current * 100) / 100 }));
       if (shakeTriggeredRef.current) return;
       if (y > 1.5) {
         swingUpDetectedRef.current = true;
@@ -198,6 +200,7 @@ export default function StampPressScreen() {
         // 遅い（弱い）スイングほど掠れが強くなる
         const scratchLevel = peak < -6.0 ? 0.8 : peak < -4.0 ? 0.4 : 0.0;
         chosenScratchLevelRef.current = scratchLevel;
+        setDebugAccel({ y: Math.round(y * 100) / 100, peak: Math.round(peak * 100) / 100, scratch: scratchLevel });
         applyScratch(scratchLevel);
         const previews = previewImagesRef.current;
         if (previews) {
@@ -288,6 +291,7 @@ export default function StampPressScreen() {
           </Animated.View>
         </Pressable>
         <Text style={styles.hint}>{t("stampPress.shakeHint")}</Text>
+        <Text style={styles.debug}>y: {debugAccel.y}  peak: {debugAccel.peak}  scratch: {debugAccel.scratch}</Text>
         <CommonButton
           label={t("design.changeDesign")}
           onPress={() => setDesignSheetVisible(true)}
@@ -387,6 +391,11 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: typography.caption.fontSize,
     color: colors.textMuted,
+  },
+  debug: {
+    fontSize: 11,
+    color: colors.textMuted,
+    fontFamily: "monospace",
   },
   helpIcon: {
     fontSize: 14,
