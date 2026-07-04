@@ -1,6 +1,6 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { useRouter, useFocusEffect } from "expo-router";
 import {
   FilterRow,
   type FilterOption,
@@ -11,7 +11,9 @@ import {
 } from "@/src/components/features/album/StampGrid/StampGrid";
 import { CollectionSheet } from "@/src/components/features/album/CollectionSheet/CollectionSheet";
 import { Header } from "@/src/components/common/layout/Header/Header";
-import { colors } from "@/src/theme/tokens";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { fetchStamps, type StampListItem } from "@/src/api/stamps";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 const FILTERS: FilterOption[] = [
   { id: "all", label: "すべて" },
@@ -20,12 +22,22 @@ const FILTERS: FilterOption[] = [
   { id: "walk", label: "散歩" },
 ];
 
-const PLACEHOLDER_STAMPS: StampGridItem[] = [
-  { id: "1", name: "スタンプ1", date: "2026.06.28", obtained: true },
-  { id: "2", name: "スタンプ2", obtained: false },
-  { id: "3", name: "スタンプ3", date: "2026.06.25", obtained: true },
-  { id: "4", name: "スタンプ4", obtained: false },
-];
+function formatDate(isoDate: string): string {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function toGridItem(stamp: StampListItem): StampGridItem {
+  return {
+    id: stamp.id,
+    // スポット名連携は未実装のため固定ラベルで表示する
+    name: "スタンプ",
+    date: formatDate(stamp.acquired_at),
+    imageUri: stamp.image_url,
+    obtained: true,
+  };
+}
 
 export default function AlbumScreen() {
   const router = useRouter();
@@ -33,12 +45,28 @@ export default function AlbumScreen() {
   const [collectionSheetVisible, setCollectionSheetVisible] =
     React.useState(false);
   const [collectionName, setCollectionName] = React.useState("");
+  const [stamps, setStamps] = React.useState<StampGridItem[] | null>(null);
+  const [loadFailed, setLoadFailed] = React.useState(false);
+
+  const loadStamps = React.useCallback(() => {
+    setLoadFailed(false);
+    fetchStamps()
+      .then((items) => setStamps(items.map(toGridItem)))
+      .catch(() => setLoadFailed(true));
+  }, []);
+
+  // スタンプ獲得直後にタブへ戻ったときも最新化する
+  useFocusEffect(
+    React.useCallback(() => {
+      loadStamps();
+    }, [loadStamps]),
+  );
 
   return (
     <View style={styles.container}>
       <Header
         title="アルバム"
-        subtitle={`スタンプ ${PLACEHOLDER_STAMPS.length}枚`}
+        subtitle={`スタンプ ${stamps?.length ?? 0}枚`}
       />
       <FilterRow
         filters={FILTERS}
@@ -46,10 +74,21 @@ export default function AlbumScreen() {
         onSelectFilter={setSelectedFilterId}
         onAddPress={() => setCollectionSheetVisible(true)}
       />
-      <StampGrid
-        stamps={PLACEHOLDER_STAMPS}
-        onPressStamp={() => router.push("/album-stamp-detail")}
-      />
+      {loadFailed ? (
+        <View style={styles.status}>
+          <Text style={styles.statusText}>スタンプを読み込めませんでした</Text>
+          <CommonButton label="再読み込み" onPress={loadStamps} variant="secondary" />
+        </View>
+      ) : stamps === null ? (
+        <View style={styles.status}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      ) : (
+        <StampGrid
+          stamps={stamps}
+          onPressStamp={() => router.push("/album-stamp-detail")}
+        />
+      )}
       <CollectionSheet
         visible={collectionSheetVisible}
         onClose={() => setCollectionSheetVisible(false)}
@@ -68,5 +107,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
+  },
+  status: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.l,
+  },
+  statusText: {
+    fontSize: typography.caption.fontSize,
+    color: colors.textMuted,
   },
 });

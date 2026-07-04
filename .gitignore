@@ -8,6 +8,9 @@ __pycache__/
 *.egg-info/
 .env
 
+# Logs
+log/
+
 # Node / Expo
 frontend/node_modules/
 frontend/.expo/

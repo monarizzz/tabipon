@@ -6,6 +6,7 @@ import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
 import { StampResultHeader } from "@/src/components/features/camera/StampResultHeader/StampResultHeader";
 import { StampShowcase } from "@/src/components/features/camera/StampShowcase/StampShowcase";
 import { StampDoneActions } from "@/src/components/features/camera/StampDoneActions/StampDoneActions";
+import { clearSession } from "@/src/api/stampSession";
 import { colors, spacing } from "@/src/theme/tokens";
 
 const today = new Date();
@@ -13,7 +14,11 @@ const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).pad
 
 export default function StampDoneScreen() {
   const router = useRouter();
-  const { stampTop: stampTopParam } = useLocalSearchParams<{ stampTop?: string }>();
+  const { stampTop: stampTopParam, imageUrl } = useLocalSearchParams<{
+    stampTop?: string;
+    stampId?: string;
+    imageUrl?: string;
+  }>();
   const [memo, setMemo] = React.useState("");
 
   // 前の画面(押し込みアニメーション)でスタンプがあった位置を引き継ぎ、
@@ -33,13 +38,22 @@ export default function StampDoneScreen() {
         >
           <StampResultHeader date={formattedDate} />
         </View>
-        <StampShowcase onShare={() => Share.share({ message: "スタンプを獲得しました！" })} />
+        <StampShowcase
+          imageUri={imageUrl}
+          onShare={() => Share.share({ message: "スタンプを獲得しました！" })}
+        />
         <View style={styles.actionsAnchor}>
           <StampDoneActions
             memo={memo}
             onChangeMemo={setMemo}
-            onContinueShooting={() => router.replace("/(tabs)")}
-            onGoToAlbum={() => router.push("/(tabs)/album")}
+            onContinueShooting={() => {
+              clearSession();
+              router.replace("/(tabs)");
+            }}
+            onGoToAlbum={() => {
+              clearSession();
+              router.push("/(tabs)/album");
+            }}
           />
         </View>
       </KeyboardAvoidingView>
@@ -50,21 +64,30 @@ export default function StampDoneScreen() {
             label: "カメラ",
             icon: Camera,
             active: true,
-            onPress: () => router.replace("/(tabs)"),
+            onPress: () => {
+              clearSession();
+              router.replace("/(tabs)");
+            },
           },
           {
             key: "album",
             label: "アルバム",
             icon: Image,
             active: false,
-            onPress: () => router.push("/(tabs)/album"),
+            onPress: () => {
+              clearSession();
+              router.push("/(tabs)/album");
+            },
           },
           {
             key: "mypage",
             label: "マイページ",
             icon: User,
             active: false,
-            onPress: () => router.push("/(tabs)/mypage"),
+            onPress: () => {
+              clearSession();
+              router.push("/(tabs)/mypage");
+            },
           },
         ]}
       />

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { colors } from '@/src/theme/tokens';
+import type { StampColor } from '@/src/api/stamps';
 import type { FrameStyleOption } from './DesignChangeSheet';
 
 type FrameThumbVariant = 'classic' | 'vintage' | 'minimal' | 'wave';
@@ -91,12 +92,18 @@ export const FRAME_STYLE_OPTIONS: FrameStyleOption[] = [
   { id: 'wave', label: '波形', preview: makePreview('wave') },
 ];
 
+// バックエンドの StampColor (red/blue/black/green) に対応する4色のみ提供する
+// 先頭(デフォルト選択)は POST 時のデフォルト色 red に合わせる
 export const STAMP_COLOR_OPTIONS = [
-  '#333333',
   '#ff6b6b',
-  '#fcc06d',
-  '#6de8b9',
   '#6bc1ff',
-  '#be91fa',
-  '#ff94dd',
+  '#333333',
+  '#6de8b9',
 ];
+
+export const API_COLOR_BY_HEX: Record<string, StampColor> = {
+  '#ff6b6b': 'red',
+  '#6bc1ff': 'blue',
+  '#333333': 'black',
+  '#6de8b9': 'green',
+};

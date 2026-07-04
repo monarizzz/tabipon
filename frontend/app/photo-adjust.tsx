@@ -7,6 +7,7 @@ import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
 import { PhotoCropArea } from "@/src/components/features/camera/PhotoCropArea/PhotoCropArea";
 import { PhotoAdjustControls } from "@/src/components/features/camera/PhotoAdjustControls/PhotoAdjustControls";
+import { startUpload } from "@/src/api/stampSession";
 import { colors } from "@/src/theme/tokens";
 
 export default function PhotoAdjustScreen() {
@@ -23,7 +24,11 @@ export default function PhotoAdjustScreen() {
       <PhotoAdjustControls
         zoom={zoom}
         onChangeZoom={setZoom}
-        onConfirm={() => router.push("/stamp-press")}
+        onConfirm={() => {
+          // 待たずに送信開始し、結果はスタンプを押す画面で待ち合わせる
+          if (uri) startUpload(uri, "red");
+          router.push({ pathname: "/stamp-press", params: { uri } });
+        }}
       />
       <TabBar
         items={[
