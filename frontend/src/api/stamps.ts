@@ -19,7 +19,7 @@ export type StampListItem = {
   acquired_at: string;
 };
 
-function buildImageFormData(photoUri: string, color: StampColor): FormData {
+function buildImageFormData(photoUri: string, color: StampColor, scratchLevel: number = 0): FormData {
   const formData = new FormData();
   // React Native の fetch は {uri, name, type} オブジェクトをファイルとして multipart 送信する
   formData.append("image", {
@@ -28,17 +28,19 @@ function buildImageFormData(photoUri: string, color: StampColor): FormData {
     type: "image/jpeg",
   } as unknown as Blob);
   formData.append("color", color);
+  if (scratchLevel > 0) formData.append("scratch_level", String(scratchLevel));
   return formData;
 }
 
 export function createStampImage(
   photoUri: string,
   color: StampColor,
+  scratchLevel: number = 0,
 ): Promise<StampCreateResponse> {
   // Content-Type は指定しない(boundary 付きで fetch が自動付与する)
   return request<StampCreateResponse>("/stamp-image", {
     method: "POST",
-    body: buildImageFormData(photoUri, color),
+    body: buildImageFormData(photoUri, color, scratchLevel),
   });
 }
 
@@ -48,11 +50,9 @@ export function updateStampImage(
   color: StampColor,
   scratchLevel: number = 0,
 ): Promise<StampUpdateResponse> {
-  const formData = buildImageFormData(photoUri, color);
-  if (scratchLevel > 0) formData.append("scratch_level", String(scratchLevel));
   return request<StampUpdateResponse>(`/stamp-image/${stampId}`, {
     method: "PUT",
-    body: formData,
+    body: buildImageFormData(photoUri, color, scratchLevel),
   });
 }
 

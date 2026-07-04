@@ -24,19 +24,21 @@ async def create_stamp_image_endpoint(
     image: Annotated[UploadFile, File()],
     color: StampColor = StampColor.red,
     frame: StampFrame = StampFrame.classic,
+    scratch_level: float = 0.0,
 ):
     logger.info(
-        "stamp-image create received filename=%s content_type=%s color=%s",
+        "stamp-image create received filename=%s content_type=%s color=%s scratch_level=%s",
         image.filename,
         image.content_type,
         color,
+        scratch_level,
     )
     image_bytes = await image.read()
     logger.info("stamp-image create read bytes=%s", len(image_bytes))
     validate_upload(image, image_bytes)
     validate_image_data(image_bytes)
 
-    png_bytes = process_stamp_image(image_bytes, color, frame)
+    png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level)
     logger.info("stamp-image create processed png_bytes=%s", len(png_bytes))
     stamp = save_stamp(png_bytes)
     logger.info("stamp-image create saved stamp_id=%s", stamp.get("id"))
