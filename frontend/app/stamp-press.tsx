@@ -70,10 +70,9 @@ export default function StampPressScreen() {
   const stampScale = useSharedValue(1);
   const stampWrapRef = React.useRef<View>(null);
   const shakeTriggeredRef = React.useRef(false);
-  const stampDownDetectedRef = React.useRef(false);
+  const stampLiftDetectedRef = React.useRef(false);
+  const stampLiftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const stampDownPeakRef = React.useRef(0);
-  const liftingRef = React.useRef(false);
-  const liftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentRotationAlphaRef = React.useRef(0);
   const [previewImages, setPreviewImages] = React.useState<{ low: string; mid: string; high: string } | null>(null);
   const previewImagesRef = React.useRef<{ low: string; mid: string; high: string } | null>(null);
@@ -186,25 +185,26 @@ export default function StampPressScreen() {
 
       const z = acceleration?.z ?? 0;
 
-      // 上方向への加速を検知したら600ms間は押し付け判定を無視
-      if (z > 1.5) {
-        liftingRef.current = true;
-        if (liftTimerRef.current) clearTimeout(liftTimerRef.current);
-        liftTimerRef.current = setTimeout(() => {
-          liftingRef.current = false;
-        }, 600);
+      // ①持ち上げ検知（z がプラスに振れたら準備OK、800ms以内に押し付けが来なければリセット）
+      if (z > 2) {
+        stampLiftDetectedRef.current = true;
+        stampDownPeakRef.current = 0;
+        if (stampLiftTimerRef.current) clearTimeout(stampLiftTimerRef.current);
+        stampLiftTimerRef.current = setTimeout(() => {
+          stampLiftDetectedRef.current = false;
+        }, 800);
       }
 
-      // 下方向への加速度を検知（振り上げ直後でなければ押し付けと判定）
-      if (z < -5 && !liftingRef.current) {
-        stampDownDetectedRef.current = true;
-        stampDownPeakRef.current = Math.min(stampDownPeakRef.current, z);
+      // ②押し付け中のpeak記録
+      if (stampLiftDetectedRef.current && z < stampDownPeakRef.current) {
+        stampDownPeakRef.current = z;
       }
 
-      // 押し付けから戻ったタイミングでスタンプ確定
-      if (stampDownDetectedRef.current && z > -1.5) {
+      // ③持ち上げ後に z < -5 まで下がったらスタンプ確定
+      if (z < -5 && stampLiftDetectedRef.current) {
         shakeTriggeredRef.current = true;
-        stampDownDetectedRef.current = false;
+        stampLiftDetectedRef.current = false;
+        if (stampLiftTimerRef.current) clearTimeout(stampLiftTimerRef.current);
         const peak = stampDownPeakRef.current;
         stampDownPeakRef.current = 0;
 
