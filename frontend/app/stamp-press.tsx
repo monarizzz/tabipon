@@ -79,8 +79,12 @@ export default function StampPressScreen() {
   const previewImagesRef = React.useRef<{ low: string; mid: string; high: string } | null>(null);
   const [previewLoading, setPreviewLoading] = React.useState(false);
   const chosenScratchLevelRef = React.useRef(0);
+  const stampRotation = useSharedValue(0);
   const stampAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: stampScale.value }],
+    transform: [
+      { scale: stampScale.value },
+      { rotate: `${stampRotation.value}deg` },
+    ],
   }));
 
   React.useEffect(() => {
@@ -179,6 +183,11 @@ export default function StampPressScreen() {
     const subscription = DeviceMotion.addListener(({ acceleration, rotation }) => {
       if (rotation?.alpha != null) {
         currentRotationAlphaRef.current = rotation.alpha;
+        // -180〜180度に正規化してプレビューをリアルタイム回転
+        let deg = rotation.alpha * (180 / Math.PI);
+        if (deg > 180) deg -= 360;
+        if (deg < -180) deg += 360;
+        stampRotation.value = deg;
       }
       if (shakeTriggeredRef.current) return;
 
@@ -210,7 +219,9 @@ export default function StampPressScreen() {
         // 弱い押し付け(peak=-5) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
         const scratchLevel = Math.max(0, Math.min(1.0, (peak - (-75)) / ((-5) - (-75))));
         chosenScratchLevelRef.current = scratchLevel;
-        const tiltAngle = currentRotationAlphaRef.current * (180 / Math.PI);
+        let tiltAngle = currentRotationAlphaRef.current * (180 / Math.PI);
+        if (tiltAngle > 180) tiltAngle -= 360;
+        if (tiltAngle < -180) tiltAngle += 360;
         applyScratch(scratchLevel, tiltAngle);
         const previews = previewImagesRef.current;
         if (previews) {
