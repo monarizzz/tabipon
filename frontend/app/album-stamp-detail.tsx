@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Share } from "react-native";
+import { Share2 } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
@@ -74,6 +75,17 @@ export default function StampDetailScreen() {
   };
   const closeEditor = () => setEditingField(null);
 
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: [spotName, location, memo].filter(Boolean).join("\n"),
+        url: imageUri,
+      });
+    } catch {
+      // ユーザーによるキャンセル等は無視
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={[styles.topBar, { paddingTop: insets.top + spacing.xl }]}>
@@ -84,8 +96,12 @@ export default function StampDetailScreen() {
         >
           <Text style={styles.iconGlyph}>‹</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-          <Text style={styles.iconGlyph}>↗</Text>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={handleShare}
+          activeOpacity={0.7}
+        >
+          <Share2 size={16} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
       <StampDetailMediaPager
