@@ -1,6 +1,7 @@
 import React from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { Bell, Shield, Info } from "lucide-react-native";
 import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
 import { ProfileSection } from "@/src/components/features/mypage/ProfileSection/ProfileSection";
 import { RecentCollectionsSection } from "@/src/components/features/mypage/RecentCollectionsSection/RecentCollectionsSection";
@@ -30,16 +31,19 @@ export default function MypageScreen() {
             {
               id: "notifications",
               label: "通知設定",
+              icon: Bell,
               onPress: () => router.push("/mypage/notifications"),
             },
             {
               id: "privacy",
               label: "プライバシー",
+              icon: Shield,
               onPress: () => router.push("/mypage/privacy"),
             },
             {
               id: "help",
               label: "ヘルプ",
+              icon: Info,
               onPress: () => router.push("/mypage/help"),
             },
           ]}
