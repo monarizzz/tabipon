@@ -1,5 +1,6 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import { User } from "lucide-react-native";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export function ProfileSection({ name, registeredDate, avatarUri }: Props) {
+  const { t } = useTranslation();
   return (
     <View style={styles.wrap}>
       <View style={styles.avatar}>
@@ -19,7 +21,7 @@ export function ProfileSection({ name, registeredDate, avatarUri }: Props) {
         )}
       </View>
       <Text style={styles.name}>{name}</Text>
-      <Text style={styles.bio}>{registeredDate} 登録</Text>
+      <Text style={styles.bio}>{t("mypage.registered", { date: registeredDate })}</Text>
     </View>
   );
 }

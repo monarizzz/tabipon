@@ -112,6 +112,7 @@ src/components/
 | StampGrid | StampCardの2列グリッド＋空状態（features/stamp-rally固有） | - | アルバム画面 |
 | CollectionSheet | BottomSheet+入力欄+CommonButtonのコレクション追加シート（features/stamp-rally固有） | - | アルバム画面 |
 | StampDetailPhoto | Stamp+デザイン変更ボタン+スポット名（タップで編集可）（features/stamp-rally固有） | - | スタンプ詳細画面 |
+| DesignChangePanel | プレビュー+フレーム/カラー選択+トグル+適用ボタンを全画面インライン表示するデザイン変更パネル（features/stamp-rally固有）。stamp-press はボトムシート版 DesignChangeSheet を使用 | - | スタンプ詳細画面（デザイン変更） |
 | StampInfoCard | 日付/場所セル+メモセクション（すべてタップで編集・追加可、未入力時はプレースホルダー表示）（features/stamp-rally固有） | - | スタンプ詳細画面 |
 | StampLocationMap | WebViewでGoogleマップ埋め込みを表示する地図カード+スポット名（features/stamp-rally固有） | - | スタンプ詳細画面（マップページ） |
 | StampDetailMediaPager | StampDetailPhotoとStampLocationMapを横スクロールで切り替えるページャー+ドットインジケーター（features/stamp-rally固有） | - | スタンプ詳細画面 |

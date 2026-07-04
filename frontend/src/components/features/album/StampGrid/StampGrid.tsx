@@ -1,5 +1,12 @@
-import { FlatList, View, Text, StyleSheet } from "react-native";
+import {
+  FlatList,
+  View,
+  Text,
+  StyleSheet,
+  RefreshControl,
+} from "react-native";
 import { StampCard } from "@/src/components/features/album/StampCard/StampCard";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export type StampGridItem = {
@@ -13,15 +20,21 @@ export type StampGridItem = {
 type Props = {
   stamps: StampGridItem[];
   onPressStamp?: (item: StampGridItem) => void;
+  refreshing?: boolean;
+  onRefresh?: () => void;
 };
 
-export function StampGrid({ stamps, onPressStamp }: Props) {
+export function StampGrid({
+  stamps,
+  onPressStamp,
+  refreshing,
+  onRefresh,
+}: Props) {
+  const { t } = useTranslation();
   if (stamps.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>
-          スタンプを集めるとここに表示されます!
-        </Text>
+        <Text style={styles.emptyText}>{t("album.empty")}</Text>
       </View>
     );
   }
@@ -33,6 +46,16 @@ export function StampGrid({ stamps, onPressStamp }: Props) {
       numColumns={2}
       contentContainerStyle={styles.list}
       columnWrapperStyle={styles.row}
+      refreshControl={
+        onRefresh ? (
+          <RefreshControl
+            refreshing={refreshing ?? false}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        ) : undefined
+      }
       renderItem={({ item }) => (
         <StampCard
           name={item.name}

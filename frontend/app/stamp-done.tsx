@@ -7,6 +7,7 @@ import { StampResultHeader } from "@/src/components/features/camera/StampResultH
 import { StampShowcase } from "@/src/components/features/camera/StampShowcase/StampShowcase";
 import { StampDoneActions } from "@/src/components/features/camera/StampDoneActions/StampDoneActions";
 import { clearSession, getChosenPreviewUri } from "@/src/api/stampSession";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, spacing } from "@/src/theme/tokens";
 
 const today = new Date();
@@ -14,12 +15,11 @@ const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).pad
 
 export default function StampDoneScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { stampTop: stampTopParam, imageUrl, scratchLevel, peak } = useLocalSearchParams<{
     stampTop?: string;
     stampId?: string;
     imageUrl?: string;
-    scratchLevel?: string;
-    peak?: string;
   }>();
   const previewUri = getChosenPreviewUri();
   const [spotName, setSpotName] = React.useState("");
@@ -52,7 +52,7 @@ export default function StampDoneScreen() {
           </View>
           <StampShowcase
             imageUri={imageUrl ?? previewUri}
-            onShare={() => Share.share({ message: "スタンプを獲得しました！" })}
+            onShare={() => Share.share({ message: t("stampDone.shareMessage") })}
           />
           {scratchLevel !== undefined && (
             <Text style={styles.debugText}>[DEBUG] scratch: {scratchLevel} / peak: {peak}</Text>
@@ -79,7 +79,7 @@ export default function StampDoneScreen() {
         items={[
           {
             key: "index",
-            label: "カメラ",
+            label: t("tabs.camera"),
             icon: Camera,
             active: true,
             onPress: () => {
@@ -89,7 +89,7 @@ export default function StampDoneScreen() {
           },
           {
             key: "album",
-            label: "アルバム",
+            label: t("tabs.album"),
             icon: Image,
             active: false,
             onPress: () => {
@@ -99,7 +99,7 @@ export default function StampDoneScreen() {
           },
           {
             key: "mypage",
-            label: "マイページ",
+            label: t("tabs.mypage"),
             icon: User,
             active: false,
             onPress: () => {
@@ -134,11 +134,5 @@ const styles = StyleSheet.create({
   },
   actionsAnchor: {
     justifyContent: "flex-start",
-  },
-  debugText: {
-    fontSize: 12,
-    color: "red",
-    textAlign: "center",
-    marginTop: 4,
   },
 });

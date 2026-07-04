@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
@@ -6,10 +7,11 @@ type Props = {
 };
 
 export function StampResultHeader({ date }: Props) {
+  const { t } = useTranslation();
   return (
     <View style={styles.wrap}>
-      <Text style={styles.badge}>✦ スタンプ獲得！ ✦</Text>
-      <Text style={styles.title}>スタンプを押しました</Text>
+      <Text style={styles.badge}>{t("stampDone.badge")}</Text>
+      <Text style={styles.title}>{t("stampDone.title")}</Text>
       <Text style={styles.date}>{date}</Text>
     </View>
   );

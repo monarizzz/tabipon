@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Share, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
+import { DesignChangePanel } from "@/src/components/features/album/stamp-rally/DesignChangePanel/DesignChangePanel";
 import {
   FRAME_STYLE_OPTIONS,
   STAMP_COLOR_OPTIONS,
@@ -14,7 +14,9 @@ import { CommonButton } from "@/src/components/common/CommonButton/CommonButton"
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
 import { Trash2 } from "lucide-react-native";
 import { deleteStamp, updateStampImage, previewStampImage } from "@/src/api/stamps";
+import { markStampDeleted } from "@/src/api/deletedStamps";
 import { getOriginalPhotoUri } from "@/src/utils/originalPhotoStore";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, radii, spacing } from "@/src/theme/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
@@ -36,13 +38,14 @@ type EditingField = "spotName" | "date" | "location" | "memo" | null;
 
 export default function StampDetailScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { id, imageUri, date: paramDate } = useLocalSearchParams<{
     id?: string;
     imageUri?: string;
     date?: string;
   }>();
-  const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
+  const [designMode, setDesignMode] = React.useState(false);
   const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
   );
@@ -56,7 +59,7 @@ export default function StampDetailScreen() {
   // この端末に保存された元写真の uri(無ければデザイン変更不可)
   const [originalUri, setOriginalUri] = React.useState<string | null>(null);
   const [designUpdating, setDesignUpdating] = React.useState(false);
-  // デザインシートを開いている間の、選択中デザインのリアルタイムプレビュー(data-URI)
+  // デザイン変更中の、選択中デザインのリアルタイムプレビュー(data-URI)
   const [previewUri, setPreviewUri] = React.useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = React.useState(false);
 
@@ -69,9 +72,9 @@ export default function StampDetailScreen() {
     getOriginalPhotoUri(id).then(setOriginalUri);
   }, [id]);
 
-  // シート表示中は選択中の色/フレームでプレビューを生成する(作成画面と同じ cancelled フラグ方式)
+  // デザイン変更中は選択中の色/フレームでプレビューを生成する(作成画面と同じ cancelled フラグ方式)
   React.useEffect(() => {
-    if (!designSheetVisible || !originalUri) {
+    if (!designMode || !originalUri) {
       setPreviewUri(null);
       return;
     }
@@ -93,17 +96,22 @@ export default function StampDetailScreen() {
     return () => {
       cancelled = true;
     };
-  }, [designSheetVisible, originalUri, selectedColor, selectedFrameStyleId]);
+  }, [designMode, originalUri, selectedColor, selectedFrameStyleId]);
 
   const handleOpenDesignChange = () => {
     if (!originalUri) {
       Alert.alert(
-        "デザインを変更できません",
-        "このスタンプはこの端末で作成されていないため、デザインを変更できません。",
+        t("stampDetail.designUnavailableTitle"),
+        t("stampDetail.designUnavailableMessage"),
       );
       return;
     }
-    setDesignSheetVisible(true);
+    setDesignMode(true);
+  };
+
+  const handleCloseDesignChange = () => {
+    setDesignMode(false);
+    setPreviewUri(null);
   };
 
   const handleConfirmDesign = async () => {
@@ -116,10 +124,10 @@ export default function StampDetailScreen() {
       const updated = await updateStampImage(id, originalUri, color, 0, frame);
       setCurrentImageUri(updated.image_url);
       setPreviewUri(null);
-      setDesignSheetVisible(false);
+      setDesignMode(false);
     } catch (error) {
       console.error("[stamp-detail] failed to update design", error);
-      Alert.alert("エラー", "デザインの変更に失敗しました。時間をおいて再度お試しください。");
+      Alert.alert(t("stampDetail.designUpdateFailedTitle"), t("stampDetail.designUpdateFailedMessage"));
     } finally {
       setDesignUpdating(false);
     }
@@ -161,12 +169,14 @@ export default function StampDetailScreen() {
   const handleConfirmDelete = () => {
     setDeleteDialogVisible(false);
     if (id) {
+      // アルバム側で即座に一覧から除外し、削除反映前のリフェッチで再表示されるのを防ぐ
+      markStampDeleted(id);
       // 削除はバックグラウンドで実行し、結果を待たずにアルバムへ戻る
       deleteStamp(id).catch((error) => {
         console.error("[stamp-detail] failed to delete stamp", error);
       });
     }
-    router.replace("/(tabs)/album");
+    router.back();
   };
 
   const handleShare = async () => {
@@ -194,8 +204,7 @@ export default function StampDetailScreen() {
       </View>
       <StampDetailMediaPager
         spotName={spotName}
-        imageUri={(designSheetVisible && previewUri ? previewUri : currentImageUri) || undefined}
-        previewLoading={designSheetVisible && previewLoading}
+        imageUri={currentImageUri || undefined}
         onPressDesignChange={handleOpenDesignChange}
         onPressSpotName={openSpotNameEditor}
         latitude={0}
@@ -211,7 +220,7 @@ export default function StampDetailScreen() {
       />
       <View style={styles.deleteSection}>
         <CommonButton
-          label="削除する"
+          label={t("stampDetail.delete")}
           onPress={() => setDeleteDialogVisible(true)}
           variant="ghost"
           icon={<Trash2 size={16} color={colors.danger} />}
@@ -220,37 +229,38 @@ export default function StampDetailScreen() {
       </View>
       <CommonDialog
         visible={deleteDialogVisible}
-        title="スタンプを削除しますか?"
-        message="削除したスタンプは元に戻せません。"
-        confirmLabel="削除する"
+        title={t("stampDetail.deleteConfirmTitle")}
+        message={t("stampDetail.deleteConfirmMessage")}
+        confirmLabel={t("stampDetail.delete")}
         destructive
         onCancel={() => setDeleteDialogVisible(false)}
         onConfirm={handleConfirmDelete}
       />
-      <DesignChangeSheet
-        visible={designSheetVisible}
-        onClose={() => {
-          setDesignSheetVisible(false);
-          setPreviewUri(null);
-        }}
-        frameStyles={FRAME_STYLE_OPTIONS}
-        selectedFrameStyleId={selectedFrameStyleId}
-        onSelectFrameStyle={setSelectedFrameStyleId}
-        colorOptions={STAMP_COLOR_OPTIONS}
-        selectedColor={selectedColor}
-        onSelectColor={setSelectedColor}
-        showLandmarkName={showLandmarkName}
-        onToggleShowLandmarkName={setShowLandmarkName}
-        onConfirm={handleConfirmDesign}
-      />
+      {designMode && (
+        <DesignChangePanel
+          onBack={handleCloseDesignChange}
+          onShare={handleShare}
+          imageUri={(designMode && previewUri ? previewUri : currentImageUri) || undefined}
+          loading={previewLoading}
+          frameStyles={FRAME_STYLE_OPTIONS}
+          selectedFrameStyleId={selectedFrameStyleId}
+          onSelectFrameStyle={setSelectedFrameStyleId}
+          colorOptions={STAMP_COLOR_OPTIONS}
+          selectedColor={selectedColor}
+          onSelectColor={setSelectedColor}
+          showLandmarkName={showLandmarkName}
+          onToggleShowLandmarkName={setShowLandmarkName}
+          onConfirm={handleConfirmDesign}
+        />
+      )}
       <EditFieldSheet
         visible={editingField === "spotName"}
         onClose={closeEditor}
-        title="タイトルを編集"
+        title={t("stampDetail.editTitle")}
         mode="text"
         value={draftSpotName}
         onChangeValue={setDraftSpotName}
-        placeholder="スポット名を入力"
+        placeholder={t("stampDetail.editTitlePlaceholder")}
         onSave={() => {
           setSpotName(draftSpotName.trim() || spotName);
           closeEditor();
@@ -259,11 +269,11 @@ export default function StampDetailScreen() {
       <EditFieldSheet
         visible={editingField === "location"}
         onClose={closeEditor}
-        title="場所を編集"
+        title={t("stampDetail.editPlace")}
         mode="text"
         value={draftLocation}
         onChangeValue={setDraftLocation}
-        placeholder="場所を入力"
+        placeholder={t("stampDetail.editPlacePlaceholder")}
         onSave={() => {
           setLocation(draftLocation.trim() || location);
           closeEditor();
@@ -272,7 +282,7 @@ export default function StampDetailScreen() {
       <EditFieldSheet
         visible={editingField === "date"}
         onClose={closeEditor}
-        title="日付を編集"
+        title={t("stampDetail.editDate")}
         mode="date"
         value={draftDate}
         onChangeValue={setDraftDate}
@@ -284,11 +294,11 @@ export default function StampDetailScreen() {
       <EditFieldSheet
         visible={editingField === "memo"}
         onClose={closeEditor}
-        title="メモを編集"
+        title={t("stampDetail.editMemo")}
         mode="text"
         value={draftMemo}
         onChangeValue={setDraftMemo}
-        placeholder="メモを入力"
+        placeholder={t("stampDetail.editMemoPlaceholder")}
         multiline
         onSave={() => {
           setMemo(draftMemo.trim());

@@ -4,6 +4,7 @@ import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, radii, spacing } from "@/src/theme/tokens";
 
 type TextFieldProps = {
@@ -36,6 +37,7 @@ export function EditFieldSheet({
   onSave,
   ...field
 }: Props) {
+  const { t } = useTranslation();
   const inputRef = useRef<TextInput>(null);
 
   return (
@@ -73,7 +75,7 @@ export function EditFieldSheet({
           style={styles.datePicker}
         />
       )}
-      <CommonButton label="保存する" onPress={onSave} variant="primary" style={styles.saveButton} />
+      <CommonButton label={t("common.save")} onPress={onSave} variant="primary" style={styles.saveButton} />
     </BottomSheet>
   );
 }

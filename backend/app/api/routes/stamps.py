@@ -1,7 +1,8 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 
+from app.core.auth import get_user_id
 from app.repositories.stamp_repository import (
     StampRepositoryError,
     delete_stamp,
@@ -15,9 +16,9 @@ logger = logging.getLogger("uvicorn.error")
 
 
 @router.get("/stamps")
-def list_stamps_endpoint():
+def list_stamps_endpoint(user_id: str = Depends(get_user_id)):
     try:
-        stamps = list_stamps()
+        stamps = list_stamps(user_id)
     except StampRepositoryError as error:
         raise HTTPException(status_code=500, detail="Failed to list stamps") from error
 

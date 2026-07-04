@@ -45,10 +45,12 @@ import {
   setChosenPreviewUri,
   waitForResult,
 } from "@/src/api/stampSession";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export default function StampPressScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { uri } = useLocalSearchParams<{ uri?: string }>();
   const [helpVisible, setHelpVisible] = React.useState(false);
   const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
@@ -60,8 +62,8 @@ export default function StampPressScreen() {
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const [stampResult, setStampResult] = React.useState<StampCreateResponse | null>(null);
   const [uploadFailed, setUploadFailed] = React.useState(false);
-  const [uploadErrorMessage, setUploadErrorMessage] = React.useState(
-    "通信環境を確認して、もう一度お試しください。",
+  const [uploadErrorMessage, setUploadErrorMessage] = React.useState(() =>
+    t("stampPress.networkError"),
   );
   const [waiting, setWaiting] = React.useState(false);
   const longPressTriggeredRef = React.useRef(false);
@@ -110,15 +112,15 @@ export default function StampPressScreen() {
   }, [uri, selectedColor, selectedFrameStyleId]);
 
   const showUploadError = React.useCallback((error: unknown) => {
-    let message = "通信環境を確認して、もう一度お試しください。";
+    let message = t("stampPress.networkError");
     if (error instanceof ApiError) {
-      message = `APIエラー: ${error.status} ${error.detail}`;
+      message = t("stampPress.apiError", { status: error.status, detail: String(error.detail) });
     } else if (error instanceof Error) {
       message = `${error.name}: ${error.message}`;
     }
     setUploadErrorMessage(message);
     setUploadFailed(true);
-  }, []);
+  }, [t]);
 
   // 送信結果を購読し、長押し前でもエラーを先出しする(色変更でチェーンが
   // 差し替わった後の結果は無視して、常に最新のものだけ反映する)
@@ -147,7 +149,7 @@ export default function StampPressScreen() {
   const goToStampDone = React.useCallback(() => {
     // 次の画面(animation: 'none')でも同じ画面座標にスタンプが来るよう、押した位置を引き継ぐ
     stampWrapRef.current?.measureInWindow(async (_x, y) => {
-      const baseParams = { stampTop: String(Math.round(y)), scratchLevel: String(chosenScratchLevelRef.current), peak: String(swingDownPeakRef.current.toFixed(2)) };
+      const baseParams = { stampTop: String(Math.round(y)) };
       if (!getSession()) {
         router.push({ pathname: "/stamp-done", params: baseParams });
         return;
@@ -263,7 +265,7 @@ export default function StampPressScreen() {
   return (
     <View style={styles.container}>
       <NavBar
-        title="スタンプを押す"
+        title={t("stampPress.title")}
         onBack={() => router.back()}
         rightIcon={<Text style={styles.helpIcon}>？</Text>}
         onRightPress={() => setHelpVisible((visible) => !visible)}
@@ -284,9 +286,9 @@ export default function StampPressScreen() {
             )}
           </Animated.View>
         </Pressable>
-        <Text style={styles.hint}>スマホを上下に振ってスタンプ！</Text>
+        <Text style={styles.hint}>{t("stampPress.shakeHint")}</Text>
         <CommonButton
-          label="デザインを変更する"
+          label={t("design.changeDesign")}
           onPress={() => setDesignSheetVisible(true)}
           variant="secondary"
           icon={<Palette size={14} color={colors.secondary} />}
@@ -296,21 +298,21 @@ export default function StampPressScreen() {
         items={[
           {
             key: "index",
-            label: "カメラ",
+            label: t("tabs.camera"),
             icon: Camera,
             active: true,
             onPress: () => setPendingTab("/(tabs)"),
           },
           {
             key: "album",
-            label: "アルバム",
+            label: t("tabs.album"),
             icon: Image,
             active: false,
             onPress: () => setPendingTab("/(tabs)/album"),
           },
           {
             key: "mypage",
-            label: "マイページ",
+            label: t("tabs.mypage"),
             icon: User,
             active: false,
             onPress: () => setPendingTab("/(tabs)/mypage"),
@@ -338,9 +340,9 @@ export default function StampPressScreen() {
       />
       <CommonDialog
         visible={pendingTab !== null}
-        title="編集内容を破棄しますか？"
-        message="タブを切り替えると、現在の編集内容が失われます。"
-        confirmLabel="破棄する"
+        title={t("discardDialog.title")}
+        message={t("discardDialog.message")}
+        confirmLabel={t("common.discard")}
         onCancel={() => setPendingTab(null)}
         onConfirm={() => {
           if (pendingTab) router.replace(pendingTab);
@@ -349,13 +351,13 @@ export default function StampPressScreen() {
       />
       <CommonDialog
         visible={uploadFailed}
-        title="送信に失敗しました"
+        title={t("stampPress.uploadFailedTitle")}
         message={uploadErrorMessage}
-        confirmLabel="再試行"
+        confirmLabel={t("common.retry")}
         onCancel={() => setUploadFailed(false)}
         onConfirm={() => {
           setUploadFailed(false);
-          setUploadErrorMessage("通信環境を確認して、もう一度お試しください。");
+          setUploadErrorMessage(t("stampPress.networkError"));
           retryUpload();
           watchSession();
         }}
@@ -363,7 +365,7 @@ export default function StampPressScreen() {
       {waiting && (
         <View style={styles.waitingOverlay}>
           <ActivityIndicator size="large" color={colors.white} />
-          <Text style={styles.waitingText}>スタンプを作成中…</Text>
+          <Text style={styles.waitingText}>{t("stampPress.creating")}</Text>
         </View>
       )}
     </View>

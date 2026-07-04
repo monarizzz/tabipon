@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, LayoutChangeEvent } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Minimize2, Maximize2 } from 'lucide-react-native';
 import { CommonButton } from '@/src/components/common/CommonButton/CommonButton';
+import { useTranslation } from '@/src/i18n/I18nProvider';
 import { colors, typography, spacing } from '@/src/theme/tokens';
 
 const THUMB_SIZE = 20;
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export function PhotoAdjustControls({ zoom, onChangeZoom, onConfirm }: Props) {
+  const { t } = useTranslation();
   const [trackWidth, setTrackWidth] = useState(0);
 
   const handleTrackLayout = (event: LayoutChangeEvent) => {
@@ -25,7 +27,7 @@ export function PhotoAdjustControls({ zoom, onChangeZoom, onConfirm }: Props) {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.hint}>ピンチで拡大縮小・ドラッグで移動</Text>
+      <Text style={styles.hint}>{t("photoAdjust.gestureHint")}</Text>
       <View style={styles.sliderRow}>
         <Minimize2 size={ZOOM_ICON_SIZE} color={colors.textMuted} />
         <View style={styles.sliderTrack} onLayout={handleTrackLayout}>
@@ -46,7 +48,7 @@ export function PhotoAdjustControls({ zoom, onChangeZoom, onConfirm }: Props) {
         <Maximize2 size={ZOOM_ICON_SIZE} color={colors.textMuted} />
       </View>
       <CommonButton
-        label="次へ"
+        label={t("common.next")}
         onPress={onConfirm}
         variant="primary"
         style={styles.confirmButton}

@@ -13,6 +13,7 @@ import { CommonButton } from "@/src/components/common/CommonButton/CommonButton"
 import { CameraHintBar } from "@/src/components/features/camera/CameraHintBar/CameraHintBar";
 import { CameraPreview } from "@/src/components/features/camera/CameraPreview/CameraPreview";
 import { CameraControls } from "@/src/components/features/camera/CameraControls/CameraControls";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 async function cropToPreview(
@@ -81,6 +82,7 @@ async function cropToPreview(
 
 export default function CameraScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [permission, requestPermission] = useCameraPermissions();
   const [facing, setFacing] = React.useState<CameraType>("back");
@@ -103,9 +105,9 @@ export default function CameraScreen() {
   if (!permission?.granted) {
     return (
       <View style={styles.permissionContainer}>
-        <Text style={styles.title}>カメラへのアクセスが必要です</Text>
+        <Text style={styles.title}>{t("camera.accessRequiredTitle")}</Text>
         <CommonButton
-          label="カメラへのアクセスを許可"
+          label={t("camera.accessAllow")}
           onPress={requestPermission}
         />
       </View>
