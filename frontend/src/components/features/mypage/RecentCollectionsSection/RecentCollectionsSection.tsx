@@ -1,5 +1,6 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { MapPin } from "lucide-react-native";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export type RecentCollectionItem = {
@@ -19,12 +20,13 @@ export function RecentCollectionsSection({
   onPressSeeAll,
   onPressItem,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <View style={styles.wrap}>
       <View style={styles.header}>
-        <Text style={styles.title}>最近のコレクション</Text>
+        <Text style={styles.title}>{t("mypage.recentCollections")}</Text>
         <TouchableOpacity onPress={onPressSeeAll}>
-          <Text style={styles.seeAll}>すべて見る</Text>
+          <Text style={styles.seeAll}>{t("mypage.seeAll")}</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.row}>

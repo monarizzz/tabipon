@@ -5,11 +5,14 @@ import { SelectableTile } from '@/src/components/common/SelectableTile/Selectabl
 import { ColorSwatch } from '@/src/components/common/ColorSwatch/ColorSwatch';
 import { Toggle } from '@/src/components/common/Toggle/Toggle';
 import { CommonButton } from '@/src/components/common/CommonButton/CommonButton';
+import { useTranslation } from '@/src/i18n/I18nProvider';
+import type { TranslationKey } from '@/src/i18n';
 import { colors, typography, spacing } from '@/src/theme/tokens';
 
 export type FrameStyleOption = {
   id: string;
-  label: string;
+  /** design.frameClassic のような翻訳キー。表示時に t() で解決する。 */
+  label: TranslationKey;
   preview: (selected: boolean) => React.ReactNode;
 };
 
@@ -40,6 +43,7 @@ export function DesignChangeSheet({
   onToggleShowLandmarkName,
   onConfirm,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <BottomSheet
       visible={visible}
@@ -48,14 +52,14 @@ export function DesignChangeSheet({
       contentPaddingBottom={spacing.xxxl}
     >
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>フレーム</Text>
+        <Text style={styles.sectionLabel}>{t('design.frame')}</Text>
         <View style={styles.row}>
           {frameStyles.map((style) => {
             const selected = style.id === selectedFrameStyleId;
             return (
               <SelectableTile
                 key={style.id}
-                label={style.label}
+                label={t(style.label)}
                 selected={selected}
                 onPress={() => onSelectFrameStyle(style.id)}
               >
@@ -67,7 +71,7 @@ export function DesignChangeSheet({
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>カラー</Text>
+        <Text style={styles.sectionLabel}>{t('design.color')}</Text>
         <View style={styles.colorRow}>
           {colorOptions.map((color) => (
             <ColorSwatch
@@ -81,12 +85,12 @@ export function DesignChangeSheet({
       </View>
 
       <View style={styles.toggleRow}>
-        <Text style={styles.toggleLabel}>ランドマーク名を表示</Text>
+        <Text style={styles.toggleLabel}>{t('design.showLandmark')}</Text>
         <Toggle value={showLandmarkName} onValueChange={onToggleShowLandmarkName} />
       </View>
 
       <CommonButton
-        label="このデザインにする"
+        label={t('design.apply')}
         onPress={onConfirm}
         variant="primary"
         style={styles.confirmButton}

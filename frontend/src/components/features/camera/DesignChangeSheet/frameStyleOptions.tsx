@@ -86,10 +86,10 @@ function makePreview(variant: FrameThumbVariant) {
 }
 
 export const FRAME_STYLE_OPTIONS: FrameStyleOption[] = [
-  { id: 'classic', label: 'クラシック', preview: makePreview('classic') },
-  { id: 'vintage', label: 'ヴィンテージ', preview: makePreview('vintage') },
-  { id: 'minimal', label: 'ミニマル', preview: makePreview('minimal') },
-  { id: 'wave', label: '波形', preview: makePreview('wave') },
+  { id: 'classic', label: 'design.frameClassic', preview: makePreview('classic') },
+  { id: 'vintage', label: 'design.frameVintage', preview: makePreview('vintage') },
+  { id: 'minimal', label: 'design.frameMinimal', preview: makePreview('minimal') },
+  { id: 'wave', label: 'design.frameWave', preview: makePreview('wave') },
 ];
 
 // バックエンドの StampColor (red/blue/black/green) に対応する4色のみ提供する

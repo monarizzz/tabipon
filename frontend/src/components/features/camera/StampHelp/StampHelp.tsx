@@ -1,17 +1,7 @@
 import { View, Text, StyleSheet } from "react-native";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
-
-type Step = {
-  number: number;
-  description: string;
-};
-
-const STEPS: Step[] = [
-  { number: 1, description: "スマホを上に持ち上げる" },
-  { number: 2, description: "振り下げる" },
-  { number: 3, description: "ぐっと押し込む" },
-];
 
 type Props = {
   visible: boolean;
@@ -19,15 +9,21 @@ type Props = {
   title?: string;
 };
 
-export function StampHelp({ visible, onClose, title = "スタンプの押し方" }: Props) {
+export function StampHelp({ visible, onClose, title }: Props) {
+  const { t } = useTranslation();
+  const steps = [
+    { number: 1, description: t("stampHelp.step1") },
+    { number: 2, description: t("stampHelp.step2") },
+    { number: 3, description: t("stampHelp.step3") },
+  ];
   return (
     <BottomSheet visible={visible} onClose={onClose}>
       <View style={styles.wrap}>
         <View style={styles.header}>
-          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.title}>{title ?? t("stampHelp.title")}</Text>
         </View>
         <View style={styles.divider} />
-        {STEPS.map((step) => (
+        {steps.map((step) => (
           <View key={step.number} style={styles.step}>
             <View style={styles.badge}>
               <Text style={styles.badgeLabel}>{step.number}</Text>

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Palette, Pencil } from "lucide-react-native";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
@@ -18,11 +19,12 @@ export function StampDetailPhoto({
   onPressDesignChange,
   onPressSpotName,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <View style={styles.wrap}>
       <Stamp imageUri={imageUri} />
       <CommonButton
-        label="デザインを変更する"
+        label={t("design.changeDesign")}
         onPress={onPressDesignChange}
         variant="secondary"
         icon={<Palette size={14} color={colors.secondary} />}
@@ -36,7 +38,7 @@ export function StampDetailPhoto({
         {spotName ? (
           <Text style={styles.spotName}>{spotName}</Text>
         ) : (
-          <Text style={styles.placeholder}>スポット名を追加</Text>
+          <Text style={styles.placeholder}>{t("stampDetail.addSpotName")}</Text>
         )}
         {onPressSpotName ? (
           <Pencil size={14} color={colors.textMuted} />

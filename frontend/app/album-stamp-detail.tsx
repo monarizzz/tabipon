@@ -13,6 +13,7 @@ import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog"
 import { Trash2 } from "lucide-react-native";
 import { deleteStamp } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, radii, spacing } from "@/src/theme/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
@@ -34,6 +35,7 @@ type EditingField = "spotName" | "date" | "location" | "memo" | null;
 
 export default function StampDetailScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { id, imageUri, date: paramDate } = useLocalSearchParams<{
     id?: string;
@@ -136,7 +138,7 @@ export default function StampDetailScreen() {
       />
       <View style={styles.deleteSection}>
         <CommonButton
-          label="削除する"
+          label={t("stampDetail.delete")}
           onPress={() => setDeleteDialogVisible(true)}
           variant="ghost"
           icon={<Trash2 size={16} color={colors.danger} />}
@@ -145,9 +147,9 @@ export default function StampDetailScreen() {
       </View>
       <CommonDialog
         visible={deleteDialogVisible}
-        title="スタンプを削除しますか?"
-        message="削除したスタンプは元に戻せません。"
-        confirmLabel="削除する"
+        title={t("stampDetail.deleteConfirmTitle")}
+        message={t("stampDetail.deleteConfirmMessage")}
+        confirmLabel={t("stampDetail.delete")}
         destructive
         onCancel={() => setDeleteDialogVisible(false)}
         onConfirm={handleConfirmDelete}
@@ -171,11 +173,11 @@ export default function StampDetailScreen() {
       <EditFieldSheet
         visible={editingField === "spotName"}
         onClose={closeEditor}
-        title="タイトルを編集"
+        title={t("stampDetail.editTitle")}
         mode="text"
         value={draftSpotName}
         onChangeValue={setDraftSpotName}
-        placeholder="スポット名を入力"
+        placeholder={t("stampDetail.editTitlePlaceholder")}
         onSave={() => {
           setSpotName(draftSpotName.trim() || spotName);
           closeEditor();
@@ -184,11 +186,11 @@ export default function StampDetailScreen() {
       <EditFieldSheet
         visible={editingField === "location"}
         onClose={closeEditor}
-        title="場所を編集"
+        title={t("stampDetail.editPlace")}
         mode="text"
         value={draftLocation}
         onChangeValue={setDraftLocation}
-        placeholder="場所を入力"
+        placeholder={t("stampDetail.editPlacePlaceholder")}
         onSave={() => {
           setLocation(draftLocation.trim() || location);
           closeEditor();
@@ -197,7 +199,7 @@ export default function StampDetailScreen() {
       <EditFieldSheet
         visible={editingField === "date"}
         onClose={closeEditor}
-        title="日付を編集"
+        title={t("stampDetail.editDate")}
         mode="date"
         value={draftDate}
         onChangeValue={setDraftDate}
@@ -209,11 +211,11 @@ export default function StampDetailScreen() {
       <EditFieldSheet
         visible={editingField === "memo"}
         onClose={closeEditor}
-        title="メモを編集"
+        title={t("stampDetail.editMemo")}
         mode="text"
         value={draftMemo}
         onChangeValue={setDraftMemo}
-        placeholder="メモを入力"
+        placeholder={t("stampDetail.editMemoPlaceholder")}
         multiline
         onSave={() => {
           setMemo(draftMemo.trim());
