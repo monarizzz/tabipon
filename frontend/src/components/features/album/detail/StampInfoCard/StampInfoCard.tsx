@@ -33,7 +33,11 @@ export function StampInfoCard({
             <Text style={styles.label}>日付</Text>
             {onPressDate ? <Pencil size={12} color={colors.textMuted} /> : null}
           </View>
-          <Text style={styles.value}>{date}</Text>
+          {date ? (
+            <Text style={styles.value}>{date}</Text>
+          ) : (
+            <Text style={styles.placeholder}>日付を追加</Text>
+          )}
         </TouchableOpacity>
         <View style={styles.divider} />
         <TouchableOpacity
@@ -46,7 +50,11 @@ export function StampInfoCard({
             <Text style={styles.label}>場所</Text>
             {onPressLocation ? <Pencil size={12} color={colors.textMuted} /> : null}
           </View>
-          <Text style={styles.value}>{location}</Text>
+          {location ? (
+            <Text style={styles.value}>{location}</Text>
+          ) : (
+            <Text style={styles.placeholder}>場所を追加</Text>
+          )}
         </TouchableOpacity>
       </View>
       <View style={styles.sectionDivider} />
