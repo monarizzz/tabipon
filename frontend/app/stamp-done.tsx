@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Share, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, StyleSheet, Share, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Camera, Image, User } from "lucide-react-native";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
@@ -22,6 +22,7 @@ export default function StampDoneScreen() {
     peak?: string;
   }>();
   const previewUri = getChosenPreviewUri();
+  const [spotName, setSpotName] = React.useState("");
   const [memo, setMemo] = React.useState("");
 
   // 前の画面(押し込みアニメーション)でスタンプがあった位置を引き継ぎ、
@@ -33,35 +34,46 @@ export default function StampDoneScreen() {
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView
-        style={[styles.content, headerAnchorHeight === undefined && styles.contentCentered]}
+        style={styles.content}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View
-          style={[styles.headerAnchor, headerAnchorHeight !== undefined && { height: headerAnchorHeight }]}
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            headerAnchorHeight === undefined && styles.scrollContentSpread,
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <StampResultHeader date={formattedDate} />
-        </View>
-        <StampShowcase
-          imageUri={imageUrl ?? previewUri}
-          onShare={() => Share.share({ message: "スタンプを獲得しました！" })}
-        />
-        {scratchLevel !== undefined && (
-          <Text style={styles.debugText}>[DEBUG] scratch: {scratchLevel} / peak: {peak}</Text>
-        )}
-        <View style={styles.actionsAnchor}>
-          <StampDoneActions
-            memo={memo}
-            onChangeMemo={setMemo}
-            onContinueShooting={() => {
-              clearSession();
-              router.replace("/(tabs)");
-            }}
-            onGoToAlbum={() => {
-              clearSession();
-              router.push("/(tabs)/album");
-            }}
+          <View
+            style={[styles.headerAnchor, headerAnchorHeight !== undefined && { height: headerAnchorHeight }]}
+          >
+            <StampResultHeader date={formattedDate} />
+          </View>
+          <StampShowcase
+            imageUri={imageUrl ?? previewUri}
+            onShare={() => Share.share({ message: "スタンプを獲得しました！" })}
           />
-        </View>
+          {scratchLevel !== undefined && (
+            <Text style={styles.debugText}>[DEBUG] scratch: {scratchLevel} / peak: {peak}</Text>
+          )}
+          <View style={styles.actionsAnchor}>
+            <StampDoneActions
+              spotName={spotName}
+              onChangeSpotName={setSpotName}
+              memo={memo}
+              onChangeMemo={setMemo}
+              onContinueShooting={() => {
+                clearSession();
+                router.replace("/(tabs)");
+              }}
+              onGoToAlbum={() => {
+                clearSession();
+                router.push("/(tabs)/album");
+              }}
+            />
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
       <TabBar
         items={[
@@ -109,14 +121,18 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  contentCentered: {
-    justifyContent: "center",
+  scrollContent: {
+    flexGrow: 1,
+  },
+  scrollContentSpread: {
+    justifyContent: "space-between",
+    paddingTop: spacing.xxl,
+    paddingBottom: spacing.xxxl * 3,
   },
   headerAnchor: {
     justifyContent: "flex-end",
   },
   actionsAnchor: {
-    flex: 1,
     justifyContent: "flex-start",
   },
   debugText: {

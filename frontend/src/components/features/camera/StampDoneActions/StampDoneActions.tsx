@@ -1,9 +1,11 @@
 import { View, TextInput, StyleSheet } from "react-native";
-import { Camera, BookImage } from "lucide-react-native";
+import { Camera, BookImage, Pencil } from "lucide-react-native";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { colors, typography, radii, spacing } from "@/src/theme/tokens";
 
 type Props = {
+  spotName: string;
+  onChangeSpotName: (spotName: string) => void;
   memo: string;
   onChangeMemo: (memo: string) => void;
   onContinueShooting: () => void;
@@ -11,6 +13,8 @@ type Props = {
 };
 
 export function StampDoneActions({
+  spotName,
+  onChangeSpotName,
   memo,
   onChangeMemo,
   onContinueShooting,
@@ -18,6 +22,17 @@ export function StampDoneActions({
 }: Props) {
   return (
     <View style={styles.wrap}>
+      <View style={styles.spotNameRow}>
+        <TextInput
+          style={styles.spotNameInput}
+          placeholder="スポット名を追加"
+          placeholderTextColor={colors.textPlaceholder}
+          value={spotName}
+          onChangeText={onChangeSpotName}
+          textAlign="center"
+        />
+        <Pencil size={14} color={colors.textMuted} />
+      </View>
       <TextInput
         style={styles.memoInput}
         placeholder="メモを追加..."
@@ -50,6 +65,19 @@ const styles = StyleSheet.create({
     gap: spacing.l,
     paddingHorizontal: spacing.xl,
     paddingBottom: spacing.xxxl,
+  },
+  spotNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
+    gap: spacing.s,
+  },
+  spotNameInput: {
+    fontSize: typography.sectionHeading.fontSize,
+    fontWeight: typography.sectionHeading.fontWeight,
+    color: colors.textPrimary,
+    padding: 0,
+    minWidth: 160,
   },
   memoInput: {
     borderRadius: radii.hint,

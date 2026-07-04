@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
     fontWeight: typography.screenTitle.fontWeight,
   },
   iconButton: {
-    width: 32,
-    height: 32,
+    width: 44,
+    height: 44,
     borderRadius: radii.tab,
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -71,8 +71,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconButtonPlaceholder: {
-    width: 32,
-    height: 32,
+    width: 44,
+    height: 44,
   },
   iconGlyph: {
     fontSize: 16,

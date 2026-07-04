@@ -11,6 +11,7 @@ export const colors = {
   activeOverlay: 'rgba(51,51,51,0.08)',
   cropDimOverlay: 'rgba(0,0,0,0.55)',
   white: '#ffffff',
+  danger: '#d9534f',
 };
 
 export const typography = {

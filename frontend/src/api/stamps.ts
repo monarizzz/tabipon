@@ -69,6 +69,10 @@ export function fetchStamps(): Promise<StampListItem[]> {
   return request<StampListItem[]>("/stamps");
 }
 
+export function deleteStamp(stampId: string): Promise<void> {
+  return request<void>(`/stamps/${stampId}`, { method: "DELETE" });
+}
+
 export async function previewStampImage(
   photoUri: string,
   color: StampColor,

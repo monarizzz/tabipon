@@ -1,5 +1,5 @@
-import React from "react";
-import { Text, StyleSheet } from "react-native";
+import React, { useRef } from "react";
+import { Text, StyleSheet, TextInput } from "react-native";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
@@ -36,11 +36,22 @@ export function EditFieldSheet({
   onSave,
   ...field
 }: Props) {
+  const inputRef = useRef<TextInput>(null);
+
   return (
-    <BottomSheet visible={visible} onClose={onClose}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      onOpened={() => {
+        if (field.mode === "text") {
+          inputRef.current?.focus();
+        }
+      }}
+    >
       <Text style={styles.title}>{title}</Text>
       {field.mode === "text" ? (
         <BottomSheetTextInput
+          ref={inputRef}
           style={[styles.input, field.multiline && styles.inputMultiline]}
           value={field.value}
           onChangeText={field.onChangeValue}
@@ -48,7 +59,6 @@ export function EditFieldSheet({
           placeholderTextColor={colors.textPlaceholder}
           multiline={field.multiline}
           textAlignVertical={field.multiline ? "top" : "center"}
-          autoFocus
         />
       ) : (
         <DateTimePicker

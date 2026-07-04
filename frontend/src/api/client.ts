@@ -46,5 +46,10 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(response.status, detail);
   }
 
+  // 204 No Content などボディを持たないレスポンスは json() が失敗するため undefined を返す
+  if (response.status === 204 || response.headers.get("content-length") === "0") {
+    return undefined as T;
+  }
+
   return response.json();
 }
