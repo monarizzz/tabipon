@@ -35,7 +35,8 @@ import {
   FRAME_STYLE_OPTIONS,
   STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
-import { type StampCreateResponse, previewStampImage } from "@/src/api/stamps";
+import { type StampCreateResponse } from "@/src/api/stamps";
+import { StampOrientationGuide } from "@/src/components/features/camera/StampOrientationGuide/StampOrientationGuide";
 import { ApiError } from "@/src/api/client";
 import {
   applyScratch,
@@ -43,7 +44,6 @@ import {
   changeFrame,
   getSession,
   retryUpload,
-  setChosenPreviewUri,
   waitForResult,
 } from "@/src/api/stampSession";
 import { useTranslation } from "@/src/i18n/I18nProvider";
@@ -67,6 +67,7 @@ export default function StampPressScreen() {
     t("stampPress.networkError"),
   );
   const [waiting, setWaiting] = React.useState(false);
+  const [stampPressed, setStampPressed] = React.useState(false);
   const longPressTriggeredRef = React.useRef(false);
   const stampScale = useSharedValue(1);
   const stampWrapRef = React.useRef<View>(null);
@@ -76,10 +77,6 @@ export default function StampPressScreen() {
   const stampDownPeakRef = React.useRef(0);
   const currentRotationAlphaRef = React.useRef(0);
   const referenceAlphaRef = React.useRef<number | null>(null);
-  const [previewImages, setPreviewImages] = React.useState<{ low: string; mid: string; high: string } | null>(null);
-  const previewImagesRef = React.useRef<{ low: string; mid: string; high: string } | null>(null);
-  const [previewLoading, setPreviewLoading] = React.useState(false);
-  const chosenScratchLevelRef = React.useRef(0);
   const stampRotation = useSharedValue(0);
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -87,34 +84,6 @@ export default function StampPressScreen() {
       { rotate: `${stampRotation.value}deg` },
     ],
   }));
-
-  React.useEffect(() => {
-    previewImagesRef.current = previewImages;
-  }, [previewImages]);
-
-  React.useEffect(() => {
-    if (!uri) return;
-    const apiColor = API_COLOR_BY_HEX[selectedColor] ?? "red";
-    const apiFrame = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
-    let cancelled = false;
-    setPreviewLoading(true);
-    console.log(`[preview] start color=${apiColor} frame=${apiFrame}`);
-    Promise.all([
-      previewStampImage(uri, apiColor, 0.0, apiFrame),
-      previewStampImage(uri, apiColor, 0.4, apiFrame),
-      previewStampImage(uri, apiColor, 0.8, apiFrame),
-    ]).then(([low, mid, high]) => {
-      if (!cancelled) {
-        console.log(`[preview] done color=${apiColor} frame=${apiFrame}`);
-        setPreviewImages({ low, mid, high });
-        setPreviewLoading(false);
-      }
-    }).catch((err) => {
-      if (!cancelled) setPreviewLoading(false);
-      console.warn("[stamp-press] preview generation failed", err);
-    });
-    return () => { cancelled = true; setPreviewLoading(false); };
-  }, [uri, selectedColor, selectedFrameStyleId]);
 
   const showUploadError = React.useCallback((error: unknown) => {
     let message = t("stampPress.networkError");
@@ -221,17 +190,11 @@ export default function StampPressScreen() {
 
         // 弱い押し付け(peak=-5) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
         const scratchLevel = Math.max(0, Math.min(1.0, (peak - (-75)) / ((-5) - (-75))));
-        chosenScratchLevelRef.current = scratchLevel;
         let tiltAngle = currentRotationAlphaRef.current * (180 / Math.PI);
         if (tiltAngle > 180) tiltAngle -= 360;
         if (tiltAngle < -180) tiltAngle += 360;
+        runOnJS(setStampPressed)(true);
         applyScratch(scratchLevel, tiltAngle);
-        const previews = previewImagesRef.current;
-        if (previews) {
-          setChosenPreviewUri(
-            scratchLevel >= 0.8 ? previews.high : scratchLevel >= 0.4 ? previews.mid : previews.low,
-          );
-        }
         Audio.Sound.createAsync(require("@/assets/sounds/stamp.mp3"))
           .then(({ sound }) => { sound.playAsync(); })
           .catch(() => {});
@@ -270,6 +233,7 @@ export default function StampPressScreen() {
     if (shakeTriggeredRef.current) return;
     shakeTriggeredRef.current = true;
     longPressTriggeredRef.current = true;
+    setStampPressed(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     // 押し込み中の振動を止めて、「ドン」と強めの二段振動を鳴らす
     Vibration.cancel();
@@ -311,11 +275,20 @@ export default function StampPressScreen() {
           onPressOut={handleStampPressOut}
         >
           <Animated.View style={stampAnimatedStyle}>
-            <Stamp imageUri={stampResult?.image_url ?? previewImages?.mid ?? uri} />
-            {previewLoading && (
-              <View style={styles.previewLoadingOverlay}>
-                <ActivityIndicator size="small" color={colors.white} />
-              </View>
+            {stampPressed ? (
+              <>
+                <Stamp imageUri={stampResult?.image_url} />
+                {!stampResult && (
+                  <View style={styles.previewLoadingOverlay}>
+                    <ActivityIndicator size="small" color={colors.white} />
+                  </View>
+                )}
+              </>
+            ) : (
+              <StampOrientationGuide
+                color={selectedColor}
+                frameId={selectedFrameStyleId as "classic" | "vintage" | "minimal" | "wave"}
+              />
             )}
           </Animated.View>
         </Pressable>
