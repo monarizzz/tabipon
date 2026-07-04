@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, Text, Image, StyleSheet, type LayoutChangeEvent } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Svg, { Defs, Mask, Rect, Circle } from "react-native-svg";
@@ -14,6 +14,10 @@ type Props = {
 const PINCH_SENSITIVITY = 1;
 const SCALE_MIN = 1;
 const SCALE_MAX = 3;
+// 円ガイドとぴったり同じ大きさにフィットさせると、画像とガイドのアスペクト比が異なる限り
+// 必ずどちらか一方の軸の余白が0になり、その方向にパンできなくなる。最小ズームでも上下左右
+// どちらにも少し動かせるよう、フィットサイズより少し大きく表示しておくための倍率。
+const BASE_OVERSCAN = 1.15;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -22,8 +26,47 @@ function clamp(value: number, min: number, max: number) {
 export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: Props) {
   const scale = SCALE_MIN + zoom * (SCALE_MAX - SCALE_MIN);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const maxOffsetX = (containerSize.width * (scale - 1)) / 2;
-  const maxOffsetY = (containerSize.height * (scale - 1)) / 2;
+  const [imageNaturalSize, setImageNaturalSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (!imageUri) {
+      setImageNaturalSize({ width: 0, height: 0 });
+      return;
+    }
+    let cancelled = false;
+    Image.getSize(
+      imageUri,
+      (width, height) => {
+        if (!cancelled) setImageNaturalSize({ width, height });
+      },
+      () => {
+        if (!cancelled) setImageNaturalSize({ width: 0, height: 0 });
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [imageUri]);
+
+  // 撮影画面のガイド円 (CameraPreview) と同じ算出式にして両画面の円径を一致させる
+  const effectiveSize = Math.min(size, containerSize.width - 24, containerSize.height - 24);
+
+  // クロップ結果として実際に使われるのは中央の円形ガイドだけなので、その円を常に覆えるサイズを
+  // 画像の実寸(アスペクト比)から計算する。resizeMode="cover" の自動クロップに任せると、
+  // クロップ後のテクスチャを拡大するだけになってしまい、写真本来の端まで見せられないため、
+  // ここで実寸ベースの幅・高さを明示的に指定する。
+  let baseWidth = effectiveSize;
+  let baseHeight = effectiveSize;
+  if (imageNaturalSize.width > 0 && imageNaturalSize.height > 0 && effectiveSize > 0) {
+    const fitScale =
+      Math.max(effectiveSize / imageNaturalSize.width, effectiveSize / imageNaturalSize.height) *
+      BASE_OVERSCAN;
+    baseWidth = imageNaturalSize.width * fitScale;
+    baseHeight = imageNaturalSize.height * fitScale;
+  }
+
+  const maxOffsetX = Math.max(0, (baseWidth * scale - effectiveSize) / 2);
+  const maxOffsetY = Math.max(0, (baseHeight * scale - effectiveSize) / 2);
 
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
   const baseZoom = useRef(zoom);
@@ -64,8 +107,6 @@ export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: 
 
   const cx = containerSize.width / 2;
   const cy = containerSize.height / 2;
-  // 撮影画面のガイド円 (CameraPreview) と同じ算出式にして両画面の円径を一致させる
-  const effectiveSize = Math.min(size, containerSize.width - 24, containerSize.height - 24);
   const radius = effectiveSize / 2;
 
   return (
@@ -78,6 +119,10 @@ export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: 
             style={[
               styles.image,
               {
+                left: cx - baseWidth / 2,
+                top: cy - baseHeight / 2,
+                width: baseWidth,
+                height: baseHeight,
                 transform: [
                   { translateX: clampedTranslate.x },
                   { translateY: clampedTranslate.y },
@@ -93,22 +138,24 @@ export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: 
         </View>
       )}
       {containerSize.width > 0 && (
-        <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Defs>
-            <Mask id="spotlightMask">
-              <Rect x={0} y={0} width={containerSize.width} height={containerSize.height} fill="#fff" />
-              <Circle cx={cx} cy={cy} r={radius} fill="#000" />
-            </Mask>
-          </Defs>
-          <Rect
-            x={0}
-            y={0}
-            width={containerSize.width}
-            height={containerSize.height}
-            fill={colors.cropDimOverlay}
-            mask="url(#spotlightMask)"
-          />
-        </Svg>
+        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <Svg style={StyleSheet.absoluteFill}>
+            <Defs>
+              <Mask id="spotlightMask">
+                <Rect x={0} y={0} width={containerSize.width} height={containerSize.height} fill="#fff" />
+                <Circle cx={cx} cy={cy} r={radius} fill="#000" />
+              </Mask>
+            </Defs>
+            <Rect
+              x={0}
+              y={0}
+              width={containerSize.width}
+              height={containerSize.height}
+              fill={colors.cropDimOverlay}
+              mask="url(#spotlightMask)"
+            />
+          </Svg>
+        </View>
       )}
       {containerSize.width > 0 && (
         <View
@@ -136,9 +183,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   image: {
-    ...StyleSheet.absoluteFillObject,
-    width: "100%",
-    height: "100%",
+    position: "absolute",
   },
   guide: {
     position: "absolute",

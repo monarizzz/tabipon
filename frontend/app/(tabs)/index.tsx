@@ -2,7 +2,12 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CameraView, useCameraPermissions, type CameraType, type FlashMode } from "expo-camera";
+import {
+  CameraView,
+  useCameraPermissions,
+  type CameraType,
+  type FlashMode,
+} from "expo-camera";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { CameraHintBar } from "@/src/components/features/camera/CameraHintBar/CameraHintBar";
@@ -10,18 +15,9 @@ import { CameraPreview } from "@/src/components/features/camera/CameraPreview/Ca
 import { CameraControls } from "@/src/components/features/camera/CameraControls/CameraControls";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
-// プレビューは containerSize の縦横比で cover 表示されるが、takePictureAsync が返す写真は
-// センサーの画角そのまま(異なる縦横比)になることがあるため、プレビューに写っていた範囲だけを
-// 切り出してから次の画面へ渡す。
-// 撮影画面と調整画面はどちらも「画面幅いっぱいに cover 表示 + 中央に同径のガイド円」なので、
-// プレビュー範囲へ正確に切り出すことで両画面の円内の画像が一致する。
-// 注意: takePictureAsync が報告する width/height は EXIF 回転適用前の値(縦持ちでも横長)に
-// なる端末があり、それを信用すると切り出し位置が右上にズレて拡大されたようになる。
-// そのため一度 ImageManipulator に読み込ませ、レンダリング後の ImageRef 自身の実寸で計算し、
-// 同じ ImageRef に対して crop することで座標系を必ず一致させる。
 async function cropToPreview(
   photo: { uri: string },
-  containerSize: { width: number; height: number }
+  containerSize: { width: number; height: number },
 ) {
   if (containerSize.width <= 0 || containerSize.height <= 0) return photo.uri;
 
@@ -29,13 +25,28 @@ async function cropToPreview(
   const containerAspect = containerSize.width / containerSize.height;
   const photoAspect = source.width / source.height;
 
-  let cropRect: { originX: number; originY: number; width: number; height: number };
+  let cropRect: {
+    originX: number;
+    originY: number;
+    width: number;
+    height: number;
+  };
   if (photoAspect > containerAspect) {
     const width = source.height * containerAspect;
-    cropRect = { originX: (source.width - width) / 2, originY: 0, width, height: source.height };
+    cropRect = {
+      originX: (source.width - width) / 2,
+      originY: 0,
+      width,
+      height: source.height,
+    };
   } else {
     const height = source.width / containerAspect;
-    cropRect = { originX: 0, originY: (source.height - height) / 2, width: source.width, height };
+    cropRect = {
+      originX: 0,
+      originY: (source.height - height) / 2,
+      width: source.width,
+      height,
+    };
   }
 
   const width = Math.floor(cropRect.width);
@@ -93,7 +104,10 @@ export default function CameraScreen() {
     return (
       <View style={styles.permissionContainer}>
         <Text style={styles.title}>カメラへのアクセスが必要です</Text>
-        <CommonButton label="カメラへのアクセスを許可" onPress={requestPermission} />
+        <CommonButton
+          label="カメラへのアクセスを許可"
+          onPress={requestPermission}
+        />
       </View>
     );
   }
@@ -114,9 +128,13 @@ export default function CameraScreen() {
       <View style={[styles.controlsWrap, { paddingBottom: spacing.xl }]}>
         <CameraControls
           flashOn={flash === "on"}
-          onToggleFlash={() => setFlash((prev) => (prev === "on" ? "off" : "on"))}
+          onToggleFlash={() =>
+            setFlash((prev) => (prev === "on" ? "off" : "on"))
+          }
           onCapture={handleCapture}
-          onFlipCamera={() => setFacing((prev) => (prev === "back" ? "front" : "back"))}
+          onFlipCamera={() =>
+            setFacing((prev) => (prev === "back" ? "front" : "back"))
+          }
         />
       </View>
     </View>

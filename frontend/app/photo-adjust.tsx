@@ -13,7 +13,6 @@ import { colors } from "@/src/theme/tokens";
 export default function PhotoAdjustScreen() {
   const router = useRouter();
   const { uri } = useLocalSearchParams<{ uri?: string }>();
-  // 写真はガイド円に合わせて撮影済みなので、初期状態は等倍(円内 = 撮影時の円内)
   const [zoom, setZoom] = React.useState(0);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
 
