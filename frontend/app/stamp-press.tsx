@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { Accelerometer } from "expo-sensors";
+import { DeviceMotion } from "expo-sensors";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -70,14 +70,14 @@ export default function StampPressScreen() {
   const stampScale = useSharedValue(1);
   const stampWrapRef = React.useRef<View>(null);
   const shakeTriggeredRef = React.useRef(false);
-  const swingUpDetectedRef = React.useRef(false);
-  const swingUpTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stampDownDetectedRef = React.useRef(false);
+  const stampDownPeakRef = React.useRef(0);
+  const currentRotationAlphaRef = React.useRef(0);
   const [previewImages, setPreviewImages] = React.useState<{ low: string; mid: string; high: string } | null>(null);
   const previewImagesRef = React.useRef<{ low: string; mid: string; high: string } | null>(null);
   const [previewLoading, setPreviewLoading] = React.useState(false);
-  const swingUpTimestampRef = React.useRef(0);
-  const swingDownPeakRef = React.useRef(0);
   const chosenScratchLevelRef = React.useRef(0);
+  const [debugInfo, setDebugInfo] = React.useState({ z: 0, alpha: 0, scratch: 0 });
 
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
@@ -175,29 +175,34 @@ export default function StampPressScreen() {
   }, [router]);
 
   React.useEffect(() => {
-    Accelerometer.setUpdateInterval(100);
-    const subscription = Accelerometer.addListener(({ y }) => {
+    DeviceMotion.setUpdateInterval(50);
+    const subscription = DeviceMotion.addListener(({ acceleration, rotation }) => {
+      if (rotation?.alpha != null) {
+        currentRotationAlphaRef.current = rotation.alpha;
+      }
       if (shakeTriggeredRef.current) return;
-      if (y > 1.5) {
-        swingUpDetectedRef.current = true;
-        swingUpTimestampRef.current = Date.now();
-        swingDownPeakRef.current = 0;
-        if (swingUpTimerRef.current) clearTimeout(swingUpTimerRef.current);
-        swingUpTimerRef.current = setTimeout(() => {
-          swingUpDetectedRef.current = false;
-        }, 800);
+
+      const z = acceleration?.z ?? 0;
+
+      // 下方向への加速度を検知（端末を水平に持って押し付ける）
+      if (z < -2) {
+        stampDownDetectedRef.current = true;
+        stampDownPeakRef.current = Math.min(stampDownPeakRef.current, z);
       }
-      if (swingUpDetectedRef.current && y < swingDownPeakRef.current) {
-        swingDownPeakRef.current = y;
-      }
-      if (y < -1.5 && swingUpDetectedRef.current) {
+
+      // 押し付けから戻ったタイミングでスタンプ確定
+      if (stampDownDetectedRef.current && z > -0.5) {
         shakeTriggeredRef.current = true;
-        swingUpDetectedRef.current = false;
-        const peak = swingDownPeakRef.current;
-        const elapsed = Date.now() - swingUpTimestampRef.current;
-        const scratchLevel = peak < -6.0 ? 0.8 : peak < -4.0 ? 0.4 : 0.0;
+        stampDownDetectedRef.current = false;
+        const peak = stampDownPeakRef.current;
+        stampDownPeakRef.current = 0;
+
+        // 弱い押し付け(peak=-2) → scratch=1.0、強い押し付け(peak=-15) → scratch=0.0
+        const scratchLevel = Math.max(0, Math.min(1.0, (-2 - peak) / (-2 - (-15))));
         chosenScratchLevelRef.current = scratchLevel;
-        applyScratch(scratchLevel);
+        const tiltAngle = currentRotationAlphaRef.current;
+        setDebugInfo({ z: Math.round(peak * 100) / 100, alpha: Math.round(tiltAngle), scratch: Math.round(scratchLevel * 100) / 100 });
+        applyScratch(scratchLevel, tiltAngle);
         const previews = previewImagesRef.current;
         if (previews) {
           setChosenPreviewUri(
@@ -287,6 +292,7 @@ export default function StampPressScreen() {
           </Animated.View>
         </Pressable>
         <Text style={styles.hint}>{t("stampPress.shakeHint")}</Text>
+        <Text style={styles.debug}>z: {debugInfo.z}  α: {debugInfo.alpha}°  scratch: {debugInfo.scratch}</Text>
         <CommonButton
           label={t("design.changeDesign")}
           onPress={() => setDesignSheetVisible(true)}
@@ -386,6 +392,11 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: typography.caption.fontSize,
     color: colors.textMuted,
+  },
+  debug: {
+    fontSize: 11,
+    color: colors.textMuted,
+    fontFamily: "monospace",
   },
   helpIcon: {
     fontSize: 14,

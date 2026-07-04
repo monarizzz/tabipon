@@ -23,6 +23,8 @@ type StampSession = {
   location: StampLocation | null;
   /** 振り強度で決まった掠れ具合(0=なし) */
   scratchLevel: number;
+  /** 押し付け時の端末コンパス方向(度, 0-360) */
+  tiltAngle: number;
   /** POST で作成されたスタンプ(色変更 PUT の起点として保持) */
   created: StampCreateResponse | null;
   /** 現在の処理チェーン。最新のスタンプ情報で解決する */
@@ -72,6 +74,7 @@ export function startUpload(
     desiredFrame: "classic",
     location,
     scratchLevel: 0,
+    tiltAngle: 0,
     created: null,
     promise,
     _resolve: resolve,
@@ -80,12 +83,13 @@ export function startUpload(
 }
 
 /** 振り下ろし確定時に呼ぶ。scratchLevel・color・frame を含めて初回 POST 保存する */
-export function applyScratch(scratchLevel: number): void {
+export function applyScratch(scratchLevel: number, tiltAngle: number = 0): void {
   if (!session) return;
   const s = session;
-  console.log(`[stampSession] apply scratch level=${scratchLevel} color=${s.desiredColor} frame=${s.desiredFrame}`);
+  console.log(`[stampSession] apply scratch level=${scratchLevel} tilt=${tiltAngle} color=${s.desiredColor} frame=${s.desiredFrame}`);
   s.scratchLevel = scratchLevel;
-  createStampImage(s.photoUri, s.desiredColor, scratchLevel, s.desiredFrame, s.location)
+  s.tiltAngle = tiltAngle;
+  createStampImage(s.photoUri, s.desiredColor, scratchLevel, s.desiredFrame, s.location, tiltAngle)
     .then((created) => {
       console.log(`[stampSession] created stamp id=${created.id}`);
       s.created = created;
@@ -112,7 +116,7 @@ export function retryUpload(): void {
     s._resolve = resolve;
     s._reject = reject;
     markHandled(s.promise);
-    createStampImage(s.photoUri, s.desiredColor, s.scratchLevel, s.desiredFrame, s.location)
+    createStampImage(s.photoUri, s.desiredColor, s.scratchLevel, s.desiredFrame, s.location, s.tiltAngle)
       .then((created) => {
         s.created = created;
         s.appliedColor = s.desiredColor;
