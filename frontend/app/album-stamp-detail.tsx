@@ -43,17 +43,17 @@ export default function StampDetailScreen() {
   );
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
-  const [spotName, setSpotName] = React.useState("東京スカイツリー");
-  const [date, setDate] = React.useState(paramDate || "2026.06.28");
-  const [location, setLocation] = React.useState("東京・墨田区");
-  const [memo, setMemo] = React.useState(
-    "晴れた日に行ってきた！展望台からの眺めが最高だった。",
-  );
+  const [spotName, setSpotName] = React.useState("");
+  const [date, setDate] = React.useState(paramDate || "");
+  const [location, setLocation] = React.useState("");
+  const [memo, setMemo] = React.useState("");
 
   const [editingField, setEditingField] = React.useState<EditingField>(null);
   const [draftSpotName, setDraftSpotName] = React.useState(spotName);
   const [draftLocation, setDraftLocation] = React.useState(location);
-  const [draftDate, setDraftDate] = React.useState(() => parseDate(date));
+  const [draftDate, setDraftDate] = React.useState(() =>
+    date ? parseDate(date) : new Date(),
+  );
   const [draftMemo, setDraftMemo] = React.useState(memo);
 
   const openSpotNameEditor = () => {
@@ -61,7 +61,7 @@ export default function StampDetailScreen() {
     setEditingField("spotName");
   };
   const openDateEditor = () => {
-    setDraftDate(parseDate(date));
+    setDraftDate(date ? parseDate(date) : new Date());
     setEditingField("date");
   };
   const openLocationEditor = () => {
@@ -93,8 +93,8 @@ export default function StampDetailScreen() {
         imageUri={imageUri || undefined}
         onPressDesignChange={() => setDesignSheetVisible(true)}
         onPressSpotName={openSpotNameEditor}
-        latitude={35.7100627}
-        longitude={139.8107004}
+        latitude={0}
+        longitude={0}
       />
       <StampInfoCard
         date={date}
