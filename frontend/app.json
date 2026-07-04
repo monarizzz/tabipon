@@ -40,7 +40,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "スタンプを取得した場所を記録するために位置情報へのアクセスを許可してください"
         }
-      ]
+      ],
+      "expo-localization"
     ]
   }
 }
