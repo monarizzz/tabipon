@@ -185,20 +185,20 @@ export default function StampPressScreen() {
       const z = acceleration?.z ?? 0;
 
       // 下方向への加速度を検知（端末を水平に持って押し付ける）
-      if (z < -2) {
+      if (z < -5) {
         stampDownDetectedRef.current = true;
         stampDownPeakRef.current = Math.min(stampDownPeakRef.current, z);
       }
 
       // 押し付けから戻ったタイミングでスタンプ確定
-      if (stampDownDetectedRef.current && z > -0.5) {
+      if (stampDownDetectedRef.current && z > -1.5) {
         shakeTriggeredRef.current = true;
         stampDownDetectedRef.current = false;
         const peak = stampDownPeakRef.current;
         stampDownPeakRef.current = 0;
 
-        // 弱い押し付け(peak=-2) → scratch=1.0、強い押し付け(peak=-15) → scratch=0.0
-        const scratchLevel = Math.max(0, Math.min(1.0, (-2 - peak) / (-2 - (-15))));
+        // 弱い押し付け(peak=-5) → scratch=1.0、強い押し付け(peak=-20) → scratch=0.0
+        const scratchLevel = Math.max(0, Math.min(1.0, (-5 - peak) / (-5 - (-20))));
         chosenScratchLevelRef.current = scratchLevel;
         const tiltAngle = currentRotationAlphaRef.current;
         setDebugInfo({ z: Math.round(peak * 100) / 100, alpha: Math.round(tiltAngle), scratch: Math.round(scratchLevel * 100) / 100 });
