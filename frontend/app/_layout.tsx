@@ -1,7 +1,9 @@
+import React from 'react';
 import { Stack } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AuthProvider, useAuth } from '@/src/contexts/AuthContext';
+import { AuthProvider } from '@/src/contexts/AuthContext';
+import { I18nProvider } from '@/src/i18n/I18nProvider';
 
 function RootNavigator() {
   return (
@@ -16,21 +18,22 @@ function RootNavigator() {
       <Stack.Screen name="mypage/notifications" options={{ headerShown: false }} />
       <Stack.Screen name="mypage/privacy" options={{ headerShown: false }} />
       <Stack.Screen name="mypage/help" options={{ headerShown: false }} />
+      <Stack.Screen name="mypage/language" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
   );
 }
 
-import React from 'react';
-
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <AuthProvider>
-          <RootNavigator />
-        </AuthProvider>
-      </SafeAreaProvider>
+      <I18nProvider>
+        <SafeAreaProvider>
+          <AuthProvider>
+            <RootNavigator />
+          </AuthProvider>
+        </SafeAreaProvider>
+      </I18nProvider>
     </GestureHandlerRootView>
   );
 }

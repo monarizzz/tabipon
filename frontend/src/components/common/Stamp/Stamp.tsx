@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
+import { useTranslation } from '@/src/i18n/I18nProvider';
 import { colors } from '@/src/theme/tokens';
 
 type Props = {
@@ -9,8 +10,28 @@ type Props = {
 };
 
 export function Stamp({ imageUri, size = 260, muted = false }: Props) {
+  const { t } = useTranslation();
   const outerRingSize = size * 1.258;
   const innerRingSize = size * 1.154;
+
+  if (imageUri) {
+    return (
+      <View style={[styles.wrap, { width: outerRingSize, height: outerRingSize }]}>
+        <View
+          style={[
+            styles.content,
+            {
+              width: outerRingSize,
+              height: outerRingSize,
+              borderRadius: outerRingSize / 2,
+            },
+          ]}
+        >
+          <Image key={imageUri} source={{ uri: imageUri }} style={styles.image} />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.wrap, { width: outerRingSize, height: outerRingSize }]}>
@@ -46,11 +67,7 @@ export function Stamp({ imageUri, size = 260, muted = false }: Props) {
           muted && styles.contentMuted,
         ]}
       >
-        {imageUri ? (
-          <Image key={imageUri} source={{ uri: imageUri }} style={styles.image} />
-        ) : muted ? null : (
-          <Text style={styles.placeholder}>[撮影した画像]</Text>
-        )}
+        {muted ? null : <Text style={styles.placeholder}>{t("common.capturedImage")}</Text>}
       </View>
     </View>
   );

@@ -77,7 +77,7 @@ src/components/
 
 以下を正式名として固定する。似た役割の別名コンポーネント（`CustomButton`, `MyCard`, `StampButton` 等）を新たに作らない。
 
-`CommonButton`, `Card`, `Badge`, `Modal`, `ListItem`, `ColorSwatch`, `Toggle`, `BottomSheet`, `SelectableTile`, `Header`, `NavBar`, `ConfirmDialog`, `Stamp`, `TabBar`
+`CommonButton`, `Card`, `Badge`, `Modal`, `ListItem`, `ColorSwatch`, `Toggle`, `BottomSheet`, `SelectableTile`, `Header`, `NavBar`, `ConfirmDialog`, `Stamp`, `TabBar`, `ShareButton`
 
 新しい基本パーツが必要になった場合は、このリストに追記してから作成する。
 
@@ -92,7 +92,7 @@ src/components/
 
 | コンポーネント | 役割 | variant | 使用箇所 |
 |---|---|---|---|
-| CommonButton | 汎用ボタン | primary / secondary / ghost / accent（icon prop対応） | - |
+| CommonButton | 汎用ボタン | primary / secondary / ghost / accent / danger（icon prop対応） | - |
 | Card | 汎用カード | - | - |
 | Badge | - | - | - |
 | Modal | - | - | - |
@@ -103,14 +103,16 @@ src/components/
 | SelectableTile | 選択式サムネイルカード | selected | デザイン変更ボトムシート（フレームスタイル選択） |
 | Header | タイトル＋サブテキストの画面ヘッダー | - | アルバム画面 |
 | NavBar | 戻る/タイトル/右アクションのナビゲーションバー | - | 写真調整・スタンプを押す・マイページ・スタンプ詳細 系画面 |
-| ConfirmDialog | Modal+Buttonで組んだ確認ダイアログ | destructive | タブ切替時の編集破棄確認（写真調整／スタンプを押す） |
+| ConfirmDialog | Modal+Buttonで組んだ確認ダイアログ | destructive | タブ切替時の編集破棄確認（写真調整／スタンプを押す）、スタンプ削除確認（スタンプ詳細） |
 | Stamp | 二重リング円形のスタンプ/写真プレビュー | - | スタンプを押す・スタンプ詳細・スタンプを押しました（camera機能から昇格） |
+| ShareButton | 円形の共有アイコンボタン（Share2アイコン） | size指定可 | スタンプ詳細画面・スタンプを押しました画面 |
 | TabBar | アクティブタブに丸背景を敷くlucideアイコン+ラベルの下部タブバー | - | ルートタブナビゲーション（カメラ／アルバム／マイページ） |
 | FilterChip | 65×65正方形の選択式フィルタータイル（features/stamp-rally固有） | filter / add | アルバム画面のフィルター行（FilterRow） |
 | FilterRow | FilterChipを並べたフィルター行（features/stamp-rally固有） | - | アルバム画面 |
 | StampGrid | StampCardの2列グリッド＋空状態（features/stamp-rally固有） | - | アルバム画面 |
 | CollectionSheet | BottomSheet+入力欄+CommonButtonのコレクション追加シート（features/stamp-rally固有） | - | アルバム画面 |
 | StampDetailPhoto | Stamp+デザイン変更ボタン+スポット名（タップで編集可）（features/stamp-rally固有） | - | スタンプ詳細画面 |
+| DesignChangePanel | プレビュー+フレーム/カラー選択+トグル+適用ボタンを全画面インライン表示するデザイン変更パネル（features/stamp-rally固有）。stamp-press はボトムシート版 DesignChangeSheet を使用 | - | スタンプ詳細画面（デザイン変更） |
 | StampInfoCard | 日付/場所セル+メモセクション（すべてタップで編集・追加可、未入力時はプレースホルダー表示）（features/stamp-rally固有） | - | スタンプ詳細画面 |
 | StampLocationMap | WebViewでGoogleマップ埋め込みを表示する地図カード+スポット名（features/stamp-rally固有） | - | スタンプ詳細画面（マップページ） |
 | StampDetailMediaPager | StampDetailPhotoとStampLocationMapを横スクロールで切り替えるページャー+ドットインジケーター（features/stamp-rally固有） | - | スタンプ詳細画面 |

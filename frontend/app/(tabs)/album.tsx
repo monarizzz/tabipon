@@ -13,10 +13,17 @@ import { CollectionSheet } from "@/src/components/features/album/CollectionSheet
 import { Header } from "@/src/components/common/layout/Header/Header";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { fetchStamps, type StampListItem } from "@/src/api/stamps";
+import {
+  isStampDeleted,
+  reconcileDeletedStamps,
+} from "@/src/api/deletedStamps";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
-const FILTERS: FilterOption[] = [
-  { id: "all", label: "すべて" },
+// フィルターの id は固定。ラベルは描画時に翻訳・整形する。
+// tokyo/kyoto/walk はデモ用のコレクション名（ユーザーデータ相当）なので翻訳対象外。
+const FILTER_IDS: { id: string; label?: string }[] = [
+  { id: "all" },
   { id: "tokyo", label: "東京旅行" },
   { id: "kyoto", label: "京都" },
   { id: "walk", label: "散歩" },
@@ -28,11 +35,11 @@ function formatDate(isoDate: string): string {
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
 }
 
-function toGridItem(stamp: StampListItem): StampGridItem {
+function toGridItem(stamp: StampListItem, defaultName: string): StampGridItem {
   return {
     id: stamp.id,
     // スポット名連携は未実装のため固定ラベルで表示する
-    name: "スタンプ",
+    name: defaultName,
     date: formatDate(stamp.acquired_at),
     imageUri: stamp.image_url,
     obtained: true,
@@ -41,19 +48,40 @@ function toGridItem(stamp: StampListItem): StampGridItem {
 
 export default function AlbumScreen() {
   const router = useRouter();
-  const [selectedFilterId, setSelectedFilterId] = React.useState(FILTERS[0].id);
+  const { t } = useTranslation();
+  const filters: FilterOption[] = FILTER_IDS.map((f) => ({
+    id: f.id,
+    label: f.label ?? t("album.filterAll"),
+  }));
+  const [selectedFilterId, setSelectedFilterId] = React.useState(FILTER_IDS[0].id);
   const [collectionSheetVisible, setCollectionSheetVisible] =
     React.useState(false);
   const [collectionName, setCollectionName] = React.useState("");
   const [stamps, setStamps] = React.useState<StampGridItem[] | null>(null);
   const [loadFailed, setLoadFailed] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
 
   const loadStamps = React.useCallback(() => {
     setLoadFailed(false);
-    fetchStamps()
-      .then((items) => setStamps(items.map(toGridItem)))
+    return fetchStamps()
+      .then((items) => {
+        // サーバー側で削除が反映済みのIDは除外リストから掃除する
+        reconcileDeletedStamps(items.map((item) => item.id));
+        // 削除確定済み(まだDB未反映の可能性がある)スタンプは一覧に出さない
+        setStamps(
+          items
+            .filter((item) => !isStampDeleted(item.id))
+            .map((item) => toGridItem(item, t("album.stampName"))),
+        );
+      })
       .catch(() => setLoadFailed(true));
-  }, []);
+  }, [t]);
+
+  // 一覧を下に引っ張ったときの再読み込み
+  const handleRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    loadStamps().finally(() => setRefreshing(false));
+  }, [loadStamps]);
 
   // スタンプ獲得直後にタブへ戻ったときも最新化する
   useFocusEffect(
@@ -65,19 +93,19 @@ export default function AlbumScreen() {
   return (
     <View style={styles.container}>
       <Header
-        title="アルバム"
-        subtitle={`スタンプ ${stamps?.length ?? 0}枚`}
+        title={t("album.title")}
+        subtitle={t("album.stampCount", { count: stamps?.length ?? 0 })}
       />
       <FilterRow
-        filters={FILTERS}
+        filters={filters}
         selectedFilterId={selectedFilterId}
         onSelectFilter={setSelectedFilterId}
         onAddPress={() => setCollectionSheetVisible(true)}
       />
       {loadFailed ? (
         <View style={styles.status}>
-          <Text style={styles.statusText}>スタンプを読み込めませんでした</Text>
-          <CommonButton label="再読み込み" onPress={loadStamps} variant="secondary" />
+          <Text style={styles.statusText}>{t("album.loadError")}</Text>
+          <CommonButton label={t("common.reload")} onPress={loadStamps} variant="secondary" />
         </View>
       ) : stamps === null ? (
         <View style={styles.status}>
@@ -86,7 +114,18 @@ export default function AlbumScreen() {
       ) : (
         <StampGrid
           stamps={stamps}
-          onPressStamp={() => router.push("/album-stamp-detail")}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          onPressStamp={(item) =>
+            router.push({
+              pathname: "/album-stamp-detail",
+              params: {
+                id: item.id,
+                imageUri: item.imageUri ?? "",
+                date: item.date ?? "",
+              },
+            })
+          }
         />
       )}
       <CollectionSheet

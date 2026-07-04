@@ -71,7 +71,39 @@ class StampImageApiTest(unittest.TestCase):
                 "image_url": TEST_IMAGE_URL,
             },
         )
-        create_stamp.assert_called_once_with(TEST_IMAGE_URL)
+        create_stamp.assert_called_once_with(
+            TEST_IMAGE_URL,
+            latitude=None,
+            longitude=None,
+            spot_name=None,
+            tilt_angle=None,
+        )
+
+    @patch("app.api.routes.stamp_image.create_stamp")
+    @patch("app.api.routes.stamp_image.upload_stamp_image")
+    def test_stamp_image_forwards_location(
+        self,
+        upload_stamp_image,
+        create_stamp,
+    ):
+        upload_stamp_image.return_value = TEST_IMAGE_URL
+        create_stamp.return_value = {"id": TEST_STAMP_ID, "image_url": TEST_IMAGE_URL}
+        image_bytes = create_jpeg_bytes()
+
+        response = client.post(
+            "/stamp-image",
+            files={"image": ("test.jpg", image_bytes, "image/jpeg")},
+            data={"latitude": "35.681236", "longitude": "139.767125", "spot_name": "東京駅"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        create_stamp.assert_called_once_with(
+            TEST_IMAGE_URL,
+            latitude=35.681236,
+            longitude=139.767125,
+            spot_name="東京駅",
+            tilt_angle=None,
+        )
 
     @patch("app.api.routes.stamp_image.upload_stamp_image")
     def test_stamp_image_returns_server_error_when_save_fails(
@@ -213,6 +245,10 @@ class StampsApiTest(unittest.TestCase):
                 "id": TEST_STAMP_ID,
                 "image_url": TEST_IMAGE_URL,
                 "acquired_at": "2026-07-04T00:00:00+00:00",
+                "latitude": 35.681236,
+                "longitude": 139.767125,
+                "spot_name": "東京駅",
+                "tilt_angle": None,
             },
         ]
 
@@ -226,6 +262,10 @@ class StampsApiTest(unittest.TestCase):
                     "id": TEST_STAMP_ID,
                     "image_url": TEST_IMAGE_URL,
                     "acquired_at": "2026-07-04T00:00:00+00:00",
+                    "latitude": 35.681236,
+                    "longitude": 139.767125,
+                    "spot_name": "東京駅",
+                    "tilt_angle": None,
                 },
             ],
         )
@@ -247,6 +287,50 @@ class StampsApiTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json(), {"detail": "Failed to list stamps"})
+
+
+class StampDeleteApiTest(unittest.TestCase):
+    @patch("app.api.routes.stamps.delete_stamp_image_by_url")
+    @patch("app.api.routes.stamps.delete_stamp")
+    @patch("app.api.routes.stamps.get_stamp")
+    def test_delete_stamp_removes_record_and_image(
+        self,
+        get_stamp,
+        delete_stamp,
+        delete_stamp_image_by_url,
+    ):
+        get_stamp.return_value = {"id": TEST_STAMP_ID, "image_url": TEST_IMAGE_URL}
+
+        response = client.delete(f"/stamps/{TEST_STAMP_ID}")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.content, b"")
+        delete_stamp.assert_called_once_with(TEST_STAMP_ID)
+        delete_stamp_image_by_url.assert_called_once_with(TEST_IMAGE_URL)
+
+    @patch("app.api.routes.stamps.get_stamp")
+    def test_delete_stamp_returns_not_found_for_missing_stamp(self, get_stamp):
+        get_stamp.return_value = None
+
+        response = client.delete(f"/stamps/{TEST_STAMP_ID}")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"detail": "Stamp not found"})
+
+    @patch("app.api.routes.stamps.delete_stamp")
+    @patch("app.api.routes.stamps.get_stamp")
+    def test_delete_stamp_returns_server_error_when_delete_fails(
+        self,
+        get_stamp,
+        delete_stamp,
+    ):
+        get_stamp.return_value = {"id": TEST_STAMP_ID, "image_url": TEST_IMAGE_URL}
+        delete_stamp.side_effect = StampRepositoryError("delete failed")
+
+        response = client.delete(f"/stamps/{TEST_STAMP_ID}")
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json(), {"detail": "Failed to delete stamp"})
 
 
 if __name__ == "__main__":

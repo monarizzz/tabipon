@@ -26,14 +26,21 @@ async def create_stamp_image_endpoint(
     color: StampColor = Form(StampColor.red),
     frame: StampFrame = Form(StampFrame.classic),
     scratch_level: float = Form(0.0),
+    # 位置情報は multipart フォームで送られるため Form() で受ける
+    latitude: Annotated[float | None, Form()] = None,
+    longitude: Annotated[float | None, Form()] = None,
+    spot_name: Annotated[str | None, Form()] = None,
+    tilt_angle: Annotated[float | None, Form()] = None,
     user_id: str = Depends(get_user_id),
 ):
     logger.info(
-        "stamp-image create received filename=%s content_type=%s color=%s scratch_level=%s user_id=%s",
+        "stamp-image create received filename=%s content_type=%s color=%s scratch_level=%s lat=%s lng=%s user_id=%s",
         image.filename,
         image.content_type,
         color,
         scratch_level,
+        latitude,
+        longitude,
         user_id,
     )
     image_bytes = await image.read()
@@ -43,7 +50,14 @@ async def create_stamp_image_endpoint(
 
     png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level)
     logger.info("stamp-image create processed png_bytes=%s", len(png_bytes))
-    stamp = save_stamp(png_bytes, user_id)
+    stamp = save_stamp(
+        png_bytes,
+        user_id=user_id,
+        latitude=latitude,
+        longitude=longitude,
+        spot_name=spot_name,
+        tilt_angle=tilt_angle,
+    )
     logger.info("stamp-image create saved stamp_id=%s", stamp.get("id"))
 
     return {
@@ -125,10 +139,25 @@ def replace_stamp_image(stamp: dict, png_bytes: bytes) -> dict:
     return updated
 
 
-def save_stamp(png_bytes: bytes, user_id: str) -> dict:
+def save_stamp(
+    png_bytes: bytes,
+    *,
+    user_id: str,
+    latitude: float | None = None,
+    longitude: float | None = None,
+    spot_name: str | None = None,
+    tilt_angle: float | None = None,
+) -> dict:
     try:
         image_url = upload_stamp_image(png_bytes)
-        return create_stamp(image_url, user_id)
+        return create_stamp(
+            image_url,
+            user_id=user_id,
+            latitude=latitude,
+            longitude=longitude,
+            spot_name=spot_name,
+            tilt_angle=tilt_angle,
+        )
     except StampRepositoryError as error:
         logger.exception("stamp-image create save failed")
         raise HTTPException(status_code=500, detail="Failed to save stamp") from error

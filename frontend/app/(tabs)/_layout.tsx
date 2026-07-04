@@ -4,6 +4,7 @@ import {
   TabBar,
   type TabBarIcon,
 } from "@/src/components/common/layout/TabBar/TabBar";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors } from "@/src/theme/tokens";
 
 const ICONS: Record<string, TabBarIcon> = {
@@ -13,6 +14,7 @@ const ICONS: Record<string, TabBarIcon> = {
 };
 
 export default function TabsLayout() {
+  const { t } = useTranslation();
   return (
     <Tabs
       screenOptions={{ headerShown: false }}
@@ -42,9 +44,9 @@ export default function TabsLayout() {
         />
       )}
     >
-      <Tabs.Screen name="index" options={{ title: "カメラ" }} />
-      <Tabs.Screen name="album" options={{ title: "アルバム" }} />
-      <Tabs.Screen name="mypage" options={{ title: "マイページ" }} />
+      <Tabs.Screen name="index" options={{ title: t("tabs.camera") }} />
+      <Tabs.Screen name="album" options={{ title: t("tabs.album") }} />
+      <Tabs.Screen name="mypage" options={{ title: t("tabs.mypage") }} />
     </Tabs>
   );
 }

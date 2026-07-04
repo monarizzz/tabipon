@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, radii, spacing } from "@/src/theme/tokens";
 
 type Props = {
@@ -20,20 +21,21 @@ export function CollectionSheet({
   onChangeName,
   onAdd,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <BottomSheet visible={visible} onClose={onClose}>
-      <Text style={styles.title}>コレクションを追加</Text>
-      <Text style={styles.fieldLabel}>コレクション名</Text>
+      <Text style={styles.title}>{t("collection.add")}</Text>
+      <Text style={styles.fieldLabel}>{t("collection.name")}</Text>
       <BottomSheetTextInput
         style={styles.input}
         value={name}
         onChangeText={onChangeName}
-        placeholder="コレクション名を入力"
+        placeholder={t("collection.namePlaceholder")}
         placeholderTextColor={colors.textPlaceholder}
       />
       <View style={styles.buttonWrap}>
         <CommonButton
-          label="追加する"
+          label={t("common.add")}
           onPress={onAdd}
           variant="primary"
           disabled={!name.trim()}

@@ -1,9 +1,10 @@
-import React from "react";
-import { Text, StyleSheet } from "react-native";
+import React, { useRef } from "react";
+import { Text, StyleSheet, TextInput } from "react-native";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, radii, spacing } from "@/src/theme/tokens";
 
 type TextFieldProps = {
@@ -36,11 +37,23 @@ export function EditFieldSheet({
   onSave,
   ...field
 }: Props) {
+  const { t } = useTranslation();
+  const inputRef = useRef<TextInput>(null);
+
   return (
-    <BottomSheet visible={visible} onClose={onClose}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      onOpened={() => {
+        if (field.mode === "text") {
+          inputRef.current?.focus();
+        }
+      }}
+    >
       <Text style={styles.title}>{title}</Text>
       {field.mode === "text" ? (
         <BottomSheetTextInput
+          ref={inputRef}
           style={[styles.input, field.multiline && styles.inputMultiline]}
           value={field.value}
           onChangeText={field.onChangeValue}
@@ -48,7 +61,6 @@ export function EditFieldSheet({
           placeholderTextColor={colors.textPlaceholder}
           multiline={field.multiline}
           textAlignVertical={field.multiline ? "top" : "center"}
-          autoFocus
         />
       ) : (
         <DateTimePicker
@@ -63,7 +75,7 @@ export function EditFieldSheet({
           style={styles.datePicker}
         />
       )}
-      <CommonButton label="保存する" onPress={onSave} variant="primary" style={styles.saveButton} />
+      <CommonButton label={t("common.save")} onPress={onSave} variant="primary" style={styles.saveButton} />
     </BottomSheet>
   );
 }

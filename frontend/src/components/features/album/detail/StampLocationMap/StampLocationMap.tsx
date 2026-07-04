@@ -1,5 +1,6 @@
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, radii, spacing, typography } from "@/src/theme/tokens";
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 
 // 位置情報を反映した実際の地図を表示する代わりに、モックの地図画像を表示する
 export function StampLocationMap({ spotName }: Props) {
+  const { t } = useTranslation();
   return (
     <View style={styles.wrap}>
       <View style={styles.mapCard}>
@@ -20,7 +22,11 @@ export function StampLocationMap({ spotName }: Props) {
           resizeMode="cover"
         />
       </View>
-      <Text style={styles.spotName}>{spotName}</Text>
+      {spotName ? (
+        <Text style={styles.spotName}>{spotName}</Text>
+      ) : (
+        <Text style={styles.placeholder}>{t("stampDetail.addSpotName")}</Text>
+      )}
     </View>
   );
 }
@@ -46,5 +52,10 @@ const styles = StyleSheet.create({
     fontSize: typography.sectionHeading.fontSize,
     fontWeight: typography.sectionHeading.fontWeight,
     color: colors.textPrimary,
+  },
+  placeholder: {
+    fontSize: typography.sectionHeading.fontSize,
+    fontWeight: typography.sectionHeading.fontWeight,
+    color: colors.textPlaceholder,
   },
 });

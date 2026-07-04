@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { View, Text, Image, StyleSheet, type LayoutChangeEvent } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Svg, { Defs, Mask, Rect, Circle } from "react-native-svg";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography } from "@/src/theme/tokens";
 
 type Props = {
@@ -9,6 +11,11 @@ type Props = {
   size?: number;
   zoom?: number;
   onChangeZoom?: (value: number) => void;
+};
+
+export type PhotoCropAreaHandle = {
+  /** 円ガイド内に実際に見えている範囲だけを正方形で切り出した画像の URI を返す */
+  getCroppedImageUri: () => Promise<string | null>;
 };
 
 const PINCH_SENSITIVITY = 1;
@@ -23,7 +30,11 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: Props) {
+export const PhotoCropArea = forwardRef<PhotoCropAreaHandle, Props>(function PhotoCropArea(
+  { imageUri, size = 296, zoom = 0, onChangeZoom },
+  ref
+) {
+  const { t } = useTranslation();
   const scale = SCALE_MIN + zoom * (SCALE_MAX - SCALE_MIN);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [imageNaturalSize, setImageNaturalSize] = useState({ width: 0, height: 0 });
@@ -57,8 +68,9 @@ export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: 
   // ここで実寸ベースの幅・高さを明示的に指定する。
   let baseWidth = effectiveSize;
   let baseHeight = effectiveSize;
+  let fitScale = 1;
   if (imageNaturalSize.width > 0 && imageNaturalSize.height > 0 && effectiveSize > 0) {
-    const fitScale =
+    fitScale =
       Math.max(effectiveSize / imageNaturalSize.width, effectiveSize / imageNaturalSize.height) *
       BASE_OVERSCAN;
     baseWidth = imageNaturalSize.width * fitScale;
@@ -105,6 +117,34 @@ export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: 
     y: clamp(translate.y, -maxOffsetY, maxOffsetY),
   };
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      getCroppedImageUri: async () => {
+        if (!imageUri || imageNaturalSize.width <= 0 || imageNaturalSize.height <= 0 || effectiveSize <= 0) {
+          return null;
+        }
+        // 画面上の円ガイド(半径 radius, 中心が画像中心からズレる量が translate/scale)を
+        // 表示用の座標変換の逆算で元画像のピクセル座標に戻し、その正方形だけを切り出す。
+        const radius = effectiveSize / 2;
+        const cropSize = (2 * radius) / (scale * fitScale);
+        const centerX =
+          imageNaturalSize.width / 2 - clampedTranslate.x / (scale * fitScale);
+        const centerY =
+          imageNaturalSize.height / 2 - clampedTranslate.y / (scale * fitScale);
+        const originX = clamp(centerX - cropSize / 2, 0, imageNaturalSize.width - cropSize);
+        const originY = clamp(centerY - cropSize / 2, 0, imageNaturalSize.height - cropSize);
+
+        const context = ImageManipulator.manipulate(imageUri);
+        context.crop({ originX, originY, width: cropSize, height: cropSize });
+        const rendered = await context.renderAsync();
+        const result = await rendered.saveAsync({ compress: 0.9, format: SaveFormat.JPEG });
+        return result.uri;
+      },
+    }),
+    [imageUri, imageNaturalSize, effectiveSize, scale, fitScale, clampedTranslate.x, clampedTranslate.y]
+  );
+
   const cx = containerSize.width / 2;
   const cy = containerSize.height / 2;
   const radius = effectiveSize / 2;
@@ -134,7 +174,7 @@ export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: 
         </GestureDetector>
       ) : (
         <View style={styles.placeholderWrap}>
-          <Text style={styles.placeholder}>[ 撮影した写真 ]</Text>
+          <Text style={styles.placeholder}>{t("camera.capturedPhoto")}</Text>
         </View>
       )}
       {containerSize.width > 0 && (
@@ -174,7 +214,7 @@ export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: 
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   wrap: {
