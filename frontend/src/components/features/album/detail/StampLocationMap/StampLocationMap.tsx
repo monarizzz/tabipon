@@ -17,11 +17,14 @@ export function StampLocationMap({
   zoom = 15,
 }: Props) {
   const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}&z=${zoom}&output=embed`;
+  // Google の embed 用エンドポイントは iframe 経由でのみ許可されるため、
+  // WebView で直接 URL に遷移せず、iframe を含む HTML をラップして読み込む
+  const mapHtml = `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>html,body,iframe{margin:0;padding:0;width:100%;height:100%;border:0;}</style></head><body><iframe src="${mapUrl}"></iframe></body></html>`;
 
   return (
     <View style={styles.wrap}>
       <View style={styles.mapCard}>
-        <WebView style={styles.map} source={{ uri: mapUrl }} />
+        <WebView style={styles.map} source={{ html: mapHtml }} />
       </View>
       <Text style={styles.spotName}>{spotName}</Text>
     </View>
