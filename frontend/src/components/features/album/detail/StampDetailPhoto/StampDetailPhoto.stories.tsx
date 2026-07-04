@@ -17,6 +17,7 @@ const meta = {
   args: {
     spotName: "東京スカイツリー",
     onPressDesignChange: fn(),
+    onPressSpotName: fn(),
   },
 } satisfies Meta<typeof StampDetailPhoto>;
 
