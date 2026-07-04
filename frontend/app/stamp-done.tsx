@@ -20,8 +20,6 @@ export default function StampDoneScreen() {
     stampTop?: string;
     stampId?: string;
     imageUrl?: string;
-    scratchLevel?: string;
-    peak?: string;
   }>();
   const previewUri = getChosenPreviewUri();
   const [spotName, setSpotName] = React.useState("");
@@ -136,11 +134,5 @@ const styles = StyleSheet.create({
   },
   actionsAnchor: {
     justifyContent: "flex-start",
-  },
-  debugText: {
-    fontSize: 12,
-    color: "red",
-    textAlign: "center",
-    marginTop: 4,
   },
 });

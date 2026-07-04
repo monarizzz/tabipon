@@ -59,13 +59,14 @@ def delete_stamp_image_by_url(image_url: str) -> None:
         pass
 
 
-def list_stamps() -> list[dict]:
+def list_stamps(user_id: str) -> list[dict]:
     try:
         # 位置情報(latitude/longitude/spot_name)など列追加に追従できるよう全列取得する
         result = (
             get_supabase()
             .table("stamps")
             .select("*")
+            .eq("user_id", user_id)
             .order("acquired_at", desc=True)
             .execute()
         )
@@ -84,6 +85,7 @@ def delete_stamp(stamp_id: str) -> None:
 def create_stamp(
     image_url: str,
     *,
+    user_id: str,
     latitude: float | None = None,
     longitude: float | None = None,
     spot_name: str | None = None,
@@ -94,6 +96,7 @@ def create_stamp(
     record: dict = {
         "image_url": image_url,
         "acquired_at": datetime.now(timezone.utc).isoformat(),
+        "user_id": user_id,
     }
     if latitude is not None:
         record["latitude"] = latitude

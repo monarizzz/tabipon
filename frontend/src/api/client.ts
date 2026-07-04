@@ -1,3 +1,5 @@
+import { supabase } from '@/src/lib/supabase';
+
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8000";
 
 function describeError(error: unknown): string {
@@ -24,9 +26,17 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const method = init?.method ?? "GET";
   console.log(`[api] ${method} ${url}`);
 
+  const { data: { session } } = await supabase.auth.getSession();
+  const authHeaders: Record<string, string> = session?.access_token
+    ? { Authorization: `Bearer ${session.access_token}` }
+    : {};
+
   let response: Response;
   try {
-    response = await fetch(url, init);
+    response = await fetch(url, {
+      ...init,
+      headers: { ...authHeaders, ...(init?.headers as Record<string, string> ?? {}) },
+    });
   } catch (error) {
     console.error(`[api] ${method} ${url} failed before response: ${describeError(error)}`);
     throw error;
