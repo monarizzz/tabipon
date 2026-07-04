@@ -75,6 +75,7 @@ export default function StampPressScreen() {
   const stampLiftDetectedRef = React.useRef(false);
   const stampLiftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const stampLiftTimeRef = React.useRef<number>(0);
+  const stampNeutralAfterLiftRef = React.useRef(false);
   const stampDownPeakRef = React.useRef(0);
   const currentRotationAlphaRef = React.useRef(0);
   const referenceAlphaRef = React.useRef<number | null>(null);
@@ -170,22 +171,30 @@ export default function StampPressScreen() {
       if (z > 2) {
         stampLiftDetectedRef.current = true;
         stampLiftTimeRef.current = Date.now();
+        stampNeutralAfterLiftRef.current = false;
         stampDownPeakRef.current = 0;
         if (stampLiftTimerRef.current) clearTimeout(stampLiftTimerRef.current);
         stampLiftTimerRef.current = setTimeout(() => {
           stampLiftDetectedRef.current = false;
+          stampNeutralAfterLiftRef.current = false;
         }, 800);
       }
 
-      // ②押し付け中のpeak記録
-      if (stampLiftDetectedRef.current && z < stampDownPeakRef.current) {
+      // ②持ち上げ後に一度ニュートラル（|z| < 1.5）に戻ったら押し付け受付開始
+      if (stampLiftDetectedRef.current && !stampNeutralAfterLiftRef.current && Math.abs(z) < 1.5) {
+        stampNeutralAfterLiftRef.current = true;
+      }
+
+      // ③押し付け中のpeak記録
+      if (stampLiftDetectedRef.current && stampNeutralAfterLiftRef.current && z < stampDownPeakRef.current) {
         stampDownPeakRef.current = z;
       }
 
-      // ③持ち上げ後に z < -5 まで下がったらスタンプ確定（振り上げ直後の反動を除外するため300ms待つ）
-      if (z < -5 && stampLiftDetectedRef.current && Date.now() - stampLiftTimeRef.current > 300) {
+      // ④ニュートラルを経由した後に z < -5 まで下がったらスタンプ確定
+      if (z < -5 && stampLiftDetectedRef.current && stampNeutralAfterLiftRef.current) {
         shakeTriggeredRef.current = true;
         stampLiftDetectedRef.current = false;
+        stampNeutralAfterLiftRef.current = false;
         if (stampLiftTimerRef.current) clearTimeout(stampLiftTimerRef.current);
         const peak = stampDownPeakRef.current;
         stampDownPeakRef.current = 0;
