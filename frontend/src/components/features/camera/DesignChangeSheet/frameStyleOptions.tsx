@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { colors } from '@/src/theme/tokens';
-import type { StampColor } from '@/src/api/stamps';
+import type { StampColor, StampFrame } from '@/src/api/stamps';
 import type { FrameStyleOption } from './DesignChangeSheet';
 
 type FrameThumbVariant = 'classic' | 'vintage' | 'minimal' | 'wave';
@@ -106,4 +106,11 @@ export const API_COLOR_BY_HEX: Record<string, StampColor> = {
   '#6bc1ff': 'blue',
   '#333333': 'black',
   '#6de8b9': 'green',
+};
+
+export const API_FRAME_BY_ID: Record<string, StampFrame> = {
+  'classic': 'classic',
+  'vintage': 'dash',
+  'minimal': 'simple',
+  'wave': 'wave',
 };

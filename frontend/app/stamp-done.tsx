@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Share, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, StyleSheet, Share, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Camera, Image, User } from "lucide-react-native";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
@@ -14,10 +14,12 @@ const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).pad
 
 export default function StampDoneScreen() {
   const router = useRouter();
-  const { stampTop: stampTopParam, imageUrl } = useLocalSearchParams<{
+  const { stampTop: stampTopParam, imageUrl, scratchLevel, peak } = useLocalSearchParams<{
     stampTop?: string;
     stampId?: string;
     imageUrl?: string;
+    scratchLevel?: string;
+    peak?: string;
   }>();
   const previewUri = getChosenPreviewUri();
   const [memo, setMemo] = React.useState("");
@@ -43,6 +45,9 @@ export default function StampDoneScreen() {
           imageUri={imageUrl ?? previewUri}
           onShare={() => Share.share({ message: "スタンプを獲得しました！" })}
         />
+        {scratchLevel !== undefined && (
+          <Text style={styles.debugText}>[DEBUG] scratch: {scratchLevel} / peak: {peak}</Text>
+        )}
         <View style={styles.actionsAnchor}>
           <StampDoneActions
             memo={memo}
@@ -113,5 +118,11 @@ const styles = StyleSheet.create({
   actionsAnchor: {
     flex: 1,
     justifyContent: "flex-start",
+  },
+  debugText: {
+    fontSize: 12,
+    color: "red",
+    textAlign: "center",
+    marginTop: 4,
   },
 });

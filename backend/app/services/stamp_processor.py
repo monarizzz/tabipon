@@ -18,6 +18,7 @@ class StampFrame(str, Enum):
     simple = "simple"    # 細い一重円
     classic = "classic"  # 二重円
     dash = "dash"        # 破線の円
+    wave = "wave"        # 波形の円
 
 
 STAMP_COLORS: dict[StampColor, np.ndarray] = {
@@ -112,6 +113,8 @@ def apply_circular_stamp_frame(
         cv2.circle(circular_stamp, center, radius - 30, ink_color_tuple, 3)
     elif frame == StampFrame.dash:
         _draw_dashed_circle(circular_stamp, center, radius, ink_color_tuple, thickness=4, dash_count=24)
+    elif frame == StampFrame.wave:
+        _draw_wave_circle(circular_stamp, center, radius, ink_color_tuple, thickness=4, wave_count=12, wave_amplitude=6)
 
     return circular_stamp
 
@@ -130,6 +133,28 @@ def _draw_dashed_circle(
         start_angle = i * 360 / dash_count
         end_angle = (i + 1) * 360 / dash_count
         cv2.ellipse(image, center, (radius, radius), 0, start_angle, end_angle, color, thickness)
+
+
+def _draw_wave_circle(
+    image: np.ndarray,
+    center: tuple[int, int],
+    radius: int,
+    color: tuple[int, ...],
+    thickness: int,
+    wave_count: int,
+    wave_amplitude: int,
+) -> None:
+    import math
+    num_points = 720
+    pts = []
+    for i in range(num_points):
+        angle = 2 * math.pi * i / num_points
+        r = radius + wave_amplitude * math.sin(wave_count * angle)
+        x = int(center[0] + r * math.cos(angle))
+        y = int(center[1] + r * math.sin(angle))
+        pts.append([[x, y]])
+    pts_array = np.array(pts, dtype=np.int32)
+    cv2.polylines(image, [pts_array], isClosed=True, color=color, thickness=thickness)
 
 
 def apply_scratch(image: np.ndarray, scratch_level: float) -> np.ndarray:

@@ -47,7 +47,7 @@ export function Stamp({ imageUri, size = 260, muted = false }: Props) {
         ]}
       >
         {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.image} />
+          <Image key={imageUri} source={{ uri: imageUri }} style={styles.image} />
         ) : muted ? null : (
           <Text style={styles.placeholder}>[撮影した画像]</Text>
         )}
