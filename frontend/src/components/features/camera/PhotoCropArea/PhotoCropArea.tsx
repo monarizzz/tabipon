@@ -93,22 +93,24 @@ export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: 
         </View>
       )}
       {containerSize.width > 0 && (
-        <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Defs>
-            <Mask id="spotlightMask">
-              <Rect x={0} y={0} width={containerSize.width} height={containerSize.height} fill="#fff" />
-              <Circle cx={cx} cy={cy} r={radius} fill="#000" />
-            </Mask>
-          </Defs>
-          <Rect
-            x={0}
-            y={0}
-            width={containerSize.width}
-            height={containerSize.height}
-            fill={colors.cropDimOverlay}
-            mask="url(#spotlightMask)"
-          />
-        </Svg>
+        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <Svg style={StyleSheet.absoluteFill}>
+            <Defs>
+              <Mask id="spotlightMask">
+                <Rect x={0} y={0} width={containerSize.width} height={containerSize.height} fill="#fff" />
+                <Circle cx={cx} cy={cy} r={radius} fill="#000" />
+              </Mask>
+            </Defs>
+            <Rect
+              x={0}
+              y={0}
+              width={containerSize.width}
+              height={containerSize.height}
+              fill={colors.cropDimOverlay}
+              mask="url(#spotlightMask)"
+            />
+          </Svg>
+        </View>
       )}
       {containerSize.width > 0 && (
         <View
