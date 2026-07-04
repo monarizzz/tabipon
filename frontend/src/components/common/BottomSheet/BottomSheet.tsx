@@ -9,6 +9,7 @@ type Props = {
   children: React.ReactNode;
   snapPoints?: (string | number)[];
   contentPaddingBottom?: number;
+  onOpened?: () => void;
 };
 
 export function BottomSheet({
@@ -17,6 +18,7 @@ export function BottomSheet({
   children,
   snapPoints,
   contentPaddingBottom = spacing.xxl,
+  onOpened,
 }: Props) {
   const sheetRef = useRef<React.ElementRef<typeof GorhomBottomSheet>>(null);
   const insets = useSafeAreaInsets();
@@ -37,6 +39,11 @@ export function BottomSheet({
       enableDynamicSizing={!snapPoints}
       enablePanDownToClose
       onClose={onClose}
+      onChange={(index) => {
+        if (index >= 0) {
+          onOpened?.();
+        }
+      }}
       backdropComponent={(props) => (
         <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
       )}

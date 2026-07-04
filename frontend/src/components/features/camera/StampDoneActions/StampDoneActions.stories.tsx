@@ -15,6 +15,8 @@ const meta = {
   ],
   tags: ["autodocs"],
   args: {
+    spotName: "",
+    onChangeSpotName: fn(),
     memo: "",
     onChangeMemo: fn(),
     onContinueShooting: fn(),
