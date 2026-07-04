@@ -5,7 +5,10 @@ import { Camera, Image, User } from "lucide-react-native";
 import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
-import { PhotoCropArea } from "@/src/components/features/camera/PhotoCropArea/PhotoCropArea";
+import {
+  PhotoCropArea,
+  type PhotoCropAreaHandle,
+} from "@/src/components/features/camera/PhotoCropArea/PhotoCropArea";
 import { PhotoAdjustControls } from "@/src/components/features/camera/PhotoAdjustControls/PhotoAdjustControls";
 import { startUpload } from "@/src/api/stampSession";
 import { colors } from "@/src/theme/tokens";
@@ -15,18 +18,22 @@ export default function PhotoAdjustScreen() {
   const { uri } = useLocalSearchParams<{ uri?: string }>();
   const [zoom, setZoom] = React.useState(0);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
+  const cropAreaRef = React.useRef<PhotoCropAreaHandle>(null);
 
   return (
     <View style={styles.container}>
       <NavBar title="写真を調整" onBack={() => router.back()} />
-      <PhotoCropArea imageUri={uri} zoom={zoom} onChangeZoom={setZoom} />
+      <PhotoCropArea ref={cropAreaRef} imageUri={uri} zoom={zoom} onChangeZoom={setZoom} />
       <PhotoAdjustControls
         zoom={zoom}
         onChangeZoom={setZoom}
-        onConfirm={() => {
+        onConfirm={async () => {
+          // 円ガイド内に実際に見えている範囲を切り出してからアップロードする。
           // 待たずに送信開始し、結果はスタンプを押す画面で待ち合わせる
-          if (uri) startUpload(uri, "red");
-          router.push({ pathname: "/stamp-press", params: { uri } });
+          const croppedUri = uri ? await cropAreaRef.current?.getCroppedImageUri() : null;
+          const uploadUri = croppedUri ?? uri;
+          if (uploadUri) startUpload(uploadUri, "red");
+          router.push({ pathname: "/stamp-press", params: { uri: uploadUri } });
         }}
       />
       <TabBar
