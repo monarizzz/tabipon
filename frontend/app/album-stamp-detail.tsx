@@ -143,6 +143,20 @@ export default function StampDetailScreen() {
   const [location, setLocation] = React.useState("");
   const [memo, setMemo] = React.useState("");
 
+  React.useEffect(() => {
+    if (!stampLatitude || !stampLongitude) return;
+    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
+    fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${stampLatitude},${stampLongitude}&key=${apiKey}&language=ja`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const address = data.results?.[0]?.formatted_address;
+        if (address) setLocation(address);
+      })
+      .catch(() => {});
+  }, [stampLatitude, stampLongitude]);
+
   const [editingField, setEditingField] = React.useState<EditingField>(null);
   const [draftSpotName, setDraftSpotName] = React.useState(spotName);
   const [draftLocation, setDraftLocation] = React.useState(location);
