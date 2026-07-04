@@ -57,6 +57,7 @@ export default function AlbumScreen() {
   const [collectionSheetVisible, setCollectionSheetVisible] =
     React.useState(false);
   const [collectionName, setCollectionName] = React.useState("");
+  const [fetchedStamps, setFetchedStamps] = React.useState<StampListItem[]>([]);
   const [stamps, setStamps] = React.useState<StampGridItem[] | null>(null);
   const [loadFailed, setLoadFailed] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -65,9 +66,8 @@ export default function AlbumScreen() {
     setLoadFailed(false);
     return fetchStamps()
       .then((items) => {
-        // サーバー側で削除が反映済みのIDは除外リストから掃除する
         reconcileDeletedStamps(items.map((item) => item.id));
-        // 削除確定済み(まだDB未反映の可能性がある)スタンプは一覧に出さない
+        setFetchedStamps(items);
         setStamps(
           items
             .filter((item) => !isStampDeleted(item.id))
@@ -116,15 +116,22 @@ export default function AlbumScreen() {
           stamps={stamps}
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          onPressStamp={(item) =>
+          onPressStamp={(item) => {
+            const stamp = stamps && Array.isArray(stamps)
+              ? (fetchedStamps.find((s) => s.id === item.id) ?? null)
+              : null;
             router.push({
               pathname: "/album-stamp-detail",
               params: {
                 id: item.id,
                 imageUri: item.imageUri ?? "",
                 date: item.date ?? "",
+                latitude: String(stamp?.latitude ?? ""),
+                longitude: String(stamp?.longitude ?? ""),
+                spotName: stamp?.spot_name ?? "",
               },
-            })
+            });
+          }
           }
         />
       )}

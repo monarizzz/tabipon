@@ -5,22 +5,38 @@ import { colors, radii, spacing, typography } from "@/src/theme/tokens";
 
 type Props = {
   spotName: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   zoom?: number;
 };
 
-// 位置情報を反映した実際の地図を表示する代わりに、モックの地図画像を表示する
-export function StampLocationMap({ spotName }: Props) {
+function buildStaticMapUrl(lat: number, lon: number, zoom: number): string {
+  const width = 700;
+  const height = 520;
+  return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=${zoom}&size=${width}x${height}&markers=${lat},${lon},red-pushpin`;
+}
+
+export function StampLocationMap({ spotName, latitude, longitude, zoom = 15 }: Props) {
   const { t } = useTranslation();
+
+  const hasLocation = latitude !== null && longitude !== null && !(latitude === 0 && longitude === 0);
+
   return (
     <View style={styles.wrap}>
       <View style={styles.mapCard}>
-        <Image
-          source={require("./assets/mock-map.png")}
-          style={styles.map}
-          resizeMode="cover"
-        />
+        {hasLocation ? (
+          <Image
+            source={{ uri: buildStaticMapUrl(latitude!, longitude!, zoom) }}
+            style={styles.map}
+            resizeMode="cover"
+          />
+        ) : (
+          <Image
+            source={require("./assets/mock-map.png")}
+            style={styles.map}
+            resizeMode="cover"
+          />
+        )}
       </View>
       {spotName ? (
         <Text style={styles.spotName}>{spotName}</Text>

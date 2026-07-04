@@ -40,11 +40,16 @@ export default function StampDetailScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { id, imageUri, date: paramDate } = useLocalSearchParams<{
+  const { id, imageUri, date: paramDate, latitude: paramLat, longitude: paramLon, spotName: paramSpotName } = useLocalSearchParams<{
     id?: string;
     imageUri?: string;
     date?: string;
+    latitude?: string;
+    longitude?: string;
+    spotName?: string;
   }>();
+  const stampLatitude = paramLat ? parseFloat(paramLat) : null;
+  const stampLongitude = paramLon ? parseFloat(paramLon) : null;
   const [designMode, setDesignMode] = React.useState(false);
   const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
@@ -133,7 +138,7 @@ export default function StampDetailScreen() {
     }
   };
 
-  const [spotName, setSpotName] = React.useState("");
+  const [spotName, setSpotName] = React.useState(paramSpotName ?? "");
   const [date, setDate] = React.useState(paramDate || "");
   const [location, setLocation] = React.useState("");
   const [memo, setMemo] = React.useState("");
@@ -207,8 +212,8 @@ export default function StampDetailScreen() {
         imageUri={currentImageUri || undefined}
         onPressDesignChange={handleOpenDesignChange}
         onPressSpotName={openSpotNameEditor}
-        latitude={0}
-        longitude={0}
+        latitude={stampLatitude}
+        longitude={stampLongitude}
       />
       <StampInfoCard
         date={date}
