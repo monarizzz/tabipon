@@ -23,8 +23,8 @@ class VisionClientTest(unittest.TestCase):
         client.landmark_detection.return_value = SimpleNamespace(
             error=SimpleNamespace(message=""),
             landmark_annotations=[
-                SimpleNamespace(description="Tokyo Tower", score=0.98),
-                SimpleNamespace(description="Shibuya Crossing", score=0.82),
+                SimpleNamespace(description="Tokyo Tower", score=0.98, locations=[]),
+                SimpleNamespace(description="Shibuya Crossing", score=0.82, locations=[]),
             ],
         )
 
@@ -38,6 +38,37 @@ class VisionClientTest(unittest.TestCase):
             ],
         )
         client.landmark_detection.assert_called_once()
+
+    def test_detect_landmarks_returns_landmark_location(self):
+        client = MagicMock()
+        client.landmark_detection.return_value = SimpleNamespace(
+            error=SimpleNamespace(message=""),
+            landmark_annotations=[
+                SimpleNamespace(
+                    description="Tokyo Tower",
+                    score=0.98,
+                    locations=[
+                        SimpleNamespace(
+                            lat_lng=SimpleNamespace(latitude=35.6586, longitude=139.7454),
+                        ),
+                    ],
+                ),
+            ],
+        )
+
+        landmarks = detect_landmarks_with_client(b"image-bytes", client)
+
+        self.assertEqual(
+            landmarks,
+            [
+                Landmark(
+                    name="Tokyo Tower",
+                    score=0.98,
+                    latitude=35.6586,
+                    longitude=139.7454,
+                ),
+            ],
+        )
 
     def test_detect_landmarks_returns_empty_list_when_no_landmarks_found(self):
         client = MagicMock()

@@ -12,6 +12,8 @@ class VisionClientError(Exception):
 class Landmark:
     name: str
     score: float
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 def detect_landmarks(image_bytes: bytes) -> list[Landmark]:
@@ -30,7 +32,20 @@ def detect_landmarks_with_client(image_bytes: bytes, client) -> list[Landmark]:
     if response.error.message:
         raise VisionClientError(response.error.message)
 
-    return [
-        Landmark(name=annotation.description, score=annotation.score)
-        for annotation in response.landmark_annotations
-    ]
+    return [build_landmark(annotation) for annotation in response.landmark_annotations]
+
+
+def build_landmark(annotation) -> Landmark:
+    latitude = None
+    longitude = None
+    if annotation.locations:
+        lat_lng = annotation.locations[0].lat_lng
+        latitude = lat_lng.latitude
+        longitude = lat_lng.longitude
+
+    return Landmark(
+        name=annotation.description,
+        score=annotation.score,
+        latitude=latitude,
+        longitude=longitude,
+    )
