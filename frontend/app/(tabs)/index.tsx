@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   CameraView,
@@ -89,17 +89,36 @@ export default function CameraScreen() {
   const [flash, setFlash] = React.useState<FlashMode>("off");
   const cameraRef = React.useRef<CameraView>(null);
   const containerSizeRef = React.useRef({ width: 0, height: 0 });
+  const capturingRef = React.useRef(false);
+  const [capturing, setCapturing] = React.useState(false);
+
+  useFocusEffect(React.useCallback(() => {
+    capturingRef.current = false;
+    setCapturing(false);
+  }, []));
 
   const handleCapture = async () => {
-    const photo = await cameraRef.current?.takePictureAsync();
-    if (!photo) return;
-    // 撮影時のズームは写真自体に反映済みのため、調整画面には引き継がない
-    // (引き継いで再度 scale をかけるとガイド円の中身がズレる)
-    const uri = await cropToPreview(photo, containerSizeRef.current);
-    router.push({
-      pathname: "/photo-adjust",
-      params: { uri },
-    });
+    if (capturingRef.current) return;
+    capturingRef.current = true;
+    setCapturing(true);
+    try {
+      const photo = await cameraRef.current?.takePictureAsync();
+      if (!photo) {
+        capturingRef.current = false;
+        setCapturing(false);
+        return;
+      }
+      // 撮影時のズームは写真自体に反映済みのため、調整画面には引き継がない
+      // (引き継いで再度 scale をかけるとガイド円の中身がズレる)
+      const uri = await cropToPreview(photo, containerSizeRef.current);
+      router.push({
+        pathname: "/photo-adjust",
+        params: { uri },
+      });
+    } catch {
+      capturingRef.current = false;
+      setCapturing(false);
+    }
   };
 
   if (!permission?.granted) {
@@ -134,6 +153,7 @@ export default function CameraScreen() {
             setFlash((prev) => (prev === "on" ? "off" : "on"))
           }
           onCapture={handleCapture}
+          disabled={capturing}
           onFlipCamera={() =>
             setFacing((prev) => (prev === "back" ? "front" : "back"))
           }

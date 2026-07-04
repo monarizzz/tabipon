@@ -79,8 +79,6 @@ export default function StampPressScreen() {
   const previewImagesRef = React.useRef<{ low: string; mid: string; high: string } | null>(null);
   const [previewLoading, setPreviewLoading] = React.useState(false);
   const chosenScratchLevelRef = React.useRef(0);
-  const [debugInfo, setDebugInfo] = React.useState({ z: 0, alpha: 0, scratch: 0 });
-
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
   }));
@@ -213,7 +211,6 @@ export default function StampPressScreen() {
         const scratchLevel = Math.max(0, Math.min(1.0, (peak - (-75)) / ((-5) - (-75))));
         chosenScratchLevelRef.current = scratchLevel;
         const tiltAngle = currentRotationAlphaRef.current;
-        setDebugInfo({ z: Math.round(peak * 100) / 100, alpha: Math.round(tiltAngle), scratch: Math.round(scratchLevel * 100) / 100 });
         applyScratch(scratchLevel, tiltAngle);
         const previews = previewImagesRef.current;
         if (previews) {
@@ -307,7 +304,6 @@ export default function StampPressScreen() {
           </Animated.View>
         </Pressable>
         <Text style={styles.hint}>{t("stampPress.shakeHint")}</Text>
-        <Text style={styles.debug}>z: {debugInfo.z}  α: {debugInfo.alpha}°  scratch: {debugInfo.scratch}</Text>
         <CommonButton
           label={t("design.changeDesign")}
           onPress={() => setDesignSheetVisible(true)}
@@ -407,11 +403,6 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: typography.caption.fontSize,
     color: colors.textMuted,
-  },
-  debug: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontFamily: "monospace",
   },
   helpIcon: {
     fontSize: 14,
