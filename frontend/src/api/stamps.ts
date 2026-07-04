@@ -46,10 +46,13 @@ export function updateStampImage(
   stampId: string,
   photoUri: string,
   color: StampColor,
+  scratchLevel: number = 0,
 ): Promise<StampUpdateResponse> {
+  const formData = buildImageFormData(photoUri, color);
+  if (scratchLevel > 0) formData.append("scratch_level", String(scratchLevel));
   return request<StampUpdateResponse>(`/stamp-image/${stampId}`, {
     method: "PUT",
-    body: buildImageFormData(photoUri, color),
+    body: formData,
   });
 }
 

@@ -36,6 +36,7 @@ import {
 import { type StampCreateResponse, previewStampImage } from "@/src/api/stamps";
 import { ApiError } from "@/src/api/client";
 import {
+  applyScratch,
   changeColor,
   getSession,
   retryUpload,
@@ -179,9 +180,11 @@ export default function StampPressScreen() {
         swingUpDetectedRef.current = false;
         const peak = swingDownPeakRef.current;
         const previews = previewImagesRef.current;
+        const scratchLevel = peak < -3.5 ? 0.8 : peak < -2.7 ? 0.4 : 0.0;
+        applyScratch(scratchLevel);
         if (previews) {
           setChosenPreviewUri(
-            peak < -3.5 ? previews.high : peak < -2.7 ? previews.mid : previews.low,
+            scratchLevel >= 0.8 ? previews.high : scratchLevel >= 0.4 ? previews.mid : previews.low,
           );
         }
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

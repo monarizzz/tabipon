@@ -13,6 +13,8 @@ type StampSession = {
   desiredColor: StampColor;
   /** サーバー側のスタンプに反映済みの色(POST/PUT 成功後に更新) */
   appliedColor: StampColor | null;
+  /** 振り強度で決まった掠れ具合(0=なし) */
+  scratchLevel: number;
   /** POST で作成されたスタンプ(色変更 PUT の起点として保持) */
   created: StampCreateResponse | null;
   /** 現在の処理チェーン。最新のスタンプ情報で解決する */
@@ -45,6 +47,7 @@ export function startUpload(photoUri: string, color: StampColor): void {
     photoUri,
     desiredColor: color,
     appliedColor: null,
+    scratchLevel: 0,
     created: null,
     promise: undefined as unknown as Promise<StampCreateResponse>,
   };
@@ -74,6 +77,23 @@ export function retryUpload(): void {
     return;
   }
   s.promise = syncColor(s, s.created);
+  markHandled(s.promise);
+}
+
+/** 振り下ろし確定時に呼ぶ。進行中の処理と直列化して掠れを反映する */
+export function applyScratch(scratchLevel: number): void {
+  if (!session || scratchLevel === 0) return;
+  const s = session;
+  console.log(`[stampSession] apply scratch level=${scratchLevel}`);
+  s.scratchLevel = scratchLevel;
+  s.promise = s.promise
+    .catch(() => { throw new Error("upload failed before scratch"); })
+    .then(async (created) => {
+      const updated = await updateStampImage(created.id, s.photoUri, s.desiredColor, scratchLevel);
+      const scratched = { ...created, image_url: updated.image_url };
+      s.created = scratched;
+      return scratched;
+    });
   markHandled(s.promise);
 }
 
@@ -113,7 +133,7 @@ async function syncColor(
   while (s.appliedColor !== s.desiredColor) {
     const color = s.desiredColor;
     console.log(`[stampSession] sync color=${color} stampId=${created.id}`);
-    const updated = await updateStampImage(created.id, s.photoUri, color);
+    const updated = await updateStampImage(created.id, s.photoUri, color, s.scratchLevel);
     s.appliedColor = color;
     created = { ...created, image_url: updated.image_url };
     s.created = created;

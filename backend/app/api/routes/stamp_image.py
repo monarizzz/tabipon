@@ -66,13 +66,15 @@ async def update_stamp_image_endpoint(
     stamp_id: str,  # stamps.id は uuid
     image: Annotated[UploadFile, File()],
     color: StampColor = StampColor.red,
+    scratch_level: float = 0.0,
 ):
     logger.info(
-        "stamp-image update received stamp_id=%s filename=%s content_type=%s color=%s",
+        "stamp-image update received stamp_id=%s filename=%s content_type=%s color=%s scratch_level=%s",
         stamp_id,
         image.filename,
         image.content_type,
         color,
+        scratch_level,
     )
     image_bytes = await image.read()
     logger.info("stamp-image update read bytes=%s stamp_id=%s", len(image_bytes), stamp_id)
@@ -81,7 +83,7 @@ async def update_stamp_image_endpoint(
 
     stamp = find_stamp(stamp_id)
 
-    png_bytes = process_stamp_image(image_bytes, color)
+    png_bytes = process_stamp_image(image_bytes, color, scratch_level=scratch_level)
     logger.info("stamp-image update processed png_bytes=%s stamp_id=%s", len(png_bytes), stamp_id)
     updated = replace_stamp_image(stamp, png_bytes)
     logger.info("stamp-image update saved stamp_id=%s", updated.get("id"))
