@@ -89,7 +89,7 @@ export default function StampDetailScreen() {
         console.error("[stamp-detail] failed to delete stamp", error);
       });
     }
-    router.replace("/(tabs)/album");
+    router.back();
   };
 
   const handleShare = async () => {
