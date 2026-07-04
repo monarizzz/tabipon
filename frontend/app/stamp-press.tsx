@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
+import { Accelerometer } from "expo-sensors";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -62,6 +63,9 @@ export default function StampPressScreen() {
   const longPressTriggeredRef = React.useRef(false);
   const stampScale = useSharedValue(1);
   const stampWrapRef = React.useRef<View>(null);
+  const shakeTriggeredRef = React.useRef(false);
+  const swingUpDetectedRef = React.useRef(false);
+  const swingUpTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
@@ -130,7 +134,37 @@ export default function StampPressScreen() {
     });
   }, [router]);
 
-  React.useEffect(() => () => Vibration.cancel(), []);
+  React.useEffect(() => {
+    Accelerometer.setUpdateInterval(100);
+    const subscription = Accelerometer.addListener(({ y }) => {
+      if (shakeTriggeredRef.current) return;
+      if (y > 1.5) {
+        swingUpDetectedRef.current = true;
+        if (swingUpTimerRef.current) clearTimeout(swingUpTimerRef.current);
+        swingUpTimerRef.current = setTimeout(() => {
+          swingUpDetectedRef.current = false;
+        }, 800);
+      }
+      if (y < -2.2 && swingUpDetectedRef.current) {
+        shakeTriggeredRef.current = true;
+        swingUpDetectedRef.current = false;
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Vibration.vibrate([0, 40, 30, 80]);
+        cancelAnimation(stampScale);
+        stampScale.value = withSequence(
+          withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
+          withTiming(1.06, { duration: 20, easing: Easing.out(Easing.back(2)) }),
+          withTiming(1, { duration: 120 }, (finished) => {
+            if (finished) runOnJS(goToStampDone)();
+          }),
+        );
+      }
+    });
+    return () => {
+      subscription.remove();
+      Vibration.cancel();
+    };
+  }, [goToStampDone, stampScale]);
 
   const handleStampPressIn = () => {
     longPressTriggeredRef.current = false;

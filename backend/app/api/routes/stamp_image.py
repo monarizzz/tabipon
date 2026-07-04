@@ -12,7 +12,7 @@ from app.repositories.stamp_repository import (
     update_stamp_image_url,
     upload_stamp_image,
 )
-from app.services.stamp_processor import StampColor, decode_image, process_stamp_image
+from app.services.stamp_processor import StampColor, StampFrame, decode_image, process_stamp_image
 
 router = APIRouter()
 logger = logging.getLogger("uvicorn.error")
@@ -22,6 +22,7 @@ logger = logging.getLogger("uvicorn.error")
 async def create_stamp_image_endpoint(
     image: Annotated[UploadFile, File()],
     color: StampColor = StampColor.red,
+    frame: StampFrame = StampFrame.classic,
 ):
     logger.info(
         "stamp-image create received filename=%s content_type=%s color=%s",
@@ -34,7 +35,7 @@ async def create_stamp_image_endpoint(
     validate_upload(image, image_bytes)
     validate_image_data(image_bytes)
 
-    png_bytes = process_stamp_image(image_bytes, color)
+    png_bytes = process_stamp_image(image_bytes, color, frame)
     logger.info("stamp-image create processed png_bytes=%s", len(png_bytes))
     stamp = save_stamp(png_bytes)
     logger.info("stamp-image create saved stamp_id=%s", stamp.get("id"))

@@ -9,6 +9,7 @@ export type TabBarItemData = {
   label: string;
   icon: TabBarIcon;
   active: boolean;
+  activeColor?: string;
   onPress: () => void;
 };
 
@@ -19,21 +20,22 @@ type Props = {
 export function TabBar({ items }: Props) {
   return (
     <View style={styles.container}>
-      {items.map(({ key, label, icon: Icon, active, onPress }) => (
-        <TouchableOpacity
-          key={key}
-          style={[styles.tab, active && styles.tabActive]}
-          onPress={onPress}
-          activeOpacity={0.8}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: active }}
-        >
-          <Icon size={22} color={active ? colors.primary : colors.secondary} />
-          <Text style={[styles.label, { color: active ? colors.primary : colors.secondary }]}>
-            {label}
-          </Text>
-        </TouchableOpacity>
-      ))}
+      {items.map(({ key, label, icon: Icon, active, activeColor, onPress }) => {
+        const color = active ? activeColor ?? colors.primary : colors.secondary;
+        return (
+          <TouchableOpacity
+            key={key}
+            style={[styles.tab, active && styles.tabActive]}
+            onPress={onPress}
+            activeOpacity={0.8}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+          >
+            <Icon size={22} color={color} />
+            <Text style={[styles.label, { color }]}>{label}</Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
@@ -41,19 +43,21 @@ export function TabBar({ items }: Props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.xs,
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     paddingTop: spacing.m,
     paddingBottom: spacing.xxxl,
-    paddingHorizontal: spacing.l,
+    paddingHorizontal: spacing.xl,
   },
   tab: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.s,
-    paddingVertical: spacing.m,
+    paddingVertical: 8,
+    paddingHorizontal: spacing.xxl,
     borderRadius: radii.tab,
     backgroundColor: 'transparent',
   },

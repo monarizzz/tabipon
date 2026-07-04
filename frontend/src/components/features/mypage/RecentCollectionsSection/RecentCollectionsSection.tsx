@@ -1,4 +1,5 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { MapPin } from "lucide-react-native";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export type RecentCollectionItem = {
@@ -38,7 +39,9 @@ export function RecentCollectionsSection({
             <View style={styles.thumb}>
               {item.imageUri ? (
                 <Image source={{ uri: item.imageUri }} style={styles.image} />
-              ) : null}
+              ) : (
+                <MapPin size={24} color={colors.textMuted} />
+              )}
             </View>
             <Text style={styles.name} numberOfLines={1}>
               {item.name}
@@ -65,7 +68,8 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   seeAll: {
-    fontSize: typography.labelBold.fontSize,
+    fontSize: typography.caption.fontSize,
+    fontWeight: typography.caption.fontWeight,
     color: colors.textMuted,
   },
   row: {
@@ -78,12 +82,14 @@ const styles = StyleSheet.create({
     gap: spacing.s,
   },
   thumb: {
-    width: "100%",
-    aspectRatio: 1,
-    borderRadius: 999,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
     overflow: "hidden",
   },
   image: {
