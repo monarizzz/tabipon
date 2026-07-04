@@ -34,6 +34,12 @@
           "microphonePermission": "このアプリはマイクを使用しません",
           "recordAudioAndroid": false
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "スタンプを取得した場所を記録するために位置情報へのアクセスを許可してください"
+        }
       ]
     ]
   }

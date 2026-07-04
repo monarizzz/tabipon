@@ -11,6 +11,7 @@ import {
 } from "@/src/components/features/camera/PhotoCropArea/PhotoCropArea";
 import { PhotoAdjustControls } from "@/src/components/features/camera/PhotoAdjustControls/PhotoAdjustControls";
 import { startUpload } from "@/src/api/stampSession";
+import { getCurrentStampLocation } from "@/src/utils/location";
 import { colors } from "@/src/theme/tokens";
 
 export default function PhotoAdjustScreen() {
@@ -32,7 +33,11 @@ export default function PhotoAdjustScreen() {
           // 待たずに送信開始し、結果はスタンプを押す画面で待ち合わせる
           const croppedUri = uri ? await cropAreaRef.current?.getCroppedImageUri() : null;
           const uploadUri = croppedUri ?? uri;
-          if (uploadUri) startUpload(uploadUri, "red");
+          if (uploadUri) {
+            // 取得時の現在地(GPS)を記録する。権限拒否や失敗時は null のまま続行する
+            const location = await getCurrentStampLocation();
+            startUpload(uploadUri, "red", location);
+          }
           router.push({ pathname: "/stamp-press", params: { uri: uploadUri } });
         }}
       />

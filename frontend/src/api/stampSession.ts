@@ -3,6 +3,7 @@ import {
   updateStampImage,
   type StampColor,
   type StampCreateResponse,
+  type StampLocation,
 } from "./stamps";
 
 // 写真調整画面でセッションを開始し、スタンプを押す画面で結果を待ち合わせるための
@@ -14,6 +15,8 @@ type StampSession = {
   desiredColor: StampColor;
   /** サーバー側のスタンプに反映済みの色(POST/PUT 成功後に更新) */
   appliedColor: StampColor | null;
+  /** 撮影時の位置情報(GPS)。初回 POST でのみ送信する。取得できなければ null */
+  location: StampLocation | null;
   /** 振り強度で決まった掠れ具合(0=なし) */
   scratchLevel: number;
   /** POST で作成されたスタンプ(色変更 PUT の起点として保持) */
@@ -45,8 +48,12 @@ export function clearSession(): void {
 }
 
 /** 写真確定時に呼ぶ。API呼び出しは行わず、振り下ろしまで保留する */
-export function startUpload(photoUri: string, color: StampColor): void {
-  console.log(`[stampSession] start session color=${color} uri=${photoUri}`);
+export function startUpload(
+  photoUri: string,
+  color: StampColor,
+  location: StampLocation | null = null,
+): void {
+  console.log(`[stampSession] start session color=${color} uri=${photoUri} location=${JSON.stringify(location)}`);
   let resolve!: (value: StampCreateResponse) => void;
   let reject!: (reason: unknown) => void;
   const promise = new Promise<StampCreateResponse>((res, rej) => {
@@ -58,6 +65,7 @@ export function startUpload(photoUri: string, color: StampColor): void {
     photoUri,
     desiredColor: color,
     appliedColor: null,
+    location,
     scratchLevel: 0,
     created: null,
     promise,
@@ -72,7 +80,7 @@ export function applyScratch(scratchLevel: number): void {
   const s = session;
   console.log(`[stampSession] apply scratch level=${scratchLevel} color=${s.desiredColor}`);
   s.scratchLevel = scratchLevel;
-  createStampImage(s.photoUri, s.desiredColor, scratchLevel)
+  createStampImage(s.photoUri, s.desiredColor, scratchLevel, s.location)
     .then((created) => {
       console.log(`[stampSession] created stamp id=${created.id}`);
       s.created = created;
@@ -98,7 +106,7 @@ export function retryUpload(): void {
     s._resolve = resolve;
     s._reject = reject;
     markHandled(s.promise);
-    createStampImage(s.photoUri, s.desiredColor, s.scratchLevel)
+    createStampImage(s.photoUri, s.desiredColor, s.scratchLevel, s.location)
       .then((created) => { s.created = created; s.appliedColor = s.desiredColor; s._resolve(created); })
       .catch(s._reject);
     return;

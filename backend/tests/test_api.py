@@ -71,7 +71,39 @@ class StampImageApiTest(unittest.TestCase):
                 "image_url": TEST_IMAGE_URL,
             },
         )
-        create_stamp.assert_called_once_with(TEST_IMAGE_URL)
+        create_stamp.assert_called_once_with(
+            TEST_IMAGE_URL,
+            latitude=None,
+            longitude=None,
+            spot_name=None,
+            tilt_angle=None,
+        )
+
+    @patch("app.api.routes.stamp_image.create_stamp")
+    @patch("app.api.routes.stamp_image.upload_stamp_image")
+    def test_stamp_image_forwards_location(
+        self,
+        upload_stamp_image,
+        create_stamp,
+    ):
+        upload_stamp_image.return_value = TEST_IMAGE_URL
+        create_stamp.return_value = {"id": TEST_STAMP_ID, "image_url": TEST_IMAGE_URL}
+        image_bytes = create_jpeg_bytes()
+
+        response = client.post(
+            "/stamp-image",
+            files={"image": ("test.jpg", image_bytes, "image/jpeg")},
+            data={"latitude": "35.681236", "longitude": "139.767125", "spot_name": "東京駅"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        create_stamp.assert_called_once_with(
+            TEST_IMAGE_URL,
+            latitude=35.681236,
+            longitude=139.767125,
+            spot_name="東京駅",
+            tilt_angle=None,
+        )
 
     @patch("app.api.routes.stamp_image.upload_stamp_image")
     def test_stamp_image_returns_server_error_when_save_fails(
@@ -213,6 +245,10 @@ class StampsApiTest(unittest.TestCase):
                 "id": TEST_STAMP_ID,
                 "image_url": TEST_IMAGE_URL,
                 "acquired_at": "2026-07-04T00:00:00+00:00",
+                "latitude": 35.681236,
+                "longitude": 139.767125,
+                "spot_name": "東京駅",
+                "tilt_angle": None,
             },
         ]
 
@@ -226,6 +262,10 @@ class StampsApiTest(unittest.TestCase):
                     "id": TEST_STAMP_ID,
                     "image_url": TEST_IMAGE_URL,
                     "acquired_at": "2026-07-04T00:00:00+00:00",
+                    "latitude": 35.681236,
+                    "longitude": 139.767125,
+                    "spot_name": "東京駅",
+                    "tilt_angle": None,
                 },
             ],
         )
