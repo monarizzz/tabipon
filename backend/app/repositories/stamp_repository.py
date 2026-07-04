@@ -61,10 +61,11 @@ def delete_stamp_image_by_url(image_url: str) -> None:
 
 def list_stamps() -> list[dict]:
     try:
+        # 位置情報(latitude/longitude/spot_name)など列追加に追従できるよう全列取得する
         result = (
             get_supabase()
             .table("stamps")
-            .select("id, image_url, acquired_at")
+            .select("*")
             .order("acquired_at", desc=True)
             .execute()
         )
@@ -80,19 +81,31 @@ def delete_stamp(stamp_id: str) -> None:
         raise StampRepositoryError("Failed to delete stamp record") from error
 
 
-def create_stamp(image_url: str) -> dict:
+def create_stamp(
+    image_url: str,
+    *,
+    latitude: float | None = None,
+    longitude: float | None = None,
+    spot_name: str | None = None,
+    tilt_angle: float | None = None,
+) -> dict:
+    # 位置情報などの任意項目は、値がある場合のみ登録する。
+    # 列がまだ存在しない環境でも最低限のスタンプ作成が壊れないようにするため。
+    record: dict = {
+        "image_url": image_url,
+        "acquired_at": datetime.now(timezone.utc).isoformat(),
+    }
+    if latitude is not None:
+        record["latitude"] = latitude
+    if longitude is not None:
+        record["longitude"] = longitude
+    if spot_name is not None:
+        record["spot_name"] = spot_name
+    if tilt_angle is not None:
+        record["tilt_angle"] = tilt_angle
+
     try:
-        created = (
-            get_supabase()
-            .table("stamps")
-            .insert(
-                {
-                    "image_url": image_url,
-                    "acquired_at": datetime.now(timezone.utc).isoformat(),
-                }
-            )
-            .execute()
-        )
+        created = get_supabase().table("stamps").insert(record).execute()
         return created.data[0]
     except Exception as error:
         raise StampRepositoryError("Failed to create stamp record") from error

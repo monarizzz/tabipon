@@ -26,6 +26,10 @@ def list_stamps_endpoint():
             "id": stamp["id"],
             "image_url": stamp["image_url"],
             "acquired_at": stamp["acquired_at"],
+            "latitude": stamp.get("latitude"),
+            "longitude": stamp.get("longitude"),
+            "spot_name": stamp.get("spot_name"),
+            "tilt_angle": stamp.get("tilt_angle"),
         }
         for stamp in stamps
     ]
