@@ -178,7 +178,6 @@ export default function StampPressScreen() {
   React.useEffect(() => {
     Accelerometer.setUpdateInterval(100);
     const subscription = Accelerometer.addListener(({ y }) => {
-      setDebugAccel((prev) => ({ ...prev, y: Math.round(y * 100) / 100, peak: Math.round(swingDownPeakRef.current * 100) / 100 }));
       if (shakeTriggeredRef.current) return;
       if (y > 1.5) {
         swingUpDetectedRef.current = true;
