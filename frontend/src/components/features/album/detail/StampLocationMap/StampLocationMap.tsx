@@ -20,7 +20,11 @@ export function StampLocationMap({ spotName }: Props) {
           resizeMode="cover"
         />
       </View>
-      <Text style={styles.spotName}>{spotName}</Text>
+      {spotName ? (
+        <Text style={styles.spotName}>{spotName}</Text>
+      ) : (
+        <Text style={styles.placeholder}>スポット名を追加</Text>
+      )}
     </View>
   );
 }
@@ -46,5 +50,10 @@ const styles = StyleSheet.create({
     fontSize: typography.sectionHeading.fontSize,
     fontWeight: typography.sectionHeading.fontWeight,
     color: colors.textPrimary,
+  },
+  placeholder: {
+    fontSize: typography.sectionHeading.fontSize,
+    fontWeight: typography.sectionHeading.fontWeight,
+    color: colors.textPlaceholder,
   },
 });

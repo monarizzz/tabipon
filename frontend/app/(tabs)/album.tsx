@@ -86,7 +86,16 @@ export default function AlbumScreen() {
       ) : (
         <StampGrid
           stamps={stamps}
-          onPressStamp={() => router.push("/album-stamp-detail")}
+          onPressStamp={(item) =>
+            router.push({
+              pathname: "/album-stamp-detail",
+              params: {
+                id: item.id,
+                imageUri: item.imageUri ?? "",
+                date: item.date ?? "",
+              },
+            })
+          }
         />
       )}
       <CollectionSheet

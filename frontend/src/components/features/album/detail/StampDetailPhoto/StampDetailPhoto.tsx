@@ -33,7 +33,11 @@ export function StampDetailPhoto({
         disabled={!onPressSpotName}
         activeOpacity={0.7}
       >
-        <Text style={styles.spotName}>{spotName}</Text>
+        {spotName ? (
+          <Text style={styles.spotName}>{spotName}</Text>
+        ) : (
+          <Text style={styles.placeholder}>スポット名を追加</Text>
+        )}
         {onPressSpotName ? (
           <Pencil size={14} color={colors.textMuted} />
         ) : null}
@@ -57,5 +61,10 @@ const styles = StyleSheet.create({
     fontSize: typography.sectionHeading.fontSize,
     fontWeight: typography.sectionHeading.fontWeight,
     color: colors.textPrimary,
+  },
+  placeholder: {
+    fontSize: typography.sectionHeading.fontSize,
+    fontWeight: typography.sectionHeading.fontWeight,
+    color: colors.textPlaceholder,
   },
 });
