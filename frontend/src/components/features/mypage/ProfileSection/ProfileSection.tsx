@@ -1,4 +1,5 @@
 import { View, Text, Image, StyleSheet } from "react-native";
+import { User } from "lucide-react-native";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
@@ -14,7 +15,7 @@ export function ProfileSection({ name, registeredDate, avatarUri }: Props) {
         {avatarUri ? (
           <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
         ) : (
-          <Text style={styles.avatarGlyph}>👤</Text>
+          <User size={36} color={colors.textMuted} />
         )}
       </View>
       <Text style={styles.name}>{name}</Text>
@@ -42,9 +43,6 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: "100%",
     height: "100%",
-  },
-  avatarGlyph: {
-    fontSize: 32,
   },
   name: {
     fontSize: typography.sectionHeading.fontSize,

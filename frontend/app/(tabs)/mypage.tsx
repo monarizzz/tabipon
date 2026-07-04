@@ -1,7 +1,7 @@
 import React from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { Bell, Shield, Info } from "lucide-react-native";
+import { Bell, Shield, Info, Settings } from "lucide-react-native";
 import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
 import { ProfileSection } from "@/src/components/features/mypage/ProfileSection/ProfileSection";
 import { RecentCollectionsSection } from "@/src/components/features/mypage/RecentCollectionsSection/RecentCollectionsSection";
@@ -19,13 +19,18 @@ export default function MypageScreen() {
 
   return (
     <View style={styles.container}>
-      <NavBar title="マイページ" />
+      <NavBar
+        title="マイページ"
+        rightIcon={<Settings size={16} color={colors.textMuted} />}
+        onRightPress={() => {}}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         <ProfileSection name="たびすたんぷ太郎" registeredDate="2025.02.16" />
         <RecentCollectionsSection
           items={RECENT_COLLECTIONS}
-          onPressSeeAll={() => {}}
+          onPressSeeAll={() => router.push("/(tabs)/album")}
         />
+        <View style={styles.recentToSettingsSpacer} />
         <SettingsMenuSection
           items={[
             {
@@ -59,7 +64,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   content: {
-    gap: spacing.xxl,
-    padding: spacing.xl,
+    gap: 35,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xxl,
+  },
+  recentToSettingsSpacer: {
+    height: spacing.xl,
   },
 });
