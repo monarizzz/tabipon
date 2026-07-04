@@ -8,7 +8,7 @@ import {
   STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import { colors, radii, spacing } from "@/src/theme/tokens";
-import { StampDetailPhoto } from "@/src/components/features/album/detail/StampDetailPhoto/StampDetailPhoto";
+import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
 import { EditFieldSheet } from "@/src/components/features/album/detail/EditFieldSheet/EditFieldSheet";
 
@@ -83,10 +83,12 @@ export default function StampDetailScreen() {
           <Text style={styles.iconGlyph}>↗</Text>
         </TouchableOpacity>
       </View>
-      <StampDetailPhoto
+      <StampDetailMediaPager
         spotName={spotName}
         onPressDesignChange={() => setDesignSheetVisible(true)}
         onPressSpotName={openSpotNameEditor}
+        latitude={35.7100627}
+        longitude={139.8107004}
       />
       <StampInfoCard
         date={date}

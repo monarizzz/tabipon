@@ -111,7 +111,9 @@ src/components/
 | StampGrid | StampCardの2列グリッド＋空状態（features/stamp-rally固有） | - | アルバム画面 |
 | CollectionSheet | BottomSheet+入力欄+CommonButtonのコレクション追加シート（features/stamp-rally固有） | - | アルバム画面 |
 | StampDetailPhoto | Stamp+デザイン変更ボタン+スポット名（タップで編集可）（features/stamp-rally固有） | - | スタンプ詳細画面 |
-| StampInfoCard | 日付/場所セル+メモセクション（すべてタップで編集・追加可）（features/stamp-rally固有） | - | スタンプ詳細画面 |
+| StampInfoCard | 日付/場所セル+メモセクション（すべてタップで編集・追加可、未入力時はプレースホルダー表示）（features/stamp-rally固有） | - | スタンプ詳細画面 |
+| StampLocationMap | WebViewでGoogleマップ埋め込みを表示する地図カード+スポット名（features/stamp-rally固有） | - | スタンプ詳細画面（マップページ） |
+| StampDetailMediaPager | StampDetailPhotoとStampLocationMapを横スクロールで切り替えるページャー+ドットインジケーター（features/stamp-rally固有） | - | スタンプ詳細画面 |
 | EditFieldSheet | BottomSheet+入力欄 or DateTimePickerの単項目編集シート（features/stamp-rally固有） | text / date | スタンプ詳細画面（タイトル・場所・日付の編集） |
 | PhotoCropArea | 円形クロップ枠+ドラッグハンドル（features/camera固有） | - | 写真調整画面 |
 | PhotoAdjustControls | ジェスチャーヒント+ズームスライダー+次へボタン（features/camera固有） | - | 写真調整画面 |
