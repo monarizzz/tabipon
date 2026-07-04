@@ -73,6 +73,7 @@ export default function StampPressScreen() {
   const stampDownDetectedRef = React.useRef(false);
   const stampDownPeakRef = React.useRef(0);
   const liftingRef = React.useRef(false);
+  const liftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentRotationAlphaRef = React.useRef(0);
   const [previewImages, setPreviewImages] = React.useState<{ low: string; mid: string; high: string } | null>(null);
   const previewImagesRef = React.useRef<{ low: string; mid: string; high: string } | null>(null);
@@ -185,13 +186,13 @@ export default function StampPressScreen() {
 
       const z = acceleration?.z ?? 0;
 
-      // 上方向への加速を検知したらliftingフラグを立てる（振り上げの誤検知防止）
-      if (z > 3) {
+      // 上方向への加速を検知したら600ms間は押し付け判定を無視
+      if (z > 1.5) {
         liftingRef.current = true;
-      }
-      // 静止状態に戻ったらliftingフラグをリセット
-      if (liftingRef.current && Math.abs(z) < 1) {
-        liftingRef.current = false;
+        if (liftTimerRef.current) clearTimeout(liftTimerRef.current);
+        liftTimerRef.current = setTimeout(() => {
+          liftingRef.current = false;
+        }, 600);
       }
 
       // 下方向への加速度を検知（振り上げ直後でなければ押し付けと判定）
