@@ -161,20 +161,15 @@ def _draw_wave_circle(
 
 def apply_scratch(image: np.ndarray, scratch_level: float) -> np.ndarray:
     h, w = image.shape[:2]
-    mask = np.zeros((h, w), dtype=np.float32)
-    num_lines = max(1, int(scratch_level * 18))
-    for _ in range(num_lines):
-        x1 = random.randint(-w // 4, w)
-        y1 = random.randint(0, h)
-        angle = random.uniform(-0.25, 0.25)  # ほぼ水平な線
-        length = random.randint(w // 3, w)
-        thickness = random.randint(2, max(3, int(scratch_level * 18)))
-        x2 = int(x1 + length * math.cos(angle))
-        y2 = int(y1 + length * math.sin(angle))
-        cv2.line(mask, (x1, y1), (x2, y2), 1.0, thickness)
-    mask = cv2.GaussianBlur(mask, (5, 5), 0)
+    # 粗いノイズを大きくブラーしてまだら状の大きな塊を作る
+    small = np.random.normal(0, 1, (h // 8, w // 8)).astype(np.float32)
+    noise = cv2.resize(small, (w, h), interpolation=cv2.INTER_LINEAR)
+    k = 61 | 1
+    noise = cv2.GaussianBlur(noise, (k, k), 0)
+    noise = (noise - noise.min()) / (noise.max() - noise.min())
+    threshold = 1.0 - scratch_level * 0.65
     result = image.copy()
-    result[mask > 0.3] = [255, 255, 255]
+    result[noise > threshold] = [255, 255, 255]
     return result
 
 
