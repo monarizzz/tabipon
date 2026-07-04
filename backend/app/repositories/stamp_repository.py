@@ -59,12 +59,13 @@ def delete_stamp_image_by_url(image_url: str) -> None:
         pass
 
 
-def list_stamps() -> list[dict]:
+def list_stamps(user_id: str) -> list[dict]:
     try:
         result = (
             get_supabase()
             .table("stamps")
             .select("id, image_url, acquired_at")
+            .eq("user_id", user_id)
             .order("acquired_at", desc=True)
             .execute()
         )
@@ -73,7 +74,7 @@ def list_stamps() -> list[dict]:
         raise StampRepositoryError("Failed to list stamps") from error
 
 
-def create_stamp(image_url: str) -> dict:
+def create_stamp(image_url: str, user_id: str) -> dict:
     try:
         created = (
             get_supabase()
@@ -82,6 +83,7 @@ def create_stamp(image_url: str) -> dict:
                 {
                     "image_url": image_url,
                     "acquired_at": datetime.now(timezone.utc).isoformat(),
+                    "user_id": user_id,
                 }
             )
             .execute()

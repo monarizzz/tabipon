@@ -34,7 +34,8 @@
           "microphonePermission": "このアプリはマイクを使用しません",
           "recordAudioAndroid": false
         }
-      ]
+      ],
+      "expo-web-browser"
     ]
   }
 }
