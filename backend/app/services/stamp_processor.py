@@ -14,6 +14,12 @@ class StampColor(str, Enum):
     green = "green"
 
 
+class StampFrame(str, Enum):
+    simple = "simple"    # 細い一重円
+    classic = "classic"  # 二重円
+    dash = "dash"        # 破線の円
+
+
 STAMP_COLORS: dict[StampColor, np.ndarray] = {
     StampColor.red: np.array([30, 50, 220], dtype=np.uint8),
     StampColor.blue: np.array([180, 60, 30], dtype=np.uint8),
@@ -22,9 +28,13 @@ STAMP_COLORS: dict[StampColor, np.ndarray] = {
 }
 
 
-def process_stamp_image(image_bytes: bytes, color: StampColor = StampColor.red) -> bytes:
+def process_stamp_image(
+    image_bytes: bytes,
+    color: StampColor = StampColor.red,
+    frame: StampFrame = StampFrame.classic,
+) -> bytes:
     decoded_image = decode_image(image_bytes)
-    stamp_image = create_stamp_image(decoded_image, STAMP_COLORS[color])
+    stamp_image = create_stamp_image(decoded_image, STAMP_COLORS[color], frame)
     return encode_png(stamp_image)
 
 
@@ -36,7 +46,7 @@ def decode_image(image_bytes: bytes) -> np.ndarray:
     return decoded_image
 
 
-def create_stamp_image(image: np.ndarray, ink_color: np.ndarray) -> np.ndarray:
+def create_stamp_image(image: np.ndarray, ink_color: np.ndarray, frame: StampFrame) -> np.ndarray:
     square_image = crop_center_square(image)
     resized_image = cv2.resize(
         square_image,
@@ -64,7 +74,7 @@ def create_stamp_image(image: np.ndarray, ink_color: np.ndarray) -> np.ndarray:
     )
     stamp_image[dark_pixels] = ink_color
 
-    return apply_circular_stamp_frame(stamp_image, ink_color)
+    return apply_circular_stamp_frame(stamp_image, ink_color, frame)
 
 
 def crop_center_square(image: np.ndarray) -> np.ndarray:
@@ -75,7 +85,9 @@ def crop_center_square(image: np.ndarray) -> np.ndarray:
     return image[top : top + side, left : left + side]
 
 
-def apply_circular_stamp_frame(image: np.ndarray, ink_color: np.ndarray) -> np.ndarray:
+def apply_circular_stamp_frame(
+    image: np.ndarray, ink_color: np.ndarray, frame: StampFrame
+) -> np.ndarray:
     radius = STAMP_IMAGE_SIZE // 2 - 8
     center = (STAMP_IMAGE_SIZE // 2, STAMP_IMAGE_SIZE // 2)
     ink_color_tuple = tuple(int(value) for value in ink_color)
@@ -89,10 +101,32 @@ def apply_circular_stamp_frame(image: np.ndarray, ink_color: np.ndarray) -> np.n
         dtype=np.uint8,
     )
     circular_stamp[mask == 255] = image[mask == 255]
-    cv2.circle(circular_stamp, center, radius, ink_color_tuple, 10)
-    cv2.circle(circular_stamp, center, radius - 30, ink_color_tuple, 3)
+
+    if frame == StampFrame.simple:
+        cv2.circle(circular_stamp, center, radius, ink_color_tuple, 3)
+    elif frame == StampFrame.classic:
+        cv2.circle(circular_stamp, center, radius, ink_color_tuple, 10)
+        cv2.circle(circular_stamp, center, radius - 30, ink_color_tuple, 3)
+    elif frame == StampFrame.dash:
+        _draw_dashed_circle(circular_stamp, center, radius, ink_color_tuple, thickness=4, dash_count=24)
 
     return circular_stamp
+
+
+def _draw_dashed_circle(
+    image: np.ndarray,
+    center: tuple[int, int],
+    radius: int,
+    color: tuple[int, ...],
+    thickness: int,
+    dash_count: int,
+) -> None:
+    for i in range(dash_count):
+        if i % 2 == 0:
+            continue
+        start_angle = i * 360 / dash_count
+        end_angle = (i + 1) * 360 / dash_count
+        cv2.ellipse(image, center, (radius, radius), 0, start_angle, end_angle, color, thickness)
 
 
 def encode_png(image: np.ndarray) -> bytes:
