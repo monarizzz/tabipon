@@ -13,6 +13,10 @@ import { CollectionSheet } from "@/src/components/features/album/CollectionSheet
 import { Header } from "@/src/components/common/layout/Header/Header";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { fetchStamps, type StampListItem } from "@/src/api/stamps";
+import {
+  isStampDeleted,
+  reconcileDeletedStamps,
+} from "@/src/api/deletedStamps";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 const FILTERS: FilterOption[] = [
@@ -51,7 +55,12 @@ export default function AlbumScreen() {
   const loadStamps = React.useCallback(() => {
     setLoadFailed(false);
     fetchStamps()
-      .then((items) => setStamps(items.map(toGridItem)))
+      .then((items) => {
+        // サーバー側で削除が反映済みのIDは除外リストから掃除する
+        reconcileDeletedStamps(items.map((item) => item.id));
+        // 削除確定済み(まだDB未反映の可能性がある)スタンプは一覧に出さない
+        setStamps(items.filter((item) => !isStampDeleted(item.id)).map(toGridItem));
+      })
       .catch(() => setLoadFailed(true));
   }, []);
 
