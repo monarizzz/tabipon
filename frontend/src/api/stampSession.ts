@@ -6,6 +6,7 @@ import {
   type StampCreateResponse,
   type StampLocation,
 } from "./stamps";
+import { persistOriginalPhoto } from "@/src/utils/originalPhotoStore";
 
 // 写真調整画面でセッションを開始し、スタンプを押す画面で結果を待ち合わせるための
 // モジュールシングルトン。画面をまたぐ進行中 Promise は router params では渡せない。
@@ -89,6 +90,8 @@ export function applyScratch(scratchLevel: number): void {
       console.log(`[stampSession] created stamp id=${created.id}`);
       s.created = created;
       s.appliedColor = s.desiredColor;
+      // 後からデザイン変更できるよう、元写真を端末に永続保存する(fire-and-forget)
+      void persistOriginalPhoto(created.id, s.photoUri);
       s._resolve(created);
     })
     .catch((error) => {
@@ -110,7 +113,12 @@ export function retryUpload(): void {
     s._reject = reject;
     markHandled(s.promise);
     createStampImage(s.photoUri, s.desiredColor, s.scratchLevel, s.desiredFrame, s.location)
-      .then((created) => { s.created = created; s.appliedColor = s.desiredColor; s._resolve(created); })
+      .then((created) => {
+        s.created = created;
+        s.appliedColor = s.desiredColor;
+        void persistOriginalPhoto(created.id, s.photoUri);
+        s._resolve(created);
+      })
       .catch(s._reject);
     return;
   }
