@@ -38,13 +38,17 @@ export default function StampPressScreen() {
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const longPressTriggeredRef = React.useRef(false);
   const stampScale = useSharedValue(1);
+  const stampWrapRef = React.useRef<View>(null);
 
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
   }));
 
   const goToStampDone = React.useCallback(() => {
-    router.push("/stamp-done");
+    // 次の画面(animation: 'none')でも同じ画面座標にスタンプが来るよう、押した位置を引き継ぐ
+    stampWrapRef.current?.measureInWindow((_x, y) => {
+      router.push({ pathname: "/stamp-done", params: { stampTop: String(Math.round(y)) } });
+    });
   }, [router]);
 
   React.useEffect(() => () => Vibration.cancel(), []);
@@ -71,7 +75,7 @@ export default function StampPressScreen() {
     cancelAnimation(stampScale);
     stampScale.value = withSequence(
       withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
-      withTiming(1.06, { duration: 150, easing: Easing.out(Easing.back(2)) }),
+      withTiming(1.06, { duration: 20, easing: Easing.out(Easing.back(2)) }),
       withTiming(1, { duration: 120 }, (finished) => {
         if (finished) runOnJS(goToStampDone)();
       }),
@@ -99,6 +103,7 @@ export default function StampPressScreen() {
       />
       <View style={styles.content}>
         <Pressable
+          ref={stampWrapRef}
           onPressIn={handleStampPressIn}
           onLongPress={handleStampLongPress}
           onPressOut={handleStampPressOut}
