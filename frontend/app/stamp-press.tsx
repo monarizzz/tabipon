@@ -209,8 +209,8 @@ export default function StampPressScreen() {
         const peak = stampDownPeakRef.current;
         stampDownPeakRef.current = 0;
 
-        // 弱い押し付け(peak=-5) → scratch=1.0、強い押し付け(peak=-35) → scratch=0.0
-        const scratchLevel = Math.max(0, Math.min(1.0, (peak - (-35)) / ((-5) - (-35))));
+        // 弱い押し付け(peak=-5) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
+        const scratchLevel = Math.max(0, Math.min(1.0, (peak - (-75)) / ((-5) - (-75))));
         chosenScratchLevelRef.current = scratchLevel;
         const tiltAngle = currentRotationAlphaRef.current;
         setDebugInfo({ z: Math.round(peak * 100) / 100, alpha: Math.round(tiltAngle), scratch: Math.round(scratchLevel * 100) / 100 });
