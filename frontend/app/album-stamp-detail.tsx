@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Share, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Share } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
@@ -80,29 +80,16 @@ export default function StampDetailScreen() {
   const closeEditor = () => setEditingField(null);
 
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
-  const [deleting, setDeleting] = React.useState(false);
 
-  const handleConfirmDelete = async () => {
-    if (deleting) return;
-
-    if (!id) {
-      // id が無い(未保存など)場合は画面を閉じるだけ
-      setDeleteDialogVisible(false);
-      router.back();
-      return;
+  const handleConfirmDelete = () => {
+    setDeleteDialogVisible(false);
+    if (id) {
+      // 削除はバックグラウンドで実行し、結果を待たずにアルバムへ戻る
+      deleteStamp(id).catch((error) => {
+        console.error("[stamp-detail] failed to delete stamp", error);
+      });
     }
-
-    setDeleting(true);
-    try {
-      await deleteStamp(id);
-      setDeleteDialogVisible(false);
-      router.back();
-    } catch (error) {
-      console.error("[stamp-detail] failed to delete stamp", error);
-      Alert.alert("削除に失敗しました", "時間をおいて再度お試しください。");
-    } finally {
-      setDeleting(false);
-    }
+    router.replace("/(tabs)/album");
   };
 
   const handleShare = async () => {
@@ -157,10 +144,9 @@ export default function StampDetailScreen() {
         visible={deleteDialogVisible}
         title="スタンプを削除しますか?"
         message="削除したスタンプは元に戻せません。"
-        confirmLabel={deleting ? "削除中..." : "削除する"}
-        onCancel={() => {
-          if (!deleting) setDeleteDialogVisible(false);
-        }}
+        confirmLabel="削除する"
+        destructive
+        onCancel={() => setDeleteDialogVisible(false)}
         onConfirm={handleConfirmDelete}
       />
       <DesignChangeSheet

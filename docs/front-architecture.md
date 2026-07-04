@@ -92,7 +92,7 @@ src/components/
 
 | コンポーネント | 役割 | variant | 使用箇所 |
 |---|---|---|---|
-| CommonButton | 汎用ボタン | primary / secondary / ghost / accent（icon prop対応） | - |
+| CommonButton | 汎用ボタン | primary / secondary / ghost / accent / danger（icon prop対応） | - |
 | Card | 汎用カード | - | - |
 | Badge | - | - | - |
 | Modal | - | - | - |
@@ -103,7 +103,7 @@ src/components/
 | SelectableTile | 選択式サムネイルカード | selected | デザイン変更ボトムシート（フレームスタイル選択） |
 | Header | タイトル＋サブテキストの画面ヘッダー | - | アルバム画面 |
 | NavBar | 戻る/タイトル/右アクションのナビゲーションバー | - | 写真調整・スタンプを押す・マイページ・スタンプ詳細 系画面 |
-| ConfirmDialog | Modal+Buttonで組んだ確認ダイアログ | destructive | タブ切替時の編集破棄確認（写真調整／スタンプを押す） |
+| ConfirmDialog | Modal+Buttonで組んだ確認ダイアログ | destructive | タブ切替時の編集破棄確認（写真調整／スタンプを押す）、スタンプ削除確認（スタンプ詳細） |
 | Stamp | 二重リング円形のスタンプ/写真プレビュー | - | スタンプを押す・スタンプ詳細・スタンプを押しました（camera機能から昇格） |
 | ShareButton | 円形の共有アイコンボタン（Share2アイコン） | size指定可 | スタンプ詳細画面・スタンプを押しました画面 |
 | TabBar | アクティブタブに丸背景を敷くlucideアイコン+ラベルの下部タブバー | - | ルートタブナビゲーション（カメラ／アルバム／マイページ） |

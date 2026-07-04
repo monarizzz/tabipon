@@ -9,6 +9,7 @@ type Props = {
   message: string;
   cancelLabel?: string;
   confirmLabel: string;
+  destructive?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 };
@@ -19,6 +20,7 @@ export function CommonDialog({
   message,
   cancelLabel = "キャンセル",
   confirmLabel,
+  destructive = false,
   onCancel,
   onConfirm,
 }: Props) {
@@ -38,7 +40,7 @@ export function CommonDialog({
         <CommonButton
           label={confirmLabel}
           onPress={onConfirm}
-          variant="primary"
+          variant={destructive ? "danger" : "primary"}
           style={styles.flexButton}
         />
       </View>
