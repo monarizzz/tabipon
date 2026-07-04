@@ -1,3 +1,4 @@
+import base64
 import logging
 from typing import Annotated, NoReturn
 
@@ -23,19 +24,21 @@ async def create_stamp_image_endpoint(
     image: Annotated[UploadFile, File()],
     color: StampColor = StampColor.red,
     frame: StampFrame = StampFrame.classic,
+    scratch_level: float = 0.0,
 ):
     logger.info(
-        "stamp-image create received filename=%s content_type=%s color=%s",
+        "stamp-image create received filename=%s content_type=%s color=%s scratch_level=%s",
         image.filename,
         image.content_type,
         color,
+        scratch_level,
     )
     image_bytes = await image.read()
     logger.info("stamp-image create read bytes=%s", len(image_bytes))
     validate_upload(image, image_bytes)
     validate_image_data(image_bytes)
 
-    png_bytes = process_stamp_image(image_bytes, color, frame)
+    png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level)
     logger.info("stamp-image create processed png_bytes=%s", len(png_bytes))
     stamp = save_stamp(png_bytes)
     logger.info("stamp-image create saved stamp_id=%s", stamp.get("id"))
@@ -46,18 +49,34 @@ async def create_stamp_image_endpoint(
     }
 
 
+@router.post("/stamp-image/preview")
+async def preview_stamp_image_endpoint(
+    image: Annotated[UploadFile, File()],
+    color: StampColor = StampColor.red,
+    frame: StampFrame = StampFrame.classic,
+    scratch_level: float = 0.0,
+):
+    image_bytes = await image.read()
+    validate_upload(image, image_bytes)
+    validate_image_data(image_bytes)
+    png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level)
+    return {"image_base64": base64.b64encode(png_bytes).decode()}
+
+
 @router.put("/stamp-image/{stamp_id}")
 async def update_stamp_image_endpoint(
     stamp_id: str,  # stamps.id は uuid
     image: Annotated[UploadFile, File()],
     color: StampColor = StampColor.red,
+    scratch_level: float = 0.0,
 ):
     logger.info(
-        "stamp-image update received stamp_id=%s filename=%s content_type=%s color=%s",
+        "stamp-image update received stamp_id=%s filename=%s content_type=%s color=%s scratch_level=%s",
         stamp_id,
         image.filename,
         image.content_type,
         color,
+        scratch_level,
     )
     image_bytes = await image.read()
     logger.info("stamp-image update read bytes=%s stamp_id=%s", len(image_bytes), stamp_id)
@@ -66,7 +85,7 @@ async def update_stamp_image_endpoint(
 
     stamp = find_stamp(stamp_id)
 
-    png_bytes = process_stamp_image(image_bytes, color)
+    png_bytes = process_stamp_image(image_bytes, color, scratch_level=scratch_level)
     logger.info("stamp-image update processed png_bytes=%s stamp_id=%s", len(png_bytes), stamp_id)
     updated = replace_stamp_image(stamp, png_bytes)
     logger.info("stamp-image update saved stamp_id=%s", updated.get("id"))

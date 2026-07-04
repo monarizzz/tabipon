@@ -6,7 +6,7 @@ import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
 import { StampResultHeader } from "@/src/components/features/camera/StampResultHeader/StampResultHeader";
 import { StampShowcase } from "@/src/components/features/camera/StampShowcase/StampShowcase";
 import { StampDoneActions } from "@/src/components/features/camera/StampDoneActions/StampDoneActions";
-import { clearSession } from "@/src/api/stampSession";
+import { clearSession, getChosenPreviewUri } from "@/src/api/stampSession";
 import { colors, spacing } from "@/src/theme/tokens";
 
 const today = new Date();
@@ -19,6 +19,7 @@ export default function StampDoneScreen() {
     stampId?: string;
     imageUrl?: string;
   }>();
+  const previewUri = getChosenPreviewUri();
   const [memo, setMemo] = React.useState("");
 
   // 前の画面(押し込みアニメーション)でスタンプがあった位置を引き継ぎ、
@@ -39,7 +40,7 @@ export default function StampDoneScreen() {
           <StampResultHeader date={formattedDate} />
         </View>
         <StampShowcase
-          imageUri={imageUrl}
+          imageUri={imageUrl ?? previewUri}
           onShare={() => Share.share({ message: "スタンプを獲得しました！" })}
         />
         <View style={styles.actionsAnchor}>

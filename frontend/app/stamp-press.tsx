@@ -33,12 +33,14 @@ import {
   FRAME_STYLE_OPTIONS,
   STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
-import { type StampCreateResponse } from "@/src/api/stamps";
+import { type StampCreateResponse, previewStampImage } from "@/src/api/stamps";
 import { ApiError } from "@/src/api/client";
 import {
+  applyScratch,
   changeColor,
   getSession,
   retryUpload,
+  setChosenPreviewUri,
   waitForResult,
 } from "@/src/api/stampSession";
 import { colors, typography, spacing } from "@/src/theme/tokens";
@@ -66,10 +68,34 @@ export default function StampPressScreen() {
   const shakeTriggeredRef = React.useRef(false);
   const swingUpDetectedRef = React.useRef(false);
   const swingUpTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [previewImages, setPreviewImages] = React.useState<{ low: string; mid: string; high: string } | null>(null);
+  const previewImagesRef = React.useRef<{ low: string; mid: string; high: string } | null>(null);
+  const swingDownPeakRef = React.useRef(0);
 
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
   }));
+
+  React.useEffect(() => {
+    previewImagesRef.current = previewImages;
+  }, [previewImages]);
+
+  React.useEffect(() => {
+    if (!uri) return;
+    const apiColor = API_COLOR_BY_HEX[selectedColor] ?? "red";
+    let cancelled = false;
+    setPreviewImages(null);
+    Promise.all([
+      previewStampImage(uri, apiColor, 0.0),
+      previewStampImage(uri, apiColor, 0.4),
+      previewStampImage(uri, apiColor, 0.8),
+    ]).then(([low, mid, high]) => {
+      if (!cancelled) setPreviewImages({ low, mid, high });
+    }).catch((err) => {
+      console.warn("[stamp-press] preview generation failed", err);
+    });
+    return () => { cancelled = true; };
+  }, [uri, selectedColor]);
 
   const showUploadError = React.useCallback((error: unknown) => {
     let message = "通信環境を確認して、もう一度お試しください。";
@@ -140,14 +166,27 @@ export default function StampPressScreen() {
       if (shakeTriggeredRef.current) return;
       if (y > 1.5) {
         swingUpDetectedRef.current = true;
+        swingDownPeakRef.current = 0;
         if (swingUpTimerRef.current) clearTimeout(swingUpTimerRef.current);
         swingUpTimerRef.current = setTimeout(() => {
           swingUpDetectedRef.current = false;
         }, 800);
       }
+      if (swingUpDetectedRef.current && y < swingDownPeakRef.current) {
+        swingDownPeakRef.current = y;
+      }
       if (y < -2.2 && swingUpDetectedRef.current) {
         shakeTriggeredRef.current = true;
         swingUpDetectedRef.current = false;
+        const peak = swingDownPeakRef.current;
+        const previews = previewImagesRef.current;
+        const scratchLevel = peak < -3.5 ? 0.8 : peak < -2.7 ? 0.4 : 0.0;
+        applyScratch(scratchLevel);
+        if (previews) {
+          setChosenPreviewUri(
+            scratchLevel >= 0.8 ? previews.high : scratchLevel >= 0.4 ? previews.mid : previews.low,
+          );
+        }
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Vibration.vibrate([0, 40, 30, 80]);
         cancelAnimation(stampScale);
@@ -222,7 +261,7 @@ export default function StampPressScreen() {
           onPressOut={handleStampPressOut}
         >
           <Animated.View style={stampAnimatedStyle}>
-            <Stamp imageUri={stampResult?.image_url ?? uri} />
+            <Stamp imageUri={stampResult?.image_url ?? previewImages?.mid ?? uri} />
           </Animated.View>
         </Pressable>
         <Text style={styles.hint}>スマホを上下に振ってスタンプ！</Text>
