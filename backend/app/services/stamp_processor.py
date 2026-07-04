@@ -162,7 +162,7 @@ def apply_scratch(image: np.ndarray, scratch_level: float) -> np.ndarray:
     noise = np.random.normal(0, 1, (h, w)).astype(np.float32)
     noise = cv2.GaussianBlur(noise, (15, 15), 0)
     noise = (noise - noise.min()) / (noise.max() - noise.min())
-    threshold = 1.0 - scratch_level * 0.4
+    threshold = 1.0 - scratch_level * 0.65
     scratch_mask = noise > threshold
     result = image.copy()
     result[scratch_mask] = [255, 255, 255]
