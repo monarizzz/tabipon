@@ -2,27 +2,25 @@ import type { Meta, StoryObj } from "@storybook/react-native";
 import { View } from "react-native";
 import { fn } from "storybook/test";
 
-import { StampHelp } from "./StampHelp";
-import { colors } from "@/src/theme/tokens";
+import { StampDoneActions } from "./StampDoneActions";
 
 const meta = {
-  component: StampHelp,
+  component: StampDoneActions,
   decorators: [
     (Story) => (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "flex-end",
-          backgroundColor: colors.textPrimary,
-        }}
-      >
+      <View style={{ padding: 16 }}>
         <Story />
       </View>
     ),
   ],
   tags: ["autodocs"],
-  args: { visible: true, onClose: fn() },
-} satisfies Meta<typeof StampHelp>;
+  args: {
+    memo: "",
+    onChangeMemo: fn(),
+    onContinueShooting: fn(),
+    onGoToAlbum: fn(),
+  },
+} satisfies Meta<typeof StampDoneActions>;
 
 export default meta;
 

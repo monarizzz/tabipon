@@ -1,57 +1,132 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import { useRef, useState } from "react";
+import { View, Text, Image, StyleSheet, type LayoutChangeEvent } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Svg, { Defs, Mask, Rect, Circle } from "react-native-svg";
 import { colors, typography } from "@/src/theme/tokens";
 
 type Props = {
   imageUri?: string;
   size?: number;
+  zoom?: number;
+  onChangeZoom?: (value: number) => void;
 };
 
-const HANDLE_SIZE = 14;
+const PINCH_SENSITIVITY = 1;
+const SCALE_MIN = 1;
+const SCALE_MAX = 3;
 
-export function PhotoCropArea({ imageUri, size = 296 }: Props) {
-  return (
-    <View style={styles.wrap}>
-      <View style={styles.dimTop} />
-      <View style={styles.dimBottom} />
-      <View style={styles.row}>
-        <View style={styles.dimSide} />
-        <View
-          style={[
-            styles.circle,
-            { width: size, height: size, borderRadius: size / 2 },
-          ]}
-        >
-          {imageUri ? (
-            <Image source={{ uri: imageUri }} style={styles.image} />
-          ) : (
-            <Text style={styles.placeholder}>[ 撮影した写真 ]</Text>
-          )}
-        </View>
-        <View style={styles.dimSide} />
-      </View>
-      {(["N", "S", "E", "W"] as const).map((position) => (
-        <View
-          key={position}
-          style={[styles.handle, handlePosition(position, size)]}
-        />
-      ))}
-    </View>
-  );
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
 
-function handlePosition(position: "N" | "S" | "E" | "W", size: number) {
-  const half = HANDLE_SIZE / 2;
-  const radius = size / 2;
-  switch (position) {
-    case "N":
-      return { top: radius - half, left: "50%" as const, marginLeft: -half };
-    case "S":
-      return { bottom: radius - half, left: "50%" as const, marginLeft: -half };
-    case "E":
-      return { right: radius - half, top: "50%" as const, marginTop: -half };
-    case "W":
-      return { left: radius - half, top: "50%" as const, marginTop: -half };
-  }
+export function PhotoCropArea({ imageUri, size = 296, zoom = 0, onChangeZoom }: Props) {
+  const scale = SCALE_MIN + zoom * (SCALE_MAX - SCALE_MIN);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const maxOffsetX = (containerSize.width * (scale - 1)) / 2;
+  const maxOffsetY = (containerSize.height * (scale - 1)) / 2;
+
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
+  const baseZoom = useRef(zoom);
+  const baseTranslate = useRef(translate);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setContainerSize({ width, height });
+  };
+
+  const pinchGesture = Gesture.Pinch()
+    .runOnJS(true)
+    .onStart(() => {
+      baseZoom.current = zoom;
+    })
+    .onUpdate((event) => {
+      const next = baseZoom.current + (event.scale - 1) * PINCH_SENSITIVITY;
+      onChangeZoom?.(clamp(next, 0, 1));
+    });
+
+  const panGesture = Gesture.Pan()
+    .runOnJS(true)
+    .onStart(() => {
+      baseTranslate.current = translate;
+    })
+    .onUpdate((event) => {
+      setTranslate({
+        x: clamp(baseTranslate.current.x + event.translationX, -maxOffsetX, maxOffsetX),
+        y: clamp(baseTranslate.current.y + event.translationY, -maxOffsetY, maxOffsetY),
+      });
+    });
+
+  const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
+  const clampedTranslate = {
+    x: clamp(translate.x, -maxOffsetX, maxOffsetX),
+    y: clamp(translate.y, -maxOffsetY, maxOffsetY),
+  };
+
+  const cx = containerSize.width / 2;
+  const cy = containerSize.height / 2;
+  // 撮影画面のガイド円 (CameraPreview) と同じ算出式にして両画面の円径を一致させる
+  const effectiveSize = Math.min(size, containerSize.width - 24, containerSize.height - 24);
+  const radius = effectiveSize / 2;
+
+  return (
+    <View style={styles.wrap} onLayout={handleLayout}>
+      {imageUri ? (
+        <GestureDetector gesture={combinedGesture}>
+          <Image
+            source={{ uri: imageUri }}
+            resizeMode="cover"
+            style={[
+              styles.image,
+              {
+                transform: [
+                  { translateX: clampedTranslate.x },
+                  { translateY: clampedTranslate.y },
+                  { scale },
+                ],
+              },
+            ]}
+          />
+        </GestureDetector>
+      ) : (
+        <View style={styles.placeholderWrap}>
+          <Text style={styles.placeholder}>[ 撮影した写真 ]</Text>
+        </View>
+      )}
+      {containerSize.width > 0 && (
+        <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Defs>
+            <Mask id="spotlightMask">
+              <Rect x={0} y={0} width={containerSize.width} height={containerSize.height} fill="#fff" />
+              <Circle cx={cx} cy={cy} r={radius} fill="#000" />
+            </Mask>
+          </Defs>
+          <Rect
+            x={0}
+            y={0}
+            width={containerSize.width}
+            height={containerSize.height}
+            fill={colors.cropDimOverlay}
+            mask="url(#spotlightMask)"
+          />
+        </Svg>
+      )}
+      {containerSize.width > 0 && (
+        <View
+          pointerEvents="none"
+          style={[
+            styles.guide,
+            {
+              left: cx - radius,
+              top: cy - radius,
+              width: effectiveSize,
+              height: effectiveSize,
+              borderRadius: radius,
+            },
+          ]}
+        />
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -60,52 +135,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     overflow: "hidden",
   },
-  row: {
-    flexDirection: "row",
-    flex: 1,
-    alignItems: "center",
-  },
-  dimTop: {
-    height: 85,
-    backgroundColor: "rgba(0,0,0,0.19)",
-  },
-  dimBottom: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 85,
-    backgroundColor: "rgba(0,0,0,0.19)",
-  },
-  dimSide: {
-    flex: 1,
-    alignSelf: "stretch",
-    backgroundColor: "rgba(0,0,0,0.19)",
-  },
-  circle: {
-    borderWidth: 2,
-    borderColor: colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
   image: {
+    ...StyleSheet.absoluteFillObject,
     width: "100%",
     height: "100%",
+  },
+  guide: {
+    position: "absolute",
+    borderWidth: 2,
+    borderColor: colors.white,
+  },
+  placeholderWrap: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
   },
   placeholder: {
     fontSize: typography.buttonLabel.fontSize,
     color: colors.textPlaceholder,
     textAlign: "center",
     width: 160,
-  },
-  handle: {
-    position: "absolute",
-    width: HANDLE_SIZE,
-    height: HANDLE_SIZE,
-    borderRadius: HANDLE_SIZE / 2,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.primary,
   },
 });

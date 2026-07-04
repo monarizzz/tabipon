@@ -1,6 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { colors, radii, spacing } from '@/src/theme/tokens';
+import { TouchableOpacity, StyleSheet } from 'react-native';
+import { colors, spacing } from '@/src/theme/tokens';
 
 type Props = {
   label: string;
@@ -16,11 +16,9 @@ export function SelectableTile({ label, selected = false, onPress, children }: P
       onPress={onPress}
       activeOpacity={0.8}
       disabled={!onPress}
+      accessibilityLabel={label}
     >
       {children}
-      <Text style={styles.label} numberOfLines={1}>
-        {label}
-      </Text>
     </TouchableOpacity>
   );
 }
@@ -28,20 +26,18 @@ export function SelectableTile({ label, selected = false, onPress, children }: P
 const styles = StyleSheet.create({
   tile: {
     width: 67,
-    gap: spacing.s,
+    height: 67,
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: radii.card,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: 'transparent',
-    padding: spacing.s,
+    paddingVertical: spacing.s + 2,
+    paddingHorizontal: spacing.s,
   },
   selected: {
     borderColor: colors.textMuted,
     borderWidth: 1.5,
-  },
-  label: {
-    fontSize: 10,
-    color: colors.textMuted,
   },
 });

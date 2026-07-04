@@ -26,7 +26,15 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "スタンプ撮影のためにカメラへのアクセスを許可してください",
+          "microphonePermission": "このアプリはマイクを使用しません",
+          "recordAudioAndroid": false
+        }
+      ]
     ]
   }
 }

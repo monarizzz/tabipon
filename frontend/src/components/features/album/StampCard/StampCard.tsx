@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Card } from "@/src/components/common/Card/Card";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { colors, typography, spacing } from "@/src/theme/tokens";
@@ -18,30 +18,22 @@ export function StampCard({
   obtained = false,
   onPress,
 }: Props) {
-  const content = (
+  return (
     <Card style={styles.card}>
       <View style={styles.circleArea}>
-        <Stamp
-          size={100}
-          imageUri={obtained ? imageUri : undefined}
-          muted={!obtained}
-        />
+        <Pressable disabled={!onPress} onPress={onPress}>
+          <Stamp
+            size={100}
+            imageUri={obtained ? imageUri : undefined}
+            muted={!obtained}
+          />
+        </Pressable>
       </View>
       <Text style={styles.name} numberOfLines={1}>
         {name}
       </Text>
       {obtained && date ? <Text style={styles.date}>{date}</Text> : null}
     </Card>
-  );
-
-  if (!onPress) {
-    return content;
-  }
-
-  return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      {content}
-    </TouchableOpacity>
   );
 }
 

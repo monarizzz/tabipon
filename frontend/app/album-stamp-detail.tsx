@@ -3,6 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
+import {
+  FRAME_STYLE_OPTIONS,
+  STAMP_COLOR_OPTIONS,
+} from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import { colors, radii, spacing } from "@/src/theme/tokens";
 import { StampDetailPhoto } from "@/src/components/features/album/detail/StampDetailPhoto/StampDetailPhoto";
 import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
@@ -11,6 +15,11 @@ export default function StampDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
+  const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
+    FRAME_STYLE_OPTIONS[0].id,
+  );
+  const [selectedColor, setSelectedColor] = React.useState(STAMP_COLOR_OPTIONS[0]);
+  const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
   return (
     <View style={styles.container}>
@@ -38,14 +47,14 @@ export default function StampDetailScreen() {
       <DesignChangeSheet
         visible={designSheetVisible}
         onClose={() => setDesignSheetVisible(false)}
-        frameStyles={[]}
-        selectedFrameStyleId=""
-        onSelectFrameStyle={() => {}}
-        colorOptions={[]}
-        selectedColor=""
-        onSelectColor={() => {}}
-        showLandmarkName
-        onToggleShowLandmarkName={() => {}}
+        frameStyles={FRAME_STYLE_OPTIONS}
+        selectedFrameStyleId={selectedFrameStyleId}
+        onSelectFrameStyle={setSelectedFrameStyleId}
+        colorOptions={STAMP_COLOR_OPTIONS}
+        selectedColor={selectedColor}
+        onSelectColor={setSelectedColor}
+        showLandmarkName={showLandmarkName}
+        onToggleShowLandmarkName={setShowLandmarkName}
         onConfirm={() => setDesignSheetVisible(false)}
       />
     </View>
