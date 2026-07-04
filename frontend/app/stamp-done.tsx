@@ -14,12 +14,10 @@ const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).pad
 
 export default function StampDoneScreen() {
   const router = useRouter();
-  const { stampTop: stampTopParam, imageUrl, scratchLevel, peak } = useLocalSearchParams<{
+  const { stampTop: stampTopParam, imageUrl } = useLocalSearchParams<{
     stampTop?: string;
     stampId?: string;
     imageUrl?: string;
-    scratchLevel?: string;
-    peak?: string;
   }>();
   const previewUri = getChosenPreviewUri();
   const [memo, setMemo] = React.useState("");
@@ -45,10 +43,7 @@ export default function StampDoneScreen() {
           imageUri={imageUrl ?? previewUri}
           onShare={() => Share.share({ message: "スタンプを獲得しました！" })}
         />
-        {scratchLevel !== undefined && (
-          <Text style={styles.debugText}>[DEBUG] scratch: {scratchLevel} / peak: {peak}</Text>
-        )}
-        <View style={styles.actionsAnchor}>
+<View style={styles.actionsAnchor}>
           <StampDoneActions
             memo={memo}
             onChangeMemo={setMemo}
@@ -118,11 +113,5 @@ const styles = StyleSheet.create({
   actionsAnchor: {
     flex: 1,
     justifyContent: "flex-start",
-  },
-  debugText: {
-    fontSize: 12,
-    color: "red",
-    textAlign: "center",
-    marginTop: 4,
   },
 });

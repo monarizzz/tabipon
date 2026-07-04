@@ -147,7 +147,7 @@ export default function StampPressScreen() {
   const goToStampDone = React.useCallback(() => {
     // 次の画面(animation: 'none')でも同じ画面座標にスタンプが来るよう、押した位置を引き継ぐ
     stampWrapRef.current?.measureInWindow(async (_x, y) => {
-      const baseParams = { stampTop: String(Math.round(y)), scratchLevel: String(chosenScratchLevelRef.current), peak: String(swingDownPeakRef.current.toFixed(2)) };
+      const baseParams = { stampTop: String(Math.round(y)) };
       if (!getSession()) {
         router.push({ pathname: "/stamp-done", params: baseParams });
         return;
