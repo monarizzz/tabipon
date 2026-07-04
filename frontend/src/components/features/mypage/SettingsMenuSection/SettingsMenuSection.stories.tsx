@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-native";
 import { View } from "react-native";
+import { Bell, Shield, Info } from "lucide-react-native";
 import { fn } from "storybook/test";
 
 import {
@@ -8,9 +9,9 @@ import {
 } from "./SettingsMenuSection";
 
 const ITEMS: SettingsMenuItem[] = [
-  { id: "notifications", label: "通知設定", onPress: fn() },
-  { id: "privacy", label: "プライバシー", onPress: fn() },
-  { id: "help", label: "ヘルプ", onPress: fn() },
+  { id: "notifications", label: "通知設定", icon: Bell, onPress: fn() },
+  { id: "privacy", label: "プライバシー", icon: Shield, onPress: fn() },
+  { id: "help", label: "ヘルプ", icon: Info, onPress: fn() },
 ];
 
 const meta = {
