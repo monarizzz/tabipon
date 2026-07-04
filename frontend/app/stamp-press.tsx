@@ -197,7 +197,8 @@ export default function StampPressScreen() {
         const peak = swingDownPeakRef.current;
         const elapsed = Date.now() - swingUpTimestampRef.current;
         // 遅い（弱い）スイングほど掠れが強くなる
-        const scratchLevel = peak > -2.5 ? 1.0 : peak > -4.0 ? 0.8 : peak > -6.0 ? 0.4 : 0.0;
+        // peak: -1.5(弱) → scratch 1.0、-8.0(強) → scratch 0.0 の線形マッピング
+        const scratchLevel = Math.max(0, Math.min(1.0, (peak + 8.0) / 6.5));
         chosenScratchLevelRef.current = scratchLevel;
         setDebugAccel({ y: Math.round(y * 100) / 100, peak: Math.round(peak * 100) / 100, scratch: scratchLevel });
         applyScratch(scratchLevel);
