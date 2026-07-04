@@ -175,21 +175,21 @@ export default function StampPressScreen() {
         }, 800);
       }
 
-      // ②押し付け中のpeak記録
-      if (stampLiftDetectedRef.current && z < stampDownPeakRef.current) {
+      // ②持ち上げ後に z < -2 まで下がったら押し付け中とみなしてpeak記録
+      if (stampLiftDetectedRef.current && z < -2 && z < stampDownPeakRef.current) {
         stampDownPeakRef.current = z;
       }
 
-      // ③持ち上げ後に z < -5 まで下がったらスタンプ確定
-      if (z < -5 && stampLiftDetectedRef.current) {
+      // ③押し付けピーク後にニュートラル(z > -0.5)に戻ったらスタンプ確定（縦持ち方式）
+      if (stampLiftDetectedRef.current && stampDownPeakRef.current < -2 && z > -0.5) {
         shakeTriggeredRef.current = true;
         stampLiftDetectedRef.current = false;
         if (stampLiftTimerRef.current) clearTimeout(stampLiftTimerRef.current);
         const peak = stampDownPeakRef.current;
         stampDownPeakRef.current = 0;
 
-        // 弱い押し付け(peak=-5) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
-        const scratchLevel = Math.max(0, Math.min(1.0, (peak - (-75)) / ((-5) - (-75))));
+        // 弱い押し付け(peak=-2) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
+        const scratchLevel = Math.max(0, Math.min(1.0, (peak - (-75)) / ((-2) - (-75))));
         let tiltAngle = -(currentRotationAlphaRef.current * (180 / Math.PI));
         if (tiltAngle > 180) tiltAngle -= 360;
         if (tiltAngle < -180) tiltAngle += 360;
