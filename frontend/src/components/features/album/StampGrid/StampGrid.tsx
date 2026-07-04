@@ -6,6 +6,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { StampCard } from "@/src/components/features/album/StampCard/StampCard";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export type StampGridItem = {
@@ -29,12 +30,11 @@ export function StampGrid({
   refreshing,
   onRefresh,
 }: Props) {
+  const { t } = useTranslation();
   if (stamps.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>
-          スタンプを集めるとここに表示されます!
-        </Text>
+        <Text style={styles.emptyText}>{t("album.empty")}</Text>
       </View>
     );
   }

@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, type LayoutChangeEvent } from "react-nat
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Svg, { Defs, Mask, Rect, Circle } from "react-native-svg";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography } from "@/src/theme/tokens";
 
 type Props = {
@@ -33,6 +34,7 @@ export const PhotoCropArea = forwardRef<PhotoCropAreaHandle, Props>(function Pho
   { imageUri, size = 296, zoom = 0, onChangeZoom },
   ref
 ) {
+  const { t } = useTranslation();
   const scale = SCALE_MIN + zoom * (SCALE_MAX - SCALE_MIN);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [imageNaturalSize, setImageNaturalSize] = useState({ width: 0, height: 0 });
@@ -172,7 +174,7 @@ export const PhotoCropArea = forwardRef<PhotoCropAreaHandle, Props>(function Pho
         </GestureDetector>
       ) : (
         <View style={styles.placeholderWrap}>
-          <Text style={styles.placeholder}>[ 撮影した写真 ]</Text>
+          <Text style={styles.placeholder}>{t("camera.capturedPhoto")}</Text>
         </View>
       )}
       {containerSize.width > 0 && (

@@ -12,10 +12,12 @@ import {
 import { PhotoAdjustControls } from "@/src/components/features/camera/PhotoAdjustControls/PhotoAdjustControls";
 import { startUpload } from "@/src/api/stampSession";
 import { getCurrentStampLocation } from "@/src/utils/location";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors } from "@/src/theme/tokens";
 
 export default function PhotoAdjustScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { uri } = useLocalSearchParams<{ uri?: string }>();
   const [zoom, setZoom] = React.useState(0);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
@@ -23,7 +25,7 @@ export default function PhotoAdjustScreen() {
 
   return (
     <View style={styles.container}>
-      <NavBar title="写真を調整" onBack={() => router.back()} />
+      <NavBar title={t("photoAdjust.title")} onBack={() => router.back()} />
       <PhotoCropArea ref={cropAreaRef} imageUri={uri} zoom={zoom} onChangeZoom={setZoom} />
       <PhotoAdjustControls
         zoom={zoom}
@@ -45,21 +47,21 @@ export default function PhotoAdjustScreen() {
         items={[
           {
             key: "index",
-            label: "カメラ",
+            label: t("tabs.camera"),
             icon: Camera,
             active: true,
             onPress: () => setPendingTab("/(tabs)"),
           },
           {
             key: "album",
-            label: "アルバム",
+            label: t("tabs.album"),
             icon: Image,
             active: false,
             onPress: () => setPendingTab("/(tabs)/album"),
           },
           {
             key: "mypage",
-            label: "マイページ",
+            label: t("tabs.mypage"),
             icon: User,
             active: false,
             onPress: () => setPendingTab("/(tabs)/mypage"),
@@ -68,9 +70,9 @@ export default function PhotoAdjustScreen() {
       />
       <CommonDialog
         visible={pendingTab !== null}
-        title="編集内容を破棄しますか？"
-        message="タブを切り替えると、現在の編集内容が失われます。"
-        confirmLabel="破棄する"
+        title={t("discardDialog.title")}
+        message={t("discardDialog.message")}
+        confirmLabel={t("common.discard")}
         onCancel={() => setPendingTab(null)}
         onConfirm={() => {
           if (pendingTab) router.replace(pendingTab);

@@ -13,6 +13,7 @@ import { Toggle } from "@/src/components/common/Toggle/Toggle";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
+import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, radii, typography, spacing } from "@/src/theme/tokens";
 import type { FrameStyleOption } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
 
@@ -46,6 +47,7 @@ export function DesignChangePanel({
   onConfirm,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
@@ -69,14 +71,14 @@ export function DesignChangePanel({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>フレーム</Text>
+          <Text style={styles.sectionLabel}>{t("design.frame")}</Text>
           <View style={styles.row}>
             {frameStyles.map((style) => {
               const selected = style.id === selectedFrameStyleId;
               return (
                 <SelectableTile
                   key={style.id}
-                  label={style.label}
+                  label={t(style.label)}
                   selected={selected}
                   onPress={() => onSelectFrameStyle(style.id)}
                 >
@@ -88,7 +90,7 @@ export function DesignChangePanel({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>カラー</Text>
+          <Text style={styles.sectionLabel}>{t("design.color")}</Text>
           <View style={styles.colorRow}>
             {colorOptions.map((color) => (
               <ColorSwatch
@@ -102,7 +104,7 @@ export function DesignChangePanel({
         </View>
 
         <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>ランドマーク名を表示</Text>
+          <Text style={styles.toggleLabel}>{t("design.showLandmark")}</Text>
           <Toggle
             value={showLandmarkName}
             onValueChange={onToggleShowLandmarkName}
@@ -110,7 +112,7 @@ export function DesignChangePanel({
         </View>
 
         <CommonButton
-          label="このデザインにする"
+          label={t("design.apply")}
           onPress={onConfirm}
           variant="primary"
           style={styles.confirmButton}
