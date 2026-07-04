@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Share } from "react-native";
-import { Share2 } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
@@ -8,6 +7,7 @@ import {
   FRAME_STYLE_OPTIONS,
   STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
 import { colors, radii, spacing } from "@/src/theme/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
@@ -96,13 +96,7 @@ export default function StampDetailScreen() {
         >
           <Text style={styles.iconGlyph}>‹</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={handleShare}
-          activeOpacity={0.7}
-        >
-          <Share2 size={16} color={colors.textMuted} />
-        </TouchableOpacity>
+        <ShareButton onPress={handleShare} size={44} />
       </View>
       <StampDetailMediaPager
         spotName={spotName}
@@ -201,8 +195,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xl,
   },
   iconButton: {
-    width: 34,
-    height: 34,
+    width: 44,
+    height: 44,
     borderRadius: radii.tab,
     backgroundColor: colors.surface,
     borderWidth: 1,
