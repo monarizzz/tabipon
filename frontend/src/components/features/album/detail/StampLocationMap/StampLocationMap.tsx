@@ -1,7 +1,10 @@
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
+import { WebView } from "react-native-webview";
 import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, radii, spacing, typography } from "@/src/theme/tokens";
+
+const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
 
 type Props = {
   spotName: string;
@@ -10,25 +13,52 @@ type Props = {
   zoom?: number;
 };
 
-function buildStaticMapUrl(lat: number, lon: number, zoom: number): string {
-  const width = 700;
-  const height = 520;
-  return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=${zoom}&size=${width}x${height}&markers=${lat},${lon},red-pushpin`;
+function buildMapHtml(lat: number, lon: number, zoom: number): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style>
+  * { margin: 0; padding: 0; }
+  html, body, #map { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  function initMap() {
+    var pos = { lat: ${lat}, lng: ${lon} };
+    var map = new google.maps.Map(document.getElementById('map'), {
+      center: pos,
+      zoom: ${zoom},
+      disableDefaultUI: true,
+      gestureHandling: 'greedy'
+    });
+    new google.maps.Marker({ position: pos, map: map });
+  }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap" async defer></script>
+</body>
+</html>`;
 }
 
 export function StampLocationMap({ spotName, latitude, longitude, zoom = 15 }: Props) {
   const { t } = useTranslation();
 
-  const hasLocation = latitude !== null && longitude !== null && !(latitude === 0 && longitude === 0);
+  const hasLocation =
+    latitude !== null &&
+    longitude !== null &&
+    !(latitude === 0 && longitude === 0);
 
   return (
     <View style={styles.wrap}>
       <View style={styles.mapCard}>
         {hasLocation ? (
-          <Image
-            source={{ uri: buildStaticMapUrl(latitude!, longitude!, zoom) }}
+          <WebView
+            source={{ html: buildMapHtml(latitude!, longitude!, zoom) }}
             style={styles.map}
-            resizeMode="cover"
+            scrollEnabled={false}
+            originWhitelist={["*"]}
           />
         ) : (
           <Image
