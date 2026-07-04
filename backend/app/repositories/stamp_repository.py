@@ -73,6 +73,13 @@ def list_stamps() -> list[dict]:
         raise StampRepositoryError("Failed to list stamps") from error
 
 
+def delete_stamp(stamp_id: str) -> None:
+    try:
+        get_supabase().table("stamps").delete().eq("id", stamp_id).execute()
+    except Exception as error:
+        raise StampRepositoryError("Failed to delete stamp record") from error
+
+
 def create_stamp(image_url: str) -> dict:
     try:
         created = (

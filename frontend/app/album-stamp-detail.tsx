@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Share } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Share, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
@@ -11,6 +11,7 @@ import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
 import { Trash2 } from "lucide-react-native";
+import { deleteStamp } from "@/src/api/stamps";
 import { colors, radii, spacing } from "@/src/theme/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
@@ -33,7 +34,7 @@ type EditingField = "spotName" | "date" | "location" | "memo" | null;
 export default function StampDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { imageUri, date: paramDate } = useLocalSearchParams<{
+  const { id, imageUri, date: paramDate } = useLocalSearchParams<{
     id?: string;
     imageUri?: string;
     date?: string;
@@ -79,11 +80,29 @@ export default function StampDetailScreen() {
   const closeEditor = () => setEditingField(null);
 
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
 
-  const handleConfirmDelete = () => {
-    setDeleteDialogVisible(false);
-    // TODO: 削除APIと連携する。現状はフロントのみで前画面へ戻る。
-    router.back();
+  const handleConfirmDelete = async () => {
+    if (deleting) return;
+
+    if (!id) {
+      // id が無い(未保存など)場合は画面を閉じるだけ
+      setDeleteDialogVisible(false);
+      router.back();
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await deleteStamp(id);
+      setDeleteDialogVisible(false);
+      router.back();
+    } catch (error) {
+      console.error("[stamp-detail] failed to delete stamp", error);
+      Alert.alert("削除に失敗しました", "時間をおいて再度お試しください。");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleShare = async () => {
@@ -138,8 +157,10 @@ export default function StampDetailScreen() {
         visible={deleteDialogVisible}
         title="スタンプを削除しますか?"
         message="削除したスタンプは元に戻せません。"
-        confirmLabel="削除する"
-        onCancel={() => setDeleteDialogVisible(false)}
+        confirmLabel={deleting ? "削除中..." : "削除する"}
+        onCancel={() => {
+          if (!deleting) setDeleteDialogVisible(false);
+        }}
         onConfirm={handleConfirmDelete}
       />
       <DesignChangeSheet
