@@ -8,6 +8,9 @@ import {
   STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
+import { Trash2 } from "lucide-react-native";
 import { colors, radii, spacing } from "@/src/theme/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
@@ -75,6 +78,14 @@ export default function StampDetailScreen() {
   };
   const closeEditor = () => setEditingField(null);
 
+  const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
+
+  const handleConfirmDelete = () => {
+    setDeleteDialogVisible(false);
+    // TODO: 削除APIと連携する。現状はフロントのみで前画面へ戻る。
+    router.back();
+  };
+
   const handleShare = async () => {
     try {
       await Share.share({
@@ -113,6 +124,23 @@ export default function StampDetailScreen() {
         onPressDate={openDateEditor}
         onPressLocation={openLocationEditor}
         onPressMemo={openMemoEditor}
+      />
+      <View style={styles.deleteSection}>
+        <CommonButton
+          label="削除する"
+          onPress={() => setDeleteDialogVisible(true)}
+          variant="ghost"
+          icon={<Trash2 size={16} color={colors.danger} />}
+          textStyle={styles.deleteLabel}
+        />
+      </View>
+      <CommonDialog
+        visible={deleteDialogVisible}
+        title="スタンプを削除しますか?"
+        message="削除したスタンプは元に戻せません。"
+        confirmLabel="削除する"
+        onCancel={() => setDeleteDialogVisible(false)}
+        onConfirm={handleConfirmDelete}
       />
       <DesignChangeSheet
         visible={designSheetVisible}
@@ -207,5 +235,13 @@ const styles = StyleSheet.create({
   iconGlyph: {
     fontSize: 16,
     color: colors.textMuted,
+  },
+  deleteSection: {
+    marginTop: "auto",
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xl,
+  },
+  deleteLabel: {
+    color: colors.danger,
   },
 });
