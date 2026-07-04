@@ -267,6 +267,8 @@ export default function StampPressScreen() {
   };
 
   const handleStampLongPress = () => {
+    if (shakeTriggeredRef.current) return;
+    shakeTriggeredRef.current = true;
     longPressTriggeredRef.current = true;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     // 押し込み中の振動を止めて、「ドン」と強めの二段振動を鳴らす
