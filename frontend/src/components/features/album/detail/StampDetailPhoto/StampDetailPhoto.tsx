@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { Palette } from "lucide-react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Palette, Pencil } from "lucide-react-native";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { colors, typography, spacing } from "@/src/theme/tokens";
@@ -9,12 +9,14 @@ type Props = {
   spotName: string;
   imageUri?: string;
   onPressDesignChange: () => void;
+  onPressSpotName?: () => void;
 };
 
 export function StampDetailPhoto({
   spotName,
   imageUri,
   onPressDesignChange,
+  onPressSpotName,
 }: Props) {
   return (
     <View style={styles.wrap}>
@@ -25,7 +27,17 @@ export function StampDetailPhoto({
         variant="secondary"
         icon={<Palette size={14} color={colors.secondary} />}
       />
-      <Text style={styles.spotName}>{spotName}</Text>
+      <TouchableOpacity
+        style={styles.spotNameRow}
+        onPress={onPressSpotName}
+        disabled={!onPressSpotName}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.spotName}>{spotName}</Text>
+        {onPressSpotName ? (
+          <Pencil size={14} color={colors.textMuted} />
+        ) : null}
+      </TouchableOpacity>
     </View>
   );
 }
@@ -35,6 +47,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xxl,
     paddingVertical: spacing.l,
+  },
+  spotNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.s,
   },
   spotName: {
     fontSize: typography.sectionHeading.fontSize,
