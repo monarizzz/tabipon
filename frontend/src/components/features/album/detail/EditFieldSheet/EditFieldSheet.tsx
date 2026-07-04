@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { Text, StyleSheet, TextInput } from "react-native";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -38,15 +38,16 @@ export function EditFieldSheet({
 }: Props) {
   const inputRef = useRef<TextInput>(null);
 
-  useEffect(() => {
-    if (visible && field.mode === "text") {
-      const timer = setTimeout(() => inputRef.current?.focus(), 100);
-      return () => clearTimeout(timer);
-    }
-  }, [visible, field.mode]);
-
   return (
-    <BottomSheet visible={visible} onClose={onClose}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      onOpened={() => {
+        if (field.mode === "text") {
+          inputRef.current?.focus();
+        }
+      }}
+    >
       <Text style={styles.title}>{title}</Text>
       {field.mode === "text" ? (
         <BottomSheetTextInput

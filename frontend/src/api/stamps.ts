@@ -1,6 +1,7 @@
 import { request } from "./client";
 
 export type StampColor = "red" | "blue" | "black" | "green";
+export type StampFrame = "simple" | "classic" | "dash" | "wave";
 
 // id は Supabase の uuid 文字列
 export type StampCreateResponse = {
@@ -34,6 +35,7 @@ function buildImageFormData(
   photoUri: string,
   color: StampColor,
   scratchLevel: number = 0,
+  frame: StampFrame = "classic",
   location?: StampLocation | null,
 ): FormData {
   const formData = new FormData();
@@ -44,6 +46,7 @@ function buildImageFormData(
     type: "image/jpeg",
   } as unknown as Blob);
   formData.append("color", color);
+  formData.append("frame", frame);
   if (scratchLevel > 0) formData.append("scratch_level", String(scratchLevel));
   if (location) {
     formData.append("latitude", String(location.latitude));
@@ -57,12 +60,13 @@ export function createStampImage(
   photoUri: string,
   color: StampColor,
   scratchLevel: number = 0,
+  frame: StampFrame = "classic",
   location?: StampLocation | null,
 ): Promise<StampCreateResponse> {
   // Content-Type は指定しない(boundary 付きで fetch が自動付与する)
   return request<StampCreateResponse>("/stamp-image", {
     method: "POST",
-    body: buildImageFormData(photoUri, color, scratchLevel, location),
+    body: buildImageFormData(photoUri, color, scratchLevel, frame, location),
   });
 }
 
@@ -71,10 +75,11 @@ export function updateStampImage(
   photoUri: string,
   color: StampColor,
   scratchLevel: number = 0,
+  frame: StampFrame = "classic",
 ): Promise<StampUpdateResponse> {
   return request<StampUpdateResponse>(`/stamp-image/${stampId}`, {
     method: "PUT",
-    body: buildImageFormData(photoUri, color, scratchLevel),
+    body: buildImageFormData(photoUri, color, scratchLevel, frame),
   });
 }
 
@@ -82,14 +87,20 @@ export function fetchStamps(): Promise<StampListItem[]> {
   return request<StampListItem[]>("/stamps");
 }
 
+export function deleteStamp(stampId: string): Promise<void> {
+  return request<void>(`/stamps/${stampId}`, { method: "DELETE" });
+}
+
 export async function previewStampImage(
   photoUri: string,
   color: StampColor,
   scratchLevel: number,
+  frame: StampFrame = "classic",
 ): Promise<string> {
   const formData = new FormData();
   formData.append("image", { uri: photoUri, name: "photo.jpg", type: "image/jpeg" } as unknown as Blob);
   formData.append("color", color);
+  formData.append("frame", frame);
   formData.append("scratch_level", String(scratchLevel));
   const { image_base64 } = await request<{ image_base64: string }>("/stamp-image/preview", {
     method: "POST",

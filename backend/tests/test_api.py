@@ -289,5 +289,49 @@ class StampsApiTest(unittest.TestCase):
         self.assertEqual(response.json(), {"detail": "Failed to list stamps"})
 
 
+class StampDeleteApiTest(unittest.TestCase):
+    @patch("app.api.routes.stamps.delete_stamp_image_by_url")
+    @patch("app.api.routes.stamps.delete_stamp")
+    @patch("app.api.routes.stamps.get_stamp")
+    def test_delete_stamp_removes_record_and_image(
+        self,
+        get_stamp,
+        delete_stamp,
+        delete_stamp_image_by_url,
+    ):
+        get_stamp.return_value = {"id": TEST_STAMP_ID, "image_url": TEST_IMAGE_URL}
+
+        response = client.delete(f"/stamps/{TEST_STAMP_ID}")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.content, b"")
+        delete_stamp.assert_called_once_with(TEST_STAMP_ID)
+        delete_stamp_image_by_url.assert_called_once_with(TEST_IMAGE_URL)
+
+    @patch("app.api.routes.stamps.get_stamp")
+    def test_delete_stamp_returns_not_found_for_missing_stamp(self, get_stamp):
+        get_stamp.return_value = None
+
+        response = client.delete(f"/stamps/{TEST_STAMP_ID}")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"detail": "Stamp not found"})
+
+    @patch("app.api.routes.stamps.delete_stamp")
+    @patch("app.api.routes.stamps.get_stamp")
+    def test_delete_stamp_returns_server_error_when_delete_fails(
+        self,
+        get_stamp,
+        delete_stamp,
+    ):
+        get_stamp.return_value = {"id": TEST_STAMP_ID, "image_url": TEST_IMAGE_URL}
+        delete_stamp.side_effect = StampRepositoryError("delete failed")
+
+        response = client.delete(f"/stamps/{TEST_STAMP_ID}")
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json(), {"detail": "Failed to delete stamp"})
+
+
 if __name__ == "__main__":
     unittest.main()

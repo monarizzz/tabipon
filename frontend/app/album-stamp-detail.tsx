@@ -8,6 +8,10 @@ import {
   STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
+import { Trash2 } from "lucide-react-native";
+import { deleteStamp } from "@/src/api/stamps";
 import { colors, radii, spacing } from "@/src/theme/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
@@ -30,7 +34,7 @@ type EditingField = "spotName" | "date" | "location" | "memo" | null;
 export default function StampDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { imageUri, date: paramDate } = useLocalSearchParams<{
+  const { id, imageUri, date: paramDate } = useLocalSearchParams<{
     id?: string;
     imageUri?: string;
     date?: string;
@@ -75,6 +79,19 @@ export default function StampDetailScreen() {
   };
   const closeEditor = () => setEditingField(null);
 
+  const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
+
+  const handleConfirmDelete = () => {
+    setDeleteDialogVisible(false);
+    if (id) {
+      // 削除はバックグラウンドで実行し、結果を待たずにアルバムへ戻る
+      deleteStamp(id).catch((error) => {
+        console.error("[stamp-detail] failed to delete stamp", error);
+      });
+    }
+    router.replace("/(tabs)/album");
+  };
+
   const handleShare = async () => {
     try {
       await Share.share({
@@ -113,6 +130,24 @@ export default function StampDetailScreen() {
         onPressDate={openDateEditor}
         onPressLocation={openLocationEditor}
         onPressMemo={openMemoEditor}
+      />
+      <View style={styles.deleteSection}>
+        <CommonButton
+          label="削除する"
+          onPress={() => setDeleteDialogVisible(true)}
+          variant="ghost"
+          icon={<Trash2 size={16} color={colors.danger} />}
+          textStyle={styles.deleteLabel}
+        />
+      </View>
+      <CommonDialog
+        visible={deleteDialogVisible}
+        title="スタンプを削除しますか?"
+        message="削除したスタンプは元に戻せません。"
+        confirmLabel="削除する"
+        destructive
+        onCancel={() => setDeleteDialogVisible(false)}
+        onConfirm={handleConfirmDelete}
       />
       <DesignChangeSheet
         visible={designSheetVisible}
@@ -207,5 +242,13 @@ const styles = StyleSheet.create({
   iconGlyph: {
     fontSize: 16,
     color: colors.textMuted,
+  },
+  deleteSection: {
+    marginTop: "auto",
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xl,
+  },
+  deleteLabel: {
+    color: colors.danger,
   },
 });

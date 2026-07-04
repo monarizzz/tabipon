@@ -22,9 +22,9 @@ logger = logging.getLogger("uvicorn.error")
 @router.post("/stamp-image")
 async def create_stamp_image_endpoint(
     image: Annotated[UploadFile, File()],
-    color: StampColor = StampColor.red,
-    frame: StampFrame = StampFrame.classic,
-    scratch_level: float = 0.0,
+    color: StampColor = Form(StampColor.red),
+    frame: StampFrame = Form(StampFrame.classic),
+    scratch_level: float = Form(0.0),
     # 位置情報は multipart フォームで送られるため Form() で受ける
     latitude: Annotated[float | None, Form()] = None,
     longitude: Annotated[float | None, Form()] = None,
@@ -65,9 +65,9 @@ async def create_stamp_image_endpoint(
 @router.post("/stamp-image/preview")
 async def preview_stamp_image_endpoint(
     image: Annotated[UploadFile, File()],
-    color: StampColor = StampColor.red,
-    frame: StampFrame = StampFrame.classic,
-    scratch_level: float = 0.0,
+    color: StampColor = Form(StampColor.red),
+    frame: StampFrame = Form(StampFrame.classic),
+    scratch_level: float = Form(0.0),
 ):
     image_bytes = await image.read()
     validate_upload(image, image_bytes)
@@ -80,8 +80,9 @@ async def preview_stamp_image_endpoint(
 async def update_stamp_image_endpoint(
     stamp_id: str,  # stamps.id は uuid
     image: Annotated[UploadFile, File()],
-    color: StampColor = StampColor.red,
-    scratch_level: float = 0.0,
+    color: StampColor = Form(StampColor.red),
+    frame: StampFrame = Form(StampFrame.classic),
+    scratch_level: float = Form(0.0),
 ):
     logger.info(
         "stamp-image update received stamp_id=%s filename=%s content_type=%s color=%s scratch_level=%s",
@@ -98,7 +99,7 @@ async def update_stamp_image_endpoint(
 
     stamp = find_stamp(stamp_id)
 
-    png_bytes = process_stamp_image(image_bytes, color, scratch_level=scratch_level)
+    png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level=scratch_level)
     logger.info("stamp-image update processed png_bytes=%s stamp_id=%s", len(png_bytes), stamp_id)
     updated = replace_stamp_image(stamp, png_bytes)
     logger.info("stamp-image update saved stamp_id=%s", updated.get("id"))
