@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
+import { Audio } from "expo-av";
 import { DeviceMotion } from "expo-sensors";
 import Animated, {
   useSharedValue,
@@ -220,6 +221,9 @@ export default function StampPressScreen() {
             scratchLevel >= 0.8 ? previews.high : scratchLevel >= 0.4 ? previews.mid : previews.low,
           );
         }
+        Audio.Sound.createAsync(require("@/assets/sounds/stamp.mp3"))
+          .then(({ sound }) => { sound.playAsync(); })
+          .catch(() => {});
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Vibration.vibrate([0, 40, 30, 80]);
         cancelAnimation(stampScale);
