@@ -30,6 +30,7 @@ import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp"
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
 import {
   API_COLOR_BY_HEX,
+  API_FRAME_BY_ID,
   FRAME_STYLE_OPTIONS,
   STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
@@ -38,6 +39,7 @@ import { ApiError } from "@/src/api/client";
 import {
   applyScratch,
   changeColor,
+  changeFrame,
   getSession,
   retryUpload,
   setChosenPreviewUri,
@@ -70,7 +72,10 @@ export default function StampPressScreen() {
   const swingUpTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [previewImages, setPreviewImages] = React.useState<{ low: string; mid: string; high: string } | null>(null);
   const previewImagesRef = React.useRef<{ low: string; mid: string; high: string } | null>(null);
+  const [previewLoading, setPreviewLoading] = React.useState(false);
+  const swingUpTimestampRef = React.useRef(0);
   const swingDownPeakRef = React.useRef(0);
+  const chosenScratchLevelRef = React.useRef(0);
 
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
@@ -83,19 +88,26 @@ export default function StampPressScreen() {
   React.useEffect(() => {
     if (!uri) return;
     const apiColor = API_COLOR_BY_HEX[selectedColor] ?? "red";
+    const apiFrame = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
     let cancelled = false;
-    setPreviewImages(null);
+    setPreviewLoading(true);
+    console.log(`[preview] start color=${apiColor} frame=${apiFrame}`);
     Promise.all([
-      previewStampImage(uri, apiColor, 0.0),
-      previewStampImage(uri, apiColor, 0.4),
-      previewStampImage(uri, apiColor, 0.8),
+      previewStampImage(uri, apiColor, 0.0, apiFrame),
+      previewStampImage(uri, apiColor, 0.4, apiFrame),
+      previewStampImage(uri, apiColor, 0.8, apiFrame),
     ]).then(([low, mid, high]) => {
-      if (!cancelled) setPreviewImages({ low, mid, high });
+      if (!cancelled) {
+        console.log(`[preview] done color=${apiColor} frame=${apiFrame}`);
+        setPreviewImages({ low, mid, high });
+        setPreviewLoading(false);
+      }
     }).catch((err) => {
+      if (!cancelled) setPreviewLoading(false);
       console.warn("[stamp-press] preview generation failed", err);
     });
-    return () => { cancelled = true; };
-  }, [uri, selectedColor]);
+    return () => { cancelled = true; setPreviewLoading(false); };
+  }, [uri, selectedColor, selectedFrameStyleId]);
 
   const showUploadError = React.useCallback((error: unknown) => {
     let message = "通信環境を確認して、もう一度お試しください。";
@@ -135,7 +147,7 @@ export default function StampPressScreen() {
   const goToStampDone = React.useCallback(() => {
     // 次の画面(animation: 'none')でも同じ画面座標にスタンプが来るよう、押した位置を引き継ぐ
     stampWrapRef.current?.measureInWindow(async (_x, y) => {
-      const baseParams = { stampTop: String(Math.round(y)) };
+      const baseParams = { stampTop: String(Math.round(y)), scratchLevel: String(chosenScratchLevelRef.current), peak: String(swingDownPeakRef.current.toFixed(2)) };
       if (!getSession()) {
         router.push({ pathname: "/stamp-done", params: baseParams });
         return;
@@ -166,6 +178,7 @@ export default function StampPressScreen() {
       if (shakeTriggeredRef.current) return;
       if (y > 1.5) {
         swingUpDetectedRef.current = true;
+        swingUpTimestampRef.current = Date.now();
         swingDownPeakRef.current = 0;
         if (swingUpTimerRef.current) clearTimeout(swingUpTimerRef.current);
         swingUpTimerRef.current = setTimeout(() => {
@@ -175,13 +188,15 @@ export default function StampPressScreen() {
       if (swingUpDetectedRef.current && y < swingDownPeakRef.current) {
         swingDownPeakRef.current = y;
       }
-      if (y < -2.2 && swingUpDetectedRef.current) {
+      if (y < -1.5 && swingUpDetectedRef.current) {
         shakeTriggeredRef.current = true;
         swingUpDetectedRef.current = false;
         const peak = swingDownPeakRef.current;
-        const previews = previewImagesRef.current;
-        const scratchLevel = peak < -3.5 ? 0.8 : peak < -2.7 ? 0.4 : 0.0;
+        const elapsed = Date.now() - swingUpTimestampRef.current;
+        const scratchLevel = peak < -6.0 ? 0.8 : peak < -4.0 ? 0.4 : 0.0;
+        chosenScratchLevelRef.current = scratchLevel;
         applyScratch(scratchLevel);
+        const previews = previewImagesRef.current;
         if (previews) {
           setChosenPreviewUri(
             scratchLevel >= 0.8 ? previews.high : scratchLevel >= 0.4 ? previews.mid : previews.low,
@@ -262,6 +277,11 @@ export default function StampPressScreen() {
         >
           <Animated.View style={stampAnimatedStyle}>
             <Stamp imageUri={stampResult?.image_url ?? previewImages?.mid ?? uri} />
+            {previewLoading && (
+              <View style={styles.previewLoadingOverlay}>
+                <ActivityIndicator size="small" color={colors.white} />
+              </View>
+            )}
           </Animated.View>
         </Pressable>
         <Text style={styles.hint}>スマホを上下に振ってスタンプ！</Text>
@@ -312,6 +332,7 @@ export default function StampPressScreen() {
         onConfirm={() => {
           setDesignSheetVisible(false);
           changeColor(API_COLOR_BY_HEX[selectedColor] ?? "red");
+          changeFrame(API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic");
           watchSession();
         }}
       />
@@ -378,5 +399,12 @@ const styles = StyleSheet.create({
   waitingText: {
     fontSize: typography.body.fontSize,
     color: colors.white,
+  },
+  previewLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    borderRadius: 999,
   },
 });

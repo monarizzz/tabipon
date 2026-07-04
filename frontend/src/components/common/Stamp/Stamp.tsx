@@ -25,7 +25,7 @@ export function Stamp({ imageUri, size = 260, muted = false }: Props) {
             },
           ]}
         >
-          <Image source={{ uri: imageUri }} style={styles.image} />
+          <Image key={imageUri} source={{ uri: imageUri }} style={styles.image} />
         </View>
       </View>
     );
