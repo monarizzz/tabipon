@@ -1,3 +1,5 @@
+import math
+import random
 from enum import Enum
 
 import cv2
@@ -159,13 +161,20 @@ def _draw_wave_circle(
 
 def apply_scratch(image: np.ndarray, scratch_level: float) -> np.ndarray:
     h, w = image.shape[:2]
-    noise = np.random.normal(0, 1, (h, w)).astype(np.float32)
-    noise = cv2.GaussianBlur(noise, (15, 15), 0)
-    noise = (noise - noise.min()) / (noise.max() - noise.min())
-    threshold = 1.0 - scratch_level * 0.65
-    scratch_mask = noise > threshold
+    mask = np.zeros((h, w), dtype=np.float32)
+    num_lines = max(1, int(scratch_level * 18))
+    for _ in range(num_lines):
+        x1 = random.randint(-w // 4, w)
+        y1 = random.randint(0, h)
+        angle = random.uniform(-0.25, 0.25)  # ほぼ水平な線
+        length = random.randint(w // 3, w)
+        thickness = random.randint(2, max(3, int(scratch_level * 18)))
+        x2 = int(x1 + length * math.cos(angle))
+        y2 = int(y1 + length * math.sin(angle))
+        cv2.line(mask, (x1, y1), (x2, y2), 1.0, thickness)
+    mask = cv2.GaussianBlur(mask, (5, 5), 0)
     result = image.copy()
-    result[scratch_mask] = [255, 255, 255]
+    result[mask > 0.3] = [255, 255, 255]
     return result
 
 
