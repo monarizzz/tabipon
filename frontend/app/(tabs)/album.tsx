@@ -51,10 +51,11 @@ export default function AlbumScreen() {
   const [collectionName, setCollectionName] = React.useState("");
   const [stamps, setStamps] = React.useState<StampGridItem[] | null>(null);
   const [loadFailed, setLoadFailed] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
 
   const loadStamps = React.useCallback(() => {
     setLoadFailed(false);
-    fetchStamps()
+    return fetchStamps()
       .then((items) => {
         // サーバー側で削除が反映済みのIDは除外リストから掃除する
         reconcileDeletedStamps(items.map((item) => item.id));
@@ -63,6 +64,12 @@ export default function AlbumScreen() {
       })
       .catch(() => setLoadFailed(true));
   }, []);
+
+  // 一覧を下に引っ張ったときの再読み込み
+  const handleRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    loadStamps().finally(() => setRefreshing(false));
+  }, [loadStamps]);
 
   // スタンプ獲得直後にタブへ戻ったときも最新化する
   useFocusEffect(
@@ -95,6 +102,8 @@ export default function AlbumScreen() {
       ) : (
         <StampGrid
           stamps={stamps}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
           onPressStamp={(item) =>
             router.push({
               pathname: "/album-stamp-detail",
