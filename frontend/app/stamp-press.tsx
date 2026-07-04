@@ -75,6 +75,7 @@ export default function StampPressScreen() {
   const stampLiftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const stampDownPeakRef = React.useRef(0);
   const currentRotationAlphaRef = React.useRef(0);
+  const referenceAlphaRef = React.useRef<number | null>(null);
   const [previewImages, setPreviewImages] = React.useState<{ low: string; mid: string; high: string } | null>(null);
   const previewImagesRef = React.useRef<{ low: string; mid: string; high: string } | null>(null);
   const [previewLoading, setPreviewLoading] = React.useState(false);
@@ -182,9 +183,11 @@ export default function StampPressScreen() {
     DeviceMotion.setUpdateInterval(50);
     const subscription = DeviceMotion.addListener(({ acceleration, rotation }) => {
       if (rotation?.alpha != null) {
-        currentRotationAlphaRef.current = rotation.alpha;
+        if (referenceAlphaRef.current === null) referenceAlphaRef.current = rotation.alpha;
+        const relativeAlpha = rotation.alpha - referenceAlphaRef.current;
+        currentRotationAlphaRef.current = relativeAlpha;
         // -180〜180度に正規化してプレビューをリアルタイム回転
-        let deg = rotation.alpha * (180 / Math.PI);
+        let deg = relativeAlpha * (180 / Math.PI);
         if (deg > 180) deg -= 360;
         if (deg < -180) deg += 360;
         stampRotation.value = deg;
