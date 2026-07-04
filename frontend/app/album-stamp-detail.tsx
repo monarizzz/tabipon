@@ -12,6 +12,7 @@ import { CommonButton } from "@/src/components/common/CommonButton/CommonButton"
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
 import { Trash2 } from "lucide-react-native";
 import { deleteStamp } from "@/src/api/stamps";
+import { markStampDeleted } from "@/src/api/deletedStamps";
 import { colors, radii, spacing } from "@/src/theme/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
@@ -84,6 +85,8 @@ export default function StampDetailScreen() {
   const handleConfirmDelete = () => {
     setDeleteDialogVisible(false);
     if (id) {
+      // アルバム側で即座に一覧から除外し、削除反映前のリフェッチで再表示されるのを防ぐ
+      markStampDeleted(id);
       // 削除はバックグラウンドで実行し、結果を待たずにアルバムへ戻る
       deleteStamp(id).catch((error) => {
         console.error("[stamp-detail] failed to delete stamp", error);
