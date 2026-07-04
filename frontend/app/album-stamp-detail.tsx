@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Share } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
+import { DesignChangePanel } from "@/src/components/features/album/stamp-rally/DesignChangePanel/DesignChangePanel";
 import {
   FRAME_STYLE_OPTIONS,
   STAMP_COLOR_OPTIONS,
@@ -39,7 +39,7 @@ export default function StampDetailScreen() {
     imageUri?: string;
     date?: string;
   }>();
-  const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
+  const [designMode, setDesignMode] = React.useState(false);
   const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
   );
@@ -118,7 +118,7 @@ export default function StampDetailScreen() {
       <StampDetailMediaPager
         spotName={spotName}
         imageUri={imageUri || undefined}
-        onPressDesignChange={() => setDesignSheetVisible(true)}
+        onPressDesignChange={() => setDesignMode(true)}
         onPressSpotName={openSpotNameEditor}
         latitude={0}
         longitude={0}
@@ -149,19 +149,22 @@ export default function StampDetailScreen() {
         onCancel={() => setDeleteDialogVisible(false)}
         onConfirm={handleConfirmDelete}
       />
-      <DesignChangeSheet
-        visible={designSheetVisible}
-        onClose={() => setDesignSheetVisible(false)}
-        frameStyles={FRAME_STYLE_OPTIONS}
-        selectedFrameStyleId={selectedFrameStyleId}
-        onSelectFrameStyle={setSelectedFrameStyleId}
-        colorOptions={STAMP_COLOR_OPTIONS}
-        selectedColor={selectedColor}
-        onSelectColor={setSelectedColor}
-        showLandmarkName={showLandmarkName}
-        onToggleShowLandmarkName={setShowLandmarkName}
-        onConfirm={() => setDesignSheetVisible(false)}
-      />
+      {designMode && (
+        <DesignChangePanel
+          onBack={() => setDesignMode(false)}
+          onShare={handleShare}
+          imageUri={imageUri || undefined}
+          frameStyles={FRAME_STYLE_OPTIONS}
+          selectedFrameStyleId={selectedFrameStyleId}
+          onSelectFrameStyle={setSelectedFrameStyleId}
+          colorOptions={STAMP_COLOR_OPTIONS}
+          selectedColor={selectedColor}
+          onSelectColor={setSelectedColor}
+          showLandmarkName={showLandmarkName}
+          onToggleShowLandmarkName={setShowLandmarkName}
+          onConfirm={() => setDesignMode(false)}
+        />
+      )}
       <EditFieldSheet
         visible={editingField === "spotName"}
         onClose={closeEditor}
