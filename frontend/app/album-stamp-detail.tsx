@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
 import {
@@ -29,6 +29,11 @@ type EditingField = "spotName" | "date" | "location" | "memo" | null;
 export default function StampDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { imageUri, date: paramDate } = useLocalSearchParams<{
+    id?: string;
+    imageUri?: string;
+    date?: string;
+  }>();
   const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
   const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
@@ -39,7 +44,7 @@ export default function StampDetailScreen() {
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
   const [spotName, setSpotName] = React.useState("東京スカイツリー");
-  const [date, setDate] = React.useState("2026.06.28");
+  const [date, setDate] = React.useState(paramDate || "2026.06.28");
   const [location, setLocation] = React.useState("東京・墨田区");
   const [memo, setMemo] = React.useState(
     "晴れた日に行ってきた！展望台からの眺めが最高だった。",
@@ -85,6 +90,7 @@ export default function StampDetailScreen() {
       </View>
       <StampDetailMediaPager
         spotName={spotName}
+        imageUri={imageUri || undefined}
         onPressDesignChange={() => setDesignSheetVisible(true)}
         onPressSpotName={openSpotNameEditor}
         latitude={35.7100627}
