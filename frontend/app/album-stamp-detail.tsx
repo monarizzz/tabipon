@@ -158,6 +158,7 @@ export default function StampDetailScreen() {
         title="スタンプを削除しますか?"
         message="削除したスタンプは元に戻せません。"
         confirmLabel={deleting ? "削除中..." : "削除する"}
+        destructive
         onCancel={() => {
           if (!deleting) setDeleteDialogVisible(false);
         }}
