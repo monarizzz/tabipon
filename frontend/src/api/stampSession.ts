@@ -20,13 +20,23 @@ type StampSession = {
 };
 
 let session: StampSession | null = null;
+let chosenPreviewUri: string | null = null;
 
 export function getSession(): StampSession | null {
   return session;
 }
 
+export function setChosenPreviewUri(uri: string | null): void {
+  chosenPreviewUri = uri;
+}
+
+export function getChosenPreviewUri(): string | null {
+  return chosenPreviewUri;
+}
+
 export function clearSession(): void {
   session = null;
+  chosenPreviewUri = null;
 }
 
 export function startUpload(photoUri: string, color: StampColor): void {

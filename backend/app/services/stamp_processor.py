@@ -32,9 +32,12 @@ def process_stamp_image(
     image_bytes: bytes,
     color: StampColor = StampColor.red,
     frame: StampFrame = StampFrame.classic,
+    scratch_level: float = 0.0,
 ) -> bytes:
     decoded_image = decode_image(image_bytes)
     stamp_image = create_stamp_image(decoded_image, STAMP_COLORS[color], frame)
+    if scratch_level > 0:
+        stamp_image = apply_scratch(stamp_image, scratch_level)
     return encode_png(stamp_image)
 
 
@@ -127,6 +130,18 @@ def _draw_dashed_circle(
         start_angle = i * 360 / dash_count
         end_angle = (i + 1) * 360 / dash_count
         cv2.ellipse(image, center, (radius, radius), 0, start_angle, end_angle, color, thickness)
+
+
+def apply_scratch(image: np.ndarray, scratch_level: float) -> np.ndarray:
+    h, w = image.shape[:2]
+    noise = np.random.normal(0, 1, (h, w)).astype(np.float32)
+    noise = cv2.GaussianBlur(noise, (15, 15), 0)
+    noise = (noise - noise.min()) / (noise.max() - noise.min())
+    threshold = 1.0 - scratch_level * 0.5
+    scratch_mask = noise > threshold
+    result = image.copy()
+    result[scratch_mask] = [255, 255, 255]
+    return result
 
 
 def encode_png(image: np.ndarray) -> bytes:

@@ -1,3 +1,4 @@
+import base64
 import logging
 from typing import Annotated, NoReturn
 
@@ -44,6 +45,20 @@ async def create_stamp_image_endpoint(
         "id": stamp["id"],
         "image_url": stamp["image_url"],
     }
+
+
+@router.post("/stamp-image/preview")
+async def preview_stamp_image_endpoint(
+    image: Annotated[UploadFile, File()],
+    color: StampColor = StampColor.red,
+    frame: StampFrame = StampFrame.classic,
+    scratch_level: float = 0.0,
+):
+    image_bytes = await image.read()
+    validate_upload(image, image_bytes)
+    validate_image_data(image_bytes)
+    png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level)
+    return {"image_base64": base64.b64encode(png_bytes).decode()}
 
 
 @router.put("/stamp-image/{stamp_id}")

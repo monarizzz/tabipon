@@ -56,3 +56,19 @@ export function updateStampImage(
 export function fetchStamps(): Promise<StampListItem[]> {
   return request<StampListItem[]>("/stamps");
 }
+
+export async function previewStampImage(
+  photoUri: string,
+  color: StampColor,
+  scratchLevel: number,
+): Promise<string> {
+  const formData = new FormData();
+  formData.append("image", { uri: photoUri, name: "photo.jpg", type: "image/jpeg" } as unknown as Blob);
+  formData.append("color", color);
+  formData.append("scratch_level", String(scratchLevel));
+  const { image_base64 } = await request<{ image_base64: string }>("/stamp-image/preview", {
+    method: "POST",
+    body: formData,
+  });
+  return `data:image/png;base64,${image_base64}`;
+}
