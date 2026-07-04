@@ -2,18 +2,14 @@ from typing import Annotated, NoReturn
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
-from app.clients.vision_client import Landmark
 from app.core.config import ALLOWED_CONTENT_TYPES, MAX_IMAGE_BYTES
 from app.repositories.stamp_repository import (
     StampRepositoryError,
     create_stamp,
-    find_or_create_spot,
+    delete_stamp_image_by_url,
+    get_stamp,
+    update_stamp_image_url,
     upload_stamp_image,
-)
-from app.services.landmark_detector import (
-    LandmarkDetectionServiceError,
-    LandmarkNotFoundError,
-    detect_primary_landmark,
 )
 from app.services.stamp_processor import StampColor, decode_image, process_stamp_image
 
@@ -28,23 +24,63 @@ async def create_stamp_image_endpoint(
     image_bytes = await image.read()
     validate_upload(image, image_bytes)
     validate_image_data(image_bytes)
-    landmark = detect_landmark(image_bytes)
 
     png_bytes = process_stamp_image(image_bytes, color)
-    stamp = save_stamp(landmark, png_bytes)
+    stamp = save_stamp(png_bytes)
 
     return {
         "id": stamp["id"],
-        "landmark_name": landmark.name,
         "image_url": stamp["image_url"],
     }
 
 
-def save_stamp(landmark: Landmark, png_bytes: bytes) -> dict:
+@router.put("/stamp-image/{stamp_id}")
+async def update_stamp_image_endpoint(
+    stamp_id: str,  # stamps.id は uuid
+    image: Annotated[UploadFile, File()],
+    color: StampColor = StampColor.red,
+):
+    image_bytes = await image.read()
+    validate_upload(image, image_bytes)
+    validate_image_data(image_bytes)
+
+    stamp = find_stamp(stamp_id)
+
+    png_bytes = process_stamp_image(image_bytes, color)
+    updated = replace_stamp_image(stamp, png_bytes)
+
+    return {
+        "id": updated["id"],
+        "image_url": updated["image_url"],
+    }
+
+
+def find_stamp(stamp_id: str) -> dict:
+    try:
+        stamp = get_stamp(stamp_id)
+    except StampRepositoryError as error:
+        raise HTTPException(status_code=500, detail="Failed to get stamp") from error
+
+    if stamp is None:
+        raise HTTPException(status_code=404, detail="Stamp not found")
+    return stamp
+
+
+def replace_stamp_image(stamp: dict, png_bytes: bytes) -> dict:
+    try:
+        new_image_url = upload_stamp_image(png_bytes)
+        updated = update_stamp_image_url(stamp["id"], new_image_url)
+    except StampRepositoryError as error:
+        raise HTTPException(status_code=500, detail="Failed to update stamp") from error
+
+    delete_stamp_image_by_url(stamp["image_url"])
+    return updated
+
+
+def save_stamp(png_bytes: bytes) -> dict:
     try:
         image_url = upload_stamp_image(png_bytes)
-        spot_id = find_or_create_spot(landmark.name, landmark.latitude, landmark.longitude)
-        return create_stamp(spot_id, image_url)
+        return create_stamp(image_url)
     except StampRepositoryError as error:
         raise HTTPException(status_code=500, detail="Failed to save stamp") from error
 
@@ -74,12 +110,3 @@ def raise_bad_request(detail: str) -> NoReturn:
 
 def validate_image_data(image_bytes: bytes) -> None:
     decode_image(image_bytes)
-
-
-def detect_landmark(image_bytes: bytes) -> Landmark:
-    try:
-        return detect_primary_landmark(image_bytes)
-    except LandmarkNotFoundError:
-        raise_bad_request("No landmark found")
-    except LandmarkDetectionServiceError as error:
-        raise HTTPException(status_code=500, detail="Failed to detect landmark") from error

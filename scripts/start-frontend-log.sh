@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LOG_DIR="$ROOT_DIR/log"
+
+mkdir -p "$LOG_DIR"
+
+cd "$ROOT_DIR/frontend"
+script -q "$LOG_DIR/frontend.log" npx expo start --tunnel

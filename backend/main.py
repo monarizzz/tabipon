@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import health, stamp_image
+from app.api.routes import health, stamp_image, stamps
 from app.core.config import load_env_file
 
 load_env_file()
@@ -18,3 +18,4 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(stamp_image.router)
+app.include_router(stamps.router)

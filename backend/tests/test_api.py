@@ -15,13 +15,8 @@ if str(BACKEND_DIR) not in sys.path:
 os.environ.setdefault("SUPABASE_URL", "https://test.supabase.co")
 os.environ.setdefault("SUPABASE_KEY", "test-key")
 
-from app.clients.vision_client import Landmark  # noqa: E402
 from app.core.config import MAX_IMAGE_BYTES  # noqa: E402
 from app.repositories.stamp_repository import StampRepositoryError  # noqa: E402
-from app.services.landmark_detector import (  # noqa: E402
-    LandmarkDetectionServiceError,
-    LandmarkNotFoundError,
-)
 from main import app  # noqa: E402
 
 
@@ -47,31 +42,20 @@ class HealthApiTest(unittest.TestCase):
         self.assertEqual(response.json(), {"status": "ok"})
 
 
-TEST_LANDMARK = Landmark(
-    name="Tokyo Tower",
-    score=0.98,
-    latitude=35.6586,
-    longitude=139.7454,
-)
 TEST_IMAGE_URL = "https://test.supabase.co/storage/v1/object/public/stamps/test.png"
+TEST_STAMP_ID = "11111111-1111-1111-1111-111111111111"
 
 
 class StampImageApiTest(unittest.TestCase):
     @patch("app.api.routes.stamp_image.create_stamp")
-    @patch("app.api.routes.stamp_image.find_or_create_spot")
     @patch("app.api.routes.stamp_image.upload_stamp_image")
-    @patch("app.api.routes.stamp_image.detect_primary_landmark")
     def test_stamp_image_saves_stamp_and_returns_json(
         self,
-        detect_landmark,
         upload_stamp_image,
-        find_or_create_spot,
         create_stamp,
     ):
-        detect_landmark.return_value = TEST_LANDMARK
         upload_stamp_image.return_value = TEST_IMAGE_URL
-        find_or_create_spot.return_value = 1
-        create_stamp.return_value = {"id": 10, "image_url": TEST_IMAGE_URL}
+        create_stamp.return_value = {"id": TEST_STAMP_ID, "image_url": TEST_IMAGE_URL}
         image_bytes = create_jpeg_bytes()
 
         response = client.post(
@@ -83,22 +67,17 @@ class StampImageApiTest(unittest.TestCase):
         self.assertEqual(
             response.json(),
             {
-                "id": 10,
-                "landmark_name": "Tokyo Tower",
+                "id": TEST_STAMP_ID,
                 "image_url": TEST_IMAGE_URL,
             },
         )
-        find_or_create_spot.assert_called_once_with("Tokyo Tower", 35.6586, 139.7454)
-        create_stamp.assert_called_once_with(1, TEST_IMAGE_URL)
+        create_stamp.assert_called_once_with(TEST_IMAGE_URL)
 
     @patch("app.api.routes.stamp_image.upload_stamp_image")
-    @patch("app.api.routes.stamp_image.detect_primary_landmark")
     def test_stamp_image_returns_server_error_when_save_fails(
         self,
-        detect_landmark,
         upload_stamp_image,
     ):
-        detect_landmark.return_value = TEST_LANDMARK
         upload_stamp_image.side_effect = StampRepositoryError("upload failed")
         image_bytes = create_jpeg_bytes()
 
@@ -109,37 +88,6 @@ class StampImageApiTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json(), {"detail": "Failed to save stamp"})
-
-    @patch("app.api.routes.stamp_image.detect_primary_landmark")
-    def test_stamp_image_rejects_image_without_landmark(self, detect_landmark):
-        detect_landmark.side_effect = LandmarkNotFoundError("No landmark found")
-        image_bytes = create_jpeg_bytes()
-
-        response = client.post(
-            "/stamp-image",
-            files={"image": ("test.jpg", image_bytes, "image/jpeg")},
-        )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json(), {"detail": "No landmark found"})
-
-    @patch("app.api.routes.stamp_image.detect_primary_landmark")
-    def test_stamp_image_returns_server_error_when_landmark_detection_fails(
-        self,
-        detect_landmark,
-    ):
-        detect_landmark.side_effect = LandmarkDetectionServiceError(
-            "Failed to detect landmark",
-        )
-        image_bytes = create_jpeg_bytes()
-
-        response = client.post(
-            "/stamp-image",
-            files={"image": ("test.jpg", image_bytes, "image/jpeg")},
-        )
-
-        self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json(), {"detail": "Failed to detect landmark"})
 
     def test_stamp_image_rejects_empty_file(self):
         response = client.post(
@@ -182,6 +130,123 @@ class StampImageApiTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"detail": "Image is too large"})
+
+
+NEW_IMAGE_URL = "https://test.supabase.co/storage/v1/object/public/stamps/new.png"
+
+
+class StampImageUpdateApiTest(unittest.TestCase):
+    @patch("app.api.routes.stamp_image.delete_stamp_image_by_url")
+    @patch("app.api.routes.stamp_image.update_stamp_image_url")
+    @patch("app.api.routes.stamp_image.upload_stamp_image")
+    @patch("app.api.routes.stamp_image.get_stamp")
+    def test_update_stamp_image_replaces_image(
+        self,
+        get_stamp,
+        upload_stamp_image,
+        update_stamp_image_url,
+        delete_stamp_image_by_url,
+    ):
+        get_stamp.return_value = {"id": TEST_STAMP_ID, "image_url": TEST_IMAGE_URL}
+        upload_stamp_image.return_value = NEW_IMAGE_URL
+        update_stamp_image_url.return_value = {"id": TEST_STAMP_ID, "image_url": NEW_IMAGE_URL}
+        image_bytes = create_jpeg_bytes()
+
+        response = client.put(
+            f"/stamp-image/{TEST_STAMP_ID}",
+            files={"image": ("test.jpg", image_bytes, "image/jpeg")},
+            data={"color": "blue"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"id": TEST_STAMP_ID, "image_url": NEW_IMAGE_URL})
+        update_stamp_image_url.assert_called_once_with(TEST_STAMP_ID, NEW_IMAGE_URL)
+        delete_stamp_image_by_url.assert_called_once_with(TEST_IMAGE_URL)
+
+    @patch("app.api.routes.stamp_image.get_stamp")
+    def test_update_stamp_image_returns_not_found_for_missing_stamp(self, get_stamp):
+        get_stamp.return_value = None
+        image_bytes = create_jpeg_bytes()
+
+        response = client.put(
+            "/stamp-image/999",
+            files={"image": ("test.jpg", image_bytes, "image/jpeg")},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"detail": "Stamp not found"})
+
+    def test_update_stamp_image_rejects_empty_file(self):
+        response = client.put(
+            f"/stamp-image/{TEST_STAMP_ID}",
+            files={"image": ("empty.jpg", b"", "image/jpeg")},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"detail": "Image is empty"})
+
+    @patch("app.api.routes.stamp_image.upload_stamp_image")
+    @patch("app.api.routes.stamp_image.get_stamp")
+    def test_update_stamp_image_returns_server_error_when_upload_fails(
+        self,
+        get_stamp,
+        upload_stamp_image,
+    ):
+        get_stamp.return_value = {"id": TEST_STAMP_ID, "image_url": TEST_IMAGE_URL}
+        upload_stamp_image.side_effect = StampRepositoryError("upload failed")
+        image_bytes = create_jpeg_bytes()
+
+        response = client.put(
+            f"/stamp-image/{TEST_STAMP_ID}",
+            files={"image": ("test.jpg", image_bytes, "image/jpeg")},
+        )
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json(), {"detail": "Failed to update stamp"})
+
+
+class StampsApiTest(unittest.TestCase):
+    @patch("app.api.routes.stamps.list_stamps")
+    def test_stamps_returns_items(self, list_stamps):
+        list_stamps.return_value = [
+            {
+                "id": TEST_STAMP_ID,
+                "image_url": TEST_IMAGE_URL,
+                "acquired_at": "2026-07-04T00:00:00+00:00",
+            },
+        ]
+
+        response = client.get("/stamps")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            [
+                {
+                    "id": TEST_STAMP_ID,
+                    "image_url": TEST_IMAGE_URL,
+                    "acquired_at": "2026-07-04T00:00:00+00:00",
+                },
+            ],
+        )
+
+    @patch("app.api.routes.stamps.list_stamps")
+    def test_stamps_returns_empty_list(self, list_stamps):
+        list_stamps.return_value = []
+
+        response = client.get("/stamps")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+    @patch("app.api.routes.stamps.list_stamps")
+    def test_stamps_returns_server_error_when_repository_fails(self, list_stamps):
+        list_stamps.side_effect = StampRepositoryError("query failed")
+
+        response = client.get("/stamps")
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json(), {"detail": "Failed to list stamps"})
 
 
 if __name__ == "__main__":

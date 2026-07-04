@@ -1,6 +1,13 @@
 import React from "react";
-import { View, Text, Pressable, StyleSheet, Vibration } from "react-native";
-import { useRouter, type Href } from "expo-router";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Vibration,
+  ActivityIndicator,
+} from "react-native";
+import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
 import Animated, {
   useSharedValue,
@@ -21,13 +28,22 @@ import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
 import {
+  API_COLOR_BY_HEX,
   FRAME_STYLE_OPTIONS,
   STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+import { type StampCreateResponse } from "@/src/api/stamps";
+import {
+  changeColor,
+  getSession,
+  retryUpload,
+  waitForResult,
+} from "@/src/api/stampSession";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export default function StampPressScreen() {
   const router = useRouter();
+  const { uri } = useLocalSearchParams<{ uri?: string }>();
   const [helpVisible, setHelpVisible] = React.useState(false);
   const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
@@ -36,6 +52,9 @@ export default function StampPressScreen() {
   );
   const [selectedColor, setSelectedColor] = React.useState(STAMP_COLOR_OPTIONS[0]);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
+  const [stampResult, setStampResult] = React.useState<StampCreateResponse | null>(null);
+  const [uploadFailed, setUploadFailed] = React.useState(false);
+  const [waiting, setWaiting] = React.useState(false);
   const longPressTriggeredRef = React.useRef(false);
   const stampScale = useSharedValue(1);
   const stampWrapRef = React.useRef<View>(null);
@@ -44,10 +63,53 @@ export default function StampPressScreen() {
     transform: [{ scale: stampScale.value }],
   }));
 
+  // 送信結果を購読し、長押し前でもエラーを先出しする(色変更でチェーンが
+  // 差し替わった後の結果は無視して、常に最新のものだけ反映する)
+  const watchSession = React.useCallback(() => {
+    const session = getSession();
+    if (!session) return;
+    const watched = session.promise;
+    watched.then(
+      (created) => {
+        if (getSession()?.promise !== watched) return;
+        setStampResult(created);
+        setUploadFailed(false);
+      },
+      () => {
+        if (getSession()?.promise !== watched) return;
+        setUploadFailed(true);
+      },
+    );
+  }, []);
+
+  React.useEffect(() => {
+    watchSession();
+  }, [watchSession]);
+
   const goToStampDone = React.useCallback(() => {
     // 次の画面(animation: 'none')でも同じ画面座標にスタンプが来るよう、押した位置を引き継ぐ
-    stampWrapRef.current?.measureInWindow((_x, y) => {
-      router.push({ pathname: "/stamp-done", params: { stampTop: String(Math.round(y)) } });
+    stampWrapRef.current?.measureInWindow(async (_x, y) => {
+      const baseParams = { stampTop: String(Math.round(y)) };
+      if (!getSession()) {
+        router.push({ pathname: "/stamp-done", params: baseParams });
+        return;
+      }
+      setWaiting(true);
+      try {
+        const created = await waitForResult();
+        router.push({
+          pathname: "/stamp-done",
+          params: {
+            ...baseParams,
+            stampId: created.id,
+            imageUrl: created.image_url,
+          },
+        });
+      } catch {
+        setUploadFailed(true);
+      } finally {
+        setWaiting(false);
+      }
     });
   }, [router]);
 
@@ -109,7 +171,7 @@ export default function StampPressScreen() {
           onPressOut={handleStampPressOut}
         >
           <Animated.View style={stampAnimatedStyle}>
-            <Stamp />
+            <Stamp imageUri={stampResult?.image_url ?? uri} />
           </Animated.View>
         </Pressable>
         <Text style={styles.hint}>スマホを上下に振ってスタンプ！</Text>
@@ -157,7 +219,11 @@ export default function StampPressScreen() {
         onSelectColor={setSelectedColor}
         showLandmarkName={showLandmarkName}
         onToggleShowLandmarkName={setShowLandmarkName}
-        onConfirm={() => setDesignSheetVisible(false)}
+        onConfirm={() => {
+          setDesignSheetVisible(false);
+          changeColor(API_COLOR_BY_HEX[selectedColor] ?? "red");
+          watchSession();
+        }}
       />
       <CommonDialog
         visible={pendingTab !== null}
@@ -170,6 +236,24 @@ export default function StampPressScreen() {
           setPendingTab(null);
         }}
       />
+      <CommonDialog
+        visible={uploadFailed}
+        title="送信に失敗しました"
+        message="通信環境を確認して、もう一度お試しください。"
+        confirmLabel="再試行"
+        onCancel={() => setUploadFailed(false)}
+        onConfirm={() => {
+          setUploadFailed(false);
+          retryUpload();
+          watchSession();
+        }}
+      />
+      {waiting && (
+        <View style={styles.waitingOverlay}>
+          <ActivityIndicator size="large" color={colors.white} />
+          <Text style={styles.waitingText}>スタンプを作成中…</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -192,5 +276,16 @@ const styles = StyleSheet.create({
   helpIcon: {
     fontSize: 14,
     color: colors.textMuted,
+  },
+  waitingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.cropDimOverlay,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.l,
+  },
+  waitingText: {
+    fontSize: typography.body.fontSize,
+    color: colors.white,
   },
 });
