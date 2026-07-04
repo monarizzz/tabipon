@@ -1725,17 +1725,20 @@
       "rotation": 0.02795193027627905,
       "clip": true,
       "width": 390,
+      "height": "fit_content(825)",
       "fill": "$wf-bg",
       "stroke": "$wf-border",
       "strokeWidth": 1,
-      "layout": "vertical",
+      "layout": "none",
       "children": [
         {
           "type": "frame",
           "id": "EBWkX",
+          "x": 0,
+          "y": 0,
           "name": "Album Header",
           "reusable": true,
-          "width": "fill_container",
+          "width": "fill_container(390)",
           "height": 106,
           "layout": "vertical",
           "gap": 4,
@@ -1782,20 +1785,18 @@
         {
           "type": "frame",
           "id": "hbMph",
+          "x": 0,
+          "y": 106,
           "name": "Filters",
-          "width": "fill_container",
-          "gap": 8,
-          "padding": [
-            0,
-            20,
-            12,
-            20
-          ],
-          "alignItems": "center",
+          "width": "fill_container(390)",
+          "height": "fit_content(77)",
+          "layout": "none",
           "children": [
             {
               "type": "frame",
               "id": "sFEhz",
+              "x": 20,
+              "y": 0,
               "name": "Filter すべて",
               "width": 65,
               "height": 65,
@@ -1827,6 +1828,8 @@
             {
               "type": "frame",
               "id": "Ktg4g",
+              "x": 93,
+              "y": 0,
               "name": "Filter すべて",
               "width": 65,
               "height": 65,
@@ -1856,6 +1859,8 @@
             {
               "type": "frame",
               "id": "T4t8wa",
+              "x": 166,
+              "y": 3.5236570605778894e-18,
               "name": "Filter すべて",
               "rotation": 3.1060104311167156e-18,
               "width": 65,
@@ -1886,6 +1891,8 @@
             {
               "type": "frame",
               "id": "vN8ee",
+              "x": 239,
+              "y": 7.047314121155779e-18,
               "name": "Filter すべて",
               "rotation": 6.212020862233431e-18,
               "width": 65,
@@ -1916,6 +1923,8 @@
             {
               "type": "frame",
               "id": "rZOp6",
+              "x": 312,
+              "y": 3.5236570605778894e-18,
               "name": "Filter すべて",
               "rotation": 3.1060104311167156e-18,
               "width": 65,
@@ -1946,8 +1955,10 @@
         {
           "type": "frame",
           "id": "r0DA3",
+          "x": 0,
+          "y": 183,
           "name": "Stamp Grid",
-          "width": "fill_container",
+          "width": "fill_container(390)",
           "height": 501,
           "layout": "none",
           "children": [
@@ -2068,10 +2079,42 @@
         },
         {
           "type": "frame",
+          "id": "n7qa44",
+          "x": 304.6801816590705,
+          "y": 655.7467504769306,
+          "name": "Filter すべて",
+          "rotation": 6.212020862233431e-18,
+          "width": 65,
+          "height": 65,
+          "fill": "$wf-text",
+          "cornerRadius": 80,
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "N52XFh",
+              "x": 25,
+              "y": 18,
+              "name": "Label",
+              "fill": "$wf-placeholder",
+              "textGrowth": "fixed-width-height",
+              "width": 7,
+              "height": "fit_content(11)",
+              "content": "+",
+              "fontFamily": "$font",
+              "fontSize": 24,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
           "id": "Izhj9",
+          "x": 0,
+          "y": 749,
           "name": "Tab Bar",
           "reusable": true,
-          "width": "fill_container",
+          "width": "fill_container(390)",
           "height": 76,
           "fill": "$wf-surface",
           "stroke": "$wf-border",
@@ -3289,7 +3332,7 @@
               "type": "ref",
               "ref": "X5eIGO",
               "x": 64.9217150320498,
-              "y": 16.126841831026923,
+              "y": 16.12684183102692,
               "rotation": 0.027951930276279055,
               "flipX": false,
               "flipY": false,
@@ -3357,6 +3400,16 @@
                   ]
                 }
               ]
+            },
+            {
+              "type": "text",
+              "id": "BWwWd",
+              "name": "Spot Name",
+              "fill": "$wf-text",
+              "content": "東京スカイツリー",
+              "fontFamily": "$font",
+              "fontSize": 18,
+              "fontWeight": "700"
             }
           ]
         },
@@ -3399,18 +3452,6 @@
           "name": "固定情報",
           "x": 0,
           "y": 534
-        },
-        {
-          "type": "text",
-          "id": "BWwWd",
-          "x": 123,
-          "y": 479.30048814479846,
-          "name": "Spot Name",
-          "fill": "$wf-text",
-          "content": "東京スカイツリー",
-          "fontFamily": "$font",
-          "fontSize": 18,
-          "fontWeight": "700"
         }
       ]
     },
@@ -4809,10 +4850,9 @@
           "type": "frame",
           "id": "a9mvj",
           "x": 0,
-          "y": 164,
+          "y": 53,
           "name": "Stamp Section",
           "width": "fill_container(390)",
-          "height": 291,
           "layout": "vertical",
           "gap": 25,
           "padding": [
@@ -4829,7 +4869,7 @@
               "name": "Map View",
               "clip": true,
               "width": "fill_container",
-              "height": 220,
+              "height": 321,
               "fill": {
                 "type": "image",
                 "enabled": true,
@@ -4883,56 +4923,14 @@
               ]
             },
             {
-              "type": "group",
-              "id": "vXaNd",
-              "x": 105.98095254220854,
-              "y": 395.1268036319057,
-              "enabled": false,
-              "layout": "horizontal",
-              "gap": 25,
-              "justifyContent": "center",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "Ext5z",
-                  "name": "Design Change Btn",
-                  "rotation": 0.027951930276279055,
-                  "fill": "$wf-surface",
-                  "cornerRadius": 20,
-                  "stroke": "$wf-border",
-                  "strokeWidth": 1,
-                  "gap": 6,
-                  "padding": [
-                    10,
-                    20
-                  ],
-                  "justifyContent": "center",
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "icon",
-                      "id": "tZ9Pk",
-                      "name": "Brush Icon",
-                      "width": 14,
-                      "height": 14,
-                      "icon": "palette",
-                      "library": "lucide",
-                      "fill": "$wf-text-sub"
-                    },
-                    {
-                      "type": "text",
-                      "id": "ozmOz",
-                      "name": "Btn Label",
-                      "fill": "$wf-text-sub",
-                      "content": "デザインを変更する",
-                      "fontFamily": "$font",
-                      "fontSize": 13,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
+              "type": "text",
+              "id": "M6ySUd",
+              "name": "Spot Name",
+              "fill": "$wf-text",
+              "content": "東京スカイツリー",
+              "fontFamily": "$font",
+              "fontSize": 18,
+              "fontWeight": "700"
             }
           ]
         },
@@ -4975,18 +4973,6 @@
           "name": "固定情報",
           "x": 0,
           "y": 534
-        },
-        {
-          "type": "text",
-          "id": "M6ySUd",
-          "x": 123,
-          "y": 481,
-          "name": "Spot Name",
-          "fill": "$wf-text",
-          "content": "東京スカイツリー",
-          "fontFamily": "$font",
-          "fontSize": 18,
-          "fontWeight": "700"
         }
       ]
     },
