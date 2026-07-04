@@ -210,7 +210,7 @@ export default function StampPressScreen() {
         // 弱い押し付け(peak=-5) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
         const scratchLevel = Math.max(0, Math.min(1.0, (peak - (-75)) / ((-5) - (-75))));
         chosenScratchLevelRef.current = scratchLevel;
-        const tiltAngle = currentRotationAlphaRef.current;
+        const tiltAngle = currentRotationAlphaRef.current * (180 / Math.PI);
         applyScratch(scratchLevel, tiltAngle);
         const previews = previewImagesRef.current;
         if (previews) {
