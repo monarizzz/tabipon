@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Palette, Pencil } from "lucide-react-native";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
@@ -9,7 +9,6 @@ import { colors, typography, spacing } from "@/src/theme/tokens";
 type Props = {
   spotName: string;
   imageUri?: string;
-  loading?: boolean;
   onPressDesignChange: () => void;
   onPressSpotName?: () => void;
 };
@@ -17,21 +16,13 @@ type Props = {
 export function StampDetailPhoto({
   spotName,
   imageUri,
-  loading,
   onPressDesignChange,
   onPressSpotName,
 }: Props) {
   const { t } = useTranslation();
   return (
     <View style={styles.wrap}>
-      <View>
-        <Stamp imageUri={imageUri} />
-        {loading ? (
-          <View style={styles.loadingOverlay} pointerEvents="none">
-            <ActivityIndicator color={colors.primary} />
-          </View>
-        ) : null}
-      </View>
+      <Stamp imageUri={imageUri} />
       <CommonButton
         label={t("design.changeDesign")}
         onPress={onPressDesignChange}
@@ -62,11 +53,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xxl,
     paddingVertical: spacing.l,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: "center",
-    justifyContent: "center",
   },
   spotNameRow: {
     flexDirection: "row",

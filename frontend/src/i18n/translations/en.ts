@@ -92,6 +92,12 @@ export const en: Translations = {
     addPlace: "Add place",
     addMemo: "Add memo",
     addSpotName: "Add spot name",
+    designUnavailableTitle: "Can't change the design",
+    designUnavailableMessage:
+      "This stamp wasn't created on this device, so its design can't be changed.",
+    designUpdateFailedTitle: "Error",
+    designUpdateFailedMessage:
+      "Failed to change the design. Please wait a moment and try again.",
   },
   discardDialog: {
     title: "Discard your edits?",

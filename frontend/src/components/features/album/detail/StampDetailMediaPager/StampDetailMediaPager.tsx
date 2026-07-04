@@ -16,7 +16,6 @@ const PAGE_WIDTH = Dimensions.get("window").width;
 type Props = {
   spotName: string;
   imageUri?: string;
-  previewLoading?: boolean;
   onPressDesignChange: () => void;
   onPressSpotName?: () => void;
   latitude: number;
@@ -26,7 +25,6 @@ type Props = {
 export function StampDetailMediaPager({
   spotName,
   imageUri,
-  previewLoading,
   onPressDesignChange,
   onPressSpotName,
   latitude,
@@ -53,7 +51,6 @@ export function StampDetailMediaPager({
           <StampDetailPhoto
             spotName={spotName}
             imageUri={imageUri}
-            loading={previewLoading}
             onPressDesignChange={onPressDesignChange}
             onPressSpotName={onPressSpotName}
           />

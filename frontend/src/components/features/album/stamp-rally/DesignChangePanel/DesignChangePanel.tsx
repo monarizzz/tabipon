@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SelectableTile } from "@/src/components/common/SelectableTile/SelectableTile";
@@ -21,6 +22,7 @@ type Props = {
   onBack: () => void;
   onShare?: () => void;
   imageUri?: string;
+  loading?: boolean;
   frameStyles: FrameStyleOption[];
   selectedFrameStyleId: string;
   onSelectFrameStyle: (id: string) => void;
@@ -36,6 +38,7 @@ export function DesignChangePanel({
   onBack,
   onShare,
   imageUri,
+  loading,
   frameStyles,
   selectedFrameStyleId,
   onSelectFrameStyle,
@@ -68,6 +71,11 @@ export function DesignChangePanel({
       >
         <View style={styles.previewArea}>
           <Stamp imageUri={imageUri} />
+          {loading ? (
+            <View style={styles.loadingOverlay} pointerEvents="none">
+              <ActivityIndicator color={colors.primary} />
+            </View>
+          ) : null}
         </View>
 
         <View style={styles.section}>
@@ -157,6 +165,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: spacing.l,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
   },
   section: {
     gap: 12,
