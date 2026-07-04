@@ -4,6 +4,7 @@ import {
   TabBar,
   type TabBarIcon,
 } from "@/src/components/common/layout/TabBar/TabBar";
+import { colors } from "@/src/theme/tokens";
 
 const ICONS: Record<string, TabBarIcon> = {
   index: Camera,
@@ -25,6 +26,7 @@ export default function TabsLayout() {
               label: (options.title ?? route.name) as string,
               icon: ICONS[route.name] ?? Camera,
               active: isFocused,
+              activeColor: route.name === "mypage" ? colors.textPrimary : colors.primary,
               onPress: () => {
                 const event = navigation.emit({
                   type: "tabPress",

@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.l,
+    paddingVertical: 14,
     paddingHorizontal: spacing.l,
   },
   left: {

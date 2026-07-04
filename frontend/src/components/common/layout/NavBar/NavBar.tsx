@@ -19,10 +19,11 @@ export function NavBar({ title, onBack, backIcon, rightIcon, onRightPress }: Pro
         <TouchableOpacity style={styles.iconButton} onPress={onBack} activeOpacity={0.7}>
           {backIcon ?? <Text style={styles.iconGlyph}>‹</Text>}
         </TouchableOpacity>
-      ) : (
-        <View style={styles.iconButtonPlaceholder} />
-      )}
-      <Text style={styles.title} numberOfLines={1}>
+      ) : null}
+      <Text
+        style={[styles.title, !onBack && styles.titleLarge]}
+        numberOfLines={1}
+      >
         {title}
       </Text>
       {rightIcon ? (
@@ -53,6 +54,11 @@ const styles = StyleSheet.create({
     fontSize: typography.navTitle.fontSize,
     fontWeight: typography.navTitle.fontWeight,
     color: colors.textPrimary,
+  },
+  titleLarge: {
+    textAlign: 'left',
+    fontSize: typography.screenTitle.fontSize,
+    fontWeight: typography.screenTitle.fontWeight,
   },
   iconButton: {
     width: 32,
