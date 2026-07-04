@@ -92,6 +92,10 @@ export const zh: Translations = {
     addPlace: "添加地点",
     addMemo: "添加备注",
     addSpotName: "添加地点名称",
+    designUnavailableTitle: "无法更改设计",
+    designUnavailableMessage: "该印章不是在此设备上创建的，因此无法更改设计。",
+    designUpdateFailedTitle: "错误",
+    designUpdateFailedMessage: "更改设计失败。请稍后再试。",
   },
   discardDialog: {
     title: "要放弃编辑内容吗？",

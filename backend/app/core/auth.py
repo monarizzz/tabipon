@@ -3,7 +3,6 @@ import os
 import httpx
 from fastapi import Header, HTTPException
 from jose import JWTError, jwt
-from jose.backends import ECKey
 
 
 _jwks_cache: dict | None = None

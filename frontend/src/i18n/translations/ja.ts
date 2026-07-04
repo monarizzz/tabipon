@@ -91,6 +91,12 @@ export const ja = {
     addPlace: "場所を追加",
     addMemo: "メモを追加",
     addSpotName: "スポット名を追加",
+    designUnavailableTitle: "デザインを変更できません",
+    designUnavailableMessage:
+      "このスタンプはこの端末で作成されていないため、デザインを変更できません。",
+    designUpdateFailedTitle: "エラー",
+    designUpdateFailedMessage:
+      "デザインの変更に失敗しました。時間をおいて再度お試しください。",
   },
   discardDialog: {
     title: "編集内容を破棄しますか？",
