@@ -156,7 +156,7 @@ export default function StampPressScreen() {
         const relativeAlpha = rotation.alpha - referenceAlphaRef.current;
         currentRotationAlphaRef.current = relativeAlpha;
         // -180〜180度に正規化してプレビューをリアルタイム回転
-        let deg = relativeAlpha * (180 / Math.PI);
+        let deg = -(relativeAlpha * (180 / Math.PI));
         if (deg > 180) deg -= 360;
         if (deg < -180) deg += 360;
         stampRotation.value = deg;
@@ -190,7 +190,7 @@ export default function StampPressScreen() {
 
         // 弱い押し付け(peak=-5) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
         const scratchLevel = Math.max(0, Math.min(1.0, (peak - (-75)) / ((-5) - (-75))));
-        let tiltAngle = currentRotationAlphaRef.current * (180 / Math.PI);
+        let tiltAngle = -(currentRotationAlphaRef.current * (180 / Math.PI));
         if (tiltAngle > 180) tiltAngle -= 360;
         if (tiltAngle < -180) tiltAngle += 360;
         runOnJS(setStampPressed)(true);
