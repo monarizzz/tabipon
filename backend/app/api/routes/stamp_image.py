@@ -48,7 +48,7 @@ async def create_stamp_image_endpoint(
     validate_upload(image, image_bytes)
     validate_image_data(image_bytes)
 
-    png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level)
+    png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level, tilt_angle or 0.0)
     logger.info("stamp-image create processed png_bytes=%s", len(png_bytes))
     stamp = save_stamp(
         png_bytes,

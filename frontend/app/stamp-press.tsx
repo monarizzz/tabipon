@@ -78,6 +78,7 @@ export default function StampPressScreen() {
   const swingUpTimestampRef = React.useRef(0);
   const swingDownPeakRef = React.useRef(0);
   const chosenScratchLevelRef = React.useRef(0);
+  const currentTiltXRef = React.useRef(0);
 
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
@@ -176,7 +177,8 @@ export default function StampPressScreen() {
 
   React.useEffect(() => {
     Accelerometer.setUpdateInterval(100);
-    const subscription = Accelerometer.addListener(({ y }) => {
+    const subscription = Accelerometer.addListener(({ x, y }) => {
+      currentTiltXRef.current = x;
       if (shakeTriggeredRef.current) return;
       if (y > 1.5) {
         swingUpDetectedRef.current = true;
@@ -197,7 +199,8 @@ export default function StampPressScreen() {
         const elapsed = Date.now() - swingUpTimestampRef.current;
         const scratchLevel = peak < -6.0 ? 0.8 : peak < -4.0 ? 0.4 : 0.0;
         chosenScratchLevelRef.current = scratchLevel;
-        applyScratch(scratchLevel);
+        const tiltAngle = Math.asin(Math.max(-1, Math.min(1, currentTiltXRef.current))) * (180 / Math.PI);
+        applyScratch(scratchLevel, tiltAngle);
         const previews = previewImagesRef.current;
         if (previews) {
           setChosenPreviewUri(

@@ -34,11 +34,14 @@ def process_stamp_image(
     color: StampColor = StampColor.red,
     frame: StampFrame = StampFrame.classic,
     scratch_level: float = 0.0,
+    tilt_angle: float = 0.0,
 ) -> bytes:
     decoded_image = decode_image(image_bytes)
     stamp_image = create_stamp_image(decoded_image, STAMP_COLORS[color], frame)
     if scratch_level > 0:
         stamp_image = apply_scratch(stamp_image, scratch_level)
+    if abs(tilt_angle) > 1.0:
+        stamp_image = rotate_stamp(stamp_image, tilt_angle)
     return encode_png(stamp_image)
 
 
@@ -167,6 +170,13 @@ def apply_scratch(image: np.ndarray, scratch_level: float) -> np.ndarray:
     result = image.copy()
     result[scratch_mask] = [255, 255, 255]
     return result
+
+
+def rotate_stamp(image: np.ndarray, angle_deg: float) -> np.ndarray:
+    h, w = image.shape[:2]
+    center = (w // 2, h // 2)
+    M = cv2.getRotationMatrix2D(center, -angle_deg, 1.0)
+    return cv2.warpAffine(image, M, (w, h), borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
 
 
 def encode_png(image: np.ndarray) -> bytes:
