@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TextInput, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { colors, typography, radii, spacing } from "@/src/theme/tokens";
@@ -23,7 +24,7 @@ export function CollectionSheet({
     <BottomSheet visible={visible} onClose={onClose}>
       <Text style={styles.title}>コレクションを追加</Text>
       <Text style={styles.fieldLabel}>コレクション名</Text>
-      <TextInput
+      <BottomSheetTextInput
         style={styles.input}
         value={name}
         onChangeText={onChangeName}

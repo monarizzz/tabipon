@@ -4,40 +4,9 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { fn } from "storybook/test";
 
-import { DesignChangeSheet, type FrameStyleOption } from "./DesignChangeSheet";
+import { DesignChangeSheet } from "./DesignChangeSheet";
+import { FRAME_STYLE_OPTIONS, STAMP_COLOR_OPTIONS } from "./frameStyleOptions";
 import { colors } from "@/src/theme/tokens";
-
-const Thumb = ({ color = colors.textMuted }: { color?: string }) => (
-  <View
-    style={{
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      borderWidth: 2.5,
-      borderColor: color,
-    }}
-  />
-);
-
-const FRAME_STYLES: FrameStyleOption[] = [
-  {
-    id: "classic",
-    label: "クラシック",
-    preview: <Thumb color={colors.textMuted} />,
-  },
-  { id: "vintage", label: "ヴィンテージ", preview: <Thumb /> },
-  { id: "minimal", label: "ミニマル", preview: <Thumb /> },
-];
-
-const COLOR_OPTIONS = [
-  "#333333",
-  "#ff6b6b",
-  "#fcc06d",
-  "#6de8b9",
-  "#6bc1ff",
-  "#be91fa",
-  "#ff94dd",
-];
 
 const meta = {
   component: DesignChangeSheet,
@@ -50,8 +19,8 @@ const meta = {
   ],
   tags: ["autodocs"],
   args: {
-    frameStyles: FRAME_STYLES,
-    colorOptions: COLOR_OPTIONS,
+    frameStyles: FRAME_STYLE_OPTIONS,
+    colorOptions: STAMP_COLOR_OPTIONS,
     onSelectFrameStyle: fn(),
     onSelectColor: fn(),
     onToggleShowLandmarkName: fn(),

@@ -1,5 +1,4 @@
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
-import { colors } from '@/src/theme/tokens';
 
 type Props = {
   color: string;
@@ -10,7 +9,7 @@ type Props = {
 export function ColorSwatch({ color, selected = false, onPress }: Props) {
   return (
     <TouchableOpacity
-      style={[styles.wrap, selected && styles.selected]}
+      style={[styles.wrap, selected && { borderWidth: 2, borderColor: color }]}
       onPress={onPress}
       activeOpacity={0.8}
       disabled={!onPress}
@@ -27,10 +26,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  selected: {
-    borderWidth: 2,
-    borderColor: colors.selectedRing,
   },
   dot: {
     width: 30,

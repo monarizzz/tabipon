@@ -19,7 +19,9 @@ export function StampGrid({ stamps, onPressStamp }: Props) {
   if (stamps.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>まだスタンプがありません</Text>
+        <Text style={styles.emptyText}>
+          スタンプを集めるとここに表示されます!
+        </Text>
       </View>
     );
   }

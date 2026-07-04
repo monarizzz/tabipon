@@ -1,0 +1,100 @@
+import React from "react";
+import { Text, StyleSheet } from "react-native";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { colors, typography, radii, spacing } from "@/src/theme/tokens";
+
+type TextFieldProps = {
+  mode: "text";
+  value: string;
+  onChangeValue: (value: string) => void;
+  placeholder?: string;
+  multiline?: boolean;
+};
+
+type DateFieldProps = {
+  mode: "date";
+  value: Date;
+  onChangeValue: (value: Date) => void;
+};
+
+export type EditFieldSheetProps = {
+  visible: boolean;
+  onClose: () => void;
+  title: string;
+  onSave: () => void;
+} & (TextFieldProps | DateFieldProps);
+
+type Props = EditFieldSheetProps;
+
+export function EditFieldSheet({
+  visible,
+  onClose,
+  title,
+  onSave,
+  ...field
+}: Props) {
+  return (
+    <BottomSheet visible={visible} onClose={onClose}>
+      <Text style={styles.title}>{title}</Text>
+      {field.mode === "text" ? (
+        <BottomSheetTextInput
+          style={[styles.input, field.multiline && styles.inputMultiline]}
+          value={field.value}
+          onChangeText={field.onChangeValue}
+          placeholder={field.placeholder}
+          placeholderTextColor={colors.textPlaceholder}
+          multiline={field.multiline}
+          textAlignVertical={field.multiline ? "top" : "center"}
+          autoFocus
+        />
+      ) : (
+        <DateTimePicker
+          value={field.value}
+          mode="date"
+          display="spinner"
+          onChange={(_event, selectedDate) => {
+            if (selectedDate) {
+              field.onChangeValue(selectedDate);
+            }
+          }}
+          style={styles.datePicker}
+        />
+      )}
+      <CommonButton label="保存する" onPress={onSave} variant="primary" style={styles.saveButton} />
+    </BottomSheet>
+  );
+}
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize: typography.navTitle.fontSize,
+    fontWeight: typography.navTitle.fontWeight,
+    color: colors.textPrimary,
+    marginBottom: spacing.xl,
+  },
+  input: {
+    height: 52,
+    borderRadius: radii.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.l,
+    fontSize: typography.body.fontSize,
+    color: colors.textPrimary,
+    marginBottom: spacing.xl,
+  },
+  inputMultiline: {
+    height: 120,
+    paddingVertical: spacing.l,
+  },
+  datePicker: {
+    alignSelf: "center",
+    marginBottom: spacing.xl,
+  },
+  saveButton: {
+    alignSelf: "stretch",
+  },
+});

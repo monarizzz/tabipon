@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from "@storybook/react-native";
 import { View } from "react-native";
 import { fn } from "storybook/test";
 
-import { StampDetailPhoto } from "./StampDetailPhoto";
+import { StampDoneActions } from "./StampDoneActions";
 
 const meta = {
-  component: StampDetailPhoto,
+  component: StampDoneActions,
   decorators: [
     (Story) => (
       <View style={{ padding: 16 }}>
@@ -15,18 +15,15 @@ const meta = {
   ],
   tags: ["autodocs"],
   args: {
-    spotName: "東京スカイツリー",
-    onPressDesignChange: fn(),
-    onPressSpotName: fn(),
+    memo: "",
+    onChangeMemo: fn(),
+    onContinueShooting: fn(),
+    onGoToAlbum: fn(),
   },
-} satisfies Meta<typeof StampDetailPhoto>;
+} satisfies Meta<typeof StampDoneActions>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-
-export const WithPhoto: Story = {
-  args: { imageUri: "https://picsum.photos/seed/skytree/260/260" },
-};

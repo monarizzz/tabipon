@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-native";
 import { View } from "react-native";
+import { fn } from "storybook/test";
 
 import { StampInfoCard } from "./StampInfoCard";
 
@@ -17,6 +18,9 @@ const meta = {
     date: "2026.06.28",
     location: "東京・墨田区",
     memo: "晴れた日に行ってきた！展望台からの眺めが最高だった。",
+    onPressDate: fn(),
+    onPressLocation: fn(),
+    onPressMemo: fn(),
   },
 } satisfies Meta<typeof StampInfoCard>;
 
