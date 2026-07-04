@@ -1,7 +1,7 @@
-import { View, TouchableOpacity, StyleSheet } from "react-native";
-import { Share2 } from "lucide-react-native";
+import { View, StyleSheet } from "react-native";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
-import { colors, spacing } from "@/src/theme/tokens";
+import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
+import { spacing } from "@/src/theme/tokens";
 
 type Props = {
   imageUri?: string;
@@ -11,9 +11,7 @@ type Props = {
 export function StampShowcase({ imageUri, onShare }: Props) {
   return (
     <View style={styles.wrap}>
-      <TouchableOpacity style={styles.shareButton} onPress={onShare} activeOpacity={0.7}>
-        <Share2 size={14} color={colors.secondary} />
-      </TouchableOpacity>
+      <ShareButton onPress={onShare} size={44} style={styles.shareButton} />
       <Stamp imageUri={imageUri} />
     </View>
   );
@@ -29,12 +27,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: spacing.m,
     right: spacing.xl,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
     zIndex: 1,
   },
 });

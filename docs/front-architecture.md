@@ -77,7 +77,7 @@ src/components/
 
 以下を正式名として固定する。似た役割の別名コンポーネント（`CustomButton`, `MyCard`, `StampButton` 等）を新たに作らない。
 
-`CommonButton`, `Card`, `Badge`, `Modal`, `ListItem`, `ColorSwatch`, `Toggle`, `BottomSheet`, `SelectableTile`, `Header`, `NavBar`, `ConfirmDialog`, `Stamp`, `TabBar`
+`CommonButton`, `Card`, `Badge`, `Modal`, `ListItem`, `ColorSwatch`, `Toggle`, `BottomSheet`, `SelectableTile`, `Header`, `NavBar`, `ConfirmDialog`, `Stamp`, `TabBar`, `ShareButton`
 
 新しい基本パーツが必要になった場合は、このリストに追記してから作成する。
 
@@ -105,6 +105,7 @@ src/components/
 | NavBar | 戻る/タイトル/右アクションのナビゲーションバー | - | 写真調整・スタンプを押す・マイページ・スタンプ詳細 系画面 |
 | ConfirmDialog | Modal+Buttonで組んだ確認ダイアログ | destructive | タブ切替時の編集破棄確認（写真調整／スタンプを押す） |
 | Stamp | 二重リング円形のスタンプ/写真プレビュー | - | スタンプを押す・スタンプ詳細・スタンプを押しました（camera機能から昇格） |
+| ShareButton | 円形の共有アイコンボタン（Share2アイコン） | size指定可 | スタンプ詳細画面・スタンプを押しました画面 |
 | TabBar | アクティブタブに丸背景を敷くlucideアイコン+ラベルの下部タブバー | - | ルートタブナビゲーション（カメラ／アルバム／マイページ） |
 | FilterChip | 65×65正方形の選択式フィルタータイル（features/stamp-rally固有） | filter / add | アルバム画面のフィルター行（FilterRow） |
 | FilterRow | FilterChipを並べたフィルター行（features/stamp-rally固有） | - | アルバム画面 |
