@@ -48,7 +48,23 @@ async function cropToPreview(
     height,
   });
   const croppedImage = await context.renderAsync();
-  const result = await croppedImage.saveAsync({ format: SaveFormat.JPEG });
+  const longestSide = Math.max(croppedImage.width, croppedImage.height);
+  const imageForUpload =
+    longestSide > 1600
+      ? await ImageManipulator.manipulate(croppedImage)
+          .resize({
+            width:
+              croppedImage.width >= croppedImage.height
+                ? 1600
+                : Math.round((croppedImage.width / croppedImage.height) * 1600),
+            height:
+              croppedImage.height > croppedImage.width
+                ? 1600
+                : Math.round((croppedImage.height / croppedImage.width) * 1600),
+          })
+          .renderAsync()
+      : croppedImage;
+  const result = await imageForUpload.saveAsync({ format: SaveFormat.JPEG, compress: 0.82 });
   return result.uri;
 }
 

@@ -1,5 +1,12 @@
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8000";
 
+function describeError(error: unknown): string {
+  if (error instanceof Error) {
+    return `${error.name}: ${error.message}`;
+  }
+  return String(error);
+}
+
 export class ApiError extends Error {
   status: number;
   detail: string;
@@ -13,7 +20,19 @@ export class ApiError extends Error {
 }
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, init);
+  const url = `${API_URL}${path}`;
+  const method = init?.method ?? "GET";
+  console.log(`[api] ${method} ${url}`);
+
+  let response: Response;
+  try {
+    response = await fetch(url, init);
+  } catch (error) {
+    console.error(`[api] ${method} ${url} failed before response: ${describeError(error)}`);
+    throw error;
+  }
+
+  console.log(`[api] ${method} ${url} -> ${response.status}`);
 
   if (!response.ok) {
     let detail = `HTTP ${response.status}`;
@@ -23,6 +42,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       // JSONでないエラーレスポンスはステータスコードのまま扱う
     }
+    console.error(`[api] ${method} ${url} error: ${detail}`);
     throw new ApiError(response.status, detail);
   }
 

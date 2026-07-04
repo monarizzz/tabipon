@@ -95,6 +95,15 @@ npm run start:tunnel:log
 
 役割: FastAPI の API サーバーを起動します。スタンプ画像処理や API エンドポイントを担当します。
 
+Railway に設定する環境変数:
+
+```env
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_SERVICE_KEY=your-service-role-key
+```
+
+写真送信時に失敗する場合は、Railway の Variables に上記が入っているか確認してください。古い名前の `SUPABASE_KEY` もコード側では読めますが、基本は `SUPABASE_SERVICE_KEY` に揃えます。
+
 初回セットアップ:
 
 ```bash

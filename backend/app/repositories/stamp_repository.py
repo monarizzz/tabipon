@@ -12,9 +12,9 @@ class StampRepositoryError(Exception):
 
 def upload_stamp_image(png_bytes: bytes) -> str:
     file_path = f"{uuid.uuid4()}.png"
-    storage = get_supabase().storage.from_(STAMP_BUCKET)
 
     try:
+        storage = get_supabase().storage.from_(STAMP_BUCKET)
         storage.upload(file_path, png_bytes, {"content-type": "image/png"})
         return storage.get_public_url(file_path)
     except Exception as error:

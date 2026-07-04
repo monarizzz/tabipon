@@ -30,6 +30,7 @@ export function clearSession(): void {
 }
 
 export function startUpload(photoUri: string, color: StampColor): void {
+  console.log(`[stampSession] start upload color=${color} uri=${photoUri}`);
   const s: StampSession = {
     photoUri,
     desiredColor: color,
@@ -37,12 +38,18 @@ export function startUpload(photoUri: string, color: StampColor): void {
     created: null,
     promise: undefined as unknown as Promise<StampCreateResponse>,
   };
-  s.promise = createStampImage(photoUri, color).then((created) => {
-    s.created = created;
-    s.appliedColor = color;
-    // POST 完了までに色変更されていた場合はここで追いつく
-    return syncColor(s, created);
-  });
+  s.promise = createStampImage(photoUri, color)
+    .then((created) => {
+      console.log(`[stampSession] created stamp id=${created.id}`);
+      s.created = created;
+      s.appliedColor = color;
+      // POST 完了までに色変更されていた場合はここで追いつく
+      return syncColor(s, created);
+    })
+    .catch((error) => {
+      console.error("[stampSession] upload failed", error);
+      throw error;
+    });
   markHandled(s.promise);
   session = s;
 }
@@ -51,6 +58,7 @@ export function startUpload(photoUri: string, color: StampColor): void {
 export function retryUpload(): void {
   if (!session) return;
   const s = session;
+  console.log("[stampSession] retry upload");
   if (s.created === null) {
     startUpload(s.photoUri, s.desiredColor);
     return;
@@ -63,6 +71,7 @@ export function retryUpload(): void {
 export function changeColor(color: StampColor): void {
   if (!session || session.desiredColor === color) return;
   const s = session;
+  console.log(`[stampSession] change color ${s.desiredColor} -> ${color}`);
   s.desiredColor = color;
   if (s.created === null) {
     // POST 完了時に startUpload 内の syncColor が desiredColor まで追いつくので何もしない
@@ -93,6 +102,7 @@ async function syncColor(
 ): Promise<StampCreateResponse> {
   while (s.appliedColor !== s.desiredColor) {
     const color = s.desiredColor;
+    console.log(`[stampSession] sync color=${color} stampId=${created.id}`);
     const updated = await updateStampImage(created.id, s.photoUri, color);
     s.appliedColor = color;
     created = { ...created, image_url: updated.image_url };

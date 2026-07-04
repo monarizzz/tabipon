@@ -33,6 +33,7 @@ import {
   STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import { type StampCreateResponse } from "@/src/api/stamps";
+import { ApiError } from "@/src/api/client";
 import {
   changeColor,
   getSession,
@@ -54,6 +55,9 @@ export default function StampPressScreen() {
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const [stampResult, setStampResult] = React.useState<StampCreateResponse | null>(null);
   const [uploadFailed, setUploadFailed] = React.useState(false);
+  const [uploadErrorMessage, setUploadErrorMessage] = React.useState(
+    "通信環境を確認して、もう一度お試しください。",
+  );
   const [waiting, setWaiting] = React.useState(false);
   const longPressTriggeredRef = React.useRef(false);
   const stampScale = useSharedValue(1);
@@ -62,6 +66,17 @@ export default function StampPressScreen() {
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
   }));
+
+  const showUploadError = React.useCallback((error: unknown) => {
+    let message = "通信環境を確認して、もう一度お試しください。";
+    if (error instanceof ApiError) {
+      message = `APIエラー: ${error.status} ${error.detail}`;
+    } else if (error instanceof Error) {
+      message = `${error.name}: ${error.message}`;
+    }
+    setUploadErrorMessage(message);
+    setUploadFailed(true);
+  }, []);
 
   // 送信結果を購読し、長押し前でもエラーを先出しする(色変更でチェーンが
   // 差し替わった後の結果は無視して、常に最新のものだけ反映する)
@@ -75,12 +90,13 @@ export default function StampPressScreen() {
         setStampResult(created);
         setUploadFailed(false);
       },
-      () => {
+      (error) => {
         if (getSession()?.promise !== watched) return;
-        setUploadFailed(true);
+        console.error("[stamp-press] watched upload failed", error);
+        showUploadError(error);
       },
     );
-  }, []);
+  }, [showUploadError]);
 
   React.useEffect(() => {
     watchSession();
@@ -105,8 +121,9 @@ export default function StampPressScreen() {
             imageUrl: created.image_url,
           },
         });
-      } catch {
-        setUploadFailed(true);
+      } catch (error) {
+        console.error("[stamp-press] waitForResult failed", error);
+        showUploadError(error);
       } finally {
         setWaiting(false);
       }
@@ -239,11 +256,12 @@ export default function StampPressScreen() {
       <CommonDialog
         visible={uploadFailed}
         title="送信に失敗しました"
-        message="通信環境を確認して、もう一度お試しください。"
+        message={uploadErrorMessage}
         confirmLabel="再試行"
         onCancel={() => setUploadFailed(false)}
         onConfirm={() => {
           setUploadFailed(false);
+          setUploadErrorMessage("通信環境を確認して、もう一度お試しください。");
           retryUpload();
           watchSession();
         }}
