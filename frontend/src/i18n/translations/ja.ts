@@ -67,6 +67,7 @@ export const ja = {
     empty: "スタンプを集めるとここに表示されます!",
     filterAll: "すべて",
     stampName: "スタンプ",
+    unknownSpotName: "スポット未設定",
   },
   collection: {
     add: "コレクションを追加",

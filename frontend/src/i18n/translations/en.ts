@@ -68,6 +68,7 @@ export const en: Translations = {
     empty: "Collect stamps and they will show up here!",
     filterAll: "All",
     stampName: "Stamp",
+    unknownSpotName: "No spot set",
   },
   collection: {
     add: "Add collection",
