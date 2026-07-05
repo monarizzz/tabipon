@@ -309,7 +309,7 @@ export default function StampPressScreen() {
           <Animated.View style={stampAnimatedStyle}>
             {stampPressed ? (
               <>
-                <Stamp imageUri={stampResult?.image_url} />
+                <Stamp imageUri={stampResult?.image_url ?? uri} />
                 {!stampResult && (
                   <View style={styles.previewLoadingOverlay}>
                     <ActivityIndicator size="small" color={colors.white} />
