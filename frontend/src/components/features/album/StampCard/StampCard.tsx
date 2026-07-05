@@ -44,7 +44,7 @@ export function StampCard({
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
+    width: "48%",
     gap: spacing.xs,
     backgroundColor: colors.surface,
     padding: spacing.m,

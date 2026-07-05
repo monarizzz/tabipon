@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     gap: spacing.m,
   },
   row: {
-    gap: spacing.m,
+    justifyContent: "space-between",
   },
   empty: {
     flex: 1,
