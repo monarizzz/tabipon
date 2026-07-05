@@ -257,6 +257,7 @@ export default function StampDetailScreen() {
           onShare={handleShare}
           imageUri={(designMode && previewUri ? previewUri : currentImageUri) || undefined}
           loading={previewLoading}
+          confirming={designUpdating}
           frameStyles={FRAME_STYLE_OPTIONS}
           selectedFrameStyleId={selectedFrameStyleId}
           onSelectFrameStyle={setSelectedFrameStyleId}
