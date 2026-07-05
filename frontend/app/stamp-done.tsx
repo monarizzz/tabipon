@@ -1,18 +1,36 @@
 import React from "react";
-import { View, Text, StyleSheet, Share, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Share,
+  Alert,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+} from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Camera, Image, User, RotateCcw } from "lucide-react-native";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
+import { StampInfoCard } from "@/src/components/common/StampInfoCard/StampInfoCard";
+import { EditFieldSheet } from "@/src/components/common/EditFieldSheet/EditFieldSheet";
 import { StampResultHeader } from "@/src/components/features/camera/StampResultHeader/StampResultHeader";
 import { StampShowcase } from "@/src/components/features/camera/StampShowcase/StampShowcase";
 import { StampDoneActions } from "@/src/components/features/camera/StampDoneActions/StampDoneActions";
-import { clearSession, getChosenPreviewUri } from "@/src/api/stampSession";
-import { deleteStamp } from "@/src/api/stamps";
+import { clearSession, getChosenPreviewUri, getSession } from "@/src/api/stampSession";
+import { deleteStamp, updateStampDetails } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
 import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, spacing } from "@/src/theme/tokens";
+
+function normalizeOptionalText(value: string): string | null {
+  const trimmed = value.trim();
+  return trimmed || null;
+}
+
+type EditingField = "spotName" | "location" | "memo" | null;
 
 const today = new Date();
 const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, "0")}.${String(today.getDate()).padStart(2, "0")}`;
@@ -20,15 +38,90 @@ const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).pad
 export default function StampDoneScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { stampTop: stampTopParam, stampId, imageUrl, scratchLevel, peak } = useLocalSearchParams<{
+  const {
+    stampTop: stampTopParam,
+    stampId,
+    imageUrl,
+    scratchLevel,
+    peak,
+  } = useLocalSearchParams<{
     stampTop?: string;
     stampId?: string;
     imageUrl?: string;
   }>();
   const previewUri = getChosenPreviewUri();
   const [spotName, setSpotName] = React.useState("");
+  const [location, setLocation] = React.useState("");
   const [memo, setMemo] = React.useState("");
+  const [detailUpdating, setDetailUpdating] = React.useState(false);
   const [retakeDialogVisible, setRetakeDialogVisible] = React.useState(false);
+
+  // 撮影時に記録した位置情報から住所を逆引きする(アルバム詳細画面と同じ方式)
+  React.useEffect(() => {
+    const sessionLocation = getSession()?.location;
+    if (!sessionLocation) return;
+    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
+    fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${sessionLocation.latitude},${sessionLocation.longitude}&key=${apiKey}&language=ja`,
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const address = data.results?.[0]?.formatted_address;
+        if (address) setLocation(address);
+      })
+      .catch(() => {});
+  }, []);
+
+  const [editingField, setEditingField] = React.useState<EditingField>(null);
+  const [draftSpotName, setDraftSpotName] = React.useState(spotName);
+  const [draftLocation, setDraftLocation] = React.useState(location);
+  const [draftMemo, setDraftMemo] = React.useState(memo);
+
+  const openSpotNameEditor = () => {
+    setDraftSpotName(spotName);
+    setEditingField("spotName");
+  };
+  const openLocationEditor = () => {
+    setDraftLocation(location);
+    setEditingField("location");
+  };
+  const openMemoEditor = () => {
+    setDraftMemo(memo);
+    setEditingField("memo");
+  };
+  const closeEditor = () => setEditingField(null);
+
+  const handleSaveSpotName = async () => {
+    if (!stampId || detailUpdating) return;
+    const nextSpotName = normalizeOptionalText(draftSpotName);
+    setDetailUpdating(true);
+    try {
+      const updated = await updateStampDetails(stampId, { spot_name: nextSpotName });
+      setSpotName(updated.spot_name ?? "");
+      closeEditor();
+    } catch (error) {
+      console.error("[stamp-done] failed to update spot name", error);
+      Alert.alert(t("stampDetail.saveFailedTitle"), t("stampDetail.saveFailedMessage"));
+    } finally {
+      setDetailUpdating(false);
+    }
+  };
+
+  const handleSaveMemo = async () => {
+    if (!stampId || detailUpdating) return;
+    const nextMemo = normalizeOptionalText(draftMemo);
+    setDetailUpdating(true);
+    try {
+      const updated = await updateStampDetails(stampId, { memo: nextMemo });
+      setMemo(updated.memo ?? "");
+      closeEditor();
+    } catch (error) {
+      console.error("[stamp-done] failed to update memo", error);
+      Alert.alert(t("stampDetail.saveFailedTitle"), t("stampDetail.saveFailedMessage"));
+    } finally {
+      setDetailUpdating(false);
+    }
+  };
 
   const handleConfirmRetake = () => {
     setRetakeDialogVisible(false);
@@ -48,7 +141,10 @@ export default function StampDoneScreen() {
   // 遷移(animation: 'none')してもスタンプの見た目の位置がズレないようにする
   const stampTop = stampTopParam !== undefined ? Number(stampTopParam) : NaN;
   // StampShowcase 側の上部余白の分だけ差し引き、リング自体の位置を合わせる
-  const headerAnchorHeight = Number.isFinite(stampTop) ? Math.max(0, stampTop - spacing.m) : undefined;
+  // (スポット名/場所/メモの入力欄が増えた分、全体を少し上に詰めてスクロール不要にする)
+  const headerAnchorHeight = Number.isFinite(stampTop)
+    ? Math.max(0, stampTop - spacing.m - spacing.xxxl * 3)
+    : undefined;
 
   return (
     <View style={styles.container}>
@@ -65,23 +161,37 @@ export default function StampDoneScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View
-            style={[styles.headerAnchor, headerAnchorHeight !== undefined && { height: headerAnchorHeight }]}
+            style={[
+              styles.headerAnchor,
+              headerAnchorHeight !== undefined && {
+                height: headerAnchorHeight,
+              },
+            ]}
           >
-            <StampResultHeader date={formattedDate} />
+            <StampResultHeader />
           </View>
           <StampShowcase
             imageUri={imageUrl ?? previewUri}
-            onShare={() => Share.share({ message: t("stampDone.shareMessage") })}
+            onShare={() =>
+              Share.share({ message: t("stampDone.shareMessage") })
+            }
+            spotName={spotName}
+            onPressSpotName={openSpotNameEditor}
           />
           {scratchLevel !== undefined && (
-            <Text style={styles.debugText}>[DEBUG] scratch: {scratchLevel} / peak: {peak}</Text>
+            <Text style={styles.debugText}>
+              [DEBUG] scratch: {scratchLevel} / peak: {peak}
+            </Text>
           )}
           <View style={styles.actionsAnchor}>
-            <StampDoneActions
-              spotName={spotName}
-              onChangeSpotName={setSpotName}
+            <StampInfoCard
+              date={formattedDate}
+              location={location}
               memo={memo}
-              onChangeMemo={setMemo}
+              onPressLocation={openLocationEditor}
+              onPressMemo={openMemoEditor}
+            />
+            <StampDoneActions
               onContinueShooting={() => {
                 clearSession();
                 router.replace("/(tabs)");
@@ -111,6 +221,40 @@ export default function StampDoneScreen() {
         destructive
         onCancel={() => setRetakeDialogVisible(false)}
         onConfirm={handleConfirmRetake}
+      />
+      <EditFieldSheet
+        visible={editingField === "spotName"}
+        onClose={closeEditor}
+        title={t("stampDetail.editTitle")}
+        mode="text"
+        value={draftSpotName}
+        onChangeValue={setDraftSpotName}
+        placeholder={t("stampDetail.editTitlePlaceholder")}
+        onSave={handleSaveSpotName}
+      />
+      <EditFieldSheet
+        visible={editingField === "location"}
+        onClose={closeEditor}
+        title={t("stampDetail.editPlace")}
+        mode="text"
+        value={draftLocation}
+        onChangeValue={setDraftLocation}
+        placeholder={t("stampDetail.editPlacePlaceholder")}
+        onSave={() => {
+          setLocation(draftLocation.trim() || location);
+          closeEditor();
+        }}
+      />
+      <EditFieldSheet
+        visible={editingField === "memo"}
+        onClose={closeEditor}
+        title={t("stampDetail.editMemo")}
+        mode="text"
+        value={draftMemo}
+        onChangeValue={setDraftMemo}
+        placeholder={t("stampDetail.editMemoPlaceholder")}
+        multiline
+        onSave={handleSaveMemo}
       />
       <TabBar
         items={[

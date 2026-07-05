@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Text, StyleSheet, TextInput } from "react-native";
+import { Keyboard, Text, StyleSheet, TextInput } from "react-native";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
@@ -40,10 +40,20 @@ export function EditFieldSheet({
   const { t } = useTranslation();
   const inputRef = useRef<TextInput>(null);
 
+  const handleClose = () => {
+    Keyboard.dismiss();
+    onClose();
+  };
+
+  const handleSave = () => {
+    Keyboard.dismiss();
+    onSave();
+  };
+
   return (
     <BottomSheet
       visible={visible}
-      onClose={onClose}
+      onClose={handleClose}
       onOpened={() => {
         if (field.mode === "text") {
           inputRef.current?.focus();
@@ -75,7 +85,7 @@ export function EditFieldSheet({
           style={styles.datePicker}
         />
       )}
-      <CommonButton label={t("common.save")} onPress={onSave} variant="primary" style={styles.saveButton} />
+      <CommonButton label={t("common.save")} onPress={handleSave} variant="primary" style={styles.saveButton} />
     </BottomSheet>
   );
 }

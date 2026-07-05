@@ -26,8 +26,8 @@ import { getOriginalPhotoUri } from "@/src/utils/originalPhotoStore";
 import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, radii, spacing } from "@/src/theme/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
-import { StampInfoCard } from "@/src/components/features/album/detail/StampInfoCard/StampInfoCard";
-import { EditFieldSheet } from "@/src/components/features/album/detail/EditFieldSheet/EditFieldSheet";
+import { StampInfoCard } from "@/src/components/common/StampInfoCard/StampInfoCard";
+import { EditFieldSheet } from "@/src/components/common/EditFieldSheet/EditFieldSheet";
 
 function formatDate(date: Date): string {
   const year = date.getFullYear();

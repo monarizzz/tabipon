@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from "@storybook/react-native";
 import { View } from "react-native";
 import { fn } from "storybook/test";
 
-import { StampDoneActions } from "./StampDoneActions";
+import { SpotNameLabel } from "./SpotNameLabel";
 
 const meta = {
-  component: StampDoneActions,
+  component: SpotNameLabel,
   decorators: [
     (Story) => (
       <View style={{ padding: 16 }}>
@@ -15,13 +15,17 @@ const meta = {
   ],
   tags: ["autodocs"],
   args: {
-    onContinueShooting: fn(),
-    onGoToAlbum: fn(),
+    spotName: "東京スカイツリー",
+    onPress: fn(),
   },
-} satisfies Meta<typeof StampDoneActions>;
+} satisfies Meta<typeof SpotNameLabel>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const Empty: Story = {
+  args: { spotName: "" },
+};

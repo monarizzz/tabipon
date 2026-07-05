@@ -43,7 +43,6 @@ export const zh: Translations = {
   },
   stampDone: {
     badge: "✦ 获得印章！ ✦",
-    title: "已盖章",
     shareMessage: "我获得了一枚印章！",
     addSpotName: "添加地点名称",
     addMemo: "添加备注...",

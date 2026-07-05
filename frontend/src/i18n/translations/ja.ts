@@ -42,7 +42,6 @@ export const ja = {
   },
   stampDone: {
     badge: "✦ スタンプ獲得！ ✦",
-    title: "スタンプを押しました",
     shareMessage: "スタンプを獲得しました！",
     addSpotName: "スポット名を追加",
     addMemo: "メモを追加...",
