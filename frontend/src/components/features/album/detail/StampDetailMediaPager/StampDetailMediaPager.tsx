@@ -18,8 +18,8 @@ type Props = {
   imageUri?: string;
   onPressDesignChange: () => void;
   onPressSpotName?: () => void;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 export function StampDetailMediaPager({

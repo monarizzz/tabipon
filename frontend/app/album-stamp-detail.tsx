@@ -67,15 +67,21 @@ export default function StampDetailScreen() {
     id,
     imageUri,
     date: paramDate,
+    latitude: paramLat,
+    longitude: paramLon,
     spotName: paramSpotName,
     memo: paramMemo,
   } = useLocalSearchParams<{
     id?: string;
     imageUri?: string;
     date?: string;
+    latitude?: string;
+    longitude?: string;
     spotName?: string;
     memo?: string;
   }>();
+  const stampLatitude = paramLat ? parseFloat(paramLat) : null;
+  const stampLongitude = paramLon ? parseFloat(paramLon) : null;
   const [designMode, setDesignMode] = React.useState(false);
   const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
@@ -169,6 +175,20 @@ export default function StampDetailScreen() {
   const [location, setLocation] = React.useState("");
   const [memo, setMemo] = React.useState(() => normalizeParam(paramMemo));
   const [detailUpdating, setDetailUpdating] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!stampLatitude || !stampLongitude) return;
+    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
+    fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${stampLatitude},${stampLongitude}&key=${apiKey}&language=ja`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const address = data.results?.[0]?.formatted_address;
+        if (address) setLocation(address);
+      })
+      .catch(() => {});
+  }, [stampLatitude, stampLongitude]);
 
   const [editingField, setEditingField] = React.useState<EditingField>(null);
   const [draftSpotName, setDraftSpotName] = React.useState(spotName);
@@ -301,8 +321,8 @@ export default function StampDetailScreen() {
         imageUri={currentImageUri || undefined}
         onPressDesignChange={handleOpenDesignChange}
         onPressSpotName={openSpotNameEditor}
-        latitude={0}
-        longitude={0}
+        latitude={stampLatitude}
+        longitude={stampLongitude}
       />
       <StampInfoCard
         date={date}
