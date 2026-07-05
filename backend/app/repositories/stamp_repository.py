@@ -36,12 +36,25 @@ def get_stamp(stamp_id: str) -> dict | None:
         raise StampRepositoryError("Failed to get stamp") from error
 
 
-def update_stamp_image_url(stamp_id: str, image_url: str) -> dict:
+def update_stamp_image_url(
+    stamp_id: str,
+    image_url: str,
+    *,
+    color: str | None = None,
+    frame: str | None = None,
+) -> dict:
+    # デザイン変更で画像を差し替える際、選択中の色・フレームも一緒に更新する。
+    # 列が無い環境でも壊れないよう、値がある場合のみ更新対象に含める。
+    record: dict = {"image_url": image_url}
+    if color is not None:
+        record["color"] = color
+    if frame is not None:
+        record["frame"] = frame
     try:
         updated = (
             get_supabase()
             .table("stamps")
-            .update({"image_url": image_url})
+            .update(record)
             .eq("id", stamp_id)
             .execute()
         )
@@ -110,6 +123,9 @@ def create_stamp(
     longitude: float | None = None,
     spot_name: str | None = None,
     tilt_angle: float | None = None,
+    scratch_level: float | None = None,
+    color: str | None = None,
+    frame: str | None = None,
 ) -> dict:
     # 位置情報などの任意項目は、値がある場合のみ登録する。
     # 列がまだ存在しない環境でも最低限のスタンプ作成が壊れないようにするため。
@@ -118,6 +134,10 @@ def create_stamp(
         "acquired_at": datetime.now(timezone.utc).isoformat(),
         "user_id": user_id,
     }
+    if color is not None:
+        record["color"] = color
+    if frame is not None:
+        record["frame"] = frame
     if latitude is not None:
         record["latitude"] = latitude
     if longitude is not None:
@@ -126,6 +146,8 @@ def create_stamp(
         record["spot_name"] = spot_name
     if tilt_angle is not None:
         record["tilt_angle"] = tilt_angle
+    if scratch_level is not None:
+        record["scratch_level"] = scratch_level
 
     try:
         created = get_supabase().table("stamps").insert(record).execute()

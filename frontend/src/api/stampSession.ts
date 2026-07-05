@@ -169,7 +169,7 @@ async function syncColor(
   while (s.appliedColor !== s.desiredColor) {
     const color = s.desiredColor;
     console.log(`[stampSession] sync color=${color} stampId=${created.id}`);
-    const updated = await updateStampImage(created.id, s.photoUri, color, s.scratchLevel, s.desiredFrame);
+    const updated = await updateStampImage(created.id, s.photoUri, color, s.scratchLevel, s.desiredFrame, s.tiltAngle);
     s.appliedColor = color;
     created = { ...created, image_url: updated.image_url };
     s.created = created;

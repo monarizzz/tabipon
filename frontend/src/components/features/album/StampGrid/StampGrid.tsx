@@ -18,6 +18,10 @@ export type StampGridItem = {
   spotName?: string;
   memo?: string;
   obtained?: boolean;
+  tiltAngle?: number;
+  scratchLevel?: number;
+  color?: string;
+  frame?: string;
 };
 
 type Props = {

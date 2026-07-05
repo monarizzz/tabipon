@@ -81,6 +81,9 @@ class StampImageApiTest(unittest.TestCase):
             longitude=None,
             spot_name=None,
             tilt_angle=None,
+            scratch_level=0.0,
+            color="red",
+            frame="classic",
         )
 
     @patch("app.api.routes.stamp_image.create_stamp")
@@ -108,6 +111,9 @@ class StampImageApiTest(unittest.TestCase):
             longitude=139.767125,
             spot_name="東京駅",
             tilt_angle=None,
+            scratch_level=0.0,
+            color="red",
+            frame="classic",
         )
 
     @patch("app.api.routes.stamp_image.upload_stamp_image")
@@ -197,7 +203,9 @@ class StampImageUpdateApiTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"id": TEST_STAMP_ID, "image_url": NEW_IMAGE_URL})
-        update_stamp_image_url.assert_called_once_with(TEST_STAMP_ID, NEW_IMAGE_URL)
+        update_stamp_image_url.assert_called_once_with(
+            TEST_STAMP_ID, NEW_IMAGE_URL, color="blue", frame="classic"
+        )
         delete_stamp_image_by_url.assert_called_once_with(TEST_IMAGE_URL)
 
     @patch("app.api.routes.stamp_image.get_stamp")
@@ -273,6 +281,9 @@ class StampsApiTest(unittest.TestCase):
                     "spot_name": "東京駅",
                     "memo": "晴れていた",
                     "tilt_angle": None,
+                    "scratch_level": None,
+                    "color": None,
+                    "frame": None,
                 },
             ],
         )

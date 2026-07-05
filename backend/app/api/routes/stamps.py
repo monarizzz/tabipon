@@ -61,6 +61,9 @@ def list_stamps_endpoint(user_id: str = Depends(get_user_id)):
             "spot_name": stamp.get("spot_name"),
             "memo": stamp.get("memo"),
             "tilt_angle": stamp.get("tilt_angle"),
+            "scratch_level": stamp.get("scratch_level"),
+            "color": stamp.get("color"),
+            "frame": stamp.get("frame"),
         }
         for stamp in stamps
     ]

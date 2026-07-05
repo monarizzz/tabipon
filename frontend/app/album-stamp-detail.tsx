@@ -10,6 +10,8 @@ import {
   STAMP_COLOR_OPTIONS,
   API_COLOR_BY_HEX,
   API_FRAME_BY_ID,
+  HEX_BY_API_COLOR,
+  FRAME_ID_BY_API,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
@@ -20,6 +22,8 @@ import {
   updateStampDetails,
   updateStampImage,
   previewStampImage,
+  type StampColor,
+  type StampFrame,
 } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
 import { getOriginalPhotoUri } from "@/src/utils/originalPhotoStore";
@@ -71,6 +75,10 @@ export default function StampDetailScreen() {
     longitude: paramLon,
     spotName: paramSpotName,
     memo: paramMemo,
+    tiltAngle: paramTiltAngle,
+    scratchLevel: paramScratchLevel,
+    color: paramColor,
+    frame: paramFrame,
   } = useLocalSearchParams<{
     id?: string;
     imageUri?: string;
@@ -79,16 +87,26 @@ export default function StampDetailScreen() {
     longitude?: string;
     spotName?: string;
     memo?: string;
+    tiltAngle?: string;
+    scratchLevel?: string;
+    color?: string;
+    frame?: string;
   }>();
   const stampLatitude = paramLat ? parseFloat(paramLat) : null;
   const stampLongitude = paramLon ? parseFloat(paramLon) : null;
+  // 元スタンプ作成時の演出値。デザイン変更時も引き継いで再適用する
+  const stampTiltAngle = paramTiltAngle ? parseFloat(paramTiltAngle) : 0;
+  const stampScratchLevel = paramScratchLevel ? parseFloat(paramScratchLevel) : 0;
+  // 元スタンプの色・フレーム。デザイン変更パネルの初期選択に使う(未保存の旧スタンプは既定値)
+  const initialColor =
+    (paramColor && HEX_BY_API_COLOR[paramColor as StampColor]) || STAMP_COLOR_OPTIONS[0];
+  const initialFrameStyleId =
+    (paramFrame && FRAME_ID_BY_API[paramFrame as StampFrame]) || FRAME_STYLE_OPTIONS[0].id;
   const [designMode, setDesignMode] = React.useState(false);
   const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
-    FRAME_STYLE_OPTIONS[0].id,
+    initialFrameStyleId,
   );
-  const [selectedColor, setSelectedColor] = React.useState(
-    STAMP_COLOR_OPTIONS[0],
-  );
+  const [selectedColor, setSelectedColor] = React.useState(initialColor);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
   // 表示中のスタンプ画像。デザイン変更後に即差し替える
@@ -119,7 +137,7 @@ export default function StampDetailScreen() {
     const frame = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
     let cancelled = false;
     setPreviewLoading(true);
-    previewStampImage(originalUri, color, 0, frame)
+    previewStampImage(originalUri, color, stampScratchLevel, frame, stampTiltAngle)
       .then((dataUri) => {
         if (!cancelled) {
           setPreviewUri(dataUri);
@@ -133,7 +151,7 @@ export default function StampDetailScreen() {
     return () => {
       cancelled = true;
     };
-  }, [designMode, originalUri, selectedColor, selectedFrameStyleId]);
+  }, [designMode, originalUri, selectedColor, selectedFrameStyleId, stampScratchLevel, stampTiltAngle]);
 
   const handleOpenDesignChange = () => {
     if (!originalUri) {
@@ -158,7 +176,7 @@ export default function StampDetailScreen() {
     if (!color || !frame) return;
     setDesignUpdating(true);
     try {
-      const updated = await updateStampImage(id, originalUri, color, 0, frame);
+      const updated = await updateStampImage(id, originalUri, color, stampScratchLevel, frame, stampTiltAngle);
       setCurrentImageUri(updated.image_url);
       setPreviewUri(null);
       setDesignMode(false);
