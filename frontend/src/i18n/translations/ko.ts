@@ -101,6 +101,8 @@ export const ko: Translations = {
     shareUnavailableMessage: "이 기기에서는 공유 기능을 사용할 수 없습니다.",
     shareFailedTitle: "오류",
     shareFailedMessage: "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    saveFailedTitle: "저장할 수 없습니다",
+    saveFailedMessage: "잠시 후 다시 시도해 주세요.",
   },
   discardDialog: {
     title: "편집 내용을 취소하시겠습니까?",

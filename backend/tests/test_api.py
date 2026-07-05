@@ -15,11 +15,14 @@ if str(BACKEND_DIR) not in sys.path:
 os.environ.setdefault("SUPABASE_URL", "https://test.supabase.co")
 os.environ.setdefault("SUPABASE_KEY", "test-key")
 
+from app.core.auth import get_user_id  # noqa: E402
 from app.core.config import MAX_IMAGE_BYTES  # noqa: E402
 from app.repositories.stamp_repository import StampRepositoryError  # noqa: E402
 from main import app  # noqa: E402
 
 
+TEST_USER_ID = "test-user"
+app.dependency_overrides[get_user_id] = lambda: TEST_USER_ID
 client = TestClient(app)
 
 
@@ -73,6 +76,7 @@ class StampImageApiTest(unittest.TestCase):
         )
         create_stamp.assert_called_once_with(
             TEST_IMAGE_URL,
+            user_id=TEST_USER_ID,
             latitude=None,
             longitude=None,
             spot_name=None,
@@ -99,6 +103,7 @@ class StampImageApiTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         create_stamp.assert_called_once_with(
             TEST_IMAGE_URL,
+            user_id=TEST_USER_ID,
             latitude=35.681236,
             longitude=139.767125,
             spot_name="東京駅",
@@ -248,6 +253,7 @@ class StampsApiTest(unittest.TestCase):
                 "latitude": 35.681236,
                 "longitude": 139.767125,
                 "spot_name": "東京駅",
+                "memo": "晴れていた",
                 "tilt_angle": None,
             },
         ]
@@ -265,6 +271,7 @@ class StampsApiTest(unittest.TestCase):
                     "latitude": 35.681236,
                     "longitude": 139.767125,
                     "spot_name": "東京駅",
+                    "memo": "晴れていた",
                     "tilt_angle": None,
                 },
             ],
@@ -287,6 +294,175 @@ class StampsApiTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json(), {"detail": "Failed to list stamps"})
+
+    @patch("app.api.routes.stamps.update_stamp_details")
+    def test_update_stamp_updates_memo(self, update_stamp_details):
+        update_stamp_details.return_value = {
+            "id": TEST_STAMP_ID,
+            "acquired_at": "2026-07-04T00:00:00+00:00",
+            "memo": "新しいメモ",
+            "spot_name": "東京駅",
+        }
+
+        response = client.patch(f"/stamps/{TEST_STAMP_ID}", json={"memo": " 新しいメモ "})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "id": TEST_STAMP_ID,
+                "acquired_at": "2026-07-04T00:00:00+00:00",
+                "memo": "新しいメモ",
+                "spot_name": "東京駅",
+            },
+        )
+        update_stamp_details.assert_called_once_with(
+            TEST_STAMP_ID,
+            user_id=TEST_USER_ID,
+            updates={"memo": "新しいメモ"},
+        )
+
+    @patch("app.api.routes.stamps.update_stamp_details")
+    def test_update_stamp_updates_spot_name(self, update_stamp_details):
+        update_stamp_details.return_value = {
+            "id": TEST_STAMP_ID,
+            "acquired_at": "2026-07-04T00:00:00+00:00",
+            "memo": None,
+            "spot_name": "大阪城",
+        }
+
+        response = client.patch(f"/stamps/{TEST_STAMP_ID}", json={"spot_name": "大阪城"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "id": TEST_STAMP_ID,
+                "acquired_at": "2026-07-04T00:00:00+00:00",
+                "memo": None,
+                "spot_name": "大阪城",
+            },
+        )
+        update_stamp_details.assert_called_once_with(
+            TEST_STAMP_ID,
+            user_id=TEST_USER_ID,
+            updates={"spot_name": "大阪城"},
+        )
+
+    @patch("app.api.routes.stamps.update_stamp_details")
+    def test_update_stamp_updates_acquired_at(self, update_stamp_details):
+        update_stamp_details.return_value = {
+            "id": TEST_STAMP_ID,
+            "acquired_at": "2026-07-05T00:00:00.000Z",
+            "memo": None,
+            "spot_name": "東京駅",
+        }
+
+        response = client.patch(
+            f"/stamps/{TEST_STAMP_ID}",
+            json={"acquired_at": "2026-07-05T00:00:00.000Z"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "id": TEST_STAMP_ID,
+                "acquired_at": "2026-07-05T00:00:00.000Z",
+                "memo": None,
+                "spot_name": "東京駅",
+            },
+        )
+        update_stamp_details.assert_called_once_with(
+            TEST_STAMP_ID,
+            user_id=TEST_USER_ID,
+            updates={"acquired_at": "2026-07-05T00:00:00.000Z"},
+        )
+
+    @patch("app.api.routes.stamps.update_stamp_details")
+    def test_update_stamp_updates_memo_and_spot_name(self, update_stamp_details):
+        update_stamp_details.return_value = {
+            "id": TEST_STAMP_ID,
+            "acquired_at": "2026-07-04T00:00:00+00:00",
+            "memo": "旅の記録",
+            "spot_name": "京都駅",
+        }
+
+        response = client.patch(
+            f"/stamps/{TEST_STAMP_ID}",
+            json={"memo": "旅の記録", "spot_name": "京都駅"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "id": TEST_STAMP_ID,
+                "acquired_at": "2026-07-04T00:00:00+00:00",
+                "memo": "旅の記録",
+                "spot_name": "京都駅",
+            },
+        )
+        update_stamp_details.assert_called_once_with(
+            TEST_STAMP_ID,
+            user_id=TEST_USER_ID,
+            updates={"memo": "旅の記録", "spot_name": "京都駅"},
+        )
+
+    @patch("app.api.routes.stamps.update_stamp_details")
+    def test_update_stamp_normalizes_blank_text_to_null(self, update_stamp_details):
+        update_stamp_details.return_value = {
+            "id": TEST_STAMP_ID,
+            "acquired_at": "2026-07-04T00:00:00+00:00",
+            "memo": None,
+            "spot_name": None,
+        }
+
+        response = client.patch(
+            f"/stamps/{TEST_STAMP_ID}",
+            json={"memo": "  ", "spot_name": ""},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        update_stamp_details.assert_called_once_with(
+            TEST_STAMP_ID,
+            user_id=TEST_USER_ID,
+            updates={"memo": None, "spot_name": None},
+        )
+
+    @patch("app.api.routes.stamps.update_stamp_details")
+    def test_update_stamp_rejects_empty_body(self, update_stamp_details):
+        response = client.patch(f"/stamps/{TEST_STAMP_ID}", json={})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"detail": "No fields to update"})
+        update_stamp_details.assert_not_called()
+
+    @patch("app.api.routes.stamps.update_stamp_details")
+    def test_update_stamp_rejects_invalid_acquired_at(self, update_stamp_details):
+        response = client.patch(f"/stamps/{TEST_STAMP_ID}", json={"acquired_at": "not-a-date"})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"detail": "Invalid acquired_at"})
+        update_stamp_details.assert_not_called()
+
+    @patch("app.api.routes.stamps.update_stamp_details")
+    def test_update_stamp_returns_not_found_for_missing_stamp(self, update_stamp_details):
+        update_stamp_details.return_value = None
+
+        response = client.patch(f"/stamps/{TEST_STAMP_ID}", json={"memo": "メモ"})
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"detail": "Stamp not found"})
+
+    @patch("app.api.routes.stamps.update_stamp_details")
+    def test_update_stamp_returns_server_error_when_repository_fails(self, update_stamp_details):
+        update_stamp_details.side_effect = StampRepositoryError("update failed")
+
+        response = client.patch(f"/stamps/{TEST_STAMP_ID}", json={"memo": "メモ"})
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json(), {"detail": "Failed to update stamp"})
 
 
 class StampDeleteApiTest(unittest.TestCase):
