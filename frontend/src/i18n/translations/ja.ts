@@ -48,6 +48,9 @@ export const ja = {
     addMemo: "メモを追加...",
     keepShooting: "続けて撮影",
     toAlbum: "アルバムへ",
+    retake: "撮り直す",
+    retakeConfirmTitle: "スタンプを撮り直しますか?",
+    retakeConfirmMessage: "このスタンプは削除され、もう一度撮影し直せます。",
   },
   design: {
     frame: "フレーム",

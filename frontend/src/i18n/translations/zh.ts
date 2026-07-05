@@ -49,6 +49,9 @@ export const zh: Translations = {
     addMemo: "添加备注...",
     keepShooting: "继续拍摄",
     toAlbum: "前往相册",
+    retake: "重新拍摄",
+    retakeConfirmTitle: "要重新拍摄这枚印章吗？",
+    retakeConfirmMessage: "该印章将被删除，你可以重新拍摄。",
   },
   design: {
     frame: "边框",

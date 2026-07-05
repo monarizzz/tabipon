@@ -49,6 +49,9 @@ export const en: Translations = {
     addMemo: "Add a memo...",
     keepShooting: "Keep shooting",
     toAlbum: "To album",
+    retake: "Retake",
+    retakeConfirmTitle: "Retake this stamp?",
+    retakeConfirmMessage: "This stamp will be deleted so you can shoot it again.",
   },
   design: {
     frame: "Frame",

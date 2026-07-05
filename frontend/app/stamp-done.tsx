@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Share, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Camera, Image, User, Trash2 } from "lucide-react-native";
+import { Camera, Image, User, RotateCcw } from "lucide-react-native";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
@@ -28,10 +28,10 @@ export default function StampDoneScreen() {
   const previewUri = getChosenPreviewUri();
   const [spotName, setSpotName] = React.useState("");
   const [memo, setMemo] = React.useState("");
-  const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
+  const [retakeDialogVisible, setRetakeDialogVisible] = React.useState(false);
 
-  const handleConfirmDelete = () => {
-    setDeleteDialogVisible(false);
+  const handleConfirmRetake = () => {
+    setRetakeDialogVisible(false);
     if (stampId) {
       // アルバムで即座に一覧から除外し、削除反映前のリフェッチで再表示されるのを防ぐ
       markStampDeleted(stampId);
@@ -48,7 +48,7 @@ export default function StampDoneScreen() {
   // 遷移(animation: 'none')してもスタンプの見た目の位置がズレないようにする
   const stampTop = stampTopParam !== undefined ? Number(stampTopParam) : NaN;
   // StampShowcase 側の上部余白の分だけ差し引き、リング自体の位置を合わせる
-  const headerAnchorHeight = Number.isFinite(stampTop) ? Math.max(0, stampTop - spacing.l) : undefined;
+  const headerAnchorHeight = Number.isFinite(stampTop) ? Math.max(0, stampTop - spacing.m) : undefined;
 
   return (
     <View style={styles.container}>
@@ -93,24 +93,24 @@ export default function StampDoneScreen() {
             />
             <View style={styles.deleteSection}>
               <CommonButton
-                label={t("common.delete")}
-                onPress={() => setDeleteDialogVisible(true)}
+                label={t("stampDone.retake")}
+                onPress={() => setRetakeDialogVisible(true)}
                 variant="ghost"
-                icon={<Trash2 size={16} color={colors.danger} />}
-                textStyle={styles.deleteLabel}
+                icon={<RotateCcw size={16} color={colors.danger} />}
+                textStyle={styles.retakeLabel}
               />
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
       <CommonDialog
-        visible={deleteDialogVisible}
-        title={t("stampDetail.deleteConfirmTitle")}
-        message={t("stampDetail.deleteConfirmMessage")}
-        confirmLabel={t("common.delete")}
+        visible={retakeDialogVisible}
+        title={t("stampDone.retakeConfirmTitle")}
+        message={t("stampDone.retakeConfirmMessage")}
+        confirmLabel={t("stampDone.retake")}
         destructive
-        onCancel={() => setDeleteDialogVisible(false)}
-        onConfirm={handleConfirmDelete}
+        onCancel={() => setRetakeDialogVisible(false)}
+        onConfirm={handleConfirmRetake}
       />
       <TabBar
         items={[
@@ -174,9 +174,9 @@ const styles = StyleSheet.create({
   },
   deleteSection: {
     paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.m,
   },
-  deleteLabel: {
+  retakeLabel: {
     color: colors.danger,
   },
 });

@@ -64,9 +64,9 @@ export function StampDoneActions({
 
 const styles = StyleSheet.create({
   wrap: {
-    gap: spacing.l,
+    gap: spacing.m,
     paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.xxxl,
+    paddingBottom: spacing.l,
   },
   spotNameRow: {
     flexDirection: "row",
