@@ -97,6 +97,10 @@ export const zh: Translations = {
     designUnavailableMessage: "该印章不是在此设备上创建的，因此无法更改设计。",
     designUpdateFailedTitle: "错误",
     designUpdateFailedMessage: "更改设计失败。请稍后再试。",
+    shareUnavailableTitle: "无法共享",
+    shareUnavailableMessage: "此设备不支持共享功能。",
+    shareFailedTitle: "错误",
+    shareFailedMessage: "图片共享失败。请稍后再试。",
   },
   discardDialog: {
     title: "要放弃编辑内容吗？",

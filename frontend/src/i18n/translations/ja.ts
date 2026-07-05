@@ -98,6 +98,10 @@ export const ja = {
     designUpdateFailedTitle: "エラー",
     designUpdateFailedMessage:
       "デザインの変更に失敗しました。時間をおいて再度お試しください。",
+    shareUnavailableTitle: "共有できません",
+    shareUnavailableMessage: "この端末では共有機能を利用できません。",
+    shareFailedTitle: "エラー",
+    shareFailedMessage: "画像の共有に失敗しました。時間をおいて再度お試しください。",
   },
   discardDialog: {
     title: "編集内容を破棄しますか？",

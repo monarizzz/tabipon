@@ -1,7 +1,9 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Share, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { File, Paths } from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { DesignChangePanel } from "@/src/components/features/album/stamp-rally/DesignChangePanel/DesignChangePanel";
 import {
   FRAME_STYLE_OPTIONS,
@@ -180,13 +182,26 @@ export default function StampDetailScreen() {
   };
 
   const handleShare = async () => {
+    if (!currentImageUri) return;
     try {
-      await Share.share({
-        message: [spotName, location, memo].filter(Boolean).join("\n"),
-        url: currentImageUri,
-      });
-    } catch {
-      // ユーザーによるキャンセル等は無視
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert(t("stampDetail.shareUnavailableTitle"), t("stampDetail.shareUnavailableMessage"));
+        return;
+      }
+
+      let localUri = currentImageUri;
+      if (/^https?:\/\//.test(currentImageUri)) {
+        const ext = currentImageUri.split(/[?#]/)[0].split(".").pop()?.toLowerCase();
+        const fileName = `share-${Date.now()}.${ext && ext.length <= 4 ? ext : "png"}`;
+        const downloaded = await File.downloadFileAsync(currentImageUri, new File(Paths.cache, fileName));
+        localUri = downloaded.uri;
+      }
+
+      await Sharing.shareAsync(localUri, { dialogTitle: spotName || undefined });
+    } catch (error) {
+      console.error("[stamp-detail] failed to share image", error);
+      Alert.alert(t("stampDetail.shareFailedTitle"), t("stampDetail.shareFailedMessage"));
     }
   };
 
