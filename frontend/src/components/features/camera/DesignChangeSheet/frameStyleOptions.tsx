@@ -39,9 +39,11 @@ function FrameThumb({
           borderRadius: 22,
           borderWidth: variant === 'minimal' ? 1 : 2.5,
           borderColor: color,
+          borderStyle: variant === 'vintage' ? 'dashed' : 'solid',
         }}
       />
-      {variant === 'vintage' && (
+      {/* API上の classic (二重丸) に対応するプレビュー */}
+      {variant === 'classic' && (
         <View
           style={{
             position: 'absolute',
