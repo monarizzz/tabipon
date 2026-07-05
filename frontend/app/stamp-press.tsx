@@ -59,9 +59,12 @@ export default function StampPressScreen() {
   const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
   );
-  const [selectedColor, setSelectedColor] = React.useState(STAMP_COLOR_OPTIONS[0]);
+  const [selectedColor, setSelectedColor] = React.useState(
+    STAMP_COLOR_OPTIONS[0],
+  );
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
-  const [stampResult, setStampResult] = React.useState<StampCreateResponse | null>(null);
+  const [stampResult, setStampResult] =
+    React.useState<StampCreateResponse | null>(null);
   const [uploadFailed, setUploadFailed] = React.useState(false);
   const [uploadErrorMessage, setUploadErrorMessage] = React.useState(() =>
     t("stampPress.networkError"),
@@ -73,7 +76,9 @@ export default function StampPressScreen() {
   const stampWrapRef = React.useRef<View>(null);
   const shakeTriggeredRef = React.useRef(false);
   const stampLiftDetectedRef = React.useRef(false);
-  const stampLiftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stampLiftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const stampDownPeakRef = React.useRef(0);
   const currentRotationAlphaRef = React.useRef(0);
   const referenceAlphaRef = React.useRef<number | null>(null);
@@ -85,16 +90,22 @@ export default function StampPressScreen() {
     ],
   }));
 
-  const showUploadError = React.useCallback((error: unknown) => {
-    let message = t("stampPress.networkError");
-    if (error instanceof ApiError) {
-      message = t("stampPress.apiError", { status: error.status, detail: String(error.detail) });
-    } else if (error instanceof Error) {
-      message = `${error.name}: ${error.message}`;
-    }
-    setUploadErrorMessage(message);
-    setUploadFailed(true);
-  }, [t]);
+  const showUploadError = React.useCallback(
+    (error: unknown) => {
+      let message = t("stampPress.networkError");
+      if (error instanceof ApiError) {
+        message = t("stampPress.apiError", {
+          status: error.status,
+          detail: String(error.detail),
+        });
+      } else if (error instanceof Error) {
+        message = `${error.name}: ${error.message}`;
+      }
+      setUploadErrorMessage(message);
+      setUploadFailed(true);
+    },
+    [t],
+  );
 
   // 送信結果を購読し、長押し前でもエラーを先出しする(色変更でチェーンが
   // 差し替わった後の結果は無視して、常に最新のものだけ反映する)
@@ -150,66 +161,87 @@ export default function StampPressScreen() {
 
   React.useEffect(() => {
     DeviceMotion.setUpdateInterval(50);
-    const subscription = DeviceMotion.addListener(({ acceleration, rotation }) => {
-      if (rotation?.alpha != null) {
-        if (referenceAlphaRef.current === null) referenceAlphaRef.current = rotation.alpha;
-        const relativeAlpha = rotation.alpha - referenceAlphaRef.current;
-        currentRotationAlphaRef.current = relativeAlpha;
-        // -180〜180度に正規化してプレビューをリアルタイム回転
-        let deg = -(relativeAlpha * (180 / Math.PI));
-        if (deg > 180) deg -= 360;
-        if (deg < -180) deg += 360;
-        stampRotation.value = deg;
-      }
-      if (shakeTriggeredRef.current) return;
+    const subscription = DeviceMotion.addListener(
+      ({ acceleration, rotation }) => {
+        if (rotation?.alpha != null) {
+          if (referenceAlphaRef.current === null)
+            referenceAlphaRef.current = rotation.alpha;
+          const relativeAlpha = rotation.alpha - referenceAlphaRef.current;
+          currentRotationAlphaRef.current = relativeAlpha;
+          // -180〜180度に正規化してプレビューをリアルタイム回転
+          let deg = -(relativeAlpha * (180 / Math.PI));
+          if (deg > 180) deg -= 360;
+          if (deg < -180) deg += 360;
+          stampRotation.value = deg;
+        }
+        if (shakeTriggeredRef.current) return;
 
-      const z = acceleration?.z ?? 0;
+        const z = acceleration?.z ?? 0;
 
-      // ①持ち上げ検知（z がプラスに振れたら準備OK、800ms以内に押し付けが来なければリセット）
-      if (z > 2) {
-        stampLiftDetectedRef.current = true;
-        stampDownPeakRef.current = 0;
-        if (stampLiftTimerRef.current) clearTimeout(stampLiftTimerRef.current);
-        stampLiftTimerRef.current = setTimeout(() => {
+        // ①持ち上げ検知（z がプラスに振れたら準備OK、800ms以内に押し付けが来なければリセット）
+        if (z > 2) {
+          stampLiftDetectedRef.current = true;
+          stampDownPeakRef.current = 0;
+          if (stampLiftTimerRef.current)
+            clearTimeout(stampLiftTimerRef.current);
+          stampLiftTimerRef.current = setTimeout(() => {
+            stampLiftDetectedRef.current = false;
+          }, 800);
+        }
+
+        // ②持ち上げ後に z < -2 まで下がったら押し付け中とみなしてpeak記録
+        if (
+          stampLiftDetectedRef.current &&
+          z < -2 &&
+          z < stampDownPeakRef.current
+        ) {
+          stampDownPeakRef.current = z;
+        }
+
+        // ③押し付けピーク後にニュートラル(z > -0.5)に戻ったらスタンプ確定（縦持ち方式）
+        if (
+          stampLiftDetectedRef.current &&
+          stampDownPeakRef.current < -2 &&
+          z > -0.5
+        ) {
+          shakeTriggeredRef.current = true;
           stampLiftDetectedRef.current = false;
-        }, 800);
-      }
+          if (stampLiftTimerRef.current)
+            clearTimeout(stampLiftTimerRef.current);
+          const peak = stampDownPeakRef.current;
+          stampDownPeakRef.current = 0;
 
-      // ②持ち上げ後に z < -2 まで下がったら押し付け中とみなしてpeak記録
-      if (stampLiftDetectedRef.current && z < -2 && z < stampDownPeakRef.current) {
-        stampDownPeakRef.current = z;
-      }
-
-      // ③押し付けピーク後にニュートラル(z > -0.5)に戻ったらスタンプ確定（縦持ち方式）
-      if (stampLiftDetectedRef.current && stampDownPeakRef.current < -2 && z > -0.5) {
-        shakeTriggeredRef.current = true;
-        stampLiftDetectedRef.current = false;
-        if (stampLiftTimerRef.current) clearTimeout(stampLiftTimerRef.current);
-        const peak = stampDownPeakRef.current;
-        stampDownPeakRef.current = 0;
-
-        // 弱い押し付け(peak=-2) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
-        const scratchLevel = Math.max(0, Math.min(1.0, (peak - (-75)) / ((-2) - (-75))));
-        let tiltAngle = -(currentRotationAlphaRef.current * (180 / Math.PI));
-        if (tiltAngle > 180) tiltAngle -= 360;
-        if (tiltAngle < -180) tiltAngle += 360;
-        runOnJS(setStampPressed)(true);
-        applyScratch(scratchLevel, tiltAngle);
-        Audio.Sound.createAsync(require("@/assets/sounds/stamp.mp3"))
-          .then(({ sound }) => { sound.playAsync(); })
-          .catch(() => {});
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Vibration.vibrate([0, 40, 30, 80]);
-        cancelAnimation(stampScale);
-        stampScale.value = withSequence(
-          withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
-          withTiming(1.06, { duration: 20, easing: Easing.out(Easing.back(2)) }),
-          withTiming(1, { duration: 120 }, (finished) => {
-            if (finished) runOnJS(goToStampDone)();
-          }),
-        );
-      }
-    });
+          // 弱い押し付け(peak=-2) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
+          const scratchLevel = Math.max(
+            0,
+            Math.min(1.0, (peak - -75) / (-2 - -75)),
+          );
+          let tiltAngle = -(currentRotationAlphaRef.current * (180 / Math.PI));
+          if (tiltAngle > 180) tiltAngle -= 360;
+          if (tiltAngle < -180) tiltAngle += 360;
+          runOnJS(setStampPressed)(true);
+          applyScratch(scratchLevel, tiltAngle);
+          Audio.Sound.createAsync(require("@/assets/sounds/stamp.mp3"))
+            .then(({ sound }) => {
+              sound.playAsync();
+            })
+            .catch(() => {});
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          Vibration.vibrate([0, 40, 30, 80]);
+          cancelAnimation(stampScale);
+          stampScale.value = withSequence(
+            withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
+            withTiming(1.06, {
+              duration: 20,
+              easing: Easing.out(Easing.back(2)),
+            }),
+            withTiming(1, { duration: 120 }, (finished) => {
+              if (finished) runOnJS(goToStampDone)();
+            }),
+          );
+        }
+      },
+    );
     return () => {
       subscription.remove();
       Vibration.cancel();
@@ -287,7 +319,13 @@ export default function StampPressScreen() {
             ) : (
               <StampOrientationGuide
                 color={selectedColor}
-                frameId={selectedFrameStyleId as "classic" | "vintage" | "minimal" | "wave"}
+                frameId={
+                  selectedFrameStyleId as
+                    | "classic"
+                    | "vintage"
+                    | "minimal"
+                    | "wave"
+                }
               />
             )}
           </Animated.View>
@@ -392,6 +430,11 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: typography.caption.fontSize,
     color: colors.textMuted,
+  },
+  debug: {
+    fontSize: 11,
+    color: colors.textMuted,
+    fontFamily: "monospace",
   },
   helpIcon: {
     fontSize: 14,
