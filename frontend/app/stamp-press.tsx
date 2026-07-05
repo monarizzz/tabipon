@@ -58,9 +58,12 @@ export default function StampPressScreen() {
   const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
   );
-  const [selectedColor, setSelectedColor] = React.useState(STAMP_COLOR_OPTIONS[0]);
+  const [selectedColor, setSelectedColor] = React.useState(
+    STAMP_COLOR_OPTIONS[0],
+  );
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
-  const [stampResult, setStampResult] = React.useState<StampCreateResponse | null>(null);
+  const [stampResult, setStampResult] =
+    React.useState<StampCreateResponse | null>(null);
   const [uploadFailed, setUploadFailed] = React.useState(false);
   const [uploadErrorMessage, setUploadErrorMessage] = React.useState(() =>
     t("stampPress.networkError"),
@@ -71,14 +74,28 @@ export default function StampPressScreen() {
   const stampWrapRef = React.useRef<View>(null);
   const shakeTriggeredRef = React.useRef(false);
   const swingUpDetectedRef = React.useRef(false);
-  const swingUpTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [previewImages, setPreviewImages] = React.useState<{ low: string; mid: string; high: string } | null>(null);
-  const previewImagesRef = React.useRef<{ low: string; mid: string; high: string } | null>(null);
+  const swingUpTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const [previewImages, setPreviewImages] = React.useState<{
+    low: string;
+    mid: string;
+    high: string;
+  } | null>(null);
+  const previewImagesRef = React.useRef<{
+    low: string;
+    mid: string;
+    high: string;
+  } | null>(null);
   const [previewLoading, setPreviewLoading] = React.useState(false);
   const swingUpTimestampRef = React.useRef(0);
   const swingDownPeakRef = React.useRef(0);
   const chosenScratchLevelRef = React.useRef(0);
-  const [debugAccel, setDebugAccel] = React.useState({ y: 0, peak: 0, scratch: 0 });
+  const [debugAccel, setDebugAccel] = React.useState({
+    y: 0,
+    peak: 0,
+    scratch: 0,
+  });
 
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
@@ -99,29 +116,40 @@ export default function StampPressScreen() {
       previewStampImage(uri, apiColor, 0.0, apiFrame),
       previewStampImage(uri, apiColor, 0.4, apiFrame),
       previewStampImage(uri, apiColor, 0.8, apiFrame),
-    ]).then(([low, mid, high]) => {
-      if (!cancelled) {
-        console.log(`[preview] done color=${apiColor} frame=${apiFrame}`);
-        setPreviewImages({ low, mid, high });
-        setPreviewLoading(false);
-      }
-    }).catch((err) => {
-      if (!cancelled) setPreviewLoading(false);
-      console.warn("[stamp-press] preview generation failed", err);
-    });
-    return () => { cancelled = true; setPreviewLoading(false); };
+    ])
+      .then(([low, mid, high]) => {
+        if (!cancelled) {
+          console.log(`[preview] done color=${apiColor} frame=${apiFrame}`);
+          setPreviewImages({ low, mid, high });
+          setPreviewLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) setPreviewLoading(false);
+        console.warn("[stamp-press] preview generation failed", err);
+      });
+    return () => {
+      cancelled = true;
+      setPreviewLoading(false);
+    };
   }, [uri, selectedColor, selectedFrameStyleId]);
 
-  const showUploadError = React.useCallback((error: unknown) => {
-    let message = t("stampPress.networkError");
-    if (error instanceof ApiError) {
-      message = t("stampPress.apiError", { status: error.status, detail: String(error.detail) });
-    } else if (error instanceof Error) {
-      message = `${error.name}: ${error.message}`;
-    }
-    setUploadErrorMessage(message);
-    setUploadFailed(true);
-  }, [t]);
+  const showUploadError = React.useCallback(
+    (error: unknown) => {
+      let message = t("stampPress.networkError");
+      if (error instanceof ApiError) {
+        message = t("stampPress.apiError", {
+          status: error.status,
+          detail: String(error.detail),
+        });
+      } else if (error instanceof Error) {
+        message = `${error.name}: ${error.message}`;
+      }
+      setUploadErrorMessage(message);
+      setUploadFailed(true);
+    },
+    [t],
+  );
 
   // 送信結果を購読し、長押し前でもエラーを先出しする(色変更でチェーンが
   // 差し替わった後の結果は無視して、常に最新のものだけ反映する)
@@ -200,12 +228,20 @@ export default function StampPressScreen() {
         // peak: -1.5(弱) → scratch 1.0、-8.0(強) → scratch 0.0 の線形マッピング
         const scratchLevel = Math.max(0, Math.min(1.0, (peak + 8.0) / 6.5));
         chosenScratchLevelRef.current = scratchLevel;
-        setDebugAccel({ y: Math.round(y * 100) / 100, peak: Math.round(peak * 100) / 100, scratch: scratchLevel });
+        setDebugAccel({
+          y: Math.round(y * 100) / 100,
+          peak: Math.round(peak * 100) / 100,
+          scratch: scratchLevel,
+        });
         applyScratch(scratchLevel);
         const previews = previewImagesRef.current;
         if (previews) {
           setChosenPreviewUri(
-            scratchLevel >= 0.8 ? previews.high : scratchLevel >= 0.4 ? previews.mid : previews.low,
+            scratchLevel >= 0.8
+              ? previews.high
+              : scratchLevel >= 0.4
+                ? previews.mid
+                : previews.low,
           );
         }
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -213,7 +249,10 @@ export default function StampPressScreen() {
         cancelAnimation(stampScale);
         stampScale.value = withSequence(
           withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
-          withTiming(1.06, { duration: 20, easing: Easing.out(Easing.back(2)) }),
+          withTiming(1.06, {
+            duration: 20,
+            easing: Easing.out(Easing.back(2)),
+          }),
           withTiming(1, { duration: 120 }, (finished) => {
             if (finished) runOnJS(goToStampDone)();
           }),
@@ -282,7 +321,9 @@ export default function StampPressScreen() {
           onPressOut={handleStampPressOut}
         >
           <Animated.View style={stampAnimatedStyle}>
-            <Stamp imageUri={stampResult?.image_url ?? previewImages?.mid ?? uri} />
+            <Stamp
+              imageUri={stampResult?.image_url ?? previewImages?.mid ?? uri}
+            />
             {previewLoading && (
               <View style={styles.previewLoadingOverlay}>
                 <ActivityIndicator size="small" color={colors.white} />
@@ -291,7 +332,6 @@ export default function StampPressScreen() {
           </Animated.View>
         </Pressable>
         <Text style={styles.hint}>{t("stampPress.shakeHint")}</Text>
-        <Text style={styles.debug}>y: {debugAccel.y}  peak: {debugAccel.peak}  scratch: {debugAccel.scratch}</Text>
         <CommonButton
           label={t("design.changeDesign")}
           onPress={() => setDesignSheetVisible(true)}
