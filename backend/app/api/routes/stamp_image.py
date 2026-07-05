@@ -57,6 +57,9 @@ async def create_stamp_image_endpoint(
         longitude=longitude,
         spot_name=spot_name,
         tilt_angle=tilt_angle,
+        scratch_level=scratch_level,
+        color=color.value,
+        frame=frame.value,
     )
     logger.info("stamp-image create saved stamp_id=%s", stamp.get("id"))
 
@@ -72,11 +75,12 @@ async def preview_stamp_image_endpoint(
     color: StampColor = Form(StampColor.red),
     frame: StampFrame = Form(StampFrame.classic),
     scratch_level: float = Form(0.0),
+    tilt_angle: Annotated[float | None, Form()] = None,
 ):
     image_bytes = await image.read()
     validate_upload(image, image_bytes)
     validate_image_data(image_bytes)
-    png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level)
+    png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level, tilt_angle or 0.0)
     return {"image_base64": base64.b64encode(png_bytes).decode()}
 
 
@@ -87,14 +91,16 @@ async def update_stamp_image_endpoint(
     color: StampColor = Form(StampColor.red),
     frame: StampFrame = Form(StampFrame.classic),
     scratch_level: float = Form(0.0),
+    tilt_angle: Annotated[float | None, Form()] = None,
 ):
     logger.info(
-        "stamp-image update received stamp_id=%s filename=%s content_type=%s color=%s scratch_level=%s",
+        "stamp-image update received stamp_id=%s filename=%s content_type=%s color=%s scratch_level=%s tilt_angle=%s",
         stamp_id,
         image.filename,
         image.content_type,
         color,
         scratch_level,
+        tilt_angle,
     )
     image_bytes = await image.read()
     logger.info("stamp-image update read bytes=%s stamp_id=%s", len(image_bytes), stamp_id)
@@ -103,9 +109,11 @@ async def update_stamp_image_endpoint(
 
     stamp = find_stamp(stamp_id)
 
-    png_bytes = process_stamp_image(image_bytes, color, frame, scratch_level=scratch_level)
+    png_bytes = process_stamp_image(
+        image_bytes, color, frame, scratch_level=scratch_level, tilt_angle=tilt_angle or 0.0
+    )
     logger.info("stamp-image update processed png_bytes=%s stamp_id=%s", len(png_bytes), stamp_id)
-    updated = replace_stamp_image(stamp, png_bytes)
+    updated = replace_stamp_image(stamp, png_bytes, color=color.value, frame=frame.value)
     logger.info("stamp-image update saved stamp_id=%s", updated.get("id"))
 
     return {
@@ -127,10 +135,16 @@ def find_stamp(stamp_id: str) -> dict:
     return stamp
 
 
-def replace_stamp_image(stamp: dict, png_bytes: bytes) -> dict:
+def replace_stamp_image(
+    stamp: dict,
+    png_bytes: bytes,
+    *,
+    color: str | None = None,
+    frame: str | None = None,
+) -> dict:
     try:
         new_image_url = upload_stamp_image(png_bytes)
-        updated = update_stamp_image_url(stamp["id"], new_image_url)
+        updated = update_stamp_image_url(stamp["id"], new_image_url, color=color, frame=frame)
     except StampRepositoryError as error:
         logger.exception("stamp-image update save failed stamp_id=%s", stamp.get("id"))
         raise HTTPException(status_code=500, detail="Failed to update stamp") from error
@@ -147,6 +161,9 @@ def save_stamp(
     longitude: float | None = None,
     spot_name: str | None = None,
     tilt_angle: float | None = None,
+    scratch_level: float | None = None,
+    color: str | None = None,
+    frame: str | None = None,
 ) -> dict:
     try:
         image_url = upload_stamp_image(png_bytes)
@@ -157,6 +174,9 @@ def save_stamp(
             longitude=longitude,
             spot_name=spot_name,
             tilt_angle=tilt_angle,
+            scratch_level=scratch_level,
+            color=color,
+            frame=frame,
         )
     except StampRepositoryError as error:
         logger.exception("stamp-image create save failed")

@@ -114,3 +114,19 @@ export const API_FRAME_BY_ID: Record<string, StampFrame> = {
   'minimal': 'simple',
   'wave': 'wave',
 };
+
+// 保存済み color(api値) からスウォッチの hex を逆引きする(デザイン変更パネルの初期選択用)
+export const HEX_BY_API_COLOR: Record<StampColor, string> = {
+  red: '#ff6b6b',
+  blue: '#6bc1ff',
+  black: '#333333',
+  green: '#6de8b9',
+};
+
+// 保存済み frame(api値) からフレームスタイル id を逆引きする
+export const FRAME_ID_BY_API: Record<StampFrame, string> = {
+  classic: 'classic',
+  dash: 'vintage',
+  simple: 'minimal',
+  wave: 'wave',
+};

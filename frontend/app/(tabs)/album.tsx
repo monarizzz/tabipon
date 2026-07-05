@@ -46,6 +46,10 @@ function toGridItem(stamp: StampListItem, defaultName: string): StampGridItem {
     spotName,
     memo: stamp.memo?.trim() || "",
     obtained: true,
+    tiltAngle: stamp.tilt_angle ?? 0,
+    scratchLevel: stamp.scratch_level ?? 0,
+    color: stamp.color ?? "",
+    frame: stamp.frame ?? "",
   };
 }
 
@@ -133,6 +137,10 @@ export default function AlbumScreen() {
                 longitude: String(stamp?.longitude ?? ""),
                 spotName: item.spotName ?? "",
                 memo: item.memo ?? "",
+                tiltAngle: String(item.tiltAngle ?? 0),
+                scratchLevel: String(item.scratchLevel ?? 0),
+                color: item.color ?? "",
+                frame: item.frame ?? "",
               },
             });
           }
