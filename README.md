@@ -1,28 +1,4 @@
-front
-
-cd frontend
-`npm install expo --legacy-peer-deps && npx expo install`
-
-実行方法
-npm run start
-
-backend
-
-cd backend
-
-実行方法
-`.venv/bin/uvicorn main:app --reload`
-
-確認URL
-- http://127.0.0.1:8000/health
-- http://127.0.0.1:8000/docs
-
-8000番ポートが使われている場合
-`.venv/bin/uvicorn main:app --reload --port 8001`
-
----
-
-# 追記: ログ付き実行方法
+# progate_hack_7
 
 ## ログ
 
@@ -33,17 +9,7 @@ cd backend
 
 AI にエラーを読ませたいときは、該当するログファイルの中身を貼ってください。
 
-## 同時起動
 
-フロントエンドとバックエンドを同時に起動し、それぞれログファイルへ書き出します。
-
-```bash
-./scripts/dev-with-logs.sh
-```
-
-停止するときは `Ctrl+C` です。
-
-実機で確認するときは、このコマンドのフロントエンド側に表示される QR コードを Expo Go で読み取ります。
 
 ## フロントエンド
 
@@ -66,7 +32,7 @@ npx expo start -c --tunnel
 
 ```bash
 cd frontend
-npm install
+npm install expo --legacy-peer-deps && npx expo install
 ```
 
 通常起動:
