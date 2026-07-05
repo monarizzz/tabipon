@@ -43,7 +43,6 @@ export const ko: Translations = {
   },
   stampDone: {
     badge: "✦ 스탬프 획득! ✦",
-    title: "스탬프를 찍었습니다",
     shareMessage: "스탬프를 획득했습니다!",
     addSpotName: "장소 이름 추가",
     addMemo: "메모 추가...",

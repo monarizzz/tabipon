@@ -22,3 +22,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const WithSpotName: Story = {
+  args: { spotName: "東京スカイツリー", onPressSpotName: fn() },
+};

@@ -13,9 +13,6 @@ const meta = {
     ),
   ],
   tags: ["autodocs"],
-  args: {
-    date: "2026.06.29",
-  },
 } satisfies Meta<typeof StampResultHeader>;
 
 export default meta;

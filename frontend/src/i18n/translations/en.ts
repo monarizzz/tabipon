@@ -43,7 +43,6 @@ export const en: Translations = {
   },
   stampDone: {
     badge: "✦ Stamp earned! ✦",
-    title: "Stamp collected",
     shareMessage: "I earned a stamp!",
     addSpotName: "Add spot name",
     addMemo: "Add a memo...",
