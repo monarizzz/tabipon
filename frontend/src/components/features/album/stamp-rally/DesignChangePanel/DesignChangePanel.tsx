@@ -32,6 +32,7 @@ type Props = {
   showLandmarkName: boolean;
   onToggleShowLandmarkName: (value: boolean) => void;
   onConfirm: () => void;
+  confirming?: boolean;
 };
 
 export function DesignChangePanel({
@@ -48,6 +49,7 @@ export function DesignChangePanel({
   showLandmarkName,
   onToggleShowLandmarkName,
   onConfirm,
+  confirming,
 }: Props) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
@@ -123,6 +125,8 @@ export function DesignChangePanel({
           label={t("design.apply")}
           onPress={onConfirm}
           variant="primary"
+          disabled={confirming}
+          icon={confirming ? <ActivityIndicator color={colors.white} /> : undefined}
           style={styles.confirmButton}
           textStyle={styles.confirmLabel}
         />
