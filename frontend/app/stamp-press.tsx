@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { Accelerometer } from "expo-sensors";
+import { Audio } from "expo-av";
+import { DeviceMotion } from "expo-sensors";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -34,7 +35,8 @@ import {
   FRAME_STYLE_OPTIONS,
   STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
-import { type StampCreateResponse, previewStampImage } from "@/src/api/stamps";
+import { type StampCreateResponse } from "@/src/api/stamps";
+import { StampOrientationGuide } from "@/src/components/features/camera/StampOrientationGuide/StampOrientationGuide";
 import { ApiError } from "@/src/api/client";
 import {
   applyScratch,
@@ -42,7 +44,6 @@ import {
   changeFrame,
   getSession,
   retryUpload,
-  setChosenPreviewUri,
   waitForResult,
 } from "@/src/api/stampSession";
 import { useTranslation } from "@/src/i18n/I18nProvider";
@@ -69,70 +70,25 @@ export default function StampPressScreen() {
     t("stampPress.networkError"),
   );
   const [waiting, setWaiting] = React.useState(false);
+  const [stampPressed, setStampPressed] = React.useState(false);
   const longPressTriggeredRef = React.useRef(false);
   const stampScale = useSharedValue(1);
   const stampWrapRef = React.useRef<View>(null);
   const shakeTriggeredRef = React.useRef(false);
-  const swingUpDetectedRef = React.useRef(false);
-  const swingUpTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+  const stampLiftDetectedRef = React.useRef(false);
+  const stampLiftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
-  const [previewImages, setPreviewImages] = React.useState<{
-    low: string;
-    mid: string;
-    high: string;
-  } | null>(null);
-  const previewImagesRef = React.useRef<{
-    low: string;
-    mid: string;
-    high: string;
-  } | null>(null);
-  const [previewLoading, setPreviewLoading] = React.useState(false);
-  const swingUpTimestampRef = React.useRef(0);
-  const swingDownPeakRef = React.useRef(0);
-  const chosenScratchLevelRef = React.useRef(0);
-  const [debugAccel, setDebugAccel] = React.useState({
-    y: 0,
-    peak: 0,
-    scratch: 0,
-  });
-
+  const stampDownPeakRef = React.useRef(0);
+  const currentRotationAlphaRef = React.useRef(0);
+  const referenceAlphaRef = React.useRef<number | null>(null);
+  const stampRotation = useSharedValue(0);
   const stampAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: stampScale.value }],
+    transform: [
+      { scale: stampScale.value },
+      { rotate: `${stampRotation.value}deg` },
+    ],
   }));
-
-  React.useEffect(() => {
-    previewImagesRef.current = previewImages;
-  }, [previewImages]);
-
-  React.useEffect(() => {
-    if (!uri) return;
-    const apiColor = API_COLOR_BY_HEX[selectedColor] ?? "red";
-    const apiFrame = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
-    let cancelled = false;
-    setPreviewLoading(true);
-    console.log(`[preview] start color=${apiColor} frame=${apiFrame}`);
-    Promise.all([
-      previewStampImage(uri, apiColor, 0.0, apiFrame),
-      previewStampImage(uri, apiColor, 0.4, apiFrame),
-      previewStampImage(uri, apiColor, 0.8, apiFrame),
-    ])
-      .then(([low, mid, high]) => {
-        if (!cancelled) {
-          console.log(`[preview] done color=${apiColor} frame=${apiFrame}`);
-          setPreviewImages({ low, mid, high });
-          setPreviewLoading(false);
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) setPreviewLoading(false);
-        console.warn("[stamp-press] preview generation failed", err);
-      });
-    return () => {
-      cancelled = true;
-      setPreviewLoading(false);
-    };
-  }, [uri, selectedColor, selectedFrameStyleId]);
 
   const showUploadError = React.useCallback(
     (error: unknown) => {
@@ -204,61 +160,88 @@ export default function StampPressScreen() {
   }, [router]);
 
   React.useEffect(() => {
-    Accelerometer.setUpdateInterval(100);
-    const subscription = Accelerometer.addListener(({ y }) => {
-      if (shakeTriggeredRef.current) return;
-      if (y > 1.5) {
-        swingUpDetectedRef.current = true;
-        swingUpTimestampRef.current = Date.now();
-        swingDownPeakRef.current = 0;
-        if (swingUpTimerRef.current) clearTimeout(swingUpTimerRef.current);
-        swingUpTimerRef.current = setTimeout(() => {
-          swingUpDetectedRef.current = false;
-        }, 800);
-      }
-      if (swingUpDetectedRef.current && y < swingDownPeakRef.current) {
-        swingDownPeakRef.current = y;
-      }
-      if (y < -1.5 && swingUpDetectedRef.current) {
-        shakeTriggeredRef.current = true;
-        swingUpDetectedRef.current = false;
-        const peak = swingDownPeakRef.current;
-        const elapsed = Date.now() - swingUpTimestampRef.current;
-        // 遅い（弱い）スイングほど掠れが強くなる
-        // peak: -1.5(弱) → scratch 1.0、-8.0(強) → scratch 0.0 の線形マッピング
-        const scratchLevel = Math.max(0, Math.min(1.0, (peak + 8.0) / 6.5));
-        chosenScratchLevelRef.current = scratchLevel;
-        setDebugAccel({
-          y: Math.round(y * 100) / 100,
-          peak: Math.round(peak * 100) / 100,
-          scratch: scratchLevel,
-        });
-        applyScratch(scratchLevel);
-        const previews = previewImagesRef.current;
-        if (previews) {
-          setChosenPreviewUri(
-            scratchLevel >= 0.8
-              ? previews.high
-              : scratchLevel >= 0.4
-                ? previews.mid
-                : previews.low,
+    DeviceMotion.setUpdateInterval(50);
+    const subscription = DeviceMotion.addListener(
+      ({ acceleration, rotation }) => {
+        if (rotation?.alpha != null) {
+          if (referenceAlphaRef.current === null)
+            referenceAlphaRef.current = rotation.alpha;
+          const relativeAlpha = rotation.alpha - referenceAlphaRef.current;
+          currentRotationAlphaRef.current = relativeAlpha;
+          // -180〜180度に正規化してプレビューをリアルタイム回転
+          let deg = -(relativeAlpha * (180 / Math.PI));
+          if (deg > 180) deg -= 360;
+          if (deg < -180) deg += 360;
+          stampRotation.value = deg;
+        }
+        if (shakeTriggeredRef.current) return;
+
+        const z = acceleration?.z ?? 0;
+
+        // ①持ち上げ検知（z がプラスに振れたら準備OK、800ms以内に押し付けが来なければリセット）
+        if (z > 2) {
+          stampLiftDetectedRef.current = true;
+          stampDownPeakRef.current = 0;
+          if (stampLiftTimerRef.current)
+            clearTimeout(stampLiftTimerRef.current);
+          stampLiftTimerRef.current = setTimeout(() => {
+            stampLiftDetectedRef.current = false;
+          }, 800);
+        }
+
+        // ②持ち上げ後に z < -2 まで下がったら押し付け中とみなしてpeak記録
+        if (
+          stampLiftDetectedRef.current &&
+          z < -2 &&
+          z < stampDownPeakRef.current
+        ) {
+          stampDownPeakRef.current = z;
+        }
+
+        // ③押し付けピーク後にニュートラル(z > -0.5)に戻ったらスタンプ確定（縦持ち方式）
+        if (
+          stampLiftDetectedRef.current &&
+          stampDownPeakRef.current < -2 &&
+          z > -0.5
+        ) {
+          shakeTriggeredRef.current = true;
+          stampLiftDetectedRef.current = false;
+          if (stampLiftTimerRef.current)
+            clearTimeout(stampLiftTimerRef.current);
+          const peak = stampDownPeakRef.current;
+          stampDownPeakRef.current = 0;
+
+          // 弱い押し付け(peak=-2) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
+          const scratchLevel = Math.max(
+            0,
+            Math.min(1.0, (peak - -75) / (-2 - -75)),
+          );
+          let tiltAngle = -(currentRotationAlphaRef.current * (180 / Math.PI));
+          if (tiltAngle > 180) tiltAngle -= 360;
+          if (tiltAngle < -180) tiltAngle += 360;
+          runOnJS(setStampPressed)(true);
+          applyScratch(scratchLevel, tiltAngle);
+          Audio.Sound.createAsync(require("@/assets/sounds/stamp.mp3"))
+            .then(({ sound }) => {
+              sound.playAsync();
+            })
+            .catch(() => {});
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          Vibration.vibrate([0, 40, 30, 80]);
+          cancelAnimation(stampScale);
+          stampScale.value = withSequence(
+            withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
+            withTiming(1.06, {
+              duration: 20,
+              easing: Easing.out(Easing.back(2)),
+            }),
+            withTiming(1, { duration: 120 }, (finished) => {
+              if (finished) runOnJS(goToStampDone)();
+            }),
           );
         }
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Vibration.vibrate([0, 40, 30, 80]);
-        cancelAnimation(stampScale);
-        stampScale.value = withSequence(
-          withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
-          withTiming(1.06, {
-            duration: 20,
-            easing: Easing.out(Easing.back(2)),
-          }),
-          withTiming(1, { duration: 120 }, (finished) => {
-            if (finished) runOnJS(goToStampDone)();
-          }),
-        );
-      }
-    });
+      },
+    );
     return () => {
       subscription.remove();
       Vibration.cancel();
@@ -279,7 +262,10 @@ export default function StampPressScreen() {
   };
 
   const handleStampLongPress = () => {
+    if (shakeTriggeredRef.current) return;
+    shakeTriggeredRef.current = true;
     longPressTriggeredRef.current = true;
+    setStampPressed(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     // 押し込み中の振動を止めて、「ドン」と強めの二段振動を鳴らす
     Vibration.cancel();
@@ -321,13 +307,26 @@ export default function StampPressScreen() {
           onPressOut={handleStampPressOut}
         >
           <Animated.View style={stampAnimatedStyle}>
-            <Stamp
-              imageUri={stampResult?.image_url ?? previewImages?.mid ?? uri}
-            />
-            {previewLoading && (
-              <View style={styles.previewLoadingOverlay}>
-                <ActivityIndicator size="small" color={colors.white} />
-              </View>
+            {stampPressed ? (
+              <>
+                <Stamp imageUri={stampResult?.image_url} />
+                {!stampResult && (
+                  <View style={styles.previewLoadingOverlay}>
+                    <ActivityIndicator size="small" color={colors.white} />
+                  </View>
+                )}
+              </>
+            ) : (
+              <StampOrientationGuide
+                color={selectedColor}
+                frameId={
+                  selectedFrameStyleId as
+                    | "classic"
+                    | "vintage"
+                    | "minimal"
+                    | "wave"
+                }
+              />
             )}
           </Animated.View>
         </Pressable>

@@ -62,11 +62,13 @@ export function createStampImage(
   scratchLevel: number = 0,
   frame: StampFrame = "classic",
   location?: StampLocation | null,
+  tiltAngle: number = 0,
 ): Promise<StampCreateResponse> {
-  // Content-Type は指定しない(boundary 付きで fetch が自動付与する)
+  const formData = buildImageFormData(photoUri, color, scratchLevel, frame, location);
+  if (tiltAngle !== 0) formData.append("tilt_angle", String(tiltAngle));
   return request<StampCreateResponse>("/stamp-image", {
     method: "POST",
-    body: buildImageFormData(photoUri, color, scratchLevel, frame, location),
+    body: formData,
   });
 }
 
