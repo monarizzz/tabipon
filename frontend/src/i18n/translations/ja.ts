@@ -48,6 +48,9 @@ export const ja = {
     addMemo: "メモを追加...",
     keepShooting: "続けて撮影",
     toAlbum: "アルバムへ",
+    retake: "撮り直す",
+    retakeConfirmTitle: "スタンプを撮り直しますか?",
+    retakeConfirmMessage: "このスタンプは削除され、もう一度撮影し直せます。",
   },
   design: {
     frame: "フレーム",
@@ -67,6 +70,7 @@ export const ja = {
     empty: "スタンプを集めるとここに表示されます!",
     filterAll: "すべて",
     stampName: "スタンプ",
+    unknownSpotName: "スポット未設定",
   },
   collection: {
     add: "コレクションを追加",
@@ -97,6 +101,12 @@ export const ja = {
     designUpdateFailedTitle: "エラー",
     designUpdateFailedMessage:
       "デザインの変更に失敗しました。時間をおいて再度お試しください。",
+    shareUnavailableTitle: "共有できません",
+    shareUnavailableMessage: "この端末では共有機能を利用できません。",
+    shareFailedTitle: "エラー",
+    shareFailedMessage: "画像の共有に失敗しました。時間をおいて再度お試しください。",
+    saveFailedTitle: "保存できませんでした",
+    saveFailedMessage: "時間をおいて再度お試しください。",
   },
   discardDialog: {
     title: "編集内容を破棄しますか？",

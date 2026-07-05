@@ -1,7 +1,9 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Share, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { File, Paths } from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { DesignChangePanel } from "@/src/components/features/album/stamp-rally/DesignChangePanel/DesignChangePanel";
 import {
   FRAME_STYLE_OPTIONS,
@@ -13,7 +15,12 @@ import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
 import { Trash2 } from "lucide-react-native";
-import { deleteStamp, updateStampImage, previewStampImage } from "@/src/api/stamps";
+import {
+  deleteStamp,
+  updateStampDetails,
+  updateStampImage,
+  previewStampImage,
+} from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
 import { getOriginalPhotoUri } from "@/src/utils/originalPhotoStore";
 import { useTranslation } from "@/src/i18n/I18nProvider";
@@ -26,12 +33,28 @@ function formatDate(date: Date): string {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
   const day = `${date.getDate()}`.padStart(2, "0");
-  return `${year}.${month}.${day}`;
+  return `${year}/${month}/${day}`;
+}
+
+function formatDateParam(isoDate: string): string {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return "";
+  return formatDate(date);
 }
 
 function parseDate(value: string): Date {
-  const [year, month, day] = value.split(".").map(Number);
+  const [year, month, day] = value.split(/[/.]/).map(Number);
   return new Date(year, (month || 1) - 1, day || 1);
+}
+
+function normalizeParam(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? "";
+  return value ?? "";
+}
+
+function normalizeOptionalText(value: string): string | null {
+  const trimmed = value.trim();
+  return trimmed || null;
 }
 
 type EditingField = "spotName" | "date" | "location" | "memo" | null;
@@ -40,13 +63,22 @@ export default function StampDetailScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { id, imageUri, date: paramDate, latitude: paramLat, longitude: paramLon, spotName: paramSpotName } = useLocalSearchParams<{
+  const {
+    id,
+    imageUri,
+    date: paramDate,
+    latitude: paramLat,
+    longitude: paramLon,
+    spotName: paramSpotName,
+    memo: paramMemo,
+  } = useLocalSearchParams<{
     id?: string;
     imageUri?: string;
     date?: string;
     latitude?: string;
     longitude?: string;
     spotName?: string;
+    memo?: string;
   }>();
   const stampLatitude = paramLat ? parseFloat(paramLat) : null;
   const stampLongitude = paramLon ? parseFloat(paramLon) : null;
@@ -138,10 +170,11 @@ export default function StampDetailScreen() {
     }
   };
 
-  const [spotName, setSpotName] = React.useState(paramSpotName ?? "");
-  const [date, setDate] = React.useState(paramDate || "");
+  const [spotName, setSpotName] = React.useState(() => normalizeParam(paramSpotName));
+  const [date, setDate] = React.useState(() => normalizeParam(paramDate));
   const [location, setLocation] = React.useState("");
-  const [memo, setMemo] = React.useState("");
+  const [memo, setMemo] = React.useState(() => normalizeParam(paramMemo));
+  const [detailUpdating, setDetailUpdating] = React.useState(false);
 
   React.useEffect(() => {
     if (!stampLatitude || !stampLongitude) return;
@@ -183,6 +216,55 @@ export default function StampDetailScreen() {
   };
   const closeEditor = () => setEditingField(null);
 
+  const handleSaveSpotName = async () => {
+    if (!id || detailUpdating) return;
+    const nextSpotName = normalizeOptionalText(draftSpotName);
+    setDetailUpdating(true);
+    try {
+      const updated = await updateStampDetails(id, { spot_name: nextSpotName });
+      setSpotName(updated.spot_name ?? "");
+      closeEditor();
+    } catch (error) {
+      console.error("[stamp-detail] failed to update spot name", error);
+      Alert.alert(t("stampDetail.saveFailedTitle"), t("stampDetail.saveFailedMessage"));
+    } finally {
+      setDetailUpdating(false);
+    }
+  };
+
+  const handleSaveMemo = async () => {
+    if (!id || detailUpdating) return;
+    const nextMemo = normalizeOptionalText(draftMemo);
+    setDetailUpdating(true);
+    try {
+      const updated = await updateStampDetails(id, { memo: nextMemo });
+      setMemo(updated.memo ?? "");
+      closeEditor();
+    } catch (error) {
+      console.error("[stamp-detail] failed to update memo", error);
+      Alert.alert(t("stampDetail.saveFailedTitle"), t("stampDetail.saveFailedMessage"));
+    } finally {
+      setDetailUpdating(false);
+    }
+  };
+
+  const handleSaveDate = async () => {
+    if (!id || detailUpdating) return;
+    setDetailUpdating(true);
+    try {
+      const updated = await updateStampDetails(id, {
+        acquired_at: draftDate.toISOString(),
+      });
+      setDate(formatDateParam(updated.acquired_at ?? draftDate.toISOString()));
+      closeEditor();
+    } catch (error) {
+      console.error("[stamp-detail] failed to update date", error);
+      Alert.alert(t("stampDetail.saveFailedTitle"), t("stampDetail.saveFailedMessage"));
+    } finally {
+      setDetailUpdating(false);
+    }
+  };
+
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
 
   const handleConfirmDelete = () => {
@@ -199,13 +281,26 @@ export default function StampDetailScreen() {
   };
 
   const handleShare = async () => {
+    if (!currentImageUri) return;
     try {
-      await Share.share({
-        message: [spotName, location, memo].filter(Boolean).join("\n"),
-        url: currentImageUri,
-      });
-    } catch {
-      // ユーザーによるキャンセル等は無視
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert(t("stampDetail.shareUnavailableTitle"), t("stampDetail.shareUnavailableMessage"));
+        return;
+      }
+
+      let localUri = currentImageUri;
+      if (/^https?:\/\//.test(currentImageUri)) {
+        const ext = currentImageUri.split(/[?#]/)[0].split(".").pop()?.toLowerCase();
+        const fileName = `share-${Date.now()}.${ext && ext.length <= 4 ? ext : "png"}`;
+        const downloaded = await File.downloadFileAsync(currentImageUri, new File(Paths.cache, fileName));
+        localUri = downloaded.uri;
+      }
+
+      await Sharing.shareAsync(localUri, { dialogTitle: spotName || undefined });
+    } catch (error) {
+      console.error("[stamp-detail] failed to share image", error);
+      Alert.alert(t("stampDetail.shareFailedTitle"), t("stampDetail.shareFailedMessage"));
     }
   };
 
@@ -261,6 +356,7 @@ export default function StampDetailScreen() {
           onShare={handleShare}
           imageUri={(designMode && previewUri ? previewUri : currentImageUri) || undefined}
           loading={previewLoading}
+          confirming={designUpdating}
           frameStyles={FRAME_STYLE_OPTIONS}
           selectedFrameStyleId={selectedFrameStyleId}
           onSelectFrameStyle={setSelectedFrameStyleId}
@@ -280,10 +376,7 @@ export default function StampDetailScreen() {
         value={draftSpotName}
         onChangeValue={setDraftSpotName}
         placeholder={t("stampDetail.editTitlePlaceholder")}
-        onSave={() => {
-          setSpotName(draftSpotName.trim() || spotName);
-          closeEditor();
-        }}
+        onSave={handleSaveSpotName}
       />
       <EditFieldSheet
         visible={editingField === "location"}
@@ -305,10 +398,7 @@ export default function StampDetailScreen() {
         mode="date"
         value={draftDate}
         onChangeValue={setDraftDate}
-        onSave={() => {
-          setDate(formatDate(draftDate));
-          closeEditor();
-        }}
+        onSave={handleSaveDate}
       />
       <EditFieldSheet
         visible={editingField === "memo"}
@@ -319,10 +409,7 @@ export default function StampDetailScreen() {
         onChangeValue={setDraftMemo}
         placeholder={t("stampDetail.editMemoPlaceholder")}
         multiline
-        onSave={() => {
-          setMemo(draftMemo.trim());
-          closeEditor();
-        }}
+        onSave={handleSaveMemo}
       />
     </View>
   );

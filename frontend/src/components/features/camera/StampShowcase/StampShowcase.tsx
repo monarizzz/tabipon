@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
   wrap: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: spacing.l,
+    paddingVertical: spacing.m,
   },
   shareButton: {
     position: "absolute",

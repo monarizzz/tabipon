@@ -49,6 +49,9 @@ export const en: Translations = {
     addMemo: "Add a memo...",
     keepShooting: "Keep shooting",
     toAlbum: "To album",
+    retake: "Retake",
+    retakeConfirmTitle: "Retake this stamp?",
+    retakeConfirmMessage: "This stamp will be deleted so you can shoot it again.",
   },
   design: {
     frame: "Frame",
@@ -68,6 +71,7 @@ export const en: Translations = {
     empty: "Collect stamps and they will show up here!",
     filterAll: "All",
     stampName: "Stamp",
+    unknownSpotName: "No spot set",
   },
   collection: {
     add: "Add collection",
@@ -98,6 +102,12 @@ export const en: Translations = {
     designUpdateFailedTitle: "Error",
     designUpdateFailedMessage:
       "Failed to change the design. Please wait a moment and try again.",
+    shareUnavailableTitle: "Sharing unavailable",
+    shareUnavailableMessage: "Sharing isn't available on this device.",
+    shareFailedTitle: "Error",
+    shareFailedMessage: "Failed to share the image. Please wait a moment and try again.",
+    saveFailedTitle: "Could not save",
+    saveFailedMessage: "Please wait a moment and try again.",
   },
   discardDialog: {
     title: "Discard your edits?",

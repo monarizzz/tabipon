@@ -50,6 +50,26 @@ def update_stamp_image_url(stamp_id: str, image_url: str) -> dict:
         raise StampRepositoryError("Failed to update stamp record") from error
 
 
+def update_stamp_details(
+    stamp_id: str,
+    *,
+    user_id: str,
+    updates: dict,
+) -> dict | None:
+    try:
+        updated = (
+            get_supabase()
+            .table("stamps")
+            .update(updates)
+            .eq("id", stamp_id)
+            .eq("user_id", user_id)
+            .execute()
+        )
+        return updated.data[0] if updated.data else None
+    except Exception as error:
+        raise StampRepositoryError("Failed to update stamp record") from error
+
+
 def delete_stamp_image_by_url(image_url: str) -> None:
     # 色変更で置き換えた旧画像の後始末。失敗してもスタンプ自体は有効なので握りつぶす
     try:

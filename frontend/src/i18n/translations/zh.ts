@@ -49,6 +49,9 @@ export const zh: Translations = {
     addMemo: "添加备注...",
     keepShooting: "继续拍摄",
     toAlbum: "前往相册",
+    retake: "重新拍摄",
+    retakeConfirmTitle: "要重新拍摄这枚印章吗？",
+    retakeConfirmMessage: "该印章将被删除，你可以重新拍摄。",
   },
   design: {
     frame: "边框",
@@ -68,6 +71,7 @@ export const zh: Translations = {
     empty: "收集印章后会显示在这里！",
     filterAll: "全部",
     stampName: "印章",
+    unknownSpotName: "未设置地点",
   },
   collection: {
     add: "添加合集",
@@ -96,6 +100,12 @@ export const zh: Translations = {
     designUnavailableMessage: "该印章不是在此设备上创建的，因此无法更改设计。",
     designUpdateFailedTitle: "错误",
     designUpdateFailedMessage: "更改设计失败。请稍后再试。",
+    shareUnavailableTitle: "无法共享",
+    shareUnavailableMessage: "此设备不支持共享功能。",
+    shareFailedTitle: "错误",
+    shareFailedMessage: "图片共享失败。请稍后再试。",
+    saveFailedTitle: "无法保存",
+    saveFailedMessage: "请稍后再试。",
   },
   discardDialog: {
     title: "要放弃编辑内容吗？",

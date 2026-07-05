@@ -12,8 +12,11 @@ import { colors, typography, spacing } from "@/src/theme/tokens";
 export type StampGridItem = {
   id: string;
   name: string;
+  nameUnset?: boolean;
   date?: string;
   imageUri?: string;
+  spotName?: string;
+  memo?: string;
   obtained?: boolean;
 };
 
@@ -59,6 +62,7 @@ export function StampGrid({
       renderItem={({ item }) => (
         <StampCard
           name={item.name}
+          nameUnset={item.nameUnset}
           date={item.date}
           imageUri={item.imageUri}
           obtained={item.obtained}

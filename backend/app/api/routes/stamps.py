@@ -1,6 +1,8 @@
 import logging
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from pydantic import BaseModel
 
 from app.core.auth import get_user_id
 from app.repositories.stamp_repository import (
@@ -9,10 +11,37 @@ from app.repositories.stamp_repository import (
     delete_stamp_image_by_url,
     get_stamp,
     list_stamps,
+    update_stamp_details,
 )
 
 router = APIRouter()
 logger = logging.getLogger("uvicorn.error")
+
+
+class StampUpdateRequest(BaseModel):
+    memo: str | None = None
+    spot_name: str | None = None
+    acquired_at: str | None = None
+
+
+def normalize_optional_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+    value = value.strip()
+    return value or None
+
+
+def normalize_required_datetime(value: str | None) -> str:
+    if value is None:
+        raise HTTPException(status_code=400, detail="Invalid acquired_at")
+    value = value.strip()
+    if not value:
+        raise HTTPException(status_code=400, detail="Invalid acquired_at")
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail="Invalid acquired_at") from error
+    return value
 
 
 @router.get("/stamps")
@@ -30,10 +59,44 @@ def list_stamps_endpoint(user_id: str = Depends(get_user_id)):
             "latitude": stamp.get("latitude"),
             "longitude": stamp.get("longitude"),
             "spot_name": stamp.get("spot_name"),
+            "memo": stamp.get("memo"),
             "tilt_angle": stamp.get("tilt_angle"),
         }
         for stamp in stamps
     ]
+
+
+@router.patch("/stamps/{stamp_id}")
+def update_stamp_endpoint(
+    stamp_id: str,
+    payload: StampUpdateRequest,
+    user_id: str = Depends(get_user_id),
+):
+    updates: dict = {}
+    if "memo" in payload.model_fields_set:
+        updates["memo"] = normalize_optional_text(payload.memo)
+    if "spot_name" in payload.model_fields_set:
+        updates["spot_name"] = normalize_optional_text(payload.spot_name)
+    if "acquired_at" in payload.model_fields_set:
+        updates["acquired_at"] = normalize_required_datetime(payload.acquired_at)
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    try:
+        updated = update_stamp_details(stamp_id, user_id=user_id, updates=updates)
+    except StampRepositoryError as error:
+        logger.exception("stamp update failed stamp_id=%s", stamp_id)
+        raise HTTPException(status_code=500, detail="Failed to update stamp") from error
+
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Stamp not found")
+
+    return {
+        "id": updated["id"],
+        "memo": updated.get("memo"),
+        "spot_name": updated.get("spot_name"),
+        "acquired_at": updated.get("acquired_at"),
+    }
 
 
 @router.delete("/stamps/{stamp_id}", status_code=204)
