@@ -49,6 +49,9 @@ export const ko: Translations = {
     addMemo: "메모 추가...",
     keepShooting: "계속 촬영",
     toAlbum: "앨범으로",
+    retake: "다시 찍기",
+    retakeConfirmTitle: "스탬프를 다시 찍으시겠어요?",
+    retakeConfirmMessage: "이 스탬프는 삭제되며 다시 촬영할 수 있습니다.",
   },
   design: {
     frame: "프레임",
