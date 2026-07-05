@@ -221,7 +221,10 @@ export default function StampPressScreen() {
           if (tiltAngle < -180) tiltAngle += 360;
           runOnJS(setStampPressed)(true);
           applyScratch(scratchLevel, tiltAngle);
-          Audio.Sound.createAsync(require("@/assets/sounds/stamp.mp3"))
+          const soundFile = scratchLevel < 0.3
+            ? require("@/assets/sounds/stamp_strong.mp3")
+            : require("@/assets/sounds/stamp.mp3");
+          Audio.Sound.createAsync(soundFile)
             .then(({ sound }) => {
               sound.playAsync();
             })
