@@ -78,6 +78,7 @@ export default function StampPressScreen() {
   const swingUpTimestampRef = React.useRef(0);
   const swingDownPeakRef = React.useRef(0);
   const chosenScratchLevelRef = React.useRef(0);
+  const [debugAccel, setDebugAccel] = React.useState({ y: 0, peak: 0, scratch: 0 });
 
   const stampAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: stampScale.value }],
@@ -195,8 +196,11 @@ export default function StampPressScreen() {
         swingUpDetectedRef.current = false;
         const peak = swingDownPeakRef.current;
         const elapsed = Date.now() - swingUpTimestampRef.current;
-        const scratchLevel = peak < -6.0 ? 0.8 : peak < -4.0 ? 0.4 : 0.0;
+        // 遅い（弱い）スイングほど掠れが強くなる
+        // peak: -1.5(弱) → scratch 1.0、-8.0(強) → scratch 0.0 の線形マッピング
+        const scratchLevel = Math.max(0, Math.min(1.0, (peak + 8.0) / 6.5));
         chosenScratchLevelRef.current = scratchLevel;
+        setDebugAccel({ y: Math.round(y * 100) / 100, peak: Math.round(peak * 100) / 100, scratch: scratchLevel });
         applyScratch(scratchLevel);
         const previews = previewImagesRef.current;
         if (previews) {
@@ -287,6 +291,7 @@ export default function StampPressScreen() {
           </Animated.View>
         </Pressable>
         <Text style={styles.hint}>{t("stampPress.shakeHint")}</Text>
+        <Text style={styles.debug}>y: {debugAccel.y}  peak: {debugAccel.peak}  scratch: {debugAccel.scratch}</Text>
         <CommonButton
           label={t("design.changeDesign")}
           onPress={() => setDesignSheetVisible(true)}
@@ -386,6 +391,11 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: typography.caption.fontSize,
     color: colors.textMuted,
+  },
+  debug: {
+    fontSize: 11,
+    color: colors.textMuted,
+    fontFamily: "monospace",
   },
   helpIcon: {
     fontSize: 14,
