@@ -38,8 +38,8 @@ function formatDate(isoDate: string): string {
 function toGridItem(stamp: StampListItem, defaultName: string): StampGridItem {
   return {
     id: stamp.id,
-    // スポット名連携は未実装のため固定ラベルで表示する
-    name: defaultName,
+    name: stamp.spot_name ?? defaultName,
+    nameUnset: !stamp.spot_name,
     date: formatDate(stamp.acquired_at),
     imageUri: stamp.image_url,
     obtained: true,
@@ -71,7 +71,7 @@ export default function AlbumScreen() {
         setStamps(
           items
             .filter((item) => !isStampDeleted(item.id))
-            .map((item) => toGridItem(item, t("album.stampName"))),
+            .map((item) => toGridItem(item, t("album.unknownSpotName"))),
         );
       })
       .catch(() => setLoadFailed(true));

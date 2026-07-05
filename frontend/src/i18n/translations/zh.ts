@@ -68,6 +68,7 @@ export const zh: Translations = {
     empty: "收集印章后会显示在这里！",
     filterAll: "全部",
     stampName: "印章",
+    unknownSpotName: "未设置地点",
   },
   collection: {
     add: "添加合集",

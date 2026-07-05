@@ -5,6 +5,7 @@ import { colors, typography, spacing } from "@/src/theme/tokens";
 
 type Props = {
   name: string;
+  nameUnset?: boolean;
   date?: string;
   imageUri?: string;
   obtained?: boolean;
@@ -13,6 +14,7 @@ type Props = {
 
 export function StampCard({
   name,
+  nameUnset = false,
   date,
   imageUri,
   obtained = false,
@@ -29,7 +31,10 @@ export function StampCard({
           />
         </Pressable>
       </View>
-      <Text style={styles.name} numberOfLines={1}>
+      <Text
+        style={[styles.name, nameUnset && styles.nameUnset]}
+        numberOfLines={1}
+      >
         {name}
       </Text>
       {obtained && date ? <Text style={styles.date}>{date}</Text> : null}
@@ -53,6 +58,9 @@ const styles = StyleSheet.create({
     fontSize: typography.labelBold.fontSize,
     fontWeight: typography.labelBold.fontWeight,
     color: colors.textPrimary,
+  },
+  nameUnset: {
+    color: colors.textPlaceholder,
   },
   date: {
     fontSize: typography.caption.fontSize,

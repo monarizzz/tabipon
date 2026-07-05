@@ -68,6 +68,7 @@ export const ko: Translations = {
     empty: "스탬프를 모으면 여기에 표시됩니다!",
     filterAll: "전체",
     stampName: "스탬프",
+    unknownSpotName: "장소 미설정",
   },
   collection: {
     add: "컬렉션 추가",
