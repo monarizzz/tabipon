@@ -1,12 +1,16 @@
 import React from "react";
 import { View, Text, StyleSheet, Share, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Camera, Image, User } from "lucide-react-native";
+import { Camera, Image, User, Trash2 } from "lucide-react-native";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
 import { StampResultHeader } from "@/src/components/features/camera/StampResultHeader/StampResultHeader";
 import { StampShowcase } from "@/src/components/features/camera/StampShowcase/StampShowcase";
 import { StampDoneActions } from "@/src/components/features/camera/StampDoneActions/StampDoneActions";
 import { clearSession, getChosenPreviewUri } from "@/src/api/stampSession";
+import { deleteStamp } from "@/src/api/stamps";
+import { markStampDeleted } from "@/src/api/deletedStamps";
 import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, spacing } from "@/src/theme/tokens";
 
@@ -16,7 +20,7 @@ const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).pad
 export default function StampDoneScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { stampTop: stampTopParam, imageUrl, scratchLevel, peak } = useLocalSearchParams<{
+  const { stampTop: stampTopParam, stampId, imageUrl, scratchLevel, peak } = useLocalSearchParams<{
     stampTop?: string;
     stampId?: string;
     imageUrl?: string;
@@ -24,6 +28,21 @@ export default function StampDoneScreen() {
   const previewUri = getChosenPreviewUri();
   const [spotName, setSpotName] = React.useState("");
   const [memo, setMemo] = React.useState("");
+  const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
+
+  const handleConfirmDelete = () => {
+    setDeleteDialogVisible(false);
+    if (stampId) {
+      // アルバムで即座に一覧から除外し、削除反映前のリフェッチで再表示されるのを防ぐ
+      markStampDeleted(stampId);
+      // 削除はバックグラウンドで実行し、結果を待たずにカメラへ戻る
+      deleteStamp(stampId).catch((error) => {
+        console.error("[stamp-done] failed to delete stamp", error);
+      });
+    }
+    clearSession();
+    router.replace("/(tabs)");
+  };
 
   // 前の画面(押し込みアニメーション)でスタンプがあった位置を引き継ぎ、
   // 遷移(animation: 'none')してもスタンプの見た目の位置がズレないようにする
@@ -72,9 +91,27 @@ export default function StampDoneScreen() {
                 router.push("/(tabs)/album");
               }}
             />
+            <View style={styles.deleteSection}>
+              <CommonButton
+                label={t("common.delete")}
+                onPress={() => setDeleteDialogVisible(true)}
+                variant="ghost"
+                icon={<Trash2 size={16} color={colors.danger} />}
+                textStyle={styles.deleteLabel}
+              />
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <CommonDialog
+        visible={deleteDialogVisible}
+        title={t("stampDetail.deleteConfirmTitle")}
+        message={t("stampDetail.deleteConfirmMessage")}
+        confirmLabel={t("common.delete")}
+        destructive
+        onCancel={() => setDeleteDialogVisible(false)}
+        onConfirm={handleConfirmDelete}
+      />
       <TabBar
         items={[
           {
@@ -134,5 +171,12 @@ const styles = StyleSheet.create({
   },
   actionsAnchor: {
     justifyContent: "flex-start",
+  },
+  deleteSection: {
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.xl,
+  },
+  deleteLabel: {
+    color: colors.danger,
   },
 });
