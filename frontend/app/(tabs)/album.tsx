@@ -32,16 +32,19 @@ const FILTER_IDS: { id: string; label?: string }[] = [
 function formatDate(isoDate: string): string {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return "";
-  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+  return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function toGridItem(stamp: StampListItem, defaultName: string): StampGridItem {
+  const spotName = stamp.spot_name?.trim() || "";
   return {
     id: stamp.id,
-    name: stamp.spot_name ?? defaultName,
-    nameUnset: !stamp.spot_name,
+    name: spotName || defaultName,
+    nameUnset: !spotName,
     date: formatDate(stamp.acquired_at),
     imageUri: stamp.image_url,
+    spotName,
+    memo: stamp.memo?.trim() || "",
     obtained: true,
   };
 }
@@ -123,6 +126,8 @@ export default function AlbumScreen() {
                 id: item.id,
                 imageUri: item.imageUri ?? "",
                 date: item.date ?? "",
+                spotName: item.spotName ?? "",
+                memo: item.memo ?? "",
               },
             })
           }

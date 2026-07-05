@@ -14,6 +14,19 @@ export type StampUpdateResponse = {
   image_url: string;
 };
 
+export type StampDetailUpdateInput = {
+  acquired_at?: string;
+  memo?: string | null;
+  spot_name?: string | null;
+};
+
+export type StampDetailUpdateResponse = {
+  id: string;
+  acquired_at: string | null;
+  memo: string | null;
+  spot_name: string | null;
+};
+
 // 取得時の位置情報。Vision(ランドマーク自動判定)の代わりに端末GPSで場所を記録する
 export type StampLocation = {
   latitude: number;
@@ -28,6 +41,7 @@ export type StampListItem = {
   latitude: number | null;
   longitude: number | null;
   spot_name: string | null;
+  memo: string | null;
   tilt_angle: number | null;
 };
 
@@ -87,6 +101,17 @@ export function updateStampImage(
 
 export function fetchStamps(): Promise<StampListItem[]> {
   return request<StampListItem[]>("/stamps");
+}
+
+export function updateStampDetails(
+  stampId: string,
+  input: StampDetailUpdateInput,
+): Promise<StampDetailUpdateResponse> {
+  return request<StampDetailUpdateResponse>(`/stamps/${stampId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
 }
 
 export function deleteStamp(stampId: string): Promise<void> {

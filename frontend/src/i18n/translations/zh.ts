@@ -104,6 +104,8 @@ export const zh: Translations = {
     shareUnavailableMessage: "此设备不支持共享功能。",
     shareFailedTitle: "错误",
     shareFailedMessage: "图片共享失败。请稍后再试。",
+    saveFailedTitle: "无法保存",
+    saveFailedMessage: "请稍后再试。",
   },
   discardDialog: {
     title: "要放弃编辑内容吗？",

@@ -105,6 +105,8 @@ export const ja = {
     shareUnavailableMessage: "この端末では共有機能を利用できません。",
     shareFailedTitle: "エラー",
     shareFailedMessage: "画像の共有に失敗しました。時間をおいて再度お試しください。",
+    saveFailedTitle: "保存できませんでした",
+    saveFailedMessage: "時間をおいて再度お試しください。",
   },
   discardDialog: {
     title: "編集内容を破棄しますか？",

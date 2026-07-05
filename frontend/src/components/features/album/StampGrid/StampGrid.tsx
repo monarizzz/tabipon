@@ -15,6 +15,8 @@ export type StampGridItem = {
   nameUnset?: boolean;
   date?: string;
   imageUri?: string;
+  spotName?: string;
+  memo?: string;
   obtained?: boolean;
 };
 
