@@ -98,23 +98,3 @@ python -m venv .venv
 cd backend
 .venv/bin/uvicorn main:app --reload
 ```
-
-ログ保存付き起動:
-
-```bash
-./scripts/start-backend-log.sh
-```
-
-実機から接続できるように、このログ保存付き起動では `--host 0.0.0.0` を付けて起動します。
-
-確認URL:
-
-- http://127.0.0.1:8000/health
-- http://127.0.0.1:8000/docs
-
-8000番ポートが使われている場合:
-
-```bash
-cd backend
-.venv/bin/uvicorn main:app --reload --port 8001
-```
