@@ -1,15 +1,45 @@
 # progate_hack_7
 
-## ログ
+## プロジェクト概要
 
-ログはルート直下の `log/` に出力します。`log/` は `.gitignore` 済みなので Git には入りません。
+スポットに行き、スマホのカメラでランドマークを撮影し、その写真からオリジナルのスタンプを作成するスタンプ集めアプリです。撮影後はスマホを振りかぶって振り下ろすことで、実際にスタンプを押したような体験ができます。
 
-- フロントエンド: `log/frontend.log`
-- バックエンド: `log/backend.log`
+### 体験フロー
 
-AI にエラーを読ませたいときは、該当するログファイルの中身を貼ってください。
+1. スポットへ行き、スマホのカメラでランドマークを撮影する
+2. 円形ガイド内に収まるように写真を調整する
+3. Google Cloud Vision API でランドマークを判定する
+4. 判定に成功したら、写真を円形に切り抜いてスタンプ調に加工する
+5. スマホを振り下ろしてスタンプを押す（振りかぶりで軽い振動、押し込みで強い振動、傾けると斜めに押される）
+6. 作成したスタンプをアルバムに保存する
 
+### 主な画面
 
+- **カメラ**: 撮影 / 写真調整 / スタンプを押す / スタンプを押しました
+- **アルバム**: スタンプ一覧・コレクション表示 / スタンプ詳細
+- **マイページ**: アカウント情報・最近のコレクション・各種設定
+
+### 技術スタック
+
+| 領域 | 使用技術 |
+| --- | --- |
+| フロントエンド | React Native / Expo / TypeScript（expo-camera, expo-sensors, expo-haptics, react-native-reanimated ほか） |
+| バックエンド | Python / FastAPI / OpenCV |
+| 画像認識 | Google Cloud Vision API（Landmark Detection） |
+| DB・ストレージ | Supabase Postgres / Supabase Storage |
+| デプロイ | Railway |
+
+詳しい仕様は `docs/REQUIREMENTS.md`、アーキテクチャは `docs/front-architecture.md` / `docs/backend-architecture.md`、デザインは `design/DESIGN.MD` を参照してください。
+
+## リポジトリ構成
+
+```text
+/
+├── frontend/   # React Native / Expo アプリ (TypeScript)
+├── backend/    # Python / FastAPI サーバー
+├── docs/       # 仕様書・アーキテクチャドキュメント
+└── design/     # デザインファイル・スタイルガイド
+```
 
 ## フロントエンド
 
