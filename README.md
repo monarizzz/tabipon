@@ -3,6 +3,7 @@
 ## プロジェクト概要
 
 スポットに行き、スマホのカメラでランドマークを撮影し、その写真からオリジナルのスタンプを作成するスタンプ集めアプリです。撮影後はスマホを振りかぶって振り下ろすことで、実際にスタンプを押したような体験ができます。
+詳細は、[こちら](https://topaz.dev/projects/8af82f7dea8d61828a3e)をご覧ください
 
 ### 体験フロー
 
@@ -68,21 +69,6 @@ npm install expo --legacy-peer-deps && npx expo install
 ```bash
 cd frontend
 npm run start
-```
-
-トンネル起動 + ログ保存:
-
-```bash
-cd frontend
-npm run start:tunnel:log
-```
-
-このコマンドは QR コードをターミナルに表示しつつ、`log/frontend.log` にログを書き出します。
-
-またはルートから:
-
-```bash
-./scripts/start-frontend-log.sh
 ```
 
 ## バックエンド
