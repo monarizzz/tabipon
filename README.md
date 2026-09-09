@@ -1,4 +1,5 @@
 # たびぽん
+<img width="1600" height="900" alt="26" src="https://github.com/user-attachments/assets/29fc2e0b-bdbe-462e-86ad-4333a425a6a4" />
 
 ## プロジェクト概要
 
