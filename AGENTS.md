@@ -15,8 +15,10 @@
 └── design/     # デザインファイル・スタイルガイド
 ```
 
+- ドキュメントの一覧と役割は `docs/README.md` にまとめてある。どこに何が書いてあるか分からないときはまずここを読む
 - プロジェクトの仕様書は `docs/REQUIREMENTS.md` に記載されている
 - frontend 固有の指示は `frontend/AGENTS.md` を参照すること
+- `backend/` のコードを変更する前に `docs/backend-architecture.md` を読んで責務分割のルールを確認すること
 
 ## バックエンド廃止の方針（#98）
 

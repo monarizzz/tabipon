@@ -29,7 +29,7 @@
 | DB・ストレージ | Supabase Postgres / Supabase Storage |
 | デプロイ | Railway |
 
-詳しい仕様は `docs/REQUIREMENTS.md`、アーキテクチャは `docs/front-architecture.md` / `docs/backend-architecture.md`、デザインは `design/DESIGN.MD` を参照してください。
+ドキュメントの一覧と役割は [`docs/README.md`](docs/README.md) にまとめています。詳しい仕様は [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md)、アーキテクチャは [`docs/front-architecture.md`](docs/front-architecture.md) / [`docs/backend-architecture.md`](docs/backend-architecture.md)、デザインは [`design/DESIGN.MD`](design/DESIGN.MD) を参照してください。
 
 ## リポジトリ構成
 
