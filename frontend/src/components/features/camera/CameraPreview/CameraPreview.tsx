@@ -87,6 +87,8 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
   }
 );
 
+CameraPreview.displayName = "CameraPreview";
+
 const styles = StyleSheet.create({
   wrap: {
     flex: 1,

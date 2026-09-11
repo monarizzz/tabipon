@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal as RNModal, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Modal as RNModal, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, radii, spacing } from '@/src/theme/tokens';
 
 type Props = {

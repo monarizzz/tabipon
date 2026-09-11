@@ -82,6 +82,9 @@ function FrameThumb({
 }
 
 function makePreview(variant: FrameThumbVariant) {
+  // 返しているのは props ではなく selected: boolean を受け取る描画関数(render prop)。
+  // React コンポーネントではないので displayName は付けられない
+  // eslint-disable-next-line react/display-name
   return (selected: boolean) => (
     <FrameThumb variant={variant} color={selected ? colors.textMuted : colors.textPlaceholder} />
   );
