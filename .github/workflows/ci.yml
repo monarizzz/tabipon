@@ -1,0 +1,102 @@
+name: PR-test
+
+on: [pull_request]
+
+# 同一 PR に連続で push した場合、古い run を打ち切る
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# 各ジョブが node_modules を直接キャッシュし、ヒット時は依存のインストールを丸ごと
+# スキップする。setup-node の cache: npm は ~/.npm(tarball)しか復元せず、
+# node_modules への展開は毎回走るため、それだけでは速くならない。
+#
+# npm ci ではなく npm install を使っている。npm ci は package-lock.json と
+# package.json の完全一致を要求するが、この lock は macOS で生成されており
+# Linux では `Missing: @emnapi/runtime@1.11.3 from lock file` で必ず落ちる。
+# @napi-rs/wasm-runtime の optional な peerDependency が macOS 上の npm では
+# lock のルートに記録されないためで、lock を再生成しても解消しない
+# (package.json の optionalDependencies に明示しても root エントリは作られなかった)。
+# lock の非対称性が解消できたら npm ci に戻したい。
+#
+# キャッシュキーには package-lock.json だけでなく package.json も含める。
+# lock を更新せず package.json だけ変えた PR では、lock のハッシュだけだと
+# 古い node_modules がヒットしてインストールごとスキップされ、追加した依存が
+# 無いまま検査が通ってしまうため。
+#
+# ジョブ間に依存関係は作らない。install 専用ジョブを前段に置くと、そこが落ちたときに
+# 後続が全てスキップされ「どこで落ちたか分からない」状態になるため。
+#
+# モノレポなので、run はすべて frontend/ で実行する。backend/ 向けのジョブは
+# #98 (BE 廃止) で不要になるため作らない。
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  typecheck:
+    name: Type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # #109 で .nvmrc を追加したら node-version-file に切り替える
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Restore node_modules
+        id: node-modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node24-node-modules-${{ hashFiles('frontend/package-lock.json', 'frontend/package.json') }}
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Restore node_modules
+        id: node-modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node24-node-modules-${{ hashFiles('frontend/package-lock.json', 'frontend/package.json') }}
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm install --no-audit --no-fund
+      - run: npm run lint
+
+  format:
+    name: Format check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Restore node_modules
+        id: node-modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node24-node-modules-${{ hashFiles('frontend/package-lock.json', 'frontend/package.json') }}
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm install --no-audit --no-fund
+      - run: npm run format:check
