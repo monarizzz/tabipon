@@ -9,14 +9,32 @@ Epic #98 でスタンプ画像生成を react-native-skia に移植する。移�
 
 ## 実行方法（リポジトリルートから）
 
-    backend/.venv/bin/python backend/scripts/generate_stamp_samples.py
+主サンプル（平等院、4色×4フレーム16通り + 掠れ・回転の参考パターン）:
 
-入力画像を指定しない場合は、スクリプトが合成テスト画像を生成して使う。
-実写真が用意できたら --input で指定して再生成できる。
+    backend/.venv/bin/python backend/scripts/generate_stamp_samples.py \\
+        --input docs/stamp-samples/input/byodoin-uji-kyoto.jpg \\
+        --source-key byodoin \\
+        --author "GiveMeMollusks" \\
+        --source-url "https://commons.wikimedia.org/wiki/File:By%C5%8Ddo-in_Temple_in_Uji,_Kyoto,_Japan.jpg" \\
+        --license "CC0 1.0" \\
+        --with-variants
 
-    backend/.venv/bin/python backend/scripts/generate_stamp_samples.py --input /path/to/photo.jpg
+副サンプル（雪山、少数のみ・variants無し）:
 
-出力先はデフォルトで docs/stamp-samples/ 。既存の出力は実行のたびに上書きされる。
+    backend/.venv/bin/python backend/scripts/generate_stamp_samples.py \\
+        --input docs/stamp-samples/input/hida-mountains.jpg \\
+        --source-key hida-mountains \\
+        --author "Wall Boat" \\
+        --source-url "https://commons.wikimedia.org/wiki/File:Hida_Mountains,_Japan.jpg" \\
+        --license "CC0 1.0" \\
+        --colors black \\
+        --output-subdir hida-mountains
+
+`--input` を省略すると、合成テスト画像（チェッカーボード・グラデーション・図形・ノイズ）を生成して使う
+フォールバックが動く（実写真が用意できない状況向け。現在の主サンプルは実写真を使用しているため通常は不要）。
+
+各呼び出しの結果は `manifest.json` の `sources` にキーごとにマージされる（既存の他ソースは残る）。
+出力先はデフォルトで docs/stamp-samples/ 。
 """
 
 from __future__ import annotations
@@ -45,13 +63,13 @@ from app.services.stamp_processor import (  # noqa: E402
 
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "docs" / "stamp-samples"
 # process_stamp_image は正方形に切り出した上で STAMP_IMAGE_SIZE(512) にリサイズするため、
-# 入力側をこれより大きくしても比較の意味は薄い。ファイルサイズを抑えるため 512 に合わせる。
+# 入力側をこれより大きくしても比較の意味は薄い。合成画像フォールバックはファイルサイズを抑えるため 512 にする。
 SYNTHETIC_IMAGE_SIZE = 512
 SYNTHETIC_SEED = 42
 PNG_COMPRESSION_PARAMS = [cv2.IMWRITE_PNG_COMPRESSION, 9]
 
-COLORS = [StampColor.red, StampColor.blue, StampColor.black, StampColor.green]
-FRAMES = [StampFrame.simple, StampFrame.classic, StampFrame.dash, StampFrame.wave]
+ALL_COLORS = {c.value: c for c in StampColor}
+ALL_FRAMES = {f.value: f for f in StampFrame}
 
 # 掠れ・回転の有無を確認する数パターン。base の16通りとは別に、雰囲気を見るための参考として出す。
 VARIANTS: list[dict] = [
@@ -89,7 +107,7 @@ VARIANTS: list[dict] = [
 def build_synthetic_test_image(size: int = SYNTHETIC_IMAGE_SIZE, seed: int = SYNTHETIC_SEED) -> np.ndarray:
     """adaptiveThreshold / Canny の挙動が見える程度の内容を持つ合成テスト画像を作る。
 
-    含む要素:
+    実写真が用意できない場合のフォールバック用。含む要素:
     - 横方向グラデーション（明暗差）
     - チェッカーボード状の細かいテクスチャ領域（局所2値化の挙動確認用）
     - 塗りの円・矩形・線（エッジ・輪郭確認用）
@@ -139,56 +157,63 @@ def build_synthetic_test_image(size: int = SYNTHETIC_IMAGE_SIZE, seed: int = SYN
     return noisy
 
 
-def load_input_image_bytes(input_path: Path | None, output_dir: Path) -> tuple[bytes, str]:
-    """入力画像の bytes と、manifest に残す説明文字列を返す。
+def load_input_image_bytes(
+    input_path: Path | None, output_dir: Path
+) -> tuple[bytes, dict]:
+    """入力画像の bytes と、manifest に残すメタデータ dict を返す。
 
     input_path が指定されなければ合成テスト画像を生成し、input/ 配下に保存してから使う。
     """
-    input_dir = output_dir / "input"
-    input_dir.mkdir(parents=True, exist_ok=True)
-
     if input_path is not None:
         image_bytes = input_path.read_bytes()
-        description = f"実写真（--input で指定): {input_path.name}"
-        return image_bytes, description
+        metadata = {
+            "kind": "photo",
+            "file": f"input/{input_path.name}",
+        }
+        return image_bytes, metadata
 
+    input_dir = output_dir / "input"
+    input_dir.mkdir(parents=True, exist_ok=True)
     synthetic_image = build_synthetic_test_image()
     synthetic_path = input_dir / "synthetic_test_image.png"
     success, encoded = cv2.imencode(".png", synthetic_image, PNG_COMPRESSION_PARAMS)
     if not success:
         raise RuntimeError("Failed to encode synthetic test image")
     synthetic_path.write_bytes(encoded.tobytes())
-    description = (
-        "合成テスト画像（スクリプトが自動生成。実写真ではない。"
-        "docs/stamp-samples/README.md の限界の節を参照）"
-    )
-    return encoded.tobytes(), description
-
-
-def generate_samples(output_dir: Path, input_path: Path | None) -> dict:
-    image_bytes, input_description = load_input_image_bytes(input_path, output_dir)
-
-    base_dir = output_dir / "output" / "base"
-    variants_dir = output_dir / "output" / "variants"
-    base_dir.mkdir(parents=True, exist_ok=True)
-    variants_dir.mkdir(parents=True, exist_ok=True)
-
-    manifest: dict = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "cv2_version": cv2.__version__,
-        "input": {
-            "description": input_description,
-            "path": (
-                str(input_path) if input_path is not None else "input/synthetic_test_image.png"
-            ),
-            "is_synthetic": input_path is None,
-        },
-        "base": [],
-        "variants": [],
+    metadata = {
+        "kind": "synthetic",
+        "file": "input/synthetic_test_image.png",
+        "note": "実写真が無い場合のフォールバックとして自動生成した合成テスト画像",
     }
+    return encoded.tobytes(), metadata
 
-    for color in COLORS:
-        for frame in FRAMES:
+
+def generate_samples(
+    output_dir: Path,
+    input_path: Path | None,
+    colors: list[StampColor],
+    frames: list[StampFrame],
+    base_subdir: str,
+    with_variants: bool,
+    author: str | None,
+    source_url: str | None,
+    license_name: str | None,
+) -> dict:
+    image_bytes, input_metadata = load_input_image_bytes(input_path, output_dir)
+    if author:
+        input_metadata["author"] = author
+    if source_url:
+        input_metadata["source_url"] = source_url
+    if license_name:
+        input_metadata["license"] = license_name
+
+    base_dir = output_dir / "output" / base_subdir
+    base_dir.mkdir(parents=True, exist_ok=True)
+
+    source_entry: dict = {"input": input_metadata, "base": []}
+
+    for color in colors:
+        for frame in frames:
             params = {
                 "color": color.value,
                 "frame": frame.value,
@@ -204,36 +229,77 @@ def generate_samples(output_dir: Path, input_path: Path | None) -> dict:
             )
             file_name = f"{color.value}_{frame.value}.png"
             (base_dir / file_name).write_bytes(png_bytes)
-            manifest["base"].append({"file": f"output/base/{file_name}", **params})
+            source_entry["base"].append(
+                {"file": f"output/{base_subdir}/{file_name}", **params}
+            )
 
-    for variant in VARIANTS:
-        params = {
-            "color": variant["color"].value,
-            "frame": variant["frame"].value,
-            "scratch_level": variant["scratch_level"],
-            "tilt_angle": variant["tilt_angle"],
-        }
-        png_bytes = process_stamp_image(
-            image_bytes,
-            color=variant["color"],
-            frame=variant["frame"],
-            scratch_level=params["scratch_level"],
-            tilt_angle=params["tilt_angle"],
-        )
-        file_name = f"{variant['name']}.png"
-        (variants_dir / file_name).write_bytes(png_bytes)
-        manifest["variants"].append({"file": f"output/variants/{file_name}", **params})
+    if with_variants:
+        variants_dir = output_dir / "output" / "variants"
+        variants_dir.mkdir(parents=True, exist_ok=True)
+        source_entry["variants"] = []
+        for variant in VARIANTS:
+            params = {
+                "color": variant["color"].value,
+                "frame": variant["frame"].value,
+                "scratch_level": variant["scratch_level"],
+                "tilt_angle": variant["tilt_angle"],
+            }
+            png_bytes = process_stamp_image(
+                image_bytes,
+                color=variant["color"],
+                frame=variant["frame"],
+                scratch_level=params["scratch_level"],
+                tilt_angle=params["tilt_angle"],
+            )
+            file_name = f"{variant['name']}.png"
+            (variants_dir / file_name).write_bytes(png_bytes)
+            source_entry["variants"].append(
+                {"file": f"output/variants/{file_name}", **params}
+            )
 
-    return manifest
+    return source_entry
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         "--input",
         type=Path,
         default=None,
         help="入力画像のパス。指定しない場合は合成テスト画像を生成して使う。",
+    )
+    parser.add_argument(
+        "--source-key",
+        type=str,
+        default=None,
+        help="manifest.json の sources キー。省略時は入力ファイル名（拡張子なし）、"
+        "入力未指定なら 'synthetic'。",
+    )
+    parser.add_argument("--author", type=str, default=None, help="入力画像の著作者（manifest に記録）")
+    parser.add_argument("--source-url", type=str, default=None, help="入力画像の出典URL（manifest に記録）")
+    parser.add_argument("--license", dest="license_name", type=str, default=None, help="入力画像のライセンス（manifest に記録）")
+    parser.add_argument(
+        "--colors",
+        type=str,
+        default=",".join(ALL_COLORS),
+        help=f"カンマ区切りの色リスト（デフォルト: 全4色 = {','.join(ALL_COLORS)}）",
+    )
+    parser.add_argument(
+        "--frames",
+        type=str,
+        default=",".join(ALL_FRAMES),
+        help=f"カンマ区切りのフレームリスト（デフォルト: 全4種 = {','.join(ALL_FRAMES)}）",
+    )
+    parser.add_argument(
+        "--output-subdir",
+        type=str,
+        default="base",
+        help="output/ 配下のサブディレクトリ名（デフォルト: base）。副サンプルは別名を指定する。",
+    )
+    parser.add_argument(
+        "--with-variants",
+        action="store_true",
+        help="掠れ・回転の参考パターン4通りも output/variants/ に生成する。",
     )
     parser.add_argument(
         "--output-dir",
@@ -249,13 +315,40 @@ def main() -> None:
     output_dir: Path = args.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest = generate_samples(output_dir, args.input)
+    colors = [ALL_COLORS[name] for name in args.colors.split(",") if name]
+    frames = [ALL_FRAMES[name] for name in args.frames.split(",") if name]
+
+    if args.source_key:
+        source_key = args.source_key
+    elif args.input is not None:
+        source_key = args.input.stem
+    else:
+        source_key = "synthetic"
+
+    source_entry = generate_samples(
+        output_dir=output_dir,
+        input_path=args.input,
+        colors=colors,
+        frames=frames,
+        base_subdir=args.output_subdir,
+        with_variants=args.with_variants,
+        author=args.author,
+        source_url=args.source_url,
+        license_name=args.license_name,
+    )
 
     manifest_path = output_dir / "manifest.json"
+    manifest: dict = {}
+    if manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text())
+    manifest["generated_at"] = datetime.now(timezone.utc).isoformat()
+    manifest["cv2_version"] = cv2.__version__
+    manifest.setdefault("sources", {})
+    manifest["sources"][source_key] = source_entry
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
 
-    total_files = len(manifest["base"]) + len(manifest["variants"]) + 1
-    print(f"Wrote {total_files} PNG files and manifest.json to {output_dir}")
+    total_files = len(source_entry["base"]) + len(source_entry.get("variants", []))
+    print(f"Wrote {total_files} PNG files for source '{source_key}' to {output_dir}")
 
 
 if __name__ == "__main__":
