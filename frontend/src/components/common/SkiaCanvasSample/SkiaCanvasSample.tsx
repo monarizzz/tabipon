@@ -4,7 +4,9 @@ import { colors } from "@/src/theme/tokens";
 
 // #119: @shopify/react-native-skia の導入確認用コンポーネント。
 // Canvas 上に円を1つ描くだけで、Skia のネイティブモジュールが
-// development build 上で動作していることを目視確認する。
+// 動作していることを目視確認する。Skia は Expo SDK 54 の Expo Go に
+// 同梱されているため、Storybook (npm run storybook:ios など) から
+// そのまま確認できる。
 // 画像処理そのものはこの Issue の範囲外（#121〜#123 で実装する）
 const SIZE = 120;
 

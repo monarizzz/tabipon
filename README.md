@@ -45,21 +45,8 @@
 
 役割: Expo / React Native アプリを起動します。スマホや Expo Go から画面確認します。
 
-> **development build が必要（#119）**: `@shopify/react-native-skia` はネイティブモジュールを含むため、
-> `expo-dev-client` を使った development build 上でのみ動作を確認できます。#98 の画像処理移植（#121〜）以降、
-> Expo Go では Skia を使う画面・ストーリーの実機確認ができなくなります。development build の作成手順:
->
-> ```bash
-> cd frontend
-> npx expo install expo-dev-client
-> npx expo run:ios      # または npx expo run:android（実機は --device を付ける）
-> ```
->
-> ビルド後は通常どおり `npx expo start` で起動したサーバーに development build アプリから接続します。
-> ネイティブ依存や `app.json` の設定を変えたら `npx expo prebuild --clean` で `ios/` `android/` を再生成してください。
-> クラウドでビルドする場合は `eas build --platform ios --profile development` / `--platform android` を使います
-> （`eas.json` の development プロファイル設定が別途必要）。
-> 詳細は [Expo公式: Create a development build](https://docs.expo.dev/develop/development-builds/create-a-build/) を参照。
+`@shopify/react-native-skia`（#119）は Expo SDK 54 の Expo Go に同梱されているため、
+development build は不要です（詳細: https://docs.expo.dev/versions/v54.0.0/sdk/skia/）。
 
 Railway デプロイ済みバックエンド:
 
