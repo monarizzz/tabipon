@@ -10,9 +10,23 @@ concurrency:
 permissions:
   contents: read
 
-# 各ジョブが node_modules を直接キャッシュし、ヒット時は npm ci を丸ごとスキップする。
-# setup-node の cache: npm は ~/.npm(tarball)しか復元せず、node_modules への展開は
-# 毎回走るため、それだけでは npm ci は速くならない。
+# 各ジョブが node_modules を直接キャッシュし、ヒット時は依存のインストールを丸ごと
+# スキップする。setup-node の cache: npm は ~/.npm(tarball)しか復元せず、
+# node_modules への展開は毎回走るため、それだけでは速くならない。
+#
+# npm ci ではなく npm install を使っている。npm ci は package-lock.json と
+# package.json の完全一致を要求するが、この lock は macOS で生成されており
+# Linux では `Missing: @emnapi/runtime@1.11.3 from lock file` で必ず落ちる。
+# @napi-rs/wasm-runtime の optional な peerDependency が macOS 上の npm では
+# lock のルートに記録されないためで、lock を再生成しても解消しない
+# (package.json の optionalDependencies に明示しても root エントリは作られなかった)。
+# lock の非対称性が解消できたら npm ci に戻したい。
+#
+# キャッシュキーには package-lock.json だけでなく package.json も含める。
+# lock を更新せず package.json だけ変えた PR では、lock のハッシュだけだと
+# 古い node_modules がヒットしてインストールごとスキップされ、追加した依存が
+# 無いまま検査が通ってしまうため。
+#
 # ジョブ間に依存関係は作らない。install 専用ジョブを前段に置くと、そこが落ちたときに
 # 後続が全てスキップされ「どこで落ちたか分からない」状態になるため。
 #
@@ -40,9 +54,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: frontend/node_modules
-          key: ${{ runner.os }}-node24-node-modules-${{ hashFiles('frontend/package-lock.json') }}
+          key: ${{ runner.os }}-node24-node-modules-${{ hashFiles('frontend/package-lock.json', 'frontend/package.json') }}
       - if: steps.node-modules.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - run: npm run typecheck
 
   lint:
@@ -61,9 +75,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: frontend/node_modules
-          key: ${{ runner.os }}-node24-node-modules-${{ hashFiles('frontend/package-lock.json') }}
+          key: ${{ runner.os }}-node24-node-modules-${{ hashFiles('frontend/package-lock.json', 'frontend/package.json') }}
       - if: steps.node-modules.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - run: npm run lint
 
   format:
@@ -82,7 +96,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: frontend/node_modules
-          key: ${{ runner.os }}-node24-node-modules-${{ hashFiles('frontend/package-lock.json') }}
+          key: ${{ runner.os }}-node24-node-modules-${{ hashFiles('frontend/package-lock.json', 'frontend/package.json') }}
       - if: steps.node-modules.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - run: npm run format:check
