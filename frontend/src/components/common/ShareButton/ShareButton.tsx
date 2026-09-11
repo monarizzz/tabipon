@@ -1,4 +1,9 @@
-import { StyleProp, TouchableOpacity, ViewStyle, StyleSheet } from "react-native";
+import {
+  StyleProp,
+  TouchableOpacity,
+  ViewStyle,
+  StyleSheet,
+} from "react-native";
 import { Share2 } from "lucide-react-native";
 import { colors } from "@/src/theme/tokens";
 

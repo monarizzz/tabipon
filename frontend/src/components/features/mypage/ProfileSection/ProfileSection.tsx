@@ -21,7 +21,9 @@ export function ProfileSection({ name, registeredDate, avatarUri }: Props) {
         )}
       </View>
       <Text style={styles.name}>{name}</Text>
-      <Text style={styles.bio}>{t("mypage.registered", { date: registeredDate })}</Text>
+      <Text style={styles.bio}>
+        {t("mypage.registered", { date: registeredDate })}
+      </Text>
     </View>
   );
 }

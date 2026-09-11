@@ -18,10 +18,14 @@ const DISPLAY_ZOOM_MIN = 0.5;
 const DISPLAY_ZOOM_MAX = 5;
 const DISPLAY_ZOOM_DEFAULT = 1;
 export const DEFAULT_ZOOM =
-  (DISPLAY_ZOOM_DEFAULT - DISPLAY_ZOOM_MIN) / (DISPLAY_ZOOM_MAX - DISPLAY_ZOOM_MIN);
+  (DISPLAY_ZOOM_DEFAULT - DISPLAY_ZOOM_MIN) /
+  (DISPLAY_ZOOM_MAX - DISPLAY_ZOOM_MIN);
 
 export const CameraPreview = React.forwardRef<CameraView, Props>(
-  ({ facing, flash, guideSize = 296, onZoomChange, onContainerSizeChange }, ref) => {
+  (
+    { facing, flash, guideSize = 296, onZoomChange, onContainerSizeChange },
+    ref,
+  ) => {
     const [zoom, setZoom] = useState(DEFAULT_ZOOM);
     const baseZoom = useRef(DEFAULT_ZOOM);
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -38,7 +42,10 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
         baseZoom.current = zoom;
       })
       .onUpdate((event) => {
-        const next = Math.min(1, Math.max(0, baseZoom.current + (event.scale - 1) * PINCH_SENSITIVITY));
+        const next = Math.min(
+          1,
+          Math.max(0, baseZoom.current + (event.scale - 1) * PINCH_SENSITIVITY),
+        );
         setZoom(next);
         onZoomChange?.(next);
       });
@@ -46,7 +53,7 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
     const effectiveGuideSize = Math.min(
       guideSize,
       containerSize.width - 24,
-      containerSize.height - 24
+      containerSize.height - 24,
     );
     const displayZoom = (
       DISPLAY_ZOOM_MIN +
@@ -76,7 +83,10 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
                   },
                 ]}
               />
-              <View pointerEvents="none" style={[styles.zoomBadge, { marginTop: 12 }]}>
+              <View
+                pointerEvents="none"
+                style={[styles.zoomBadge, { marginTop: 12 }]}
+              >
                 <Text style={styles.zoomBadgeText}>{displayZoom}x</Text>
               </View>
             </View>
@@ -84,7 +94,7 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
         )}
       </View>
     );
-  }
+  },
 );
 
 CameraPreview.displayName = "CameraPreview";

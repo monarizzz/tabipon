@@ -32,9 +32,7 @@ export function StampDetailMediaPager({
 }: Props) {
   const [activeIndex, setActiveIndex] = React.useState(0);
 
-  const handleScrollEnd = (
-    event: NativeSyntheticEvent<NativeScrollEvent>,
-  ) => {
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const page = Math.round(event.nativeEvent.contentOffset.x / PAGE_WIDTH);
     setActiveIndex(page);
   };

@@ -19,7 +19,11 @@ import { EditFieldSheet } from "@/src/components/common/EditFieldSheet/EditField
 import { StampResultHeader } from "@/src/components/features/camera/StampResultHeader/StampResultHeader";
 import { StampShowcase } from "@/src/components/features/camera/StampShowcase/StampShowcase";
 import { StampDoneActions } from "@/src/components/features/camera/StampDoneActions/StampDoneActions";
-import { clearSession, getChosenPreviewUri, getSession } from "@/src/api/stampSession";
+import {
+  clearSession,
+  getChosenPreviewUri,
+  getSession,
+} from "@/src/api/stampSession";
 import { deleteStamp, updateStampDetails } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
 import { useTranslation } from "@/src/i18n/I18nProvider";
@@ -98,12 +102,17 @@ export default function StampDoneScreen() {
     const nextSpotName = normalizeOptionalText(draftSpotName);
     setDetailUpdating(true);
     try {
-      const updated = await updateStampDetails(stampId, { spot_name: nextSpotName });
+      const updated = await updateStampDetails(stampId, {
+        spot_name: nextSpotName,
+      });
       setSpotName(updated.spot_name ?? "");
       closeEditor();
     } catch (error) {
       console.error("[stamp-done] failed to update spot name", error);
-      Alert.alert(t("stampDetail.saveFailedTitle"), t("stampDetail.saveFailedMessage"));
+      Alert.alert(
+        t("stampDetail.saveFailedTitle"),
+        t("stampDetail.saveFailedMessage"),
+      );
     } finally {
       setDetailUpdating(false);
     }
@@ -119,7 +128,10 @@ export default function StampDoneScreen() {
       closeEditor();
     } catch (error) {
       console.error("[stamp-done] failed to update memo", error);
-      Alert.alert(t("stampDetail.saveFailedTitle"), t("stampDetail.saveFailedMessage"));
+      Alert.alert(
+        t("stampDetail.saveFailedTitle"),
+        t("stampDetail.saveFailedMessage"),
+      );
     } finally {
       setDetailUpdating(false);
     }

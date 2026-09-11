@@ -40,7 +40,8 @@ export function EditFieldSheet({
   const { t } = useTranslation();
   // react-native の TextInput ではなく BottomSheetTextInput の ref 型を使う。
   // 後者は react-native-gesture-handler の TextInput を包んでおり、両者は別の型
-  const inputRef = useRef<React.ComponentRef<typeof BottomSheetTextInput>>(null);
+  const inputRef =
+    useRef<React.ComponentRef<typeof BottomSheetTextInput>>(null);
 
   const handleClose = () => {
     Keyboard.dismiss();
@@ -87,7 +88,12 @@ export function EditFieldSheet({
           style={styles.datePicker}
         />
       )}
-      <CommonButton label={t("common.save")} onPress={handleSave} variant="primary" style={styles.saveButton} />
+      <CommonButton
+        label={t("common.save")}
+        onPress={handleSave}
+        variant="primary"
+        style={styles.saveButton}
+      />
     </BottomSheet>
   );
 }

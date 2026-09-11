@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { Animated, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors } from '@/src/theme/tokens';
+import { useEffect, useRef } from "react";
+import { Animated, TouchableOpacity, StyleSheet } from "react-native";
+import { colors } from "@/src/theme/tokens";
 
 type Props = {
   value: boolean;
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     height: TRACK_HEIGHT,
     borderRadius: TRACK_HEIGHT / 2,
     padding: THUMB_MARGIN,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   disabled: {
     opacity: 0.4,

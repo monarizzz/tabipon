@@ -50,7 +50,9 @@ export function StampInfoCard({
         >
           <View style={styles.labelRow}>
             <Text style={styles.label}>{t("stampDetail.labelPlace")}</Text>
-            {onPressLocation ? <Pencil size={12} color={colors.textMuted} /> : null}
+            {onPressLocation ? (
+              <Pencil size={12} color={colors.textMuted} />
+            ) : null}
           </View>
           {location ? (
             <Text style={styles.value}>{location}</Text>

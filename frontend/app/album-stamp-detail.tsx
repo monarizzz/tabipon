@@ -96,16 +96,19 @@ export default function StampDetailScreen() {
   const stampLongitude = paramLon ? parseFloat(paramLon) : null;
   // 元スタンプ作成時の演出値。デザイン変更時も引き継いで再適用する
   const stampTiltAngle = paramTiltAngle ? parseFloat(paramTiltAngle) : 0;
-  const stampScratchLevel = paramScratchLevel ? parseFloat(paramScratchLevel) : 0;
+  const stampScratchLevel = paramScratchLevel
+    ? parseFloat(paramScratchLevel)
+    : 0;
   // 元スタンプの色・フレーム。デザイン変更パネルの初期選択に使う(未保存の旧スタンプは既定値)
   const initialColor =
-    (paramColor && HEX_BY_API_COLOR[paramColor as StampColor]) || STAMP_COLOR_OPTIONS[0];
+    (paramColor && HEX_BY_API_COLOR[paramColor as StampColor]) ||
+    STAMP_COLOR_OPTIONS[0];
   const initialFrameStyleId =
-    (paramFrame && FRAME_ID_BY_API[paramFrame as StampFrame]) || FRAME_STYLE_OPTIONS[0].id;
+    (paramFrame && FRAME_ID_BY_API[paramFrame as StampFrame]) ||
+    FRAME_STYLE_OPTIONS[0].id;
   const [designMode, setDesignMode] = React.useState(false);
-  const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
-    initialFrameStyleId,
-  );
+  const [selectedFrameStyleId, setSelectedFrameStyleId] =
+    React.useState(initialFrameStyleId);
   const [selectedColor, setSelectedColor] = React.useState(initialColor);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
@@ -137,7 +140,13 @@ export default function StampDetailScreen() {
     const frame = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
     let cancelled = false;
     setPreviewLoading(true);
-    previewStampImage(originalUri, color, stampScratchLevel, frame, stampTiltAngle)
+    previewStampImage(
+      originalUri,
+      color,
+      stampScratchLevel,
+      frame,
+      stampTiltAngle,
+    )
       .then((dataUri) => {
         if (!cancelled) {
           setPreviewUri(dataUri);
@@ -151,7 +160,14 @@ export default function StampDetailScreen() {
     return () => {
       cancelled = true;
     };
-  }, [designMode, originalUri, selectedColor, selectedFrameStyleId, stampScratchLevel, stampTiltAngle]);
+  }, [
+    designMode,
+    originalUri,
+    selectedColor,
+    selectedFrameStyleId,
+    stampScratchLevel,
+    stampTiltAngle,
+  ]);
 
   const handleOpenDesignChange = () => {
     if (!originalUri) {
@@ -176,19 +192,31 @@ export default function StampDetailScreen() {
     if (!color || !frame) return;
     setDesignUpdating(true);
     try {
-      const updated = await updateStampImage(id, originalUri, color, stampScratchLevel, frame, stampTiltAngle);
+      const updated = await updateStampImage(
+        id,
+        originalUri,
+        color,
+        stampScratchLevel,
+        frame,
+        stampTiltAngle,
+      );
       setCurrentImageUri(updated.image_url);
       setPreviewUri(null);
       setDesignMode(false);
     } catch (error) {
       console.error("[stamp-detail] failed to update design", error);
-      Alert.alert(t("stampDetail.designUpdateFailedTitle"), t("stampDetail.designUpdateFailedMessage"));
+      Alert.alert(
+        t("stampDetail.designUpdateFailedTitle"),
+        t("stampDetail.designUpdateFailedMessage"),
+      );
     } finally {
       setDesignUpdating(false);
     }
   };
 
-  const [spotName, setSpotName] = React.useState(() => normalizeParam(paramSpotName));
+  const [spotName, setSpotName] = React.useState(() =>
+    normalizeParam(paramSpotName),
+  );
   const [date, setDate] = React.useState(() => normalizeParam(paramDate));
   const [location, setLocation] = React.useState("");
   const [memo, setMemo] = React.useState(() => normalizeParam(paramMemo));
@@ -198,7 +226,7 @@ export default function StampDetailScreen() {
     if (!stampLatitude || !stampLongitude) return;
     const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
     fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${stampLatitude},${stampLongitude}&key=${apiKey}&language=ja`
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${stampLatitude},${stampLongitude}&key=${apiKey}&language=ja`,
     )
       .then((res) => res.json())
       .then((data) => {
@@ -244,7 +272,10 @@ export default function StampDetailScreen() {
       closeEditor();
     } catch (error) {
       console.error("[stamp-detail] failed to update spot name", error);
-      Alert.alert(t("stampDetail.saveFailedTitle"), t("stampDetail.saveFailedMessage"));
+      Alert.alert(
+        t("stampDetail.saveFailedTitle"),
+        t("stampDetail.saveFailedMessage"),
+      );
     } finally {
       setDetailUpdating(false);
     }
@@ -260,7 +291,10 @@ export default function StampDetailScreen() {
       closeEditor();
     } catch (error) {
       console.error("[stamp-detail] failed to update memo", error);
-      Alert.alert(t("stampDetail.saveFailedTitle"), t("stampDetail.saveFailedMessage"));
+      Alert.alert(
+        t("stampDetail.saveFailedTitle"),
+        t("stampDetail.saveFailedMessage"),
+      );
     } finally {
       setDetailUpdating(false);
     }
@@ -277,7 +311,10 @@ export default function StampDetailScreen() {
       closeEditor();
     } catch (error) {
       console.error("[stamp-detail] failed to update date", error);
-      Alert.alert(t("stampDetail.saveFailedTitle"), t("stampDetail.saveFailedMessage"));
+      Alert.alert(
+        t("stampDetail.saveFailedTitle"),
+        t("stampDetail.saveFailedMessage"),
+      );
     } finally {
       setDetailUpdating(false);
     }
@@ -303,22 +340,37 @@ export default function StampDetailScreen() {
     try {
       const isAvailable = await Sharing.isAvailableAsync();
       if (!isAvailable) {
-        Alert.alert(t("stampDetail.shareUnavailableTitle"), t("stampDetail.shareUnavailableMessage"));
+        Alert.alert(
+          t("stampDetail.shareUnavailableTitle"),
+          t("stampDetail.shareUnavailableMessage"),
+        );
         return;
       }
 
       let localUri = currentImageUri;
       if (/^https?:\/\//.test(currentImageUri)) {
-        const ext = currentImageUri.split(/[?#]/)[0].split(".").pop()?.toLowerCase();
+        const ext = currentImageUri
+          .split(/[?#]/)[0]
+          .split(".")
+          .pop()
+          ?.toLowerCase();
         const fileName = `share-${Date.now()}.${ext && ext.length <= 4 ? ext : "png"}`;
-        const downloaded = await File.downloadFileAsync(currentImageUri, new File(Paths.cache, fileName));
+        const downloaded = await File.downloadFileAsync(
+          currentImageUri,
+          new File(Paths.cache, fileName),
+        );
         localUri = downloaded.uri;
       }
 
-      await Sharing.shareAsync(localUri, { dialogTitle: spotName || undefined });
+      await Sharing.shareAsync(localUri, {
+        dialogTitle: spotName || undefined,
+      });
     } catch (error) {
       console.error("[stamp-detail] failed to share image", error);
-      Alert.alert(t("stampDetail.shareFailedTitle"), t("stampDetail.shareFailedMessage"));
+      Alert.alert(
+        t("stampDetail.shareFailedTitle"),
+        t("stampDetail.shareFailedMessage"),
+      );
     }
   };
 
@@ -372,7 +424,10 @@ export default function StampDetailScreen() {
         <DesignChangePanel
           onBack={handleCloseDesignChange}
           onShare={handleShare}
-          imageUri={(designMode && previewUri ? previewUri : currentImageUri) || undefined}
+          imageUri={
+            (designMode && previewUri ? previewUri : currentImageUri) ||
+            undefined
+          }
           loading={previewLoading}
           confirming={designUpdating}
           frameStyles={FRAME_STYLE_OPTIONS}

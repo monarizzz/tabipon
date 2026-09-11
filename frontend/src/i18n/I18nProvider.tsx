@@ -36,7 +36,10 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 function isPreference(value: string | null): value is LocalePreference {
-  return value === "system" || (SUPPORTED_LOCALES as readonly string[]).includes(value ?? "");
+  return (
+    value === "system" ||
+    (SUPPORTED_LOCALES as readonly string[]).includes(value ?? "")
+  );
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {

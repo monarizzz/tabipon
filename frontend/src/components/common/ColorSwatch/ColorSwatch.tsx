@@ -1,4 +1,4 @@
-import { TouchableOpacity, View, StyleSheet } from 'react-native';
+import { TouchableOpacity, View, StyleSheet } from "react-native";
 
 type Props = {
   color: string;
@@ -14,7 +14,13 @@ export function ColorSwatch({ color, selected = false, onPress }: Props) {
       activeOpacity={0.8}
       disabled={!onPress}
     >
-      <View style={[styles.dot, selected && styles.dotSelected, { backgroundColor: color }]} />
+      <View
+        style={[
+          styles.dot,
+          selected && styles.dotSelected,
+          { backgroundColor: color },
+        ]}
+      />
     </TouchableOpacity>
   );
 }
@@ -24,8 +30,8 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   dot: {
     width: 30,

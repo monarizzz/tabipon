@@ -1,6 +1,6 @@
-import type { ComponentType } from 'react';
-import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
-import { colors, radii, spacing, typography } from '@/src/theme/tokens';
+import type { ComponentType } from "react";
+import { TouchableOpacity, Text, View, StyleSheet } from "react-native";
+import { colors, radii, spacing, typography } from "@/src/theme/tokens";
 
 export type TabBarIcon = ComponentType<{ size?: number; color?: string }>;
 
@@ -21,7 +21,9 @@ export function TabBar({ items }: Props) {
   return (
     <View style={styles.container}>
       {items.map(({ key, label, icon: Icon, active, activeColor, onPress }) => {
-        const color = active ? activeColor ?? colors.primary : colors.secondary;
+        const color = active
+          ? (activeColor ?? colors.primary)
+          : colors.secondary;
         return (
           <TouchableOpacity
             key={key}
@@ -42,8 +44,8 @@ export function TabBar({ items }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     gap: spacing.xs,
     backgroundColor: colors.surface,
     borderTopWidth: 1,
@@ -53,13 +55,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
   },
   tab: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: spacing.s,
     paddingVertical: 8,
     paddingHorizontal: spacing.xxl,
     borderRadius: radii.tab,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   tabActive: {
     backgroundColor: colors.activeOverlay,

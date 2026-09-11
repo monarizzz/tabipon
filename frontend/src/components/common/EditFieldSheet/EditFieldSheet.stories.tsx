@@ -41,7 +41,11 @@ export const TextField = {
       <View style={{ flex: 1, padding: 16 }}>
         <TouchableOpacity
           onPress={() => setVisible(true)}
-          style={{ padding: 12, backgroundColor: colors.surface, borderRadius: 12 }}
+          style={{
+            padding: 12,
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+          }}
         >
           <Text style={{ color: colors.textPrimary }}>タイトルを編集する</Text>
         </TouchableOpacity>
@@ -79,7 +83,11 @@ export const DateField = {
       <View style={{ flex: 1, padding: 16 }}>
         <TouchableOpacity
           onPress={() => setVisible(true)}
-          style={{ padding: 12, backgroundColor: colors.surface, borderRadius: 12 }}
+          style={{
+            padding: 12,
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+          }}
         >
           <Text style={{ color: colors.textPrimary }}>日付を編集する</Text>
         </TouchableOpacity>

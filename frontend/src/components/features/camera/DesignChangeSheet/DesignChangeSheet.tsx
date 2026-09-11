@@ -1,13 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { BottomSheet } from '@/src/components/common/BottomSheet/BottomSheet';
-import { SelectableTile } from '@/src/components/common/SelectableTile/SelectableTile';
-import { ColorSwatch } from '@/src/components/common/ColorSwatch/ColorSwatch';
-import { Toggle } from '@/src/components/common/Toggle/Toggle';
-import { CommonButton } from '@/src/components/common/CommonButton/CommonButton';
-import { useTranslation } from '@/src/i18n/I18nProvider';
-import type { TranslationKey } from '@/src/i18n';
-import { colors, typography, spacing } from '@/src/theme/tokens';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
+import { SelectableTile } from "@/src/components/common/SelectableTile/SelectableTile";
+import { ColorSwatch } from "@/src/components/common/ColorSwatch/ColorSwatch";
+import { Toggle } from "@/src/components/common/Toggle/Toggle";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { useTranslation } from "@/src/i18n/I18nProvider";
+import type { TranslationKey } from "@/src/i18n";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 export type FrameStyleOption = {
   id: string;
@@ -48,11 +48,11 @@ export function DesignChangeSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      snapPoints={['50%']}
+      snapPoints={["50%"]}
       contentPaddingBottom={spacing.xxxl}
     >
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>{t('design.frame')}</Text>
+        <Text style={styles.sectionLabel}>{t("design.frame")}</Text>
         <View style={styles.row}>
           {frameStyles.map((style) => {
             const selected = style.id === selectedFrameStyleId;
@@ -71,7 +71,7 @@ export function DesignChangeSheet({
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>{t('design.color')}</Text>
+        <Text style={styles.sectionLabel}>{t("design.color")}</Text>
         <View style={styles.colorRow}>
           {colorOptions.map((color) => (
             <ColorSwatch
@@ -85,12 +85,15 @@ export function DesignChangeSheet({
       </View>
 
       <View style={styles.toggleRow}>
-        <Text style={styles.toggleLabel}>{t('design.showLandmark')}</Text>
-        <Toggle value={showLandmarkName} onValueChange={onToggleShowLandmarkName} />
+        <Text style={styles.toggleLabel}>{t("design.showLandmark")}</Text>
+        <Toggle
+          value={showLandmarkName}
+          onValueChange={onToggleShowLandmarkName}
+        />
       </View>
 
       <CommonButton
-        label={t('design.apply')}
+        label={t("design.apply")}
         onPress={onConfirm}
         variant="primary"
         style={styles.confirmButton}
@@ -111,17 +114,17 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: spacing.m,
   },
   colorRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 14,
     paddingHorizontal: spacing.l,
     marginBottom: spacing.xl,
@@ -137,6 +140,6 @@ const styles = StyleSheet.create({
   },
   confirmLabel: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });

@@ -26,14 +26,21 @@ export default function PhotoAdjustScreen() {
   return (
     <View style={styles.container}>
       <NavBar title={t("photoAdjust.title")} onBack={() => router.back()} />
-      <PhotoCropArea ref={cropAreaRef} imageUri={uri} zoom={zoom} onChangeZoom={setZoom} />
+      <PhotoCropArea
+        ref={cropAreaRef}
+        imageUri={uri}
+        zoom={zoom}
+        onChangeZoom={setZoom}
+      />
       <PhotoAdjustControls
         zoom={zoom}
         onChangeZoom={setZoom}
         onConfirm={async () => {
           // 円ガイド内に実際に見えている範囲を切り出してからアップロードする。
           // 待たずに送信開始し、結果はスタンプを押す画面で待ち合わせる
-          const croppedUri = uri ? await cropAreaRef.current?.getCroppedImageUri() : null;
+          const croppedUri = uri
+            ? await cropAreaRef.current?.getCroppedImageUri()
+            : null;
           const uploadUri = croppedUri ?? uri;
           if (uploadUri) {
             // 取得時の現在地(GPS)を記録する。権限拒否や失敗時は null のまま続行する

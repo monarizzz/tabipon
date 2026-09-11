@@ -96,13 +96,16 @@ export const ko: Translations = {
     addMemo: "메모 추가",
     addSpotName: "장소 이름 추가",
     designUnavailableTitle: "디자인을 변경할 수 없습니다",
-    designUnavailableMessage: "이 스탬프는 이 기기에서 만들어지지 않아 디자인을 변경할 수 없습니다.",
+    designUnavailableMessage:
+      "이 스탬프는 이 기기에서 만들어지지 않아 디자인을 변경할 수 없습니다.",
     designUpdateFailedTitle: "오류",
-    designUpdateFailedMessage: "디자인 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    designUpdateFailedMessage:
+      "디자인 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     shareUnavailableTitle: "공유할 수 없습니다",
     shareUnavailableMessage: "이 기기에서는 공유 기능을 사용할 수 없습니다.",
     shareFailedTitle: "오류",
-    shareFailedMessage: "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    shareFailedMessage:
+      "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     saveFailedTitle: "저장할 수 없습니다",
     saveFailedMessage: "잠시 후 다시 시도해 주세요.",
   },

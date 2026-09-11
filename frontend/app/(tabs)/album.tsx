@@ -60,7 +60,9 @@ export default function AlbumScreen() {
     id: f.id,
     label: f.label ?? t("album.filterAll"),
   }));
-  const [selectedFilterId, setSelectedFilterId] = React.useState(FILTER_IDS[0].id);
+  const [selectedFilterId, setSelectedFilterId] = React.useState(
+    FILTER_IDS[0].id,
+  );
   const [collectionSheetVisible, setCollectionSheetVisible] =
     React.useState(false);
   const [collectionName, setCollectionName] = React.useState("");
@@ -112,7 +114,11 @@ export default function AlbumScreen() {
       {loadFailed ? (
         <View style={styles.status}>
           <Text style={styles.statusText}>{t("album.loadError")}</Text>
-          <CommonButton label={t("common.reload")} onPress={loadStamps} variant="secondary" />
+          <CommonButton
+            label={t("common.reload")}
+            onPress={loadStamps}
+            variant="secondary"
+          />
         </View>
       ) : stamps === null ? (
         <View style={styles.status}>
@@ -124,9 +130,10 @@ export default function AlbumScreen() {
           refreshing={refreshing}
           onRefresh={handleRefresh}
           onPressStamp={(item) => {
-            const stamp = stamps && Array.isArray(stamps)
-              ? (fetchedStamps.find((s) => s.id === item.id) ?? null)
-              : null;
+            const stamp =
+              stamps && Array.isArray(stamps)
+                ? (fetchedStamps.find((s) => s.id === item.id) ?? null)
+                : null;
             router.push({
               pathname: "/album-stamp-detail",
               params: {
@@ -143,8 +150,7 @@ export default function AlbumScreen() {
                 frame: item.frame ?? "",
               },
             });
-          }
-          }
+          }}
         />
       )}
       <CollectionSheet

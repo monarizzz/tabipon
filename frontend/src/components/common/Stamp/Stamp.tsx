@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import { useTranslation } from '@/src/i18n/I18nProvider';
-import { colors } from '@/src/theme/tokens';
+import React from "react";
+import { View, Text, Image, StyleSheet } from "react-native";
+import { useTranslation } from "@/src/i18n/I18nProvider";
+import { colors } from "@/src/theme/tokens";
 
 type Props = {
   imageUri?: string;
@@ -16,7 +16,9 @@ export function Stamp({ imageUri, size = 260, muted = false }: Props) {
 
   if (imageUri) {
     return (
-      <View style={[styles.wrap, { width: outerRingSize, height: outerRingSize }]}>
+      <View
+        style={[styles.wrap, { width: outerRingSize, height: outerRingSize }]}
+      >
         <View
           style={[
             styles.content,
@@ -27,14 +29,20 @@ export function Stamp({ imageUri, size = 260, muted = false }: Props) {
             },
           ]}
         >
-          <Image key={imageUri} source={{ uri: imageUri }} style={styles.image} />
+          <Image
+            key={imageUri}
+            source={{ uri: imageUri }}
+            style={styles.image}
+          />
         </View>
       </View>
     );
   }
 
   return (
-    <View style={[styles.wrap, { width: outerRingSize, height: outerRingSize }]}>
+    <View
+      style={[styles.wrap, { width: outerRingSize, height: outerRingSize }]}
+    >
       <View
         style={[
           styles.ring,
@@ -67,7 +75,9 @@ export function Stamp({ imageUri, size = 260, muted = false }: Props) {
           muted && styles.contentMuted,
         ]}
       >
-        {muted ? null : <Text style={styles.placeholder}>{t("common.capturedImage")}</Text>}
+        {muted ? null : (
+          <Text style={styles.placeholder}>{t("common.capturedImage")}</Text>
+        )}
       </View>
     </View>
   );
@@ -75,36 +85,36 @@ export function Stamp({ imageUri, size = 260, muted = false }: Props) {
 
 const styles = StyleSheet.create({
   wrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   ring: {
-    position: 'absolute',
+    position: "absolute",
     borderWidth: 3,
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
   innerRing: {
     borderWidth: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   content: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
   },
   contentMuted: {
     backgroundColor: colors.border,
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   placeholder: {
     fontSize: 26,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.textPlaceholder,
-    textAlign: 'center',
+    textAlign: "center",
     width: 200,
   },
 });

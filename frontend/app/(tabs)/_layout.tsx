@@ -28,7 +28,8 @@ export default function TabsLayout() {
               label: (options.title ?? route.name) as string,
               icon: ICONS[route.name] ?? Camera,
               active: isFocused,
-              activeColor: route.name === "mypage" ? colors.textPrimary : colors.primary,
+              activeColor:
+                route.name === "mypage" ? colors.textPrimary : colors.primary,
               onPress: () => {
                 const event = navigation.emit({
                   type: "tabPress",

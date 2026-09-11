@@ -1,6 +1,6 @@
-import React from 'react';
-import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/src/lib/supabase';
+import React from "react";
+import type { Session, User } from "@supabase/supabase-js";
+import { supabase } from "@/src/lib/supabase";
 
 type AuthContextType = {
   session: Session | null;
@@ -26,7 +26,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
@@ -34,7 +36,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, loading }}>
+    <AuthContext.Provider
+      value={{ session, user: session?.user ?? null, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -42,6 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const ctx = React.useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }

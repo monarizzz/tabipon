@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, LayoutChangeEvent } from 'react-native';
-import Slider from '@react-native-community/slider';
-import { Minimize2, Maximize2 } from 'lucide-react-native';
-import { CommonButton } from '@/src/components/common/CommonButton/CommonButton';
-import { useTranslation } from '@/src/i18n/I18nProvider';
-import { colors, typography, spacing } from '@/src/theme/tokens';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, LayoutChangeEvent } from "react-native";
+import Slider from "@react-native-community/slider";
+import { Minimize2, Maximize2 } from "lucide-react-native";
+import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+import { useTranslation } from "@/src/i18n/I18nProvider";
+import { colors, typography, spacing } from "@/src/theme/tokens";
 
 const THUMB_SIZE = 20;
 const ZOOM_ICON_SIZE = 16;
@@ -42,7 +42,10 @@ export function PhotoAdjustControls({ zoom, onChangeZoom, onConfirm }: Props) {
             thumbTintColor="transparent"
           />
           {trackWidth > 0 && (
-            <View pointerEvents="none" style={[styles.thumbOutline, { left: thumbLeft }]} />
+            <View
+              pointerEvents="none"
+              style={[styles.thumbOutline, { left: thumbLeft }]}
+            />
           )}
         </View>
         <Maximize2 size={ZOOM_ICON_SIZE} color={colors.textMuted} />
@@ -67,22 +70,22 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: typography.caption.fontSize,
     color: colors.textMuted,
-    textAlign: 'center',
+    textAlign: "center",
   },
   sliderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.m,
   },
   sliderTrack: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   slider: {
-    width: '100%',
+    width: "100%",
   },
   thumbOutline: {
-    position: 'absolute',
+    position: "absolute",
     width: THUMB_SIZE,
     height: THUMB_SIZE,
     borderRadius: THUMB_SIZE / 2,
@@ -97,6 +100,6 @@ const styles = StyleSheet.create({
   },
   confirmButtonLabel: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });

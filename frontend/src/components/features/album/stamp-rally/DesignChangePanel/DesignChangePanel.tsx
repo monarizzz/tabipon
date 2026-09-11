@@ -126,7 +126,9 @@ export function DesignChangePanel({
           onPress={onConfirm}
           variant="primary"
           disabled={confirming}
-          icon={confirming ? <ActivityIndicator color={colors.white} /> : undefined}
+          icon={
+            confirming ? <ActivityIndicator color={colors.white} /> : undefined
+          }
           style={styles.confirmButton}
           textStyle={styles.confirmLabel}
         />

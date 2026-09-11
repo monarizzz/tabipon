@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, typography, radii, spacing } from '@/src/theme/tokens';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { colors, typography, radii, spacing } from "@/src/theme/tokens";
 
 type Props = {
   title: string;
@@ -11,12 +11,22 @@ type Props = {
   onRightPress?: () => void;
 };
 
-export function NavBar({ title, onBack, backIcon, rightIcon, onRightPress }: Props) {
+export function NavBar({
+  title,
+  onBack,
+  backIcon,
+  rightIcon,
+  onRightPress,
+}: Props) {
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.wrap, { paddingTop: insets.top + spacing.l }]}>
       {onBack ? (
-        <TouchableOpacity style={styles.iconButton} onPress={onBack} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={onBack}
+          activeOpacity={0.7}
+        >
           {backIcon ?? <Text style={styles.iconGlyph}>‹</Text>}
         </TouchableOpacity>
       ) : null}
@@ -27,7 +37,11 @@ export function NavBar({ title, onBack, backIcon, rightIcon, onRightPress }: Pro
         {title}
       </Text>
       {rightIcon ? (
-        <TouchableOpacity style={styles.iconButton} onPress={onRightPress} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={onRightPress}
+          activeOpacity={0.7}
+        >
           {rightIcon}
         </TouchableOpacity>
       ) : (
@@ -39,9 +53,9 @@ export function NavBar({ title, onBack, backIcon, rightIcon, onRightPress }: Pro
 
 const styles = StyleSheet.create({
   wrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     backgroundColor: colors.bg,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -50,13 +64,13 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: typography.navTitle.fontSize,
     fontWeight: typography.navTitle.fontWeight,
     color: colors.textPrimary,
   },
   titleLarge: {
-    textAlign: 'left',
+    textAlign: "left",
     fontSize: typography.screenTitle.fontSize,
     fontWeight: typography.screenTitle.fontWeight,
   },
@@ -67,8 +81,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   iconButtonPlaceholder: {
     width: 44,
@@ -76,7 +90,7 @@ const styles = StyleSheet.create({
   },
   iconGlyph: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.textMuted,
   },
 });
