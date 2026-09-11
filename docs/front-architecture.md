@@ -58,7 +58,10 @@ portable stories（`composeStories`）として Jest から描画する。CI（`
 
 - 走査は `src/components/stories.test.tsx` が実行時に行うので、**ストーリーを追加してもテスト側の修正は不要**
 - 検証するのは「例外を投げずに描画できること」だけ。見た目の崩れは検出できない（見た目は実機の Storybook で確認する）
-- ストーリーに `play` があれば併せて実行されるので、操作まで確かめたい場合は `play` を書く
+- ストーリーに `play` があれば併せて実行される。ただし React Native + Jest では
+  `play` に `canvasElement` / `canvas` / `userEvent` が渡らない（`document` が無いため）。
+  web の作法どおり `({ canvas, userEvent })` を分割代入する `play` は動かないので、
+  操作は `@testing-library/react-native` の `screen` / `fireEvent` で書くこと
 - グローバルな Provider は `.rnstorybook/preview.tsx` の `decorators` に置く。テスト側は
   `jest.setup.storybook.ts` の `setProjectAnnotations` で同じ設定を読み込むため、Storybook と条件が揃う
 - ネイティブモジュールに触れる依存（AsyncStorage・WebView・BottomSheet など）は `jest.setup.ts` でモックしている。

@@ -12,7 +12,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { composeStories } from "@storybook/react";
+import { composeStories, type StoryContext } from "@storybook/react";
 import { render } from "@testing-library/react-native";
 
 const COMPONENTS_DIR = path.join(__dirname);
@@ -37,8 +37,15 @@ test("ストーリーファイルを検出できている", () => {
   expect(storyFiles.length).toBeGreaterThan(0);
 });
 
-/** composeStories が返すストーリー (React コンポーネント + play) */
-type ComposedStory = React.ComponentType & { play?: () => Promise<void> };
+/**
+ * composeStories が返すストーリー (React コンポーネント + play)。
+ *
+ * play の引数は「呼び出し側が渡す context」ではなく「内部で組み立てた context への
+ * 上書き」なので、引数なしで呼んでよい (Storybook 側が context を生成して渡す)。
+ */
+type ComposedStory = React.ComponentType & {
+  play?: (context?: Partial<StoryContext>) => Promise<void>;
+};
 
 describe.each(
   storyFiles.map(
@@ -54,6 +61,15 @@ describe.each(
 
   test.each(composed)("%s がレンダリングできる", async (_storyName, Story) => {
     await render(<Story />);
+    // portable stories の run() は使えない。run() は @storybook/react の
+    // renderToCanvas (react-dom) を呼ぶため、document の無い react-native の
+    // テスト環境では "document is not defined" で落ちる。
+    // そのため RNTL で描画してから play を実行する形にしている。
+    //
+    // 注意: この環境の play には canvasElement / canvas / userEvent が渡らない
+    // (document が無いので canvasElement は undefined、canvas と userEvent は
+    // 空オブジェクト)。web の作法どおり ({ canvas, userEvent }) を分割代入する
+    // play は動かないので、操作は RNTL の screen / fireEvent で書くこと。
     await Story.play?.();
   });
 });
