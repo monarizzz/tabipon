@@ -7,7 +7,8 @@ import { colors } from "@/src/theme/tokens";
 // 動作していることを目視確認する。Skia は Expo SDK 54 の Expo Go に
 // 同梱されているため、Storybook (npm run storybook:ios など) から
 // そのまま確認できる。
-// 画像処理そのものはこの Issue の範囲外（#121〜#123 で実装する）
+// 画像処理そのものはこの Issue の範囲外（#121〜#123 で実装する）。
+// #123 でスタンプ生成関数が完成したら、この検証用コンポーネントは削除する
 const SIZE = 120;
 
 export function SkiaCanvasSample() {
