@@ -1,4 +1,8 @@
-.claude
+# Claude Code
+# settings.json（チーム共有の権限設定）・skills/ 等はリポジトリで共有するため、
+# 個人環境に閉じるものだけをピンポイントで除外する
+.claude/settings.local.json
+.claude/worktrees/
 
 # Python
 backend/.venv/
