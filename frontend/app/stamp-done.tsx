@@ -48,6 +48,8 @@ export default function StampDoneScreen() {
     stampTop?: string;
     stampId?: string;
     imageUrl?: string;
+    scratchLevel?: string;
+    peak?: string;
   }>();
   const previewUri = getChosenPreviewUri();
   const [spotName, setSpotName] = React.useState("");
@@ -171,15 +173,17 @@ export default function StampDoneScreen() {
             <StampResultHeader />
           </View>
           <StampShowcase
-            imageUri={imageUrl ?? previewUri}
+            imageUri={imageUrl ?? previewUri ?? undefined}
             onShare={() =>
               Share.share({ message: t("stampDone.shareMessage") })
             }
             spotName={spotName}
             onPressSpotName={openSpotNameEditor}
           />
+          {/* styles.debugText は定義されておらず、これまでも未適用のまま描画されていた。
+              見た目を変えないよう参照だけ外している。この DEBUG 表示自体の要否は別途判断する */}
           {scratchLevel !== undefined && (
-            <Text style={styles.debugText}>
+            <Text>
               [DEBUG] scratch: {scratchLevel} / peak: {peak}
             </Text>
           )}
