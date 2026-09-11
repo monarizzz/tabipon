@@ -1,0 +1,198 @@
+{
+  "generated_at": "2026-09-11T17:21:37.665257+00:00",
+  "cv2_version": "4.13.0",
+  "sources": {
+    "byodoin": {
+      "input": {
+        "kind": "photo",
+        "file": "input/byodoin-uji-kyoto.jpg",
+        "author": "GiveMeMollusks",
+        "source_url": "https://commons.wikimedia.org/wiki/File:By%C5%8Ddo-in_Temple_in_Uji,_Kyoto,_Japan.jpg",
+        "license": "CC0 1.0"
+      },
+      "base": [
+        {
+          "file": "output/base/red_simple.png",
+          "color": "red",
+          "frame": "simple",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/red_classic.png",
+          "color": "red",
+          "frame": "classic",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/red_dash.png",
+          "color": "red",
+          "frame": "dash",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/red_wave.png",
+          "color": "red",
+          "frame": "wave",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/blue_simple.png",
+          "color": "blue",
+          "frame": "simple",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/blue_classic.png",
+          "color": "blue",
+          "frame": "classic",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/blue_dash.png",
+          "color": "blue",
+          "frame": "dash",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/blue_wave.png",
+          "color": "blue",
+          "frame": "wave",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/black_simple.png",
+          "color": "black",
+          "frame": "simple",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/black_classic.png",
+          "color": "black",
+          "frame": "classic",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/black_dash.png",
+          "color": "black",
+          "frame": "dash",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/black_wave.png",
+          "color": "black",
+          "frame": "wave",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/green_simple.png",
+          "color": "green",
+          "frame": "simple",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/green_classic.png",
+          "color": "green",
+          "frame": "classic",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/green_dash.png",
+          "color": "green",
+          "frame": "dash",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/base/green_wave.png",
+          "color": "green",
+          "frame": "wave",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        }
+      ],
+      "variants": [
+        {
+          "file": "output/variants/scratch_light.png",
+          "color": "red",
+          "frame": "classic",
+          "scratch_level": 0.2,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/variants/scratch_heavy.png",
+          "color": "red",
+          "frame": "classic",
+          "scratch_level": 0.6,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/variants/tilt_15deg.png",
+          "color": "red",
+          "frame": "classic",
+          "scratch_level": 0.0,
+          "tilt_angle": 15.0
+        },
+        {
+          "file": "output/variants/scratch_and_tilt.png",
+          "color": "red",
+          "frame": "classic",
+          "scratch_level": 0.4,
+          "tilt_angle": 20.0
+        }
+      ]
+    },
+    "hida-mountains": {
+      "input": {
+        "kind": "photo",
+        "file": "input/hida-mountains.jpg",
+        "author": "Wall Boat",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Hida_Mountains,_Japan.jpg",
+        "license": "CC0 1.0"
+      },
+      "base": [
+        {
+          "file": "output/hida-mountains/black_simple.png",
+          "color": "black",
+          "frame": "simple",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/hida-mountains/black_classic.png",
+          "color": "black",
+          "frame": "classic",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/hida-mountains/black_dash.png",
+          "color": "black",
+          "frame": "dash",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        },
+        {
+          "file": "output/hida-mountains/black_wave.png",
+          "color": "black",
+          "frame": "wave",
+          "scratch_level": 0.0,
+          "tilt_angle": 0.0
+        }
+      ]
+    }
+  }
+}

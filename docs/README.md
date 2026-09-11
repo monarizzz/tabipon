@@ -7,6 +7,7 @@
 | [REQUIREMENTS.md](REQUIREMENTS.md) | 作るもの・ユーザー体験フロー・画面定義・画面遷移・主要機能・技術スタック | 仕様を確認したい / 新しい画面や機能の位置づけを知りたい |
 | [front-architecture.md](front-architecture.md) | フロントエンドのディレクトリ構成（`app/` と `src/`）、コンポーネントの分類基準、命名規則、Storybook の配置、既存コンポーネントカタログ | フロントのコードを書く前 / 新しいコンポーネントを作る前（**必読**） |
 | [backend-architecture.md](backend-architecture.md) | バックエンドの責務分割とディレクトリ構成 | バックエンドのコードを変更する前（※ローカルストレージ移行でバックエンドごと廃止予定。Refs #103） |
+| [stamp-samples/README.md](stamp-samples/README.md) | 現行 backend のスタンプ画像生成（4色×4フレーム他）の出力サンプルと再生成手順 | Skia 移植後の見た目を現行出力と比較したいとき（Refs #120, #121, #122） |
 | [../design/DESIGN.MD](../design/DESIGN.MD) | ビジュアルデザインシステム（配色・タイポグラフィ・コンポーネントのスタイル定義） | UI を実装する前（**必読**） |
 
 デザインファイルの実体は `design/` 配下にある。
