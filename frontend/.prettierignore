@@ -12,5 +12,9 @@
 package-lock.json
 *.tsbuildinfo
 
+# Storybook が自動生成するため、整形しても次回生成時に上書きされる
+# (eslint.config.js でも同じ理由で ignore している)
+.rnstorybook/storybook.requires.ts
+
 # Storybook のビルド成果物
 storybook-static/
