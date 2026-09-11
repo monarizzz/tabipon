@@ -34,3 +34,9 @@ jest.mock("react-native-webview", () => {
   const { View } = require("react-native");
   return { WebView: View, default: View };
 });
+
+// Skia (@shopify/react-native-skia) は GPU 描画のネイティブモジュールに
+// 直結しており、Node 上でそのまま import すると落ちる。ライブラリ公式が
+// 提供する jest 用モック (CanvasKit を使わない JS 実装への差し替え) を使う
+// https://shopify.github.io/react-native-skia/docs/setup/jest/
+require("@shopify/react-native-skia/jestSetup");
