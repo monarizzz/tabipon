@@ -178,6 +178,7 @@ portable stories（`composeStories`）として Jest から描画する。CI（`
 | CommonButton | 汎用ボタン | primary / secondary / ghost / accent / danger（`icon` 対応） | カメラ・アルバム・スタンプを押す／押しました・スタンプ詳細ほか多数 |
 | Card | 汎用カード | `style` で上書き | マイページ（設定メニュー）、言語設定、StampCard |
 | Badge | ラベル付きバッジ | `color` | **未使用**（現状どこからも import されていない） |
+| SkiaCanvasSample | Skia の `Canvas` で円を1つ描くだけの動作確認用コンポーネント（#119） | - | **未使用**（画面には組み込んでいない。ストーリー上での描画確認のみ） |
 | Modal | オーバーレイ+中央コンテンツの素のモーダル | - | CommonDialog の内部のみ |
 | ListItem | アイコン+ラベル+右要素の行 | `icon` / `rightElement` / `showChevron` | マイページ（設定メニュー）、言語設定 |
 | ColorSwatch | 色選択ドット | selected | デザイン変更シート／パネル |
