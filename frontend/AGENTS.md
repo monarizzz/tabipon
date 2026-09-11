@@ -19,6 +19,8 @@ UI コードを生成する際は、`design/DESIGN.MD`（リポジトリルー�
 作業ディレクトリを取り違えないよう、コマンドに `cd frontend` を含めた形で記載する。
 
 - 型チェック: `cd frontend && npx tsc --noEmit`
+- ストーリーのスモークテスト: `cd frontend && npm test`
+  （`src/components/**/*.stories.tsx` を Jest で描画する。詳細は `docs/front-architecture.md`）
 - ESLint / Prettier の導入と `npm run lint` / `npm run format:check` / `npm run typecheck` の追加は
   [PR #112](https://github.com/monarizzz/tabipon/pull/112) で進行中。マージ後はそちらの npm scripts を
   （同じく `frontend/` で）使うこと

@@ -50,6 +50,20 @@ src/components/
 - `index.ts` によるre-exportは置かない。他のファイルからは `import { CommonButton } from '@/src/components/common/CommonButton/CommonButton'` のように、コンポーネントファイルを直接importする
 - Storybook 側は `.rnstorybook/main.ts` の `stories` に `../src/components/**/*.stories.?(ts|tsx|js|jsx)` を指定し、この配置を自動検出する
 
+### ストーリーのテスト
+
+`cd frontend && npm test` で、`src/components/**/*.stories.tsx` を Storybook の
+portable stories（`composeStories`）として Jest から描画する。CI（`.github/workflows/ci.yml` の
+`Storybook stories` ジョブ）でも同じコマンドを実行する。
+
+- 走査は `src/components/stories.test.tsx` が実行時に行うので、**ストーリーを追加してもテスト側の修正は不要**
+- 検証するのは「例外を投げずに描画できること」だけ。見た目の崩れは検出できない（見た目は実機の Storybook で確認する）
+- ストーリーに `play` があれば併せて実行されるので、操作まで確かめたい場合は `play` を書く
+- グローバルな Provider は `.rnstorybook/preview.tsx` の `decorators` に置く。テスト側は
+  `jest.setup.storybook.ts` の `setProjectAnnotations` で同じ設定を読み込むため、Storybook と条件が揃う
+- ネイティブモジュールに触れる依存（AsyncStorage・WebView・BottomSheet など）は `jest.setup.ts` でモックしている。
+  そのため、それらの内部描画はテストの対象外
+
 ### 分類基準
 - **common** : 「このコンポーネントはスタンプラリーの仕様を何も知らない」もの
 - **features/\<feature\>** : 特定機能のデータ構造・状態・ロジックに依存するもの
