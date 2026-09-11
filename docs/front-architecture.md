@@ -231,6 +231,7 @@ portable stories（`composeStories`）として Jest から描画する。CI（`
 | CameraControls | フラッシュ/シャッター/カメラ切替の下部コントロール行 | カメラ画面 |
 | CameraHintBar | 撮影ガイドのヒントテキストバー | カメラ画面 |
 | ScanOverlay | スキャン風のオーバーレイ | **未使用**（現状どこからも import されていない） |
+| SkiaCanvasSample | Skia の `Canvas` で円を1つ描くだけの動作確認用コンポーネント（#119）。**#123 でスタンプ生成関数が完成した時点で削除する一時的な検証用コンポーネント** | **未使用**（画面には組み込んでいない。ストーリー上での描画確認のみ） |
 | PhotoCropArea | 円形クロップ枠+ドラッグハンドル | 写真調整画面 |
 | PhotoAdjustControls | ジェスチャーヒント+ズームスライダー+次へボタン | 写真調整画面 |
 | DesignChangeSheet | BottomSheet版のデザイン変更シート（フレーム/カラー/ランドマーク名トグル） | スタンプを押す画面 |
