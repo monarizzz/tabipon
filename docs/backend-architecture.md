@@ -18,10 +18,19 @@ backend/
       routes/
         health.py                 # GET /health
         stamp_image.py            # POST /stamp-image。HTTP入出力とバリデーション
+        stamps.py                 # スタンプCRUD。HTTP入出力とバリデーション
+    clients/
+      supabase_client.py          # Supabase接続クライアント
     core/
+      auth.py                     # リクエスト認証
       config.py                   # アプリ全体で使う設定値・定数
+    repositories/
+      stamp_repository.py         # スタンプのDB操作
     services/
       stamp_processor.py          # OpenCVによる画像処理
+  tests/
+    test_api.py
+    test_config.py
 ```
 
 ---
@@ -31,15 +40,17 @@ backend/
 - **main.py** : アプリ全体の配線だけを行う。画像処理やDB処理を書かない
 - **api/routes/** : HTTPの世界を担当する。URL、method、UploadFile、Response、HTTPエラーを扱う
 - **services/** : アプリが実際に行う処理を書く。今回ならOpenCVによるスタンプ画像生成
-- **core/** : 複数箇所で使う設定値や基盤的なコードを置く
+- **repositories/** : DB（Supabase）への読み書き。SQL・テーブル名の知識はここに閉じる
+- **clients/** : 外部サービスへの接続クライアントの生成
+- **core/** : 複数箇所で使う設定値や認証など、基盤的なコードを置く
 
 依存の向きは外側から内側へ流す。
 
 ```
 main.py
   -> api/routes
-      -> services
-          -> core
+      -> services / repositories
+          -> clients / core
 ```
 
 `services` から `api/routes` を import しない。OpenCVの処理を `main.py` や route ファイルに直接書かない。
@@ -58,13 +69,11 @@ main.py
 
 ## 今後増やす候補
 
-Google Vision API、Supabase、DB保存を追加する段階で、必要に応じて以下を増やす。
+`clients/` と `repositories/` は追加済み。残りは必要になった段階で増やす。
 
 ```
 app/
-  clients/        # Google VisionやSupabaseなど外部サービスの接続
-  schemas/        # request / response の型
-  repositories/   # DB操作
+  schemas/        # request / response の型（未作成。現状は route 内で定義）
 ```
 
 最初から作りすぎず、必要になったタイミングで追加する。
