@@ -16,6 +16,11 @@
 
 リポジトリ全体のセットアップ・起動手順は [ルートの README.md](../README.md) を参照。
 
+コーディングエージェント向けの指示は `docs/` ではなく AGENTS.md 側にある（`CLAUDE.md` は `AGENTS.md` を読み込むだけ）。
+
+- [`../AGENTS.md`](../AGENTS.md) — リポジトリ共通のルール（コミット粒度・PR・ブランチ運用など）
+- [`../frontend/AGENTS.md`](../frontend/AGENTS.md) — frontend 固有のルールとコマンド
+
 ## ドキュメントを分割していない理由
 
 blog リポジトリでは `docs/architecture/` 配下を `directory-structure.md` / `data-model.md` / `component-structure.md` の3枚に分けている。たびぽんでは現時点で**分割していない**。
