@@ -1,0 +1,16 @@
+# Prettier は cwd の .gitignore も自動で参照する。frontend/.gitignore が
+# node_modules・/ios・/android・dist を除外済みなので、ここには
+# 「それでも残るもの」だけを書く。
+
+# 環境変数ファイル。拡張子が無く parser を推論できずエラーになる。
+# .env はリポジトリルートの .gitignore で除外されているが、prettier は
+# frontend/ から見て親の .gitignore を読まないため、ここで明示する
+.env
+.env.*
+
+# 自動生成・ロックファイル
+package-lock.json
+*.tsbuildinfo
+
+# Storybook のビルド成果物
+storybook-static/
