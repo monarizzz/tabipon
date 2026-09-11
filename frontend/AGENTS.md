@@ -21,7 +21,9 @@ UI コードを生成する際は、`design/DESIGN.MD`（リポジトリルー�
 - 型チェック: `cd frontend && npm run typecheck`
 - Lint: `cd frontend && npm run lint`
 - フォーマット確認: `cd frontend && npm run format:check`（自動修正は `npm run format`）
+- ストーリーのスモークテスト: `cd frontend && npm test`
+  （`src/components/**/*.stories.tsx` を Jest で描画する。詳細は `docs/front-architecture.md`）
 - Storybook: `cd frontend && npm run storybook:ios` / `storybook:android` / `storybook:web`
 
-CI（`.github/workflows/ci.yml`）は PR に対して上の typecheck / lint / format:check を
+CI（`.github/workflows/ci.yml`）は PR に対して上の typecheck / lint / format:check / test を
 `frontend/` で実行する。`backend/` 向けのジョブは無い。
