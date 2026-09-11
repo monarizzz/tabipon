@@ -321,10 +321,7 @@ export default function StampPressScreen() {
                 color={selectedColor}
                 frameId={
                   selectedFrameStyleId as
-                    | "classic"
-                    | "vintage"
-                    | "minimal"
-                    | "wave"
+                    "classic" | "vintage" | "minimal" | "wave"
                 }
               />
             )}

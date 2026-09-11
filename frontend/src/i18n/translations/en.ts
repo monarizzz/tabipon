@@ -50,7 +50,8 @@ export const en: Translations = {
     toAlbum: "To album",
     retake: "Retake",
     retakeConfirmTitle: "Retake this stamp?",
-    retakeConfirmMessage: "This stamp will be deleted so you can shoot it again.",
+    retakeConfirmMessage:
+      "This stamp will be deleted so you can shoot it again.",
   },
   design: {
     frame: "Frame",
@@ -104,7 +105,8 @@ export const en: Translations = {
     shareUnavailableTitle: "Sharing unavailable",
     shareUnavailableMessage: "Sharing isn't available on this device.",
     shareFailedTitle: "Error",
-    shareFailedMessage: "Failed to share the image. Please wait a moment and try again.",
+    shareFailedMessage:
+      "Failed to share the image. Please wait a moment and try again.",
     saveFailedTitle: "Could not save",
     saveFailedMessage: "Please wait a moment and try again.",
   },

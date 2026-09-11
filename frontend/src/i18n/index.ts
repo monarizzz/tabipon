@@ -29,7 +29,10 @@ export const i18n = new I18n(
 /** 端末のロケール一覧から対応言語を探す。見つからなければ既定言語。 */
 export function resolveDeviceLocale(): SupportedLocale {
   for (const { languageCode } of getLocales()) {
-    if (languageCode && (SUPPORTED_LOCALES as readonly string[]).includes(languageCode)) {
+    if (
+      languageCode &&
+      (SUPPORTED_LOCALES as readonly string[]).includes(languageCode)
+    ) {
       return languageCode as SupportedLocale;
     }
   }

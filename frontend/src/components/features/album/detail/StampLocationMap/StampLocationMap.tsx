@@ -42,7 +42,12 @@ function buildMapHtml(lat: number, lon: number, zoom: number): string {
 </html>`;
 }
 
-export function StampLocationMap({ spotName, latitude, longitude, zoom = 15 }: Props) {
+export function StampLocationMap({
+  spotName,
+  latitude,
+  longitude,
+  zoom = 15,
+}: Props) {
   const { t } = useTranslation();
 
   const hasLocation =

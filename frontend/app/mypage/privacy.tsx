@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import { NavBar } from '@/src/components/common/layout/NavBar/NavBar';
-import { useTranslation } from '@/src/i18n/I18nProvider';
-import { colors } from '@/src/theme/tokens';
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
+import { useTranslation } from "@/src/i18n/I18nProvider";
+import { colors } from "@/src/theme/tokens";
 
 export default function PrivacyScreen() {
   const router = useRouter();
@@ -11,7 +11,7 @@ export default function PrivacyScreen() {
 
   return (
     <View style={styles.container}>
-      <NavBar title={t('mypage.privacy')} onBack={() => router.back()} />
+      <NavBar title={t("mypage.privacy")} onBack={() => router.back()} />
     </View>
   );
 }

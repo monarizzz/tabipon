@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Keyboard, Text, StyleSheet, TextInput } from "react-native";
+import { Keyboard, Text, StyleSheet } from "react-native";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
@@ -38,7 +38,10 @@ export function EditFieldSheet({
   ...field
 }: Props) {
   const { t } = useTranslation();
-  const inputRef = useRef<TextInput>(null);
+  // react-native の TextInput ではなく BottomSheetTextInput の ref 型を使う。
+  // 後者は react-native-gesture-handler の TextInput を包んでおり、両者は別の型
+  const inputRef =
+    useRef<React.ComponentRef<typeof BottomSheetTextInput>>(null);
 
   const handleClose = () => {
     Keyboard.dismiss();
@@ -85,7 +88,12 @@ export function EditFieldSheet({
           style={styles.datePicker}
         />
       )}
-      <CommonButton label={t("common.save")} onPress={handleSave} variant="primary" style={styles.saveButton} />
+      <CommonButton
+        label={t("common.save")}
+        onPress={handleSave}
+        variant="primary"
+        style={styles.saveButton}
+      />
     </BottomSheet>
   );
 }

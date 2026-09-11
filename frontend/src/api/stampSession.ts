@@ -59,7 +59,9 @@ export function startUpload(
   color: StampColor,
   location: StampLocation | null = null,
 ): void {
-  console.log(`[stampSession] start session color=${color} uri=${photoUri} location=${JSON.stringify(location)}`);
+  console.log(
+    `[stampSession] start session color=${color} uri=${photoUri} location=${JSON.stringify(location)}`,
+  );
   let resolve!: (value: StampCreateResponse) => void;
   let reject!: (reason: unknown) => void;
   const promise = new Promise<StampCreateResponse>((res, rej) => {
@@ -83,13 +85,25 @@ export function startUpload(
 }
 
 /** 振り下ろし確定時に呼ぶ。scratchLevel・color・frame を含めて初回 POST 保存する */
-export function applyScratch(scratchLevel: number, tiltAngle: number = 0): void {
+export function applyScratch(
+  scratchLevel: number,
+  tiltAngle: number = 0,
+): void {
   if (!session) return;
   const s = session;
-  console.log(`[stampSession] apply scratch level=${scratchLevel} tilt=${tiltAngle} color=${s.desiredColor} frame=${s.desiredFrame}`);
+  console.log(
+    `[stampSession] apply scratch level=${scratchLevel} tilt=${tiltAngle} color=${s.desiredColor} frame=${s.desiredFrame}`,
+  );
   s.scratchLevel = scratchLevel;
   s.tiltAngle = tiltAngle;
-  createStampImage(s.photoUri, s.desiredColor, scratchLevel, s.desiredFrame, s.location, tiltAngle)
+  createStampImage(
+    s.photoUri,
+    s.desiredColor,
+    scratchLevel,
+    s.desiredFrame,
+    s.location,
+    tiltAngle,
+  )
     .then((created) => {
       console.log(`[stampSession] created stamp id=${created.id}`);
       s.created = created;
@@ -112,11 +126,21 @@ export function retryUpload(): void {
   if (s.created === null) {
     let resolve!: (value: StampCreateResponse) => void;
     let reject!: (reason: unknown) => void;
-    s.promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+    s.promise = new Promise((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
     s._resolve = resolve;
     s._reject = reject;
     markHandled(s.promise);
-    createStampImage(s.photoUri, s.desiredColor, s.scratchLevel, s.desiredFrame, s.location, s.tiltAngle)
+    createStampImage(
+      s.photoUri,
+      s.desiredColor,
+      s.scratchLevel,
+      s.desiredFrame,
+      s.location,
+      s.tiltAngle,
+    )
       .then((created) => {
         s.created = created;
         s.appliedColor = s.desiredColor;
@@ -146,7 +170,9 @@ export function changeColor(color: StampColor): void {
 
 export function changeFrame(frame: StampFrame): void {
   if (!session || session.desiredFrame === frame) return;
-  console.log(`[stampSession] change frame ${session.desiredFrame} -> ${frame}`);
+  console.log(
+    `[stampSession] change frame ${session.desiredFrame} -> ${frame}`,
+  );
   session.desiredFrame = frame;
 }
 
@@ -169,7 +195,14 @@ async function syncColor(
   while (s.appliedColor !== s.desiredColor) {
     const color = s.desiredColor;
     console.log(`[stampSession] sync color=${color} stampId=${created.id}`);
-    const updated = await updateStampImage(created.id, s.photoUri, color, s.scratchLevel, s.desiredFrame, s.tiltAngle);
+    const updated = await updateStampImage(
+      created.id,
+      s.photoUri,
+      color,
+      s.scratchLevel,
+      s.desiredFrame,
+      s.tiltAngle,
+    );
     s.appliedColor = color;
     created = { ...created, image_url: updated.image_url };
     s.created = created;

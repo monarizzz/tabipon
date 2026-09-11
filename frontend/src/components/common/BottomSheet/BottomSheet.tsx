@@ -1,7 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import GorhomBottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, radii, spacing } from '@/src/theme/tokens';
+import React, { useEffect, useRef } from "react";
+import GorhomBottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { colors, radii, spacing } from "@/src/theme/tokens";
 
 type Props = {
   visible: boolean;
@@ -45,7 +48,11 @@ export function BottomSheet({
         }
       }}
       backdropComponent={(props) => (
-        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
+        <BottomSheetBackdrop
+          {...props}
+          disappearsOnIndex={-1}
+          appearsOnIndex={0}
+        />
       )}
       backgroundStyle={{
         backgroundColor: colors.white,

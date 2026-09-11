@@ -1,8 +1,16 @@
-import React from 'react';
-import { TouchableOpacity, Text, View, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
-import { colors, typography, radii, spacing } from '@/src/theme/tokens';
+import React from "react";
+import {
+  TouchableOpacity,
+  Text,
+  View,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
+import { colors, typography, radii, spacing } from "@/src/theme/tokens";
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'accent' | 'danger';
+type Variant = "primary" | "secondary" | "ghost" | "accent" | "danger";
 
 type Props = {
   label: string;
@@ -17,7 +25,7 @@ type Props = {
 export function CommonButton({
   label,
   onPress,
-  variant = 'primary',
+  variant = "primary",
   disabled = false,
   icon,
   style,
@@ -32,7 +40,9 @@ export function CommonButton({
     >
       <View style={styles.content}>
         {icon}
-        <Text style={[styles.label, styles[`${variant}Label`], textStyle]}>{label}</Text>
+        <Text style={[styles.label, styles[`${variant}Label`], textStyle]}>
+          {label}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -41,12 +51,12 @@ export function CommonButton({
 const styles = StyleSheet.create({
   base: {
     borderRadius: radii.button,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   content: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.s,
   },
   primary: {
@@ -64,7 +74,7 @@ const styles = StyleSheet.create({
   ghost: {
     paddingVertical: spacing.l,
     paddingHorizontal: spacing.xxxl,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   accent: {
     paddingVertical: spacing.m,

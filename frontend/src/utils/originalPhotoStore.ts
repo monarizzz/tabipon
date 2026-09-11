@@ -18,7 +18,10 @@ function originalFile(stampId: string): File {
  * スタンプ作成成功時に元写真をコピー保存する。
  * 失敗してもスタンプ作成本体は止めないため、例外は握りつぶしてログのみ残す。
  */
-export async function persistOriginalPhoto(stampId: string, photoUri: string): Promise<void> {
+export async function persistOriginalPhoto(
+  stampId: string,
+  photoUri: string,
+): Promise<void> {
   try {
     originalsDir().create({ idempotent: true });
     const dest = originalFile(stampId);
@@ -33,7 +36,9 @@ export async function persistOriginalPhoto(stampId: string, photoUri: string): P
 /**
  * 保存済みの元写真 uri を返す。無ければ null(＝この端末では変更不可)。
  */
-export async function getOriginalPhotoUri(stampId: string): Promise<string | null> {
+export async function getOriginalPhotoUri(
+  stampId: string,
+): Promise<string | null> {
   try {
     const file = originalFile(stampId);
     return file.exists ? file.uri : null;

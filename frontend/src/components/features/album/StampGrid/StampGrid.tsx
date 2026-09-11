@@ -1,10 +1,4 @@
-import {
-  FlatList,
-  View,
-  Text,
-  StyleSheet,
-  RefreshControl,
-} from "react-native";
+import { FlatList, View, Text, StyleSheet, RefreshControl } from "react-native";
 import { StampCard } from "@/src/components/features/album/StampCard/StampCard";
 import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";

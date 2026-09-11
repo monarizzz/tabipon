@@ -76,7 +76,10 @@ async function cropToPreview(
           })
           .renderAsync()
       : croppedImage;
-  const result = await imageForUpload.saveAsync({ format: SaveFormat.JPEG, compress: 0.82 });
+  const result = await imageForUpload.saveAsync({
+    format: SaveFormat.JPEG,
+    compress: 0.82,
+  });
   return result.uri;
 }
 
@@ -92,10 +95,12 @@ export default function CameraScreen() {
   const capturingRef = React.useRef(false);
   const [capturing, setCapturing] = React.useState(false);
 
-  useFocusEffect(React.useCallback(() => {
-    capturingRef.current = false;
-    setCapturing(false);
-  }, []));
+  useFocusEffect(
+    React.useCallback(() => {
+      capturingRef.current = false;
+      setCapturing(false);
+    }, []),
+  );
 
   const handleCapture = async () => {
     if (capturingRef.current) return;

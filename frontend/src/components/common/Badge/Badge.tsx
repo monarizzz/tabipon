@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { colors, typography, radii, spacing } from '@/src/theme/tokens';
+import { View, Text, StyleSheet } from "react-native";
+import { colors, typography, radii, spacing } from "@/src/theme/tokens";
 
 type Props = {
   label: string;
@@ -8,7 +8,7 @@ type Props = {
 
 export function Badge({ label, color = colors.primary }: Props) {
   return (
-    <View style={[styles.badge, { backgroundColor: color + '22' }]}>
+    <View style={[styles.badge, { backgroundColor: color + "22" }]}>
       <Text style={[styles.label, { color }]}>{label}</Text>
     </View>
   );
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.s,
     borderRadius: radii.hint,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   label: {
     fontSize: typography.caption.fontSize,

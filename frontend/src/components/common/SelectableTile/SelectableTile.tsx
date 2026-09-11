@@ -1,6 +1,6 @@
-import React from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing } from '@/src/theme/tokens';
+import React from "react";
+import { TouchableOpacity, StyleSheet } from "react-native";
+import { colors, spacing } from "@/src/theme/tokens";
 
 type Props = {
   label: string;
@@ -9,7 +9,12 @@ type Props = {
   children?: React.ReactNode;
 };
 
-export function SelectableTile({ label, selected = false, onPress, children }: Props) {
+export function SelectableTile({
+  label,
+  selected = false,
+  onPress,
+  children,
+}: Props) {
   return (
     <TouchableOpacity
       style={[styles.tile, selected && styles.selected]}
@@ -27,12 +32,12 @@ const styles = StyleSheet.create({
   tile: {
     width: 67,
     height: 67,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: colors.surface,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: "transparent",
     paddingVertical: spacing.s + 2,
     paddingHorizontal: spacing.s,
   },

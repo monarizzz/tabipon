@@ -7,7 +7,14 @@ const meta = {
   component: CameraPreview,
   decorators: [
     (Story) => (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 16,
+        }}
+      >
         <Story />
       </View>
     ),

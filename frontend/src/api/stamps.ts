@@ -81,7 +81,13 @@ export function createStampImage(
   location?: StampLocation | null,
   tiltAngle: number = 0,
 ): Promise<StampCreateResponse> {
-  const formData = buildImageFormData(photoUri, color, scratchLevel, frame, location);
+  const formData = buildImageFormData(
+    photoUri,
+    color,
+    scratchLevel,
+    frame,
+    location,
+  );
   if (tiltAngle !== 0) formData.append("tilt_angle", String(tiltAngle));
   return request<StampCreateResponse>("/stamp-image", {
     method: "POST",
@@ -132,14 +138,21 @@ export async function previewStampImage(
   tiltAngle: number = 0,
 ): Promise<string> {
   const formData = new FormData();
-  formData.append("image", { uri: photoUri, name: "photo.jpg", type: "image/jpeg" } as unknown as Blob);
+  formData.append("image", {
+    uri: photoUri,
+    name: "photo.jpg",
+    type: "image/jpeg",
+  } as unknown as Blob);
   formData.append("color", color);
   formData.append("frame", frame);
   formData.append("scratch_level", String(scratchLevel));
   if (tiltAngle !== 0) formData.append("tilt_angle", String(tiltAngle));
-  const { image_base64 } = await request<{ image_base64: string }>("/stamp-image/preview", {
-    method: "POST",
-    body: formData,
-  });
+  const { image_base64 } = await request<{ image_base64: string }>(
+    "/stamp-image/preview",
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
   return `data:image/png;base64,${image_base64}`;
 }
