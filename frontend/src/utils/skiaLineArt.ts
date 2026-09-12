@@ -92,6 +92,8 @@ import {
   type SkRuntimeEffect,
 } from "@shopify/react-native-skia";
 
+import { renderToSquareImage } from "@/src/utils/skiaSurface";
+
 /** 出力サイズ。backend の `STAMP_IMAGE_SIZE` と揃える */
 export const LINE_ART_SIZE = 512;
 
@@ -254,23 +256,9 @@ function centerSquareRect(width: number, height: number) {
   );
 }
 
-/** 指定サイズのオフスクリーンサーフェスに描いてスナップショットを返す */
-function renderToImageSized(
-  size: number,
-  draw: (canvas: SkCanvas) => void,
-): SkImage {
-  const surface = Skia.Surface.MakeOffscreen(size, size);
-  if (!surface) {
-    throw new Error("Skia.Surface.MakeOffscreen に失敗した");
-  }
-  draw(surface.getCanvas());
-  surface.flush();
-  return surface.makeImageSnapshot();
-}
-
 /** 512x512 のオフスクリーンサーフェスに描いてスナップショットを返す */
 function renderToImage(draw: (canvas: SkCanvas) => void): SkImage {
-  return renderToImageSized(LINE_ART_SIZE, draw);
+  return renderToSquareImage(LINE_ART_SIZE, draw);
 }
 
 /**
@@ -321,7 +309,7 @@ function makeGrayscaleSquare(image: SkImage): SkImage {
     const next = Math.floor(side / 2);
     const from = sourceRect;
     const current = source;
-    source = renderToImageSized(next, (canvas) => {
+    source = renderToSquareImage(next, (canvas) => {
       canvas.drawImageRectOptions(
         current,
         from,
@@ -344,7 +332,7 @@ function makeGrayscaleSquare(image: SkImage): SkImage {
     blurPaint.setImageFilter(
       Skia.ImageFilter.MakeBlur(sigma, sigma, TileMode.Clamp),
     );
-    source = renderToImageSized(side, (canvas) => {
+    source = renderToSquareImage(side, (canvas) => {
       canvas.drawImageRect(
         current,
         from,
