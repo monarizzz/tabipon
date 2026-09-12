@@ -1,8 +1,11 @@
 /**
- * 現行 backend (OpenCV) のスタンプ出力と `src/utils/skiaStamp.ts` の出力を、
- * インク色 4 色 × フレーム 4 種の 16 通りで見比べるための検証用コンポーネント。
+ * 現行 backend (OpenCV) のスタンプ出力と `src/utils/skiaStamp.ts` の出力を
+ * 見比べるための検証用コンポーネント。2 つのモードを持つ。
  *
- * Refs: #122 / #98
+ * - `色 / フレーム`: インク色 4 色 × フレーム 4 種の 16 通り（#122）
+ * - `仕上げ`: 掠れ 2 段階・傾き・その複合の 4 通り（#123）
+ *
+ * Refs: #122 / #123 / #98
  *
  * #122 の完了条件が「16 通りを実機で描画した」「#120 の現行出力と見比べて差分が
  * 許容範囲であることを確認した」の 2 つなので、その両方をこの 1 画面で満たす。
@@ -54,7 +57,11 @@ import type { StampColor, StampFrame } from "@/src/api/stamps";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { colors, radii, spacing, typography } from "@/src/theme/tokens";
 import { generateLineArtFromImage } from "@/src/utils/skiaLineArt";
-import { composeStampFromLineArt } from "@/src/utils/skiaStamp";
+import {
+  composeStampFromLineArt,
+  renderStampFromLineArt,
+  seedFromStampId,
+} from "@/src/utils/skiaStamp";
 
 const STAMP_COLORS: StampColor[] = ["red", "blue", "black", "green"];
 const STAMP_FRAMES: StampFrame[] = ["simple", "classic", "dash", "wave"];
@@ -93,22 +100,95 @@ const OPENCV_SAMPLES: Record<StampColor, Record<StampFrame, number>> = {
   },
 };
 
+/**
+ * #120 が書き出した仕上げ 4 通り（`output/variants/`）と、そのパラメータ。
+ * いずれも red / classic 固定で、掠れと傾きだけが違う。
+ */
+const FINISH_SAMPLES = [
+  {
+    key: "scratch_light",
+    label: "掠れ 0.2",
+    opencv: require("@/assets/stamp-samples/scratch_light.png"),
+    scratchLevel: 0.2,
+    tiltAngle: 0,
+  },
+  {
+    key: "scratch_heavy",
+    label: "掠れ 0.6",
+    opencv: require("@/assets/stamp-samples/scratch_heavy.png"),
+    scratchLevel: 0.6,
+    tiltAngle: 0,
+  },
+  {
+    key: "tilt_15deg",
+    label: "傾き 15°",
+    opencv: require("@/assets/stamp-samples/tilt_15deg.png"),
+    scratchLevel: 0,
+    tiltAngle: 15,
+  },
+  {
+    key: "scratch_and_tilt",
+    label: "掠れ 0.4 + 傾き 20°",
+    opencv: require("@/assets/stamp-samples/scratch_and_tilt.png"),
+    scratchLevel: 0.4,
+    tiltAngle: 20,
+  },
+] as const;
+
+/**
+ * 掠れのシード。実際は `seedFromStampId(スタンプの uuid)` で決まるが、
+ * ここは固定の文字列から作って毎回同じ模様が出るようにしている
+ * （模様が毎回変わると、掠れの「濃さ」を見比べられない）。
+ */
+const SAMPLE_SEED = seedFromStampId("byodoin-sample");
+
 /** プレビュー1枚の一辺。2 列で並べる想定の固定値（出力自体は 512x512） */
 const PREVIEW_SIZE = 140;
 
-/** 生成した 16 通り。キーは `${color}_${frame}` */
+/** 生成した画像。キーは 16 通りが `${color}_${frame}`、仕上げが `FINISH_SAMPLES` の key */
 type StampVariants = Record<string, string>;
+
+/**
+ * 生成にかかった時間。#123 の完了条件「プレビュー生成が体感で待ちを感じない速度」を
+ * 目視ではなく数値で見るために測る。1 枚あたりの時間が知りたいので、
+ * 全体ではなく線画 1 回ぶんと仕上げ 1 枚ぶんに分けて出す。
+ */
+type Timing = {
+  lineArtMs: number;
+  /** 着色 + フレームだけの 1 枚あたり（#122 の範囲）。16 枚とも同じ工程なので平均で良い */
+  perVariantMs: number;
+  /**
+   * 仕上げは**サンプルごとに工程が違う**（掠れだけ / 傾きだけ / 両方）ので、
+   * 平均を取らずに 1 枚ずつ持つ。平均にすると、掠れと傾きを両方掛ける
+   * 一番重い構成の時間が、軽い 3 枚に薄められて見えなくなる
+   */
+  finishMs: Record<string, number>;
+};
+
+type Generated = {
+  variants: StampVariants;
+  finish: StampVariants;
+  timing: Timing;
+};
 
 type GenerateResult =
   | { status: "pending" }
-  | { status: "ok"; variants: StampVariants }
+  | { status: "ok"; generated: Generated }
   | { status: "error"; message: string };
+
+/** 表示モード。#122 の 16 通りと #123 の仕上げ 4 通りを切り替える */
+type Mode = "variants" | "finish";
 
 function variantKey(color: StampColor, frame: StampFrame): string {
   return `${color}_${frame}`;
 }
 
+function toDataUri(base64: string): string {
+  return `data:image/png;base64,${base64}`;
+}
+
 export function StampVariantComparison() {
+  const [mode, setMode] = useState<Mode>("variants");
   const [selectedColor, setSelectedColor] = useState<StampColor>("red");
   const [showOpenCv, setShowOpenCv] = useState(false);
 
@@ -119,8 +199,12 @@ export function StampVariantComparison() {
       return { status: "pending" };
     }
     try {
-      // 線画は 16 通りで共通なので 1 回だけ作り、着色とフレームだけを繰り返す
+      // 線画は全通りで共通なので 1 回だけ作り、仕上げだけを繰り返す
+      const lineArtStartedAt = Date.now();
       const lineArt = generateLineArtFromImage(photo);
+      const lineArtMs = Date.now() - lineArtStartedAt;
+
+      const variantsStartedAt = Date.now();
       const variants: StampVariants = {};
       for (const color of STAMP_COLORS) {
         for (const frame of STAMP_FRAMES) {
@@ -132,11 +216,51 @@ export function StampVariantComparison() {
               message: `PNG への符号化に失敗した (${variantKey(color, frame)})`,
             };
           }
-          variants[variantKey(color, frame)] =
-            `data:image/png;base64,${base64}`;
+          variants[variantKey(color, frame)] = toDataUri(base64);
         }
       }
-      return { status: "ok", variants };
+
+      const perVariantMs = Math.round(
+        (Date.now() - variantsStartedAt) /
+          (STAMP_COLORS.length * STAMP_FRAMES.length),
+      );
+
+      // 掠れ・傾きを掛けるのは仕上げの 4 通りだけなので、上の 16 通りとは別に測る。
+      // さらに 4 通りの中でも工程が違うため、1 枚ずつ時間を持つ
+      const finish: StampVariants = {};
+      const finishMs: Record<string, number> = {};
+      for (const sample of FINISH_SAMPLES) {
+        const startedAt = Date.now();
+        const stamp = renderStampFromLineArt(lineArt, {
+          color: "red",
+          frame: "classic",
+          scratchLevel: sample.scratchLevel,
+          tiltAngle: sample.tiltAngle,
+          seed: SAMPLE_SEED,
+        });
+        const base64 = stamp.encodeToBase64();
+        if (!base64) {
+          return {
+            status: "error",
+            message: `PNG への符号化に失敗した (${sample.key})`,
+          };
+        }
+        finish[sample.key] = toDataUri(base64);
+        finishMs[sample.key] = Date.now() - startedAt;
+      }
+
+      return {
+        status: "ok",
+        generated: {
+          variants,
+          finish,
+          timing: {
+            lineArtMs,
+            perVariantMs,
+            finishMs,
+          },
+        },
+      };
     } catch (error) {
       return {
         status: "error",
@@ -145,64 +269,120 @@ export function StampVariantComparison() {
     }
   }, [photo]);
 
+  const placeholder =
+    result.status === "pending"
+      ? "生成中…"
+      : result.status === "error"
+        ? `生成に失敗: ${result.message}`
+        : null;
+
+  // モードごとに「セルの見出し / OpenCV 側の画像 / Skia 側の画像」を組み立てる。
+  // 表示部分を共通化するため、ここで同じ形に揃えてしまう
+  const cells =
+    mode === "variants"
+      ? STAMP_FRAMES.map((frame) => ({
+          key: frame,
+          label: frame,
+          opencv: OPENCV_SAMPLES[selectedColor][frame],
+          skia:
+            result.status === "ok"
+              ? result.generated.variants[variantKey(selectedColor, frame)]
+              : null,
+          // 16 枚とも同じ工程なので、個別ではなく下の平均で見る
+          elapsedMs: null as number | null,
+        }))
+      : FINISH_SAMPLES.map((sample) => ({
+          key: sample.key,
+          label: sample.label,
+          opencv: sample.opencv,
+          skia:
+            result.status === "ok" ? result.generated.finish[sample.key] : null,
+          // 工程がサンプルごとに違うので、時間もセル単位で出す
+          elapsedMs:
+            result.status === "ok"
+              ? result.generated.timing.finishMs[sample.key]
+              : null,
+        }));
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.switcher}>
-        {STAMP_COLORS.map((color) => (
-          <CommonButton
-            key={color}
-            label={color}
-            variant={color === selectedColor ? "primary" : "secondary"}
-            onPress={() => setSelectedColor(color)}
-            style={styles.switcherButton}
-          />
-        ))}
+        <CommonButton
+          label="色 / フレーム"
+          variant={mode === "variants" ? "primary" : "secondary"}
+          onPress={() => setMode("variants")}
+          style={styles.switcherButton}
+        />
+        <CommonButton
+          label="仕上げ"
+          variant={mode === "finish" ? "primary" : "secondary"}
+          onPress={() => setMode("finish")}
+          style={styles.switcherButton}
+        />
       </View>
 
+      {mode === "variants" ? (
+        <View style={styles.switcher}>
+          {STAMP_COLORS.map((color) => (
+            <CommonButton
+              key={color}
+              label={color}
+              variant={color === selectedColor ? "primary" : "secondary"}
+              onPress={() => setSelectedColor(color)}
+              style={styles.switcherButton}
+            />
+          ))}
+        </View>
+      ) : null}
+
       <CommonButton
-        label={
-          showOpenCv ? "表示中: OpenCV（現行 BE）" : "表示中: Skia（#122）"
-        }
+        label={showOpenCv ? "表示中: OpenCV（現行 BE）" : "表示中: Skia"}
         variant="secondary"
         onPress={() => setShowOpenCv((current) => !current)}
       />
 
       <View style={styles.grid}>
-        {STAMP_FRAMES.map((frame) => (
-          <View key={frame} style={styles.cell}>
-            <Text style={styles.cellTitle}>{frame}</Text>
+        {cells.map((cell) => (
+          <View key={cell.key} style={styles.cell}>
+            <Text style={styles.cellTitle}>{cell.label}</Text>
             <View style={styles.preview}>
               {showOpenCv ? (
                 <Image
-                  source={OPENCV_SAMPLES[selectedColor][frame]}
+                  source={cell.opencv}
                   style={styles.previewImage}
                   resizeMode="contain"
                 />
-              ) : result.status === "ok" ? (
+              ) : cell.skia ? (
                 <Image
-                  source={{
-                    uri: result.variants[variantKey(selectedColor, frame)],
-                  }}
+                  source={{ uri: cell.skia }}
                   style={styles.previewImage}
                   resizeMode="contain"
                 />
               ) : (
-                <Text style={styles.placeholder}>
-                  {result.status === "pending"
-                    ? "生成中…"
-                    : `生成に失敗: ${result.message}`}
-                </Text>
+                <Text style={styles.placeholder}>{placeholder}</Text>
               )}
             </View>
+            {cell.elapsedMs !== null && !showOpenCv ? (
+              <Text style={styles.metric}>{cell.elapsedMs}ms</Text>
+            ) : null}
           </View>
         ))}
       </View>
 
+      {result.status === "ok" ? (
+        <Text style={styles.metric}>
+          線画 {result.generated.timing.lineArtMs}ms / 着色+フレーム1枚{" "}
+          {result.generated.timing.perVariantMs}ms（16
+          枚の平均）。仕上げは工程が 1
+          枚ずつ違うので各プレビューの下に出す。いずれも PNG 符号化を含む
+        </Text>
+      ) : null}
+
       <Text style={styles.note}>
-        #122 の判定用。#123 の完了時に削除する。ボタンで同じ位置のまま OpenCV と
-        Skia を切り替えられる。16
-        通りは初回にまとめて生成しており、色の切り替えは
-        生成済みのものを出しているだけ。元写真は #120 と同じ平等院。
+        #122 / #123 の判定用。ボタンで同じ位置のまま OpenCV と Skia を
+        切り替えられる。掠れは backend が毎回ランダムな模様・濃さになるので、
+        一致するのは量感まで（詳細は skiaStamp.ts のコメント）。元写真は #120
+        と同じ平等院。
       </Text>
     </ScrollView>
   );
@@ -251,6 +431,11 @@ const styles = StyleSheet.create({
   previewImage: {
     width: "100%",
     height: "100%",
+  },
+  metric: {
+    ...typography.caption,
+    color: colors.textMuted,
+    textAlign: "center",
   },
   placeholder: {
     ...typography.caption,
