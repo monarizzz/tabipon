@@ -155,10 +155,14 @@ type StampVariants = Record<string, string>;
  */
 type Timing = {
   lineArtMs: number;
-  /** 着色 + フレームだけの 1 枚あたり（#122 の範囲） */
+  /** 着色 + フレームだけの 1 枚あたり（#122 の範囲）。16 枚とも同じ工程なので平均で良い */
   perVariantMs: number;
-  /** 掠れ + 傾きまで入れた 1 枚あたり（#123 の範囲）。実際のプレビューはこちらに近い */
-  perFinishMs: number;
+  /**
+   * 仕上げは**サンプルごとに工程が違う**（掠れだけ / 傾きだけ / 両方）ので、
+   * 平均を取らずに 1 枚ずつ持つ。平均にすると、掠れと傾きを両方掛ける
+   * 一番重い構成の時間が、軽い 3 枚に薄められて見えなくなる
+   */
+  finishMs: Record<string, number>;
 };
 
 type Generated = {
@@ -221,12 +225,12 @@ export function StampVariantComparison() {
           (STAMP_COLORS.length * STAMP_FRAMES.length),
       );
 
-      // 掠れ・傾きを掛けるのは仕上げの 4 通りだけなので、上の 16 通りとは
-      // 別に測る。混ぜて平均すると、安価な 16 通りに薄められて
-      // 実際のプレビュー時間を過小評価してしまう
-      const finishStartedAt = Date.now();
+      // 掠れ・傾きを掛けるのは仕上げの 4 通りだけなので、上の 16 通りとは別に測る。
+      // さらに 4 通りの中でも工程が違うため、1 枚ずつ時間を持つ
       const finish: StampVariants = {};
+      const finishMs: Record<string, number> = {};
       for (const sample of FINISH_SAMPLES) {
+        const startedAt = Date.now();
         const stamp = renderStampFromLineArt(lineArt, {
           color: "red",
           frame: "classic",
@@ -242,6 +246,7 @@ export function StampVariantComparison() {
           };
         }
         finish[sample.key] = toDataUri(base64);
+        finishMs[sample.key] = Date.now() - startedAt;
       }
 
       return {
@@ -252,9 +257,7 @@ export function StampVariantComparison() {
           timing: {
             lineArtMs,
             perVariantMs,
-            perFinishMs: Math.round(
-              (Date.now() - finishStartedAt) / FINISH_SAMPLES.length,
-            ),
+            finishMs,
           },
         },
       };
@@ -285,6 +288,8 @@ export function StampVariantComparison() {
             result.status === "ok"
               ? result.generated.variants[variantKey(selectedColor, frame)]
               : null,
+          // 16 枚とも同じ工程なので、個別ではなく下の平均で見る
+          elapsedMs: null as number | null,
         }))
       : FINISH_SAMPLES.map((sample) => ({
           key: sample.key,
@@ -292,6 +297,11 @@ export function StampVariantComparison() {
           opencv: sample.opencv,
           skia:
             result.status === "ok" ? result.generated.finish[sample.key] : null,
+          // 工程がサンプルごとに違うので、時間もセル単位で出す
+          elapsedMs:
+            result.status === "ok"
+              ? result.generated.timing.finishMs[sample.key]
+              : null,
         }));
 
   return (
@@ -352,6 +362,9 @@ export function StampVariantComparison() {
                 <Text style={styles.placeholder}>{placeholder}</Text>
               )}
             </View>
+            {cell.elapsedMs !== null && !showOpenCv ? (
+              <Text style={styles.metric}>{cell.elapsedMs}ms</Text>
+            ) : null}
           </View>
         ))}
       </View>
@@ -359,8 +372,9 @@ export function StampVariantComparison() {
       {result.status === "ok" ? (
         <Text style={styles.metric}>
           線画 {result.generated.timing.lineArtMs}ms / 着色+フレーム1枚{" "}
-          {result.generated.timing.perVariantMs}ms / 掠れ+傾き込み1枚{" "}
-          {result.generated.timing.perFinishMs}ms（いずれも PNG 符号化を含む）
+          {result.generated.timing.perVariantMs}ms（16
+          枚の平均）。仕上げは工程が 1
+          枚ずつ違うので各プレビューの下に出す。いずれも PNG 符号化を含む
         </Text>
       ) : null}
 
