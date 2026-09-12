@@ -73,6 +73,12 @@
  * OpenCV は `INTER_AREA`（面積平均）だが Skia に相当物が無い。素の linear で
  * 済ませると高周波成分がずれて **黒画素 IoU が 88% → 82% まで落ちる**。
  * `makeGrayscaleSquare()` で面積平均を近似している（詳細はその関数のコメント）。
+ *
+ * ## 戻り値は GPU テクスチャではなくラスタ画像にしてある
+ *
+ * 中間パスは GPU バックエンド（`Skia.Surface.MakeOffscreen`）で描くが、
+ * **最終結果だけは `makeNonTextureImage()` で CPU メモリへコピーして返す**。
+ * 理由は `generateLineArtFromImage()` のコメントを参照。
  */
 import {
   AlphaType,
@@ -394,6 +400,30 @@ function blurToImage(image: SkImage, sigma: number): SkImage {
  *
  * 2 と 3 を画像として焼く必要があるのは、シェーダ側で Sobel のために
  * 隣接画素を読む（= テクスチャとして参照する）必要があるため。
+ *
+ * ## 返す前に `makeNonTextureImage()` を通す理由
+ *
+ * `Skia.Surface.MakeOffscreen` は型定義のコメントどおり **GPU バックエンドの
+ * サーフェス**を作る（CPU バックエンドが要るときは `Skia.Surface.Make`）。
+ * そのため `makeImageSnapshot()` が返す `SkImage` は、そのサーフェスを作った
+ * スレッドの Skia コンテキストに属する GPU テクスチャになる。
+ *
+ * この関数は JS スレッドから呼ばれるが、`<Canvas>` の描画は UI スレッドの
+ * Skia コンテキストで行われる。公式ドキュメント（Canvas overview）は
+ * `makeImageSnapshotAsync` を「UI スレッドで実行されるので、テクスチャを含め
+ * オンスクリーンの Canvas と同じ Skia コンテキストにアクセスできる」と説明し、
+ * 同期版の `makeImageSnapshot` は「描画にテクスチャを含まない場合に使ってよい」
+ * としている。つまり **コンテキストが違えばテクスチャは共有されない**。
+ * 別コンテキストのテクスチャを描こうとしても例外は飛ばず、単に何も出ない。
+ *
+ * `makeNonTextureImage()` は「GPU テクスチャに backed された SkImage を
+ * 必要なら CPU メモリへコピーする」API なので、これを通した結果はどの
+ * コンテキスト・どのスレッドからでも描ける素のラスタ画像になる。
+ * 読み戻し自体は生成したコンテキスト内で行われるので安全（`readPixels` が
+ * 同じ経路で動いていることが実機で確認できている）。
+ *
+ * 中間パス（gray / blurred / localMean）は同一スレッド・同一コンテキスト内で
+ * しか使わないため、変換せずテクスチャのまま渡してよい。
  */
 export function generateLineArtFromImage(image: SkImage): SkImage {
   const effect = getLineArtEffect();
@@ -422,9 +452,11 @@ export function generateLineArtFromImage(image: SkImage): SkImage {
 
   const paint = Skia.Paint();
   paint.setShader(shader);
-  return renderToImage((canvas) => {
+  const rendered = renderToImage((canvas) => {
     canvas.drawRect(fullRect(), paint);
   });
+  // GPU テクスチャのままでは呼び出し側の <Canvas> で描けない（上のコメント参照）
+  return rendered.makeNonTextureImage();
 }
 
 /**
