@@ -30,6 +30,12 @@ Epic #98 でスタンプ画像生成を react-native-skia に移植する。移�
         --colors black \\
         --output-subdir hida-mountains
 
+線画のみ（色・フレーム・円マスクを適用しない工程1〜4の出力。#121 の SkSL 実装との比較基準）:
+
+    backend/.venv/bin/python backend/scripts/generate_stamp_samples.py \\
+        --input docs/stamp-samples/input/byodoin-uji-kyoto.jpg \\
+        --source-key byodoin --line-art-only
+
 `--input` を省略すると、合成テスト画像（チェッカーボード・グラデーション・図形・ノイズ）を生成して使う
 フォールバックが動く（実写真が用意できない状況向け。現在の主サンプルは実写真を使用しているため通常は不要）。
 
@@ -55,9 +61,12 @@ REPO_ROOT = BACKEND_DIR.parent
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
+from app.core.config import STAMP_IMAGE_SIZE  # noqa: E402
 from app.services.stamp_processor import (  # noqa: E402
     StampColor,
     StampFrame,
+    crop_center_square,
+    decode_image,
     process_stamp_image,
 )
 
@@ -188,6 +197,83 @@ def load_input_image_bytes(
     return encoded.tobytes(), metadata
 
 
+def build_line_art(image_bytes: bytes) -> np.ndarray:
+    """create_stamp_image() の工程1〜4だけを実行し、白黒2値の線画を返す。
+
+    Refs: #121
+
+    `create_stamp_image()` は線画化のあとに「暗い画素をインク色へ置換」「円フレーム描画」
+    「円マスク」まで一気にやってしまうため、`output/base/` の PNG からは線画だけを
+    取り出せない。#121 は SkSL で工程1〜4（= 白黒線画）だけを再現するので、
+    比較の基準として線画単体をここで書き出す。
+
+    処理は create_stamp_image() の前半と**完全に同一**であること。
+    片方だけ直すと #121 の比較が意味を失うため、stamp_processor.py 側を変更したら
+    ここも合わせる（backend 削除 #103 までの暫定的な重複）。
+    """
+    square_image = crop_center_square(decode_image(image_bytes))
+    resized_image = cv2.resize(
+        square_image,
+        (STAMP_IMAGE_SIZE, STAMP_IMAGE_SIZE),
+        interpolation=cv2.INTER_AREA,
+    )
+    gray_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
+    blurred_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+    thresholded_image = cv2.adaptiveThreshold(
+        blurred_image,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        31,
+        7,
+    )
+    edges = cv2.Canny(blurred_image, 60, 160)
+    return cv2.bitwise_and(thresholded_image, cv2.bitwise_not(edges))
+
+
+def generate_line_art(
+    output_dir: Path,
+    input_path: Path | None,
+    source_key: str,
+    author: str | None,
+    source_url: str | None,
+    license_name: str | None,
+) -> dict:
+    """線画のみ（色・フレーム・円マスクを適用しない）を output/line-art/ に書き出す。"""
+    image_bytes, input_metadata = load_input_image_bytes(input_path, output_dir)
+    if author:
+        input_metadata["author"] = author
+    if source_url:
+        input_metadata["source_url"] = source_url
+    if license_name:
+        input_metadata["license"] = license_name
+
+    line_art_dir = output_dir / "output" / "line-art"
+    line_art_dir.mkdir(parents=True, exist_ok=True)
+
+    line_art = build_line_art(image_bytes)
+    file_name = f"{source_key}.png"
+    success, encoded = cv2.imencode(".png", line_art, PNG_COMPRESSION_PARAMS)
+    if not success:
+        raise RuntimeError("Failed to encode line art image")
+    (line_art_dir / file_name).write_bytes(encoded.tobytes())
+
+    # 黒画素率は SkSL 実装との一致を数値で確認するための指標。
+    # 目視だけでは「なんとなく似ている」以上の判定ができないため manifest に残す。
+    black_ratio = float((line_art < 128).mean())
+
+    return {
+        "input": input_metadata,
+        "line_art": {
+            "file": f"output/line-art/{file_name}",
+            "size": STAMP_IMAGE_SIZE,
+            "steps": "crop_center_square -> resize(512) -> gray -> GaussianBlur(5,5) "
+            "-> adaptiveThreshold(GAUSSIAN_C, 31, 7) -> bitwise_and(not Canny(60,160))",
+            "black_pixel_ratio": round(black_ratio, 4),
+        },
+    }
+
+
 def generate_samples(
     output_dir: Path,
     input_path: Path | None,
@@ -302,6 +388,12 @@ def parse_args() -> argparse.Namespace:
         help="掠れ・回転の参考パターン4通りも output/variants/ に生成する。",
     )
     parser.add_argument(
+        "--line-art-only",
+        action="store_true",
+        help="色・フレーム・円マスクを適用しない生の線画（工程1〜4のみ）を output/line-art/ に出す。"
+        "base / variants は生成しない。#121 の SkSL 実装との比較基準用。",
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
@@ -325,17 +417,27 @@ def main() -> None:
     else:
         source_key = "synthetic"
 
-    source_entry = generate_samples(
-        output_dir=output_dir,
-        input_path=args.input,
-        colors=colors,
-        frames=frames,
-        base_subdir=args.output_subdir,
-        with_variants=args.with_variants,
-        author=args.author,
-        source_url=args.source_url,
-        license_name=args.license_name,
-    )
+    if args.line_art_only:
+        source_entry = generate_line_art(
+            output_dir=output_dir,
+            input_path=args.input,
+            source_key=source_key,
+            author=args.author,
+            source_url=args.source_url,
+            license_name=args.license_name,
+        )
+    else:
+        source_entry = generate_samples(
+            output_dir=output_dir,
+            input_path=args.input,
+            colors=colors,
+            frames=frames,
+            base_subdir=args.output_subdir,
+            with_variants=args.with_variants,
+            author=args.author,
+            source_url=args.source_url,
+            license_name=args.license_name,
+        )
 
     manifest_path = output_dir / "manifest.json"
     manifest: dict = {}
@@ -344,11 +446,27 @@ def main() -> None:
     manifest["generated_at"] = datetime.now(timezone.utc).isoformat()
     manifest["cv2_version"] = cv2.__version__
     manifest.setdefault("sources", {})
-    manifest["sources"][source_key] = source_entry
+    # 同じソースキーに対して base 生成と --line-art-only を別々に実行できるよう、
+    # 既存エントリを丸ごと差し替えずにキー単位でマージする。
+    # input は --author / --source-url / --license を省略した実行で著作者情報が
+    # 消えないよう、サブキー単位でマージする。
+    existing_entry = manifest["sources"].get(source_key, {})
+    merged_input = {**existing_entry.get("input", {}), **source_entry.get("input", {})}
+    existing_entry.update(source_entry)
+    if merged_input:
+        existing_entry["input"] = merged_input
+    manifest["sources"][source_key] = existing_entry
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
 
-    total_files = len(source_entry["base"]) + len(source_entry.get("variants", []))
-    print(f"Wrote {total_files} PNG files for source '{source_key}' to {output_dir}")
+    if args.line_art_only:
+        ratio = source_entry["line_art"]["black_pixel_ratio"]
+        print(
+            f"Wrote line art for source '{source_key}' to {output_dir} "
+            f"(black pixel ratio: {ratio:.1%})"
+        )
+    else:
+        total_files = len(source_entry["base"]) + len(source_entry.get("variants", []))
+        print(f"Wrote {total_files} PNG files for source '{source_key}' to {output_dir}")
 
 
 if __name__ == "__main__":

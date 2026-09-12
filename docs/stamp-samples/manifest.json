@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-11T17:21:37.665257+00:00",
+  "generated_at": "2026-09-12T10:39:24.347378+00:00",
   "cv2_version": "4.13.0",
   "sources": {
     "byodoin": {
@@ -153,7 +153,13 @@
           "scratch_level": 0.4,
           "tilt_angle": 20.0
         }
-      ]
+      ],
+      "line_art": {
+        "file": "output/line-art/byodoin.png",
+        "size": 512,
+        "steps": "crop_center_square -> resize(512) -> gray -> GaussianBlur(5,5) -> adaptiveThreshold(GAUSSIAN_C, 31, 7) -> bitwise_and(not Canny(60,160))",
+        "black_pixel_ratio": 0.3101
+      }
     },
     "hida-mountains": {
       "input": {
@@ -192,7 +198,13 @@
           "scratch_level": 0.0,
           "tilt_angle": 0.0
         }
-      ]
+      ],
+      "line_art": {
+        "file": "output/line-art/hida-mountains.png",
+        "size": 512,
+        "steps": "crop_center_square -> resize(512) -> gray -> GaussianBlur(5,5) -> adaptiveThreshold(GAUSSIAN_C, 31, 7) -> bitwise_and(not Canny(60,160))",
+        "black_pixel_ratio": 0.1029
+      }
     }
   }
 }
