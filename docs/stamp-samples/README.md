@@ -52,6 +52,31 @@ backend/.venv/bin/python backend/scripts/generate_stamp_samples.py \
     --output-subdir hida-mountains
 ```
 
+### 線画のみ（#121 の比較基準）
+
+`output/base/` などの PNG は「色の置換 + 円フレーム + 円マスク」まで適用済みのため、
+線画（工程1〜4）だけを取り出せない。[#121](https://github.com/monarizzz/tabipon/issues/121) は
+その線画部分だけを SkSL で再現するので、比較の基準として線画単体も書き出している。
+
+```bash
+backend/.venv/bin/python backend/scripts/generate_stamp_samples.py \
+    --input docs/stamp-samples/input/byodoin-uji-kyoto.jpg \
+    --source-key byodoin --line-art-only
+
+backend/.venv/bin/python backend/scripts/generate_stamp_samples.py \
+    --input docs/stamp-samples/input/hida-mountains.jpg \
+    --source-key hida-mountains --line-art-only
+```
+
+`--line-art-only` を付けると base / variants は生成せず、`output/line-art/{source_key}.png` だけを
+書き出す。manifest には `sources.<key>.line_art` として、工程の並びと**黒画素率**を記録する。
+黒画素率は SkSL 実装との一致を目視以外の指標で確認するためのもの。
+
+| ソース | 黒画素率 |
+| --- | --- |
+| `byodoin` | 31.0% |
+| `hida-mountains` | 10.3% |
+
 スクリプト本体は `backend/scripts/generate_stamp_samples.py`。`backend/` の削除と運命を共にするので、
 このディレクトリの中身（PNG・manifest.json・本 README）だけは `backend/` 削除後も残す。
 
@@ -88,8 +113,11 @@ docs/stamp-samples/
     │   ├── scratch_heavy.png       # scratch_level=0.6
     │   ├── tilt_15deg.png          # tilt_angle=15度
     │   └── scratch_and_tilt.png    # scratch_level=0.4, tilt_angle=20度
-    └── hida-mountains/      # 雪山（副サンプル）: 黒 × 4フレームのみ（全16通りは不要のため省略）
-        └── black_{frame}.png
+    ├── hida-mountains/      # 雪山（副サンプル）: 黒 × 4フレームのみ（全16通りは不要のため省略）
+    │   └── black_{frame}.png
+    └── line-art/            # 色・フレーム・円マスクを適用しない白黒線画（#121 の比較基準）
+        ├── byodoin.png
+        └── hida-mountains.png
 ```
 
 ## 雪山サンプルで分かったこと
