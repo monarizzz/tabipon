@@ -155,7 +155,10 @@ type StampVariants = Record<string, string>;
  */
 type Timing = {
   lineArtMs: number;
-  perStampMs: number;
+  /** 着色 + フレームだけの 1 枚あたり（#122 の範囲） */
+  perVariantMs: number;
+  /** 掠れ + 傾きまで入れた 1 枚あたり（#123 の範囲）。実際のプレビューはこちらに近い */
+  perFinishMs: number;
 };
 
 type Generated = {
@@ -197,7 +200,7 @@ export function StampVariantComparison() {
       const lineArt = generateLineArtFromImage(photo);
       const lineArtMs = Date.now() - lineArtStartedAt;
 
-      const stampsStartedAt = Date.now();
+      const variantsStartedAt = Date.now();
       const variants: StampVariants = {};
       for (const color of STAMP_COLORS) {
         for (const frame of STAMP_FRAMES) {
@@ -213,6 +216,15 @@ export function StampVariantComparison() {
         }
       }
 
+      const perVariantMs = Math.round(
+        (Date.now() - variantsStartedAt) /
+          (STAMP_COLORS.length * STAMP_FRAMES.length),
+      );
+
+      // 掠れ・傾きを掛けるのは仕上げの 4 通りだけなので、上の 16 通りとは
+      // 別に測る。混ぜて平均すると、安価な 16 通りに薄められて
+      // 実際のプレビュー時間を過小評価してしまう
+      const finishStartedAt = Date.now();
       const finish: StampVariants = {};
       for (const sample of FINISH_SAMPLES) {
         const stamp = renderStampFromLineArt(lineArt, {
@@ -232,8 +244,6 @@ export function StampVariantComparison() {
         finish[sample.key] = toDataUri(base64);
       }
 
-      const stampCount =
-        STAMP_COLORS.length * STAMP_FRAMES.length + FINISH_SAMPLES.length;
       return {
         status: "ok",
         generated: {
@@ -241,7 +251,10 @@ export function StampVariantComparison() {
           finish,
           timing: {
             lineArtMs,
-            perStampMs: Math.round((Date.now() - stampsStartedAt) / stampCount),
+            perVariantMs,
+            perFinishMs: Math.round(
+              (Date.now() - finishStartedAt) / FINISH_SAMPLES.length,
+            ),
           },
         },
       };
@@ -345,8 +358,9 @@ export function StampVariantComparison() {
 
       {result.status === "ok" ? (
         <Text style={styles.metric}>
-          線画 {result.generated.timing.lineArtMs}ms / 仕上げ1枚あたり{" "}
-          {result.generated.timing.perStampMs}ms（PNG 符号化を含む）
+          線画 {result.generated.timing.lineArtMs}ms / 着色+フレーム1枚{" "}
+          {result.generated.timing.perVariantMs}ms / 掠れ+傾き込み1枚{" "}
+          {result.generated.timing.perFinishMs}ms（いずれも PNG 符号化を含む）
         </Text>
       ) : null}
 
