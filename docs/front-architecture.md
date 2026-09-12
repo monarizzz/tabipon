@@ -231,7 +231,6 @@ portable stories（`composeStories`）として Jest から描画する。CI（`
 | CameraControls | フラッシュ/シャッター/カメラ切替の下部コントロール行 | カメラ画面 |
 | CameraHintBar | 撮影ガイドのヒントテキストバー | カメラ画面 |
 | ScanOverlay | スキャン風のオーバーレイ | **未使用**（現状どこからも import されていない） |
-| SkiaCanvasSample | Skia の `Canvas` で円を1つ描くだけの動作確認用コンポーネント（#119）。**#123 でスタンプ生成関数が完成した時点で削除する一時的な検証用コンポーネント** | **未使用**（画面には組み込んでいない。ストーリー上での描画確認のみ） |
 | LineArtComparison | 現行 backend (OpenCV) の線画と `src/utils/skiaLineArt.ts` が生成する線画を左右に並べ、サンプル2枚を切り替えて見比べる比較用コンポーネント（#121 の判定ゲート）。**#122 / #123 の完了時に、`frontend/assets/line-art-samples/` ごと削除する一時的な検証用コンポーネント** | **未使用**（画面には組み込んでいない。ストーリー上での比較のみ） |
 | StampVariantComparison | `src/utils/skiaStamp.ts` が生成するインク色4色 × フレーム4種の16通りを、#120 が書き出した現行 backend (OpenCV) の出力と同じ位置で切り替えて見比べる比較用コンポーネント（#122 の判定ゲート）。**#123 の完了時に、`frontend/assets/stamp-samples/` ごと削除する一時的な検証用コンポーネント** | **未使用**（画面には組み込んでいない。ストーリー上での比較のみ） |
 | PhotoCropArea | 円形クロップ枠+ドラッグハンドル | 写真調整画面 |
