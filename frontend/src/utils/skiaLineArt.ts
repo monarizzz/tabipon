@@ -267,7 +267,16 @@ function renderToImage(draw: (canvas: SkCanvas) => void): SkImage {
   return renderToImageSized(LINE_ART_SIZE, draw);
 }
 
-const FULL_RECT = Skia.XYWHRect(0, 0, LINE_ART_SIZE, LINE_ART_SIZE);
+/**
+ * 出力サイズの矩形。
+ *
+ * モジュールのトップレベルで `Skia.*` を呼ぶと、Skia のネイティブモジュールが
+ * 無い環境（Jest のモック）では import しただけでテストが落ちる。
+ * 定数にせず、呼ばれたときに作る。
+ */
+function fullRect() {
+  return Skia.XYWHRect(0, 0, LINE_ART_SIZE, LINE_ART_SIZE);
+}
 
 /**
  * `INTER_AREA` の面積平均を近似するためのガウス σ（出力画素単位）。
@@ -349,7 +358,7 @@ function makeGrayscaleSquare(image: SkImage): SkImage {
     canvas.drawImageRectOptions(
       current,
       from,
-      FULL_RECT,
+      fullRect(),
       FilterMode.Linear,
       MipmapMode.None,
       paint,
@@ -414,7 +423,7 @@ export function generateLineArtFromImage(image: SkImage): SkImage {
   const paint = Skia.Paint();
   paint.setShader(shader);
   return renderToImage((canvas) => {
-    canvas.drawRect(FULL_RECT, paint);
+    canvas.drawRect(fullRect(), paint);
   });
 }
 
