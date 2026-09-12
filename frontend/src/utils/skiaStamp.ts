@@ -642,9 +642,18 @@ export function seedFromStampId(id: string): number {
     // FNV の素数 16777619 を掛ける。32bit に収めるため Math.imul を使う
     hash = Math.imul(hash, 0x01000193);
   }
-  // 2^24 通りに畳んでから 0..1 へ。float32 の仮数 24bit に収まるので、
+  // FNV-1a のままだと下位ビットが使えない。素数 16777619 ≒ 2^24 なので、
+  // 最後の 1 文字の違いは「約 2^24 を足す」形でしか効かず、**下位 24bit には
+  // ほとんど残らない**。実際、末尾 1 文字違いの id 5 つが同じ値に潰れていた。
+  // 最後に撹拌（xorshift + 乗算）を掛けて、全ビットに差が回るようにする
+  hash ^= hash >>> 16;
+  hash = Math.imul(hash, 0x21f0aaad);
+  hash ^= hash >>> 15;
+  hash = Math.imul(hash, 0xd35a2d97);
+  hash ^= hash >>> 15;
+  // 上位 24bit を 0..1 へ。float32 の仮数 24bit に収まるので、
   // 別の id なら別の値になることと、精度を保つことを両立できる
-  return ((hash >>> 0) % 0x1000000) / 0x1000000;
+  return (hash >>> 8) / 0x1000000;
 }
 
 /**
