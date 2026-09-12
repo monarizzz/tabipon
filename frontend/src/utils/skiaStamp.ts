@@ -434,6 +434,9 @@ const SCRATCH_NORMALIZE_RANGE = 11.954;
  * GPU ごとに精度が違って結果が変わるため使わない。`seed` はハッシュの中に混ぜる
  * （座標を平行移動するだけだと、シードを変えても同じ模様がずれて出てしまう）。
  *
+ * **`seed` は 0 以上 1 未満であること。**`dot()` の中に足すので、大きな値を渡すと
+ * 後段の積が 32bit float の精度を超えて `fract()` が潰れる（`seedFromStampId()` 参照）。
+ *
  * 出力は 0..1 の一様乱数。backend は正規乱数だが、**このあとガウスぼかしを掛けるので
  * 中心極限定理でどちらも正規分布に近づく**。一様乱数を使うのは 8bit の
  * オフスクリーンに格納する都合で、σ = 0.289 と階調を目一杯使えるため
@@ -584,10 +587,20 @@ export function rotateStamp(stamp: SkImage, tiltAngle: number): SkImage {
   return renderToSquareImage(STAMP_SIZE, (canvas) => {
     canvas.drawColor(Skia.Color("white"));
     canvas.rotate(tiltAngle, FRAME_CENTER, FRAME_CENTER);
-    // 回転で空いた角を白のままにするため、画像そのものはアンチエイリアス付きで描く
     const paint = Skia.Paint();
+    // 画像の外周（回転して空いた角との境目）を滑らかにする
     paint.setAntiAlias(true);
-    canvas.drawImage(stamp, 0, 0, paint);
+    // サンプリングは Linear。`setAntiAlias()` は輪郭にしか効かず、テクセルの補間は
+    // 別物で、既定の Nearest のままだと斜めになった線や円周が階段状になる。
+    // 移植元の `cv2.warpAffine` も既定は `INTER_LINEAR`
+    canvas.drawImageOptions(
+      stamp,
+      0,
+      0,
+      FilterMode.Linear,
+      MipmapMode.None,
+      paint,
+    );
   });
 }
 
@@ -614,8 +627,13 @@ export type StampRenderOptions = {
  * 再生成しても掠れ模様は変わらない。保存スキーマ（#100）に列を足す必要も無い。
  *
  * ハッシュは FNV-1a（32bit）。暗号用途ではなく、id が 1 文字違えば別の模様になれば良い。
- * SkSL 側の `seed` は float なので、値域を 0..1024 に畳んでから渡す
- * （大きすぎる値を `fract()` ベースのハッシュに入れると精度が落ちて模様が退化する）。
+ *
+ * **返す値は 0 以上 1 未満**。SkSL 側のハッシュは `fract()` で下位ビットを取り出すので、
+ * 大きな値を渡すと途中の積が 32bit float の精度を食い潰して模様が退化する。
+ * 例えば 1000 程度のシードでは `(p3.x + p3.y) * p3.z` が 10^6 の桁に乗り、
+ * その付近の float32 の刻みは 0.25 なので、`fract()` の出力が数段階しか取れなくなる。
+ * ノイズが数段階に潰れると平均も 0.5 から外れ、固定閾値との比較が破綻して
+ * **uuid によって掠れ量が変わってしまう**（0..1 に収めればこの影響は無い）。
  */
 export function seedFromStampId(id: string): number {
   let hash = 0x811c9dc5;
@@ -624,7 +642,9 @@ export function seedFromStampId(id: string): number {
     // FNV の素数 16777619 を掛ける。32bit に収めるため Math.imul を使う
     hash = Math.imul(hash, 0x01000193);
   }
-  return ((hash >>> 0) % 1024) + ((hash >>> 10) & 0xff) / 256;
+  // 2^24 通りに畳んでから 0..1 へ。float32 の仮数 24bit に収まるので、
+  // 別の id なら別の値になることと、精度を保つことを両立できる
+  return ((hash >>> 0) % 0x1000000) / 0x1000000;
 }
 
 /**
