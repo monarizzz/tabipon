@@ -24,13 +24,29 @@
  *
  * 画面に出す文言は i18n 経由にするのがルールだが、ここはプロダクト画面ではなく
  * 開発者しか見ない検証用ラベルなので、4言語ぶんのキーは足さず直書きしている。
+ *
+ * ## 右側の表示に Skia の `<Canvas>` を使っていない理由
+ *
+ * 当初は生成した `SkImage` をそのまま `<Canvas>` + Skia の `<Image>` で描いていたが、
+ * iOS シミュレータ（Expo Go / iOS 26.5）で**枠が空白のまま**になった。黒画素率は
+ * 正しく出ていたので生成自体は完走しており、描画経路だけが壊れていた。
+ *
+ * `Skia.Surface.MakeOffscreen()` は GPU バックエンドのサーフェスを作るため、
+ * その `makeImageSnapshot()` は生成したスレッドの Skia コンテキストに属する
+ * テクスチャになる。一方 `<Canvas>` は UI スレッドのコンテキストで描画するので、
+ * JS スレッドで作ったテクスチャは共有されない（公式の Canvas overview が
+ * `makeImageSnapshotAsync` を「UI スレッドで実行されるのでオンスクリーンの Canvas と
+ * 同じコンテキストにアクセスできる」と説明しているのがこの裏返し）。
+ *
+ * `generateLineArtFromImage()` 側で `makeNonTextureImage()` を通すようにしたので
+ * `<Canvas>` でも描けるはずだが、**ここは #121 の判定を人間が目視するための
+ * 検証用コンポーネントであり、確実に映ることを最優先する**。そのため
+ * `encodeToBase64()` で PNG にして RN の `<Image>` に渡す、GPU コンテキストに
+ * 一切依存しない経路へ切り替えた。左（OpenCV の PNG）と同じ `<Image>` 経由に
+ * 揃うので、リサイズやスケーリングの条件も左右で一致する。
+ * 512x512 を 1 回符号化するだけなので、検証用途では速度も問題にならない。
  */
-import {
-  Canvas,
-  Image as SkiaImage,
-  useImage,
-  type SkImage,
-} from "@shopify/react-native-skia";
+import { useImage } from "@shopify/react-native-skia";
 import { useMemo, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -72,15 +88,12 @@ const SAMPLES: Record<
 
 const SAMPLE_KEYS = Object.keys(SAMPLES) as SampleKey[];
 
-/**
- * プレビュー1枚の一辺。Skia の `Canvas` は描画先の実寸を数値で要求するので、
- * 左右で条件を揃えるためにも固定値にしている（出力自体は 512x512）。
- */
+/** プレビュー1枚の一辺。左右で条件を揃えるため固定値にしている（出力自体は 512x512） */
 const PREVIEW_SIZE = 150;
 
 type LineArtResult =
   | { status: "pending" }
-  | { status: "ok"; image: SkImage; blackRatio: number | null }
+  | { status: "ok"; dataUri: string; blackRatio: number | null }
   | { status: "error"; message: string };
 
 function formatRatio(ratio: number | null): string {
@@ -102,10 +115,16 @@ export function LineArtComparison() {
     }
     try {
       const image = generateLineArtFromImage(photo);
+      // 黒画素率は SkImage から直接測る（PNG に落とす前の値）
+      const blackRatio = measureBlackPixelRatio(image);
+      const base64 = image.encodeToBase64();
+      if (!base64) {
+        return { status: "error", message: "PNG への符号化に失敗した" };
+      }
       return {
         status: "ok",
-        image,
-        blackRatio: measureBlackPixelRatio(image),
+        dataUri: `data:image/png;base64,${base64}`,
+        blackRatio,
       };
     } catch (error) {
       return {
@@ -148,18 +167,13 @@ export function LineArtComparison() {
           <Text style={styles.panelTitle}>Skia（SkSL）</Text>
           <View style={styles.preview}>
             {result.status === "ok" ? (
-              // Skia が生成した SkImage をそのまま Canvas に描く。
-              // PNG に符号化して RN の Image へ渡す経路より 1 段短い
-              <Canvas style={styles.previewImage}>
-                <SkiaImage
-                  image={result.image}
-                  x={0}
-                  y={0}
-                  width={PREVIEW_SIZE}
-                  height={PREVIEW_SIZE}
-                  fit="contain"
-                />
-              </Canvas>
+              // 生成結果を PNG に符号化して RN の Image で表示する。
+              // GPU コンテキストに依存しないので確実に映る（冒頭のコメント参照）
+              <Image
+                source={{ uri: result.dataUri }}
+                style={styles.previewImage}
+                resizeMode="contain"
+              />
             ) : (
               <Text style={styles.placeholder}>
                 {result.status === "pending"
@@ -222,9 +236,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  // 枠（borderWidth 分だけ内側が狭い）にぴったり収める
   previewImage: {
-    width: PREVIEW_SIZE,
-    height: PREVIEW_SIZE,
+    width: "100%",
+    height: "100%",
   },
   placeholder: {
     ...typography.caption,
