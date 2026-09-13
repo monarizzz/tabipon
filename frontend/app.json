@@ -42,7 +42,13 @@
         }
       ],
       "expo-localization",
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false
+        }
+      ],
       "expo-asset"
     ]
   }
