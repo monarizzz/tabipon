@@ -51,6 +51,80 @@ DB 設計は「概念設計 → 論理設計 → 物理設計」の順に降り�
 | 見た目 | 色 | 16進数の実値 |
 | 見た目 | フレーム | 識別子。必須 |
 
+### ER 図
+
+**カラム名・型は仮称。**論理設計が未着手のため、ここでは構造を示すことだけが目的である。
+
+```mermaid
+erDiagram
+    STAMP {
+        uuid id PK "不変。掠れのシード導出にも使われている"
+        string line_art_path "中間画像のパス。原本・復元不能"
+        string stamp_image_path "スタンプ PNG のパス。キャッシュ"
+        string title "任意"
+        string memo "任意"
+        datetime captured_at "撮影日時。ユーザー編集可・UTC・既定ソートキー"
+        datetime created_at "作成日時。不変"
+        number latitude "NULL 可。経度とセット"
+        number longitude "NULL 可。緯度とセット"
+        string address_country "NULL 可"
+        string address_region "都道府県相当。NULL 可"
+        string address_city "市区町村相当。NULL 可"
+        string address_detail "それ以下。NULL 可"
+        string address_formatted "表示用の整形済み文字列。NULL 可"
+        json captured_location "撮影時の座標と住所。不変。丸ごと読み書きのみ"
+        string color "16進数の実値"
+        string frame_id "アプリ内定数の識別子。必須"
+    }
+
+    APP_SETTING {
+        string timezone "ユーザーが最初に選ぶ。DB に置くかは未確定"
+    }
+```
+
+**リレーションが1本も無いことがこの図の要点である。**スタンプ以外にエンティティが無く、1対多になる箇所も無い。`APP_SETTING` はスタンプと関係を持たず、そもそも DB に置くかどうかが未確定（後述）。
+
+### 画像の派生関係
+
+線が向いている方向が「何から何を作れるか」を表す。破線は保存しないもの。
+
+```mermaid
+flowchart LR
+    photo["撮影した写真<br/>保存しない"]
+    line["中間画像<br/>原本・復元不能"]
+    color["色"]
+    frame["フレーム"]
+    png["スタンプ画像 PNG<br/>キャッシュ・再生成可"]
+
+    photo -.->|線画化・掠れ・傾きを焼き込む| line
+    line --> png
+    color --> png
+    frame --> png
+
+    style photo stroke-dasharray: 5 5
+```
+
+中間画像へ向かう矢印が破線なのは、**元写真を保存しないためこの工程をやり直せない**ことを示す。逆に `png` へ向かう実線は、材料が全部残っているので何度でも作り直せることを示す。
+
+### 位置情報の更新経路
+
+```mermaid
+flowchart LR
+    gps["GPS<br/>スタンプ作成時に一度だけ"]
+    coord["座標"]
+    addr["住所"]
+    snap["撮影時スナップショット<br/>不変"]
+
+    gps --> coord
+    gps --> snap
+    coord -->|逆ジオコーディング・作成時のみ| addr
+    addr -->|順ジオコーディング・ユーザーが編集したとき| coord
+    snap -.->|初期値に戻す| coord
+    snap -.->|初期値に戻す| addr
+```
+
+座標と住所の間に矢印が両方向へ出ている点が重要で、**どちらか一方が原本という関係ではない**。GPS から自動で入るのは作成時の一度きりで、以降はユーザー操作でしか動かない。
+
 ---
 
 ## 画像 — 原本とキャッシュ
