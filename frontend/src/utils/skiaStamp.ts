@@ -532,14 +532,19 @@ export function applyScratch(
     canvas.drawRect(Skia.XYWHRect(0, 0, STAMP_SIZE, STAMP_SIZE), noisePaint);
   });
 
-  // ぼかしのタイルモードは Clamp。既定の Decal だと画像の外側（透明）を
-  // 巻き込んで縁のノイズが偏り、四辺だけ掠れ方が変わる
+  // ぼかしのタイルモードは Mirror（反射）。既定の Decal だと画像の外側（透明）を
+  // 巻き込んで縁のノイズが偏り、四辺だけ掠れ方が変わる。
+  // Clamp も駄目で、端の 1 画素を 7 回繰り返すぶん平均化が効かず、
+  // **縁だけノイズの分散が大きくなって四辺が強く白抜きされる**。
+  // 移植元の `cv2.GaussianBlur` は borderType 省略＝`BORDER_REFLECT_101` なので、
+  // 反射に合わせる（Skia の Mirror は `BORDER_REFLECT`。端 1 画素を含むかだけの違いで、
+  // 白色ノイズに対しては分散が保たれる点は同じ）
   const blurPaint = Skia.Paint();
   blurPaint.setImageFilter(
     Skia.ImageFilter.MakeBlur(
       SCRATCH_BLUR_SIGMA,
       SCRATCH_BLUR_SIGMA,
-      TileMode.Clamp,
+      TileMode.Mirror,
     ),
   );
   const blurredNoise = renderToSquareImage(STAMP_SIZE, (canvas) => {
