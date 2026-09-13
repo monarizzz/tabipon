@@ -45,8 +45,12 @@
 
 役割: Expo / React Native アプリを起動します。スマホや Expo Go から画面確認します。
 
-`@shopify/react-native-skia`（#119）は Expo SDK 54 の Expo Go に同梱されているため、
-development build は不要です（詳細: https://docs.expo.dev/versions/v54.0.0/sdk/skia/）。
+`@shopify/react-native-skia`（#119）は Expo SDK 57 の Expo Go に同梱されているため、
+development build は不要です（詳細: https://docs.expo.dev/versions/v57.0.0/sdk/skia/）。
+
+なお Expo Go 57 以降は、開発モードでアプリを起動する際に Expo CLI と Expo Go アプリの
+両方へ同じアカウントでログインしている必要があります
+（詳細: https://expo.dev/changelog/expo-go-57-login）。
 
 Railway デプロイ済みバックエンド:
 
