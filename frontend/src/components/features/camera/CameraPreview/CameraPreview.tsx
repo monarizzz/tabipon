@@ -106,13 +106,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   frame: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
   },
   camera: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   guide: {
     borderWidth: 2,

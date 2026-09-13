@@ -374,7 +374,15 @@ export function composeStampFromLineArt(
   frame: StampFrame,
 ): SkImage {
   const inked = applyInkColor(lineArt, color);
-  return applyCircularFrame(inked, color, frame).makeNonTextureImage();
+  const nonTexture = applyCircularFrame(
+    inked,
+    color,
+    frame,
+  ).makeNonTextureImage();
+  if (!nonTexture) {
+    throw new Error("スタンプ画像の CPU コピーへの変換に失敗した");
+  }
+  return nonTexture;
 }
 
 /**
@@ -677,7 +685,11 @@ export function renderStampFromLineArt(
   const scratched = applyScratch(framed, scratchLevel, seed);
   const rotated = rotateStamp(scratched, tiltAngle);
   // GPU テクスチャのままでは呼び出し側の <Canvas> で描けない
-  return rotated.makeNonTextureImage();
+  const nonTexture = rotated.makeNonTextureImage();
+  if (!nonTexture) {
+    throw new Error("スタンプ画像の CPU コピーへの変換に失敗した");
+  }
+  return nonTexture;
 }
 
 /**

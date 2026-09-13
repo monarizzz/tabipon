@@ -444,7 +444,11 @@ export function generateLineArtFromImage(image: SkImage): SkImage {
     canvas.drawRect(fullRect(), paint);
   });
   // GPU テクスチャのままでは呼び出し側の <Canvas> で描けない（上のコメント参照）
-  return rendered.makeNonTextureImage();
+  const nonTexture = rendered.makeNonTextureImage();
+  if (!nonTexture) {
+    throw new Error("線画画像の CPU コピーへの変換に失敗した");
+  }
+  return nonTexture;
 }
 
 /**
