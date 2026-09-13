@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { Audio } from "expo-av";
+import { createAudioPlayer } from "expo-audio";
 import { DeviceMotion } from "expo-sensors";
 import Animated, {
   useSharedValue,
@@ -221,11 +221,14 @@ export default function StampPressScreen() {
           if (tiltAngle < -180) tiltAngle += 360;
           runOnJS(setStampPressed)(true);
           applyScratch(scratchLevel, tiltAngle);
-          Audio.Sound.createAsync(require("@/assets/sounds/stamp.mp3"))
-            .then(({ sound }) => {
-              sound.playAsync();
-            })
-            .catch(() => {});
+          try {
+            const player = createAudioPlayer(
+              require("@/assets/sounds/stamp.mp3"),
+            );
+            player.play();
+          } catch {
+            // 効果音の再生に失敗してもスタンプ確定処理は継続する
+          }
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           Vibration.vibrate([0, 40, 30, 80]);
           cancelAnimation(stampScale);
@@ -438,7 +441,11 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   waitingOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: colors.cropDimOverlay,
     alignItems: "center",
     justifyContent: "center",
@@ -449,7 +456,11 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   previewLoadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(0,0,0,0.3)",
