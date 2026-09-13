@@ -106,6 +106,16 @@ src/components/
 - `index.ts` によるre-exportは置かない。他のファイルからは `import { CommonButton } from '@/src/components/common/CommonButton/CommonButton'` のように、コンポーネントファイルを直接importする
 - Storybook 側は `.rnstorybook/main.ts` の `stories` に `../src/components/**/*.stories.?(ts|tsx|js|jsx)` を指定し、この配置を自動検出する
 
+### テストの置き場
+
+`cd frontend && npm test`（`jest.config.js` の `testMatch`）が拾うのは
+`frontend/src/**/*.test.ts(x)`。現在は次の 2 種類が入っている。
+
+- **ストーリーのスモークテスト**: `src/components/stories.test.tsx` の 1 本（下記）
+- **ユーティリティの単体テスト**: 対象ファイルと同じフォルダに `<対象>.test.ts` を置く
+  （例: `src/utils/skiaStamp.ts` に対する `src/utils/skiaStamp.test.ts`）。
+  ネイティブモジュールや Skia の描画に触れない純粋な関数の性質を固定するのに使う
+
 ### ストーリーのテスト
 
 `cd frontend && npm test` で、`src/components/**/*.stories.tsx` を Storybook の
