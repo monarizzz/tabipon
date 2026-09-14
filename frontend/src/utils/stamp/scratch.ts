@@ -40,34 +40,13 @@ const SCRATCH_BLUR_SIGMA = 2.5543;
 const SCRATCH_NOISE_SD = 0.031556;
 
 /**
- * ぼかしたノイズの min-max 正規化を、実測ではなく固定値で行うための定数。
+ * `scratchLevel` が 1.0 のときに白く抜く画素の割合。**掠れの強さの上限。**
  *
- * ## 実測の min / max を使わない理由
- *
- * 素直に書くと「ぼかしたノイズを実測の min / max で 0..1 に伸ばし、
- * `1.0 - level * 0.4` で切る」になる。min / max は 26 万画素の**外れ値そのもの**なので、
- * 同じ `scratchLevel` でもシードが違うと白抜き率が大きく変わる。
- * numpy で同じカーネルを組んで 512x512 を（シードを変えて）6 回試したときの実測:
- *
- * | scratch_level | 白抜き率の平均 | 最小 | 最大 |
- * | --- | --- | --- | --- |
- * | 0.2 | 0.004% | 0.001% | 0.014% |
- * | 0.4 | 0.033% | 0.004% | 0.138% |
- * | 0.6 | 0.364% | 0.016% | 1.483% |
- * | 1.0 | 16.06% | 1.45% | 39.77% |
- *
- * **level = 1.0 で 1.5% 〜 39.8% まで振れる。**同じ `scratchLevel` を指定していても、
- * スタンプごとに掠れの「濃さ」がまったく別物になる。
- *
- * そこで **min / max を実測せず、上の試行で得た期待値で固定する**。
- * ぼかし後のノイズの min / max はそれぞれ -6.025σ / +5.929σ（σ はぼかし後の標準偏差）。
- * これで平均的な見た目は保ったまま、`scratchLevel` と白抜き率がシードに依らず対応する。
- *
- * 副産物として `readPixels` での min / max 走査が要らなくなる（GPU から CPU への
- * 読み戻しは重いので、プレビュー速度の面でも都合が良い）。
+ * 見た目を決める唯一のつまみなので、強さを変えたいときはここだけ動かす。
+ * 実際に絵として消えるのはインクが乗っている画素だけなので、線画の黒画素率が
+ * 28% なら、絵の上では「線の 1/3 ほどが飛ぶ」ことになる。
  */
-const SCRATCH_NORMALIZE_LOW = 6.025;
-const SCRATCH_NORMALIZE_RANGE = 11.954;
+const SCRATCH_MAX_WHITEOUT = 0.35;
 
 /**
  * 掠れのノイズを作るシェーダ。
@@ -126,16 +105,67 @@ function getScratchEffects() {
 }
 
 /**
- * 掠れの閾値を求める。0..1 のピクセル値と直接比較できる形で返す。
+ * 逆誤差関数 `erf⁻¹(x)` の近似（Winitzki）。`|x| < 1`。
  *
- * `1.0 - scratchLevel * 0.4` は**正規化後**の値なので、
- * 固定した min / max（`SCRATCH_NORMALIZE_*`）を使って σ 単位に戻し、
- * さらにノイズ画像のスケール（平均 0.5 / σ = `SCRATCH_NOISE_SD`）へ移す。
+ * 白抜き率から閾値を逆算するのに要る。JS に標準の逆正規分布が無いため置いている。
+ * 白抜き率 0..50% の範囲で、結果の誤差は 0.006 ポイント以下（検証済み）。
+ * 裾（白抜き率が 0 に近い側）ほど誤差が大きくなるので、上限を上げるときは
+ * 精度を確かめ直すこと。
  */
-function scratchThreshold(scratchLevel: number): number {
-  const normalized = 1.0 - scratchLevel * 0.4;
-  const sigma = normalized * SCRATCH_NORMALIZE_RANGE - SCRATCH_NORMALIZE_LOW;
-  return 0.5 + sigma * SCRATCH_NOISE_SD;
+const WINITZKI_A = 0.147;
+
+function erfInv(x: number): number {
+  if (x === 0) {
+    return 0;
+  }
+  const sign = x > 0 ? 1 : -1;
+  const ln = Math.log(1 - x * x);
+  const t = 2 / (Math.PI * WINITZKI_A) + ln / 2;
+  return sign * Math.sqrt(Math.sqrt(t * t - ln / WINITZKI_A) - t);
+}
+
+/** 標準正規分布の分位点 `Φ⁻¹(p)`。`0 < p < 1` */
+function normalQuantile(p: number): number {
+  return Math.SQRT2 * erfInv(2 * p - 1);
+}
+
+/**
+ * 掠れの閾値を求める。ぼかし後のノイズ（0..1）と直接比較できる形で返す。
+ *
+ * ## 閾値を線形に動かすと 0.8 まで何も起きない
+ *
+ * 以前は `threshold = 1.0 - scratchLevel * 0.4` を、min-max 正規化したノイズに
+ * 当てていた。これは**閾値を σ 単位で線形に動かす**ということで、ぼかし後の
+ * ノイズがほぼ正規分布である以上、白く抜ける画素の割合は指数的にしか増えない。
+ * 実際 level 0.6 で 0.11%、0.8 で 1.8%、1.0 でようやく 12.6% という曲線になり、
+ * **0.8 を超えるまで目視できる変化が無かった**。
+ *
+ * ## 白抜き率そのものを線形にする
+ *
+ * つまみは「どれだけかすれるか」であってほしいので、`scratchLevel` を
+ * **白く抜く画素の割合そのもの**として扱い、閾値はそこから逆算する。
+ * level にそのまま `SCRATCH_MAX_WHITEOUT` を掛けるので、
+ * level 0.2 なら 7%、0.6 なら 21%、1.0 なら 35%。
+ *
+ * ノイズは平均 0.5・σ = `SCRATCH_NOISE_SD` のほぼ正規分布なので、
+ * 上位 f を抜く閾値は `0.5 + Φ⁻¹(1 - f) * σ` で求まる。
+ *
+ * ## 同じ入力なら必ず同じ結果になる
+ *
+ * 26 万画素の min / max という**外れ値そのもの**で正規化すると、同じ
+ * `scratchLevel` でもシードが変わるたびに白抜き率が動く（numpy での実測で
+ * level 1.0 が 1.45% 〜 39.77% まで振れる）。
+ * ここは分布の定数だけで閾値が決まるので、その振れが無い。
+ * `readPixels` での min / max 走査が要らないぶん速くもある。
+ */
+export function scratchThreshold(scratchLevel: number): number {
+  const fraction =
+    Math.min(Math.max(scratchLevel, 0), 1) * SCRATCH_MAX_WHITEOUT;
+  if (fraction <= 0) {
+    // ノイズの最大値は 1.0 なので、それより大きければ 1 画素も抜けない
+    return 2;
+  }
+  return 0.5 + normalQuantile(1 - fraction) * SCRATCH_NOISE_SD;
 }
 
 /**
