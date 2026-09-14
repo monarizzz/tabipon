@@ -26,7 +26,7 @@ import {
   type StampFrame,
 } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
-import { getOriginalPhotoUri } from "@/src/utils/originalPhotoStore";
+import { getOriginalPhotoUri } from "@/src/utils/stamp/originalPhotoStore";
 import { useTranslation } from "@/src/utils/i18n/I18nProvider";
 import { colors, radii, spacing } from "@/src/constants/style-tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
