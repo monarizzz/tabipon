@@ -1,8 +1,6 @@
 /**
  * 工程の順序を決める層。
  *
- * Refs: #134 / #123 / #98
- *
  * **このファイルは工程を並べるだけで、描画そのものは持たない。**
  * 個々の工程は `lineArt.ts` / `ink.ts` / `frame.ts` / `scratch.ts` / `rotate.ts` にある。
  * 順序を変える検討（#138）で触るのはここ 1 箇所になるよう分けてある。
@@ -13,7 +11,7 @@
  */
 import type { SkImage } from "@shopify/react-native-skia";
 
-import { applyCircularFrame } from "@/src/utils/stamp/frame";
+import { applyCircularFrame } from "@/src/utils/stamp/frame/applyCircularFrame";
 import { applyInkColor } from "@/src/utils/stamp/ink";
 import { generateLineArtFromImage } from "@/src/utils/stamp/lineArt";
 import { rotateStamp } from "@/src/utils/stamp/rotate";
