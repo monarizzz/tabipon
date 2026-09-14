@@ -3,8 +3,7 @@ import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { AuthProvider } from "@/src/contexts/AuthContext";
-import { DATABASE_NAME, migrateDbIfNeeded } from "@/src/db/migrations";
+import { DATABASE_NAME, migrateDbIfNeeded } from "@/src/libs/db/migrations";
 import { I18nProvider } from "@/src/utils/i18n/I18nProvider";
 
 function RootNavigator() {
@@ -43,9 +42,7 @@ export default function RootLayout() {
       <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
         <I18nProvider>
           <SafeAreaProvider>
-            <AuthProvider>
-              <RootNavigator />
-            </AuthProvider>
+            <RootNavigator />
           </SafeAreaProvider>
         </I18nProvider>
       </SQLiteProvider>
