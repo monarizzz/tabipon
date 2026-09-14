@@ -1,25 +1,24 @@
 import { I18n } from "i18n-js";
 import { getLocales } from "expo-localization";
-import { ja, type Translations } from "./constants/ja";
+import { ja } from "./constants/ja";
 import { en } from "./constants/en";
 import { zh } from "./constants/zh";
 import { ko } from "./constants/ko";
+import {
+  DEFAULT_LOCALE,
+  LOCALE_LABELS,
+  SUPPORTED_LOCALES,
+} from "./constants/locales";
+import type { LocalePreference, SupportedLocale } from "./types/i18n";
 
-export const SUPPORTED_LOCALES = ["ja", "en", "zh", "ko"] as const;
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
-
-/** 手動で言語を選んでいない場合は "system"（端末設定に追従）。 */
-export type LocalePreference = SupportedLocale | "system";
-
-export const DEFAULT_LOCALE: SupportedLocale = "ja";
-
-/** 設定画面の言語リスト表示に使う。ネイティブ表記。 */
-export const LOCALE_LABELS: Record<SupportedLocale, string> = {
-  ja: "日本語",
-  en: "English",
-  zh: "简体中文",
-  ko: "한국어",
-};
+export { DEFAULT_LOCALE, LOCALE_LABELS, SUPPORTED_LOCALES };
+export type {
+  I18nContextValue,
+  LocalePreference,
+  SupportedLocale,
+  TranslateOptions,
+  TranslationKey,
+} from "./types/i18n";
 
 export const i18n = new I18n(
   { ja, en, zh, ko },
@@ -43,10 +42,3 @@ export function resolveDeviceLocale(): SupportedLocale {
 export function effectiveLocale(pref: LocalePreference): SupportedLocale {
   return pref === "system" ? resolveDeviceLocale() : pref;
 }
-
-// Translations のネスト構造から "album.title" のようなドットキー型を導出する。
-type LeafKeys<T> = {
-  [K in keyof T & string]: T[K] extends string ? K : `${K}.${LeafKeys<T[K]>}`;
-}[keyof T & string];
-
-export type TranslationKey = LeafKeys<Translations>;
