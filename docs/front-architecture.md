@@ -291,6 +291,7 @@ portable stories（`composeStories`）として Jest から描画する。CI（`
 | StampResultHeader | 獲得バッジ+タイトル+日付の結果ヘッダー | スタンプを押しました画面 |
 | StampShowcase | Stamp+ShareButton+SpotNameLabelのショーケース | スタンプを押しました画面 |
 | StampDoneActions | 続けて撮影/アルバムへボタン行 | スタンプを押しました画面 |
+| StampPreview | `src/utils/stamp/` の生成パイプラインを実機で走らせて目視する確認用 | **プロダクトの画面には組み込まない**（Storybook からのみ） |
 
 ### features/mypage/
 
