@@ -4,21 +4,8 @@ import { ja } from "./constants/ja";
 import { en } from "./constants/en";
 import { zh } from "./constants/zh";
 import { ko } from "./constants/ko";
-import {
-  DEFAULT_LOCALE,
-  LOCALE_LABELS,
-  SUPPORTED_LOCALES,
-} from "./constants/locales";
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "./constants/locales";
 import type { LocalePreference, SupportedLocale } from "./types/i18n";
-
-export { DEFAULT_LOCALE, LOCALE_LABELS, SUPPORTED_LOCALES };
-export type {
-  I18nContextValue,
-  LocalePreference,
-  SupportedLocale,
-  TranslateOptions,
-  TranslationKey,
-} from "./types/i18n";
 
 export const i18n = new I18n(
   { ja, en, zh, ko },

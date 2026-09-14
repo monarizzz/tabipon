@@ -9,12 +9,8 @@ import {
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocales } from "expo-localization";
-import {
-  DEFAULT_LOCALE,
-  i18n,
-  resolveDeviceLocale,
-  SUPPORTED_LOCALES,
-} from "./index";
+import { i18n, resolveDeviceLocale } from "./index";
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "./constants/locales";
 import type {
   I18nContextValue,
   LocalePreference,

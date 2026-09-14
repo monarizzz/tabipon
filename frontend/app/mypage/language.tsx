@@ -9,8 +9,8 @@ import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import {
   LOCALE_LABELS,
   SUPPORTED_LOCALES,
-  type LocalePreference,
-} from "@/src/libs/i18n";
+} from "@/src/libs/i18n/constants/locales";
+import type { LocalePreference } from "@/src/libs/i18n/types/i18n";
 import { colors, radii, spacing } from "@/src/style/tokens";
 
 export default function LanguageScreen() {
