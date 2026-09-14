@@ -18,9 +18,8 @@ import {
   WAVE_THICKNESS,
 } from "@/src/utils/stamp/constants/constants";
 import { framePaint } from "@/src/utils/stamp/framePaint";
-import type { StampColor } from "@/src/utils/stamp/types";
 
-export function drawWaveCircle(canvas: SkCanvas, color: StampColor): void {
+export function drawWaveCircle(canvas: SkCanvas, color: string): void {
   const path = Skia.Path.Make();
   for (let i = 0; i < WAVE_POINT_COUNT; i += 1) {
     const angle = (2 * Math.PI * i) / WAVE_POINT_COUNT;

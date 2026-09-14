@@ -28,9 +28,8 @@ import {
 } from "@shopify/react-native-skia";
 
 import { inkColorOf } from "@/src/utils/stamp/ink";
-import type { StampColor } from "@/src/utils/stamp/types";
 
-export function framePaint(color: StampColor, thickness: number): SkPaint {
+export function framePaint(color: string, thickness: number): SkPaint {
   const paint = Skia.Paint();
   paint.setAntiAlias(true);
   paint.setStyle(PaintStyle.Stroke);

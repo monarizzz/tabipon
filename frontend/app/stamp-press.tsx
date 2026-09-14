@@ -29,7 +29,6 @@ import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
 import {
-  API_COLOR_BY_HEX,
   API_FRAME_BY_ID,
   FRAME_STYLE_OPTIONS,
   STAMP_COLOR_OPTIONS,
@@ -370,7 +369,8 @@ export default function StampPressScreen() {
         onToggleShowLandmarkName={setShowLandmarkName}
         onConfirm={() => {
           setDesignSheetVisible(false);
-          changeColor(API_COLOR_BY_HEX[selectedColor] ?? "red");
+          // スウォッチの値はインク色そのものなので変換しない
+          changeColor(selectedColor);
           changeFrame(API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic");
           watchSession();
         }}

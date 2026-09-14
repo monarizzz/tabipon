@@ -20,13 +20,9 @@ import {
   type SkImage,
 } from "@shopify/react-native-skia";
 
-import {
-  STAMP_INK_COLORS,
-  STAMP_SIZE,
-} from "@/src/utils/stamp/constants/constants";
+import { STAMP_SIZE } from "@/src/utils/stamp/constants/constants";
 import { createCachedEffect } from "@/src/utils/stamp/runtimeEffect";
 import { renderToSquareImage } from "@/src/utils/stamp/surface";
-import type { StampColor } from "@/src/utils/stamp/types";
 
 /** `dark_pixels` の閾値 180 を 0..1 スケールに直したもの */
 const DARK_PIXEL_THRESHOLD = 180 / 255;
@@ -53,16 +49,14 @@ half4 main(float2 p) {
 const getInkEffect = createCachedEffect(INK_SKSL, "インク置換");
 
 /** インク色の `SkColor` を作る（不透明）。`frame.ts` の枠線も同じ色を使う */
-export function inkColorOf(color: StampColor) {
-  const [r, g, b] = STAMP_INK_COLORS[color];
-  return Skia.Color(`rgb(${r}, ${g}, ${b})`);
+export function inkColorOf(color: string) {
+  return Skia.Color(color);
 }
 
 /** 線画の暗い画素をインク色に置き換える */
-export function applyInkColor(lineArt: SkImage, color: StampColor): SkImage {
+export function applyInkColor(lineArt: SkImage, color: string): SkImage {
   const effect = getInkEffect();
 
-  const [r, g, b] = STAMP_INK_COLORS[color];
   // 出力と入力が同じ 512x512 で 1:1 に対応するので、補間は掛けず元のテクセルを読む
   const source = lineArt.makeShaderOptions(
     TileMode.Clamp,
@@ -72,9 +66,10 @@ export function applyInkColor(lineArt: SkImage, color: StampColor): SkImage {
   );
   // ink を half3 ではなく half4 にしてあるのは、uniform バッファ上で
   // 3 要素ベクトルの後ろに詰め物が入る余地を作らないため（JS 側は平坦な
-  // float 配列を順に流し込むだけなので、並びがずれると色が壊れる）
+  // float 配列を順に流し込むだけなので、並びがずれると色が壊れる）。
+  // `SkColor` は 0..1 に正規化された RGBA の Float32Array なので、half4 へそのまま流せる
   const shader = effect.makeShaderWithChildren(
-    [r / 255, g / 255, b / 255, 1, DARK_PIXEL_THRESHOLD],
+    [...inkColorOf(color), DARK_PIXEL_THRESHOLD],
     [source],
   );
 

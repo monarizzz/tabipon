@@ -11,11 +11,11 @@ import { drawClassicCircle } from "@/src/utils/stamp/frames/classicCircle";
 import { drawDashedCircle } from "@/src/utils/stamp/frames/dashedCircle";
 import { drawSimpleCircle } from "@/src/utils/stamp/frames/simpleCircle";
 import { drawWaveCircle } from "@/src/utils/stamp/frames/waveCircle";
-import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types";
 
 export function drawFrame(
   canvas: SkCanvas,
-  color: StampColor,
+  color: string,
   frame: StampFrame,
 ): void {
   switch (frame) {

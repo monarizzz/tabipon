@@ -22,7 +22,7 @@ import {
 } from "@/src/utils/stamp/constants/constants";
 import { drawFrame } from "@/src/utils/stamp/frames/drawFrame";
 import { renderToSquareImage } from "@/src/utils/stamp/surface";
-import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types";
 
 /**
  * インク色を載せた画像を円マスクで切り抜き、フレームを重ねる。
@@ -36,7 +36,7 @@ import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
  */
 export function applyCircularFrame(
   inked: SkImage,
-  color: StampColor,
+  color: string,
   frame: StampFrame,
 ): SkImage {
   const circle = Skia.Path.Make();

@@ -16,9 +16,8 @@ import {
   FRAME_RADIUS,
 } from "@/src/utils/stamp/constants/constants";
 import { framePaint } from "@/src/utils/stamp/framePaint";
-import type { StampColor } from "@/src/utils/stamp/types";
 
-export function drawDashedCircle(canvas: SkCanvas, color: StampColor): void {
+export function drawDashedCircle(canvas: SkCanvas, color: string): void {
   const paint = framePaint(color, DASH_THICKNESS);
   // cv2.ellipse は弧の端をキャップしないので、丸めずに平らに切る
   paint.setStrokeCap(StrokeCap.Butt);

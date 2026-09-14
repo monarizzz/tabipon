@@ -1,7 +1,8 @@
 import React from "react";
 import { View } from "react-native";
 import { colors } from "@/src/style/tokens";
-import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
+import { STAMP_INK_COLORS } from "@/src/utils/stamp/constants/constants";
+import type { StampFrame } from "@/src/utils/stamp/types";
 import type { FrameStyleOption } from "./DesignChangeSheet";
 
 type FrameThumbVariant = "classic" | "vintage" | "minimal" | "wave";
@@ -112,30 +113,17 @@ export const FRAME_STYLE_OPTIONS: FrameStyleOption[] = [
   { id: "wave", label: "design.frameWave", preview: makePreview("wave") },
 ];
 
-// バックエンドの StampColor (red/blue/black/green) に対応する4色のみ提供する
-// 先頭(デフォルト選択)は POST 時のデフォルト色 red に合わせる
-export const STAMP_COLOR_OPTIONS = ["#ff6b6b", "#6bc1ff", "#333333", "#6de8b9"];
-
-export const API_COLOR_BY_HEX: Record<string, StampColor> = {
-  "#ff6b6b": "red",
-  "#6bc1ff": "blue",
-  "#333333": "black",
-  "#6de8b9": "green",
-};
+// スウォッチに出す色は、実際に押されるインク色そのもの（`STAMP_INK_COLORS`）。
+// 以前はここに表示専用の別の hex を置き、識別子を挟んだ変換表 2 枚で
+// インク色と行き来していたが、スウォッチと仕上がりの色が食い違っていた。
+// 保存値も表示色も同じ hex になったので、変換は要らない
+export const STAMP_COLOR_OPTIONS = STAMP_INK_COLORS;
 
 export const API_FRAME_BY_ID: Record<string, StampFrame> = {
   classic: "classic",
   vintage: "dash",
   minimal: "simple",
   wave: "wave",
-};
-
-// 保存済み color(api値) からスウォッチの hex を逆引きする(デザイン変更パネルの初期選択用)
-export const HEX_BY_API_COLOR: Record<StampColor, string> = {
-  red: "#ff6b6b",
-  blue: "#6bc1ff",
-  black: "#333333",
-  green: "#6de8b9",
 };
 
 // 保存済み frame(api値) からフレームスタイル id を逆引きする

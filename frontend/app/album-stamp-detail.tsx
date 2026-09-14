@@ -8,9 +8,7 @@ import { DesignChangePanel } from "@/src/components/features/album/stamp-rally/D
 import {
   FRAME_STYLE_OPTIONS,
   STAMP_COLOR_OPTIONS,
-  API_COLOR_BY_HEX,
   API_FRAME_BY_ID,
-  HEX_BY_API_COLOR,
   FRAME_ID_BY_API,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
@@ -22,7 +20,6 @@ import {
   updateStampDetails,
   updateStampImage,
   previewStampImage,
-  type StampColor,
   type StampFrame,
 } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
@@ -100,9 +97,8 @@ export default function StampDetailScreen() {
     ? parseFloat(paramScratchLevel)
     : 0;
   // 元スタンプの色・フレーム。デザイン変更パネルの初期選択に使う(未保存の旧スタンプは既定値)
-  const initialColor =
-    (paramColor && HEX_BY_API_COLOR[paramColor as StampColor]) ||
-    STAMP_COLOR_OPTIONS[0];
+  // 保存値がそのままインク色なので逆引きは要らない（未保存の旧スタンプは既定値）
+  const initialColor = paramColor || STAMP_COLOR_OPTIONS[0];
   const initialFrameStyleId =
     (paramFrame && FRAME_ID_BY_API[paramFrame as StampFrame]) ||
     FRAME_STYLE_OPTIONS[0].id;
@@ -136,7 +132,7 @@ export default function StampDetailScreen() {
       setPreviewUri(null);
       return;
     }
-    const color = API_COLOR_BY_HEX[selectedColor] ?? "red";
+    const color = selectedColor;
     const frame = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
     let cancelled = false;
     setPreviewLoading(true);
@@ -187,7 +183,7 @@ export default function StampDetailScreen() {
 
   const handleConfirmDesign = async () => {
     if (!id || !originalUri || designUpdating) return;
-    const color = API_COLOR_BY_HEX[selectedColor];
+    const color = selectedColor;
     const frame = API_FRAME_BY_ID[selectedFrameStyleId];
     if (!color || !frame) return;
     setDesignUpdating(true);

@@ -1,18 +1,19 @@
-import type { InkRgb, StampColor } from "@/src/utils/stamp/types";
-
 /** 生成する画像サイズ */
 export const STAMP_SIZE = 512;
 
 /** 線画のサイズ。*/
 export const LINE_ART_SIZE = STAMP_SIZE;
 
-/** インク色 4 色（RGB 順、各 0..255） */
-export const STAMP_INK_COLORS: Record<StampColor, InkRgb> = {
-  red: [220, 50, 30],
-  blue: [30, 60, 180],
-  black: [30, 30, 30],
-  green: [40, 130, 100],
-};
+/** 色選択に出すインク色。並び順 = UIの並び順 */
+export const STAMP_INK_COLORS: readonly string[] = [
+  "#DC321E", // 赤
+  "#1E3CB4", // 青
+  "#1E1E1E", // 黒
+  "#288264", // 緑
+];
+
+/** 色を指定しなかったときのインク色 */
+export const DEFAULT_STAMP_COLOR: string = STAMP_INK_COLORS[0];
 
 /** 円マスク・フレームの半径 */
 export const FRAME_RADIUS = Math.floor(STAMP_SIZE / 2) - 8;
