@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
-import { useTranslation } from "@/src/i18n/I18nProvider";
+import { useTranslation } from "@/src/utils/i18n/I18nProvider";
 import { colors } from "@/src/constants/style-tokens";
 
 type Props = {

@@ -4,7 +4,7 @@ import {
   TabBar,
   type TabBarIcon,
 } from "@/src/components/common/layout/TabBar/TabBar";
-import { useTranslation } from "@/src/i18n/I18nProvider";
+import { useTranslation } from "@/src/utils/i18n/I18nProvider";
 import { colors } from "@/src/constants/style-tokens";
 
 const ICONS: Record<string, TabBarIcon> = {

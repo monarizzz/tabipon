@@ -14,7 +14,7 @@ import { Toggle } from "@/src/components/common/Toggle/Toggle";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
-import { useTranslation } from "@/src/i18n/I18nProvider";
+import { useTranslation } from "@/src/utils/i18n/I18nProvider";
 import {
   colors,
   radii,

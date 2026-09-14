@@ -1,7 +1,7 @@
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
-import { useTranslation } from "@/src/i18n/I18nProvider";
+import { useTranslation } from "@/src/utils/i18n/I18nProvider";
 import {
   colors,
   radii,

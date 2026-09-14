@@ -26,7 +26,7 @@ import {
 } from "@/src/api/stampSession";
 import { deleteStamp, updateStampDetails } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
-import { useTranslation } from "@/src/i18n/I18nProvider";
+import { useTranslation } from "@/src/utils/i18n/I18nProvider";
 import { colors, spacing } from "@/src/constants/style-tokens";
 
 function normalizeOptionalText(value: string): string | null {

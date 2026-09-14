@@ -5,12 +5,12 @@ import { Check } from "lucide-react-native";
 import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
 import { Card } from "@/src/components/common/Card/Card";
 import { ListItem } from "@/src/components/common/ListItem/ListItem";
-import { useTranslation } from "@/src/i18n/I18nProvider";
+import { useTranslation } from "@/src/utils/i18n/I18nProvider";
 import {
   LOCALE_LABELS,
   SUPPORTED_LOCALES,
   type LocalePreference,
-} from "@/src/i18n";
+} from "@/src/utils/i18n";
 import { colors, radii, spacing } from "@/src/constants/style-tokens";
 
 export default function LanguageScreen() {

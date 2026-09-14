@@ -1,7 +1,7 @@
 import { View, StyleSheet } from "react-native";
 import { Camera, BookImage } from "lucide-react-native";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
-import { useTranslation } from "@/src/i18n/I18nProvider";
+import { useTranslation } from "@/src/utils/i18n/I18nProvider";
 import { colors, radii, spacing } from "@/src/constants/style-tokens";
 
 type Props = {
