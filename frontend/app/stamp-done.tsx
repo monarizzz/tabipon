@@ -27,7 +27,7 @@ import {
 import { deleteStamp, updateStampDetails } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
 import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, spacing } from "@/src/theme/tokens";
+import { colors, spacing } from "@/src/constants/style-tokens";
 
 function normalizeOptionalText(value: string): string | null {
   const trimmed = value.trim();

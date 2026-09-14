@@ -2,7 +2,7 @@ import React from "react";
 import { Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Pencil } from "lucide-react-native";
 import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/theme/tokens";
+import { colors, typography, spacing } from "@/src/constants/style-tokens";
 
 type Props = {
   spotName: string;

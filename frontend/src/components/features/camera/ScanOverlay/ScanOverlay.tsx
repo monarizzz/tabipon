@@ -1,5 +1,5 @@
 import { View, StyleSheet } from "react-native";
-import { colors } from "@/src/theme/tokens";
+import { colors } from "@/src/constants/design-tokens";
 
 export function ScanOverlay() {
   return <View style={styles.overlay} />;

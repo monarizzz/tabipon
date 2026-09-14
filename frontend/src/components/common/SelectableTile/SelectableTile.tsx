@@ -1,6 +1,6 @@
 import React from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
-import { colors, spacing } from "@/src/theme/tokens";
+import { colors, spacing } from "@/src/constants/style-tokens";
 
 type Props = {
   label: string;

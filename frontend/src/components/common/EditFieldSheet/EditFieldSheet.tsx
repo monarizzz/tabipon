@@ -5,7 +5,12 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, typography, radii, spacing } from "@/src/theme/tokens";
+import {
+  colors,
+  typography,
+  radii,
+  spacing,
+} from "@/src/constants/style-tokens";
 
 type TextFieldProps = {
   mode: "text";

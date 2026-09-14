@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { View, Text, StyleSheet, type LayoutChangeEvent } from "react-native";
 import { CameraView, type CameraType, type FlashMode } from "expo-camera";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { colors, typography } from "@/src/theme/tokens";
+import { colors, typography } from "@/src/constants/style-tokens";
 
 type Props = {
   facing: CameraType;

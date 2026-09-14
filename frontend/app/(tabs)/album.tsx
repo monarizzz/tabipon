@@ -18,7 +18,7 @@ import {
   reconcileDeletedStamps,
 } from "@/src/api/deletedStamps";
 import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/theme/tokens";
+import { colors, typography, spacing } from "@/src/constants/style-tokens";
 
 // フィルターの id は固定。ラベルは描画時に翻訳・整形する。
 // tokyo/kyoto/walk はデモ用のコレクション名（ユーザーデータ相当）なので翻訳対象外。

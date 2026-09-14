@@ -13,7 +13,7 @@ import { PhotoAdjustControls } from "@/src/components/features/camera/PhotoAdjus
 import { startUpload } from "@/src/api/stampSession";
 import { getCurrentStampLocation } from "@/src/utils/location";
 import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors } from "@/src/theme/tokens";
+import { colors } from "@/src/constants/style-tokens";
 
 export default function PhotoAdjustScreen() {
   const router = useRouter();

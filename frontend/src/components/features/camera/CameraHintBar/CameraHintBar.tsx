@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, radii, spacing } from "@/src/theme/tokens";
+import { colors, radii, spacing } from "@/src/constants/style-tokens";
 
 type Props = {
   text?: string;

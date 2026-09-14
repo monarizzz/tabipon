@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { fn } from "storybook/test";
 
 import { EditFieldSheet, type EditFieldSheetProps } from "./EditFieldSheet";
-import { colors } from "@/src/theme/tokens";
+import { colors } from "@/src/constants/design-tokens";
 
 const meta = {
   component: EditFieldSheet,

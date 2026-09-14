@@ -11,7 +11,7 @@ import {
   SUPPORTED_LOCALES,
   type LocalePreference,
 } from "@/src/i18n";
-import { colors, radii, spacing } from "@/src/theme/tokens";
+import { colors, radii, spacing } from "@/src/constants/design-tokens";
 
 export default function LanguageScreen() {
   const router = useRouter();
