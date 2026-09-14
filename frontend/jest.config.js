@@ -13,7 +13,7 @@ module.exports = {
     "<rootDir>/jest.setup.storybook.ts",
   ],
   // `src/` 配下の `*.test.ts(x)` を対象にする（ストーリーのスモークテストと、
-  // `skiaStamp.test.ts` のようなユーティリティの単体テスト）。
+  // `stamp/seed.test.ts` のようなユーティリティの単体テスト）。
   // *.stories.tsx 自体はテストファイルではないので拾わせない
   testMatch: ["<rootDir>/src/**/*.test.ts?(x)"],
   // node_modules は基本的に変換しないが、react-native / expo / storybook の

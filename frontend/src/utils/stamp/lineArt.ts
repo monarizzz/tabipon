@@ -1,47 +1,10 @@
 /**
- * 写真から白黒2値の線画を Skia (SkSL) で生成する。
+ * 工程1: 写真から白黒2値の線画を Skia (SkSL) で生成する。
  *
- * Refs: #121 / #98
- *
- * 現行 `backend/app/services/stamp_processor.py` の `create_stamp_image()` のうち、
- * **線画化までの工程1〜4だけ**を移植したもの。色の置換・円フレーム・円マスク・掠れ・回転は
- * #122 / #123 の範囲なのでここではやらない。
- *
- * 移植元（OpenCV）:
- *
- * ```python
- * sq   = crop_center_square(img)
- * rz   = cv2.resize(sq, (512, 512), interpolation=cv2.INTER_AREA)
- * gray = cv2.cvtColor(rz, cv2.COLOR_BGR2GRAY)
- * blur = cv2.GaussianBlur(gray, (5, 5), 0)
- * th   = cv2.adaptiveThreshold(blur, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 31, 7)
- * edges = cv2.Canny(blur, 60, 160)
- * line_art = cv2.bitwise_and(th, cv2.bitwise_not(edges))
- * ```
- *
- * ## OpenCV → Skia の数値換算（ここを外すと再現できない）
- *
- * OpenCV はカーネルサイズ (ksize) 指定、Skia のブラーは σ 指定なので変換が要る。
- * `sigma <= 0` を渡したときに OpenCV が使う式は `getGaussianKernel()` の
- *
- *     sigma = 0.3 * ((ksize - 1) * 0.5 - 1) + 0.8
- *
- * - `GaussianBlur(5, 5)`   → sigma = 0.3 * (2 - 1) + 0.8  = 1.1
- * - `adaptiveThreshold(blockSize = 31)` は内部で ksize = 31 の GaussianBlur を掛けるので
- *   → sigma = 0.3 * (15 - 1) + 0.8 = 5.0
- *
- * ただし**この公称 σ をそのまま Skia に渡すとぼけ過ぎる**。OpenCV のカーネルは ksize で
- * 打ち切られており、ksize = 5 は ±2 画素 = 1.8σ しか無いので裾が大きく削れる。
- * 実際に `cv2.getGaussianKernel()` の 2 次モーメントから実効 σ を測ると
- *
- * | OpenCV の指定 | 公称 σ | 打ち切り後の実効 σ |
- * | --- | --- | --- |
- * | `GaussianBlur(5, 5)` | 1.1 | **1.00** |
- * | `blockSize = 31` | 5.0 | **4.95** |
- *
- * Skia の `MakeBlur` は裾をほぼ落とさないため、**実効 σ の方を渡す**のが「同じ量だけ
- * ぼかす」ことになる。ksize = 31 は ±15 = 3σ まで取れているので公称とほぼ変わらないが、
- * ksize = 5 は 1.1 → 1.0 と 1 割違う。ここが最初にずれた箇所だった。
+ * `backend/app/services/stamp_processor.py` の `create_stamp_image()` のうち、
+ * **線画化までの工程1〜4だけ**を移植したもの。
+ * 色の置換・円フレーム・円マスク・掠れ・回転はこのファイルの責務ではない
+ * （`ink.ts` / `frame.ts` / `scratch.ts` / `rotate.ts`）。
  *
  * ## 2種類のブラーが要る理由
  *
@@ -71,14 +34,8 @@
  * ## リサイズ（ここが Canny より効いた）
  *
  * OpenCV は `INTER_AREA`（面積平均）だが Skia に相当物が無い。素の linear で
- * 済ませると高周波成分がずれて **黒画素 IoU が 88% → 82% まで落ちる**。
- * `makeGrayscaleSquare()` で面積平均を近似している（詳細はその関数のコメント）。
- *
- * ## 戻り値は GPU テクスチャではなくラスタ画像にしてある
- *
- * 中間パスは GPU バックエンド（`Skia.Surface.MakeOffscreen`）で描くが、
- * **最終結果だけは `makeNonTextureImage()` で CPU メモリへコピーして返す**。
- * 理由は `generateLineArtFromImage()` のコメントを参照。
+ * 済ませると高周波成分がずれて線画の一致度が落ちるため、`makeGrayscaleSquare()` で
+ * 面積平均を近似している（詳細はその関数のコメント）。
  */
 import {
   AlphaType,
@@ -89,13 +46,11 @@ import {
   TileMode,
   type SkCanvas,
   type SkImage,
-  type SkRuntimeEffect,
 } from "@shopify/react-native-skia";
 
-import { renderToSquareImage } from "@/src/utils/skiaSurface";
-
-/** 出力サイズ。backend の `STAMP_IMAGE_SIZE` と揃える */
-export const LINE_ART_SIZE = 512;
+import { LINE_ART_SIZE } from "@/src/utils/stamp/constants";
+import { createCachedEffect } from "@/src/utils/stamp/runtimeEffect";
+import { renderToSquareImage, toRasterImage } from "@/src/utils/stamp/surface";
 
 /**
  * `cv2.GaussianBlur(gray, (5, 5), 0)` 相当の σ。
@@ -230,20 +185,7 @@ half4 main(float2 p) {
 }
 `;
 
-let cachedEffect: SkRuntimeEffect | null | undefined;
-
-/**
- * SkSL をコンパイルして使い回す。
- *
- * モジュールのトップレベルでコンパイルすると、Skia のネイティブモジュールが
- * 使えない環境（Jest のモック）で import しただけで落ちるため、遅延させている。
- */
-function getLineArtEffect(): SkRuntimeEffect | null {
-  if (cachedEffect === undefined) {
-    cachedEffect = Skia.RuntimeEffect.Make(LINE_ART_SKSL) ?? null;
-  }
-  return cachedEffect;
-}
+const getLineArtEffect = createCachedEffect(LINE_ART_SKSL, "線画化");
 
 /** 中央正方形の切り出し範囲。`crop_center_square()` と同じ計算 */
 function centerSquareRect(width: number, height: number) {
@@ -389,35 +331,12 @@ function blurToImage(image: SkImage, sigma: number): SkImage {
  * 2 と 3 を画像として焼く必要があるのは、シェーダ側で Sobel のために
  * 隣接画素を読む（= テクスチャとして参照する）必要があるため。
  *
- * ## 返す前に `makeNonTextureImage()` を通す理由
- *
- * `Skia.Surface.MakeOffscreen` は型定義のコメントどおり **GPU バックエンドの
- * サーフェス**を作る（CPU バックエンドが要るときは `Skia.Surface.Make`）。
- * そのため `makeImageSnapshot()` が返す `SkImage` は、そのサーフェスを作った
- * スレッドの Skia コンテキストに属する GPU テクスチャになる。
- *
- * この関数は JS スレッドから呼ばれるが、`<Canvas>` の描画は UI スレッドの
- * Skia コンテキストで行われる。公式ドキュメント（Canvas overview）は
- * `makeImageSnapshotAsync` を「UI スレッドで実行されるので、テクスチャを含め
- * オンスクリーンの Canvas と同じ Skia コンテキストにアクセスできる」と説明し、
- * 同期版の `makeImageSnapshot` は「描画にテクスチャを含まない場合に使ってよい」
- * としている。つまり **コンテキストが違えばテクスチャは共有されない**。
- * 別コンテキストのテクスチャを描こうとしても例外は飛ばず、単に何も出ない。
- *
- * `makeNonTextureImage()` は「GPU テクスチャに backed された SkImage を
- * 必要なら CPU メモリへコピーする」API なので、これを通した結果はどの
- * コンテキスト・どのスレッドからでも描ける素のラスタ画像になる。
- * 読み戻し自体は生成したコンテキスト内で行われるので安全（`readPixels` が
- * 同じ経路で動いていることが実機で確認できている）。
- *
+ * 返す前に `toRasterImage()` を通す理由はそちらのコメントを参照。
  * 中間パス（gray / blurred / localMean）は同一スレッド・同一コンテキスト内で
  * しか使わないため、変換せずテクスチャのまま渡してよい。
  */
 export function generateLineArtFromImage(image: SkImage): SkImage {
   const effect = getLineArtEffect();
-  if (!effect) {
-    throw new Error("線画化シェーダ (SkSL) のコンパイルに失敗した");
-  }
 
   const gray = makeGrayscaleSquare(image);
   const blurred = blurToImage(gray, PRE_BLUR_SIGMA);
@@ -443,33 +362,12 @@ export function generateLineArtFromImage(image: SkImage): SkImage {
   const rendered = renderToImage((canvas) => {
     canvas.drawRect(fullRect(), paint);
   });
-  // GPU テクスチャのままでは呼び出し側の <Canvas> で描けない（上のコメント参照）
-  const nonTexture = rendered.makeNonTextureImage();
-  if (!nonTexture) {
-    throw new Error("線画画像の CPU コピーへの変換に失敗した");
-  }
-  return nonTexture;
+  // GPU テクスチャのままでは呼び出し側の <Canvas> で描けない
+  return toRasterImage(rendered, "線画画像");
 }
 
 /**
- * 写真の uri（`file://` / `http(s)://` / バンドルされたアセットの解決済み uri）から
- * 線画を生成する。
- */
-export async function generateLineArtFromUri(uri: string): Promise<SkImage> {
-  const data = await Skia.Data.fromURI(uri);
-  const image = Skia.Image.MakeImageFromEncoded(data);
-  if (!image) {
-    throw new Error(`画像をデコードできなかった: ${uri}`);
-  }
-  return generateLineArtFromImage(image);
-}
-
-/**
- * 生成結果の黒画素率を返す（0..1）。
- *
- * 目視だけだと「なんとなく似ている」以上の判定ができないので、現行 backend 側と
- * 突き合わせられる数値を出す。backend 側の値は `docs/stamp-samples/manifest.json` の
- * `sources.<key>.line_art.black_pixel_ratio`（平等院 31.0% / 雪山 10.3%）。
+ * 生成結果の黒画素率を返す（0..1）。移植の一致度を数値で突き合わせるための検証用。
  */
 export function measureBlackPixelRatio(image: SkImage): number | null {
   const pixels = image.readPixels(0, 0, {

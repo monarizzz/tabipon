@@ -6,7 +6,7 @@
  *
  * - **返り値が 0 以上 1 未満**であること。SkSL 側のハッシュは `fract()` で
  *   下位ビットを取り出すため、大きな値を渡すと 32bit float の精度を食い潰して
- *   ノイズが数段階に潰れ、固定閾値との比較が破綻する（`skiaStamp.ts` のコメント参照）
+ *   ノイズが数段階に潰れ、固定閾値との比較が破綻する（`scratch.ts` のコメント参照）
  * - **id が少し違えばシードが十分に散る**こと。FNV-1a をそのまま返していた実装では
  *   素数 16777619 ≒ 2^24 のせいで末尾 1 文字の違いが下位 24bit に残らず、
  *   **末尾違いの uuid が同じシードに潰れていた**
@@ -16,7 +16,7 @@
  *
  * Skia には触らない純粋な関数なので、`@shopify/react-native-skia` は読み込ませない。
  */
-import { seedFromStampId } from "./skiaStamp";
+import { seedFromStampId } from "./seed";
 
 /** 実際に同じシードへ潰れていた、末尾 1 文字だけ違う uuid 群 */
 const TAIL_DIFFERENT_IDS = [

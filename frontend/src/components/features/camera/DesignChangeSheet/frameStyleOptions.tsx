@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import { colors } from "@/src/theme/tokens";
-import type { StampColor, StampFrame } from "@/src/api/stamps";
+import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
 import type { FrameStyleOption } from "./DesignChangeSheet";
 
 type FrameThumbVariant = "classic" | "vintage" | "minimal" | "wave";
