@@ -14,8 +14,8 @@ import {
   DASH_THICKNESS,
   FRAME_CENTER,
   FRAME_RADIUS,
-} from "@/src/utils/stamp/constants";
-import { framePaint } from "@/src/utils/stamp/frame/framePaint";
+} from "@/src/utils/stamp/constants/constants";
+import { framePaint } from "@/src/utils/stamp/framePaint";
 import type { StampColor } from "@/src/utils/stamp/types";
 
 export function drawDashedCircle(canvas: SkCanvas, color: StampColor): void {

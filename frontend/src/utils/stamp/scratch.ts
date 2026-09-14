@@ -17,7 +17,7 @@ import {
   type SkImage,
 } from "@shopify/react-native-skia";
 
-import { STAMP_SIZE } from "@/src/utils/stamp/constants";
+import { STAMP_SIZE } from "@/src/utils/stamp/constants/constants";
 import { createCachedEffect } from "@/src/utils/stamp/runtimeEffect";
 import { renderToSquareImage } from "@/src/utils/stamp/surface";
 

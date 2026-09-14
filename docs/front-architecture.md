@@ -56,12 +56,14 @@ src/components/
 ```txt
 src/utils/stamp/
   types.ts          # StampColor / StampFrame
-  constants.ts      # サイズ・インク色・フレーム寸法
+  constants/        # サイズ・インク色・フレーム寸法
   surface.ts        # オフスクリーン描画と CPU コピー
   runtimeEffect.ts  # SkSL のコンパイルとキャッシュ
   lineArt.ts        # 工程1: 線画化
   ink.ts            # 工程2: インク着色
-  frame/            # 工程3: 円マスク + フレーム。枠の意匠ごとに 1 ファイル
+  applyCircularFrame.ts  # 工程3: 円マスクで切り抜き、フレームを重ねる
+  framePaint.ts     # 工程3: 枠線の Paint（意匠に依らない共通部分）
+  frames/           # 工程3: 枠の意匠ごとに 1 ファイル
   scratch.ts        # 工程4: 掠れ
   rotate.ts         # 工程5: 傾き
   seed.ts           # 掠れのシード（Skia に触れない純粋な関数）
@@ -86,7 +88,7 @@ src/utils/stamp/
 
 Skia のネイティブモジュールが無い環境（Jest のモック）では、**import しただけで落ちる**。
 `Skia.Color()` や `Skia.XYWHRect()` を定数にせず、呼ばれた時点で作ること。
-`constants.ts` に素の数値しか置いていないのもこの理由による。
+`constants/` に素の数値しか置いていないのもこの理由による。
 
 ### テストの置き場
 

@@ -11,7 +11,7 @@
  */
 import type { SkImage } from "@shopify/react-native-skia";
 
-import { applyCircularFrame } from "@/src/utils/stamp/frame/applyCircularFrame";
+import { applyCircularFrame } from "@/src/utils/stamp/applyCircularFrame";
 import { applyInkColor } from "@/src/utils/stamp/ink";
 import { generateLineArtFromImage } from "@/src/utils/stamp/lineArt";
 import { rotateStamp } from "@/src/utils/stamp/rotate";

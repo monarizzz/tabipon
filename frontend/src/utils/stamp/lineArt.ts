@@ -48,7 +48,7 @@ import {
   type SkImage,
 } from "@shopify/react-native-skia";
 
-import { LINE_ART_SIZE } from "@/src/utils/stamp/constants";
+import { LINE_ART_SIZE } from "@/src/utils/stamp/constants/constants";
 import { createCachedEffect } from "@/src/utils/stamp/runtimeEffect";
 import { renderToSquareImage, toRasterImage } from "@/src/utils/stamp/surface";
 

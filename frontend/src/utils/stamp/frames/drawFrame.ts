@@ -7,10 +7,10 @@
  */
 import { type SkCanvas } from "@shopify/react-native-skia";
 
-import { drawClassicCircle } from "@/src/utils/stamp/frame/classicCircle";
-import { drawDashedCircle } from "@/src/utils/stamp/frame/dashedCircle";
-import { drawSimpleCircle } from "@/src/utils/stamp/frame/simpleCircle";
-import { drawWaveCircle } from "@/src/utils/stamp/frame/waveCircle";
+import { drawClassicCircle } from "@/src/utils/stamp/frames/classicCircle";
+import { drawDashedCircle } from "@/src/utils/stamp/frames/dashedCircle";
+import { drawSimpleCircle } from "@/src/utils/stamp/frames/simpleCircle";
+import { drawWaveCircle } from "@/src/utils/stamp/frames/waveCircle";
 import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
 
 export function drawFrame(

@@ -19,8 +19,8 @@ import {
   FRAME_CENTER,
   FRAME_RADIUS,
   STAMP_SIZE,
-} from "@/src/utils/stamp/constants";
-import { drawFrame } from "@/src/utils/stamp/frame/drawFrame";
+} from "@/src/utils/stamp/constants/constants";
+import { drawFrame } from "@/src/utils/stamp/frames/drawFrame";
 import { renderToSquareImage } from "@/src/utils/stamp/surface";
 import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
 
