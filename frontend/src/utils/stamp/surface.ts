@@ -32,8 +32,6 @@ export function renderToSquareImage(
 /**
  * GPU テクスチャを CPU メモリ上のラスタ画像へ落とす。
  *
- * Refs: #121 / #123
- *
  * `renderToSquareImage()` が返す `SkImage` は、生成したスレッドの Skia
  * コンテキストに属する GPU テクスチャ。この関数群は JS スレッドから呼ばれるが、
  * `<Canvas>` の描画は UI スレッドの Skia コンテキストで行われる。

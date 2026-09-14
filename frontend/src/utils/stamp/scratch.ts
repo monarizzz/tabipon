@@ -1,10 +1,6 @@
 /**
  * 工程4: スタンプに掠れを掛ける。
  *
- * Refs: #134 / #123 / #98
- *
- * `backend/app/services/stamp_processor.py` の `apply_scratch()` に相当する。
- * 3 パス構成で、いずれも 512x512 のオフスクリーン。
  *
  * 1. `seed` から 0..1 の一様乱数ノイズを作る
  * 2. σ = 2.5543 でぼかす（`GaussianBlur(15, 15)` 相当）

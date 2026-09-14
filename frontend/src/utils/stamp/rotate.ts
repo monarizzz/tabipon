@@ -1,9 +1,5 @@
 /**
  * 工程5: スタンプを傾ける。
- *
- * Refs: #134 / #123 / #98
- *
- * `backend/app/services/stamp_processor.py` の `rotate_stamp()` に相当する。
  */
 import {
   FilterMode,
@@ -20,12 +16,6 @@ const MIN_TILT_ANGLE = 1.0;
 
 /**
  * スタンプを傾ける。
- *
- * backend は `getRotationMatrix2D(center, -angle_deg, 1.0)` に `warpAffine` で、
- * 余白は白（`BORDER_CONSTANT` + `(255, 255, 255)`）。
- * OpenCV の回転角は反時計回りが正なので、`-angle_deg` は「`angle_deg` だけ時計回り」。
- * Skia の `canvas.rotate()` も y 下向き座標系で時計回りが正なので、
- * **符号を反転させずにそのまま渡す**のが同じ向きになる。
  *
  * キャンバスは 512x512 のままなので、回転して外へ出た角は切り落とされる。
  * これも backend と同じ（`warpAffine` の出力サイズが `(w, h)` のため）。

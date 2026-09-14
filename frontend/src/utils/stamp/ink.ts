@@ -1,18 +1,5 @@
 /**
  * 工程2: 線画の暗い画素をインク色に置き換える。
- *
- * Refs: #134 / #122 / #98
- *
- * `backend/app/services/stamp_processor.py` の `create_stamp_image()` の
- * `stamp_image[dark_pixels] = ink_color` に相当する。
- *
- * 移植元（OpenCV）:
- *
- * ```python
- * dark = (img[:,:,0] < 180) & (img[:,:,1] < 180) & (img[:,:,2] < 180)
- * img[dark] = ink_color
- * ```
- *
  * ## 閾値判定は 0..1 スケール
  *
  * 暗いピクセルの判定 `< 180` は 0..255 スケール。SkSL 側は 0..1 なので
