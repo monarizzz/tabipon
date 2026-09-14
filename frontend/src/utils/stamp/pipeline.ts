@@ -11,17 +11,17 @@
  */
 import type { SkImage } from "@shopify/react-native-skia";
 
-import { applyCircularFrame } from "@/src/utils/stamp/frame/applyCircularFrame";
+import { applyCircularFrame } from "@/src/utils/stamp/applyCircularFrame";
 import { applyInkColor } from "@/src/utils/stamp/ink";
 import { generateLineArtFromImage } from "@/src/utils/stamp/lineArt";
 import { rotateStamp } from "@/src/utils/stamp/rotate";
 import { applyScratch } from "@/src/utils/stamp/scratch";
 import { toRasterImage } from "@/src/utils/stamp/surface";
-import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types";
 
 /** スタンプ 1 枚を描くためのパラメータ。backend の `process_stamp_image()` の引数と対応する */
 export type StampRenderOptions = {
-  color: StampColor;
+  color: string;
   frame: StampFrame;
   /** 0..1。押し付けの弱さから決まる（`app/stamp-press.tsx` の DeviceMotion） */
   scratchLevel?: number;
@@ -60,7 +60,7 @@ export function renderStampFromLineArt(
  */
 export function composeStampFromLineArt(
   lineArt: SkImage,
-  color: StampColor,
+  color: string,
   frame: StampFrame,
 ): SkImage {
   const inked = applyInkColor(lineArt, color);

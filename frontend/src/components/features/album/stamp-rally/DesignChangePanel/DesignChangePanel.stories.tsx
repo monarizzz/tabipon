@@ -4,10 +4,11 @@ import { View } from "react-native";
 import { fn } from "storybook/test";
 
 import { DesignChangePanel } from "./DesignChangePanel";
+import { FRAME_STYLE_OPTIONS } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import {
-  FRAME_STYLE_OPTIONS,
-  STAMP_COLOR_OPTIONS,
-} from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+  DEFAULT_STAMP_COLOR,
+  STAMP_INK_COLORS,
+} from "@/src/utils/stamp/constants/constants";
 
 const meta = {
   component: DesignChangePanel,
@@ -21,7 +22,7 @@ const meta = {
   tags: ["autodocs"],
   args: {
     frameStyles: FRAME_STYLE_OPTIONS,
-    colorOptions: STAMP_COLOR_OPTIONS,
+    colorOptions: STAMP_INK_COLORS,
     onBack: fn(),
     onShare: fn(),
     onSelectFrameStyle: fn(),
@@ -38,7 +39,7 @@ type Story = StoryObj<typeof meta>;
 export const Interactive: Story = {
   args: {
     selectedFrameStyleId: "classic",
-    selectedColor: STAMP_COLOR_OPTIONS[0],
+    selectedColor: DEFAULT_STAMP_COLOR,
     showLandmarkName: true,
   },
   render: function Render(args) {

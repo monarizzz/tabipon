@@ -29,12 +29,14 @@ import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
 import {
-  API_COLOR_BY_HEX,
   API_FRAME_BY_ID,
   FRAME_STYLE_OPTIONS,
-  STAMP_COLOR_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import { type StampCreateResponse } from "@/src/api/stamps";
+import {
+  DEFAULT_STAMP_COLOR,
+  STAMP_INK_COLORS,
+} from "@/src/utils/stamp/constants/constants";
 import { StampOrientationGuide } from "@/src/components/features/camera/StampOrientationGuide/StampOrientationGuide";
 import { ApiError } from "@/src/api/client";
 import {
@@ -59,9 +61,7 @@ export default function StampPressScreen() {
   const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
   );
-  const [selectedColor, setSelectedColor] = React.useState(
-    STAMP_COLOR_OPTIONS[0],
-  );
+  const [selectedColor, setSelectedColor] = React.useState(DEFAULT_STAMP_COLOR);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const [stampResult, setStampResult] =
     React.useState<StampCreateResponse | null>(null);
@@ -363,14 +363,14 @@ export default function StampPressScreen() {
         frameStyles={FRAME_STYLE_OPTIONS}
         selectedFrameStyleId={selectedFrameStyleId}
         onSelectFrameStyle={setSelectedFrameStyleId}
-        colorOptions={STAMP_COLOR_OPTIONS}
+        colorOptions={STAMP_INK_COLORS}
         selectedColor={selectedColor}
         onSelectColor={setSelectedColor}
         showLandmarkName={showLandmarkName}
         onToggleShowLandmarkName={setShowLandmarkName}
         onConfirm={() => {
           setDesignSheetVisible(false);
-          changeColor(API_COLOR_BY_HEX[selectedColor] ?? "red");
+          changeColor(selectedColor);
           changeFrame(API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic");
           watchSession();
         }}

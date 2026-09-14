@@ -5,7 +5,11 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { fn } from "storybook/test";
 
 import { DesignChangeSheet } from "./DesignChangeSheet";
-import { FRAME_STYLE_OPTIONS, STAMP_COLOR_OPTIONS } from "./frameStyleOptions";
+import { FRAME_STYLE_OPTIONS } from "./frameStyleOptions";
+import {
+  DEFAULT_STAMP_COLOR,
+  STAMP_INK_COLORS,
+} from "@/src/utils/stamp/constants/constants";
 import { colors } from "@/src/style/tokens";
 
 const meta = {
@@ -20,7 +24,7 @@ const meta = {
   tags: ["autodocs"],
   args: {
     frameStyles: FRAME_STYLE_OPTIONS,
-    colorOptions: STAMP_COLOR_OPTIONS,
+    colorOptions: STAMP_INK_COLORS,
     onSelectFrameStyle: fn(),
     onSelectColor: fn(),
     onToggleShowLandmarkName: fn(),
@@ -37,7 +41,7 @@ export const Interactive: Story = {
   args: {
     visible: false,
     selectedFrameStyleId: "classic",
-    selectedColor: "#333333",
+    selectedColor: DEFAULT_STAMP_COLOR,
     showLandmarkName: true,
   },
   render: function Render(args) {

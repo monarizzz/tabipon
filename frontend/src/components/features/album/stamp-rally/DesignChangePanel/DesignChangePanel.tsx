@@ -26,7 +26,7 @@ type Props = {
   frameStyles: FrameStyleOption[];
   selectedFrameStyleId: string;
   onSelectFrameStyle: (id: string) => void;
-  colorOptions: string[];
+  colorOptions: readonly string[];
   selectedColor: string;
   onSelectColor: (color: string) => void;
   showLandmarkName: boolean;

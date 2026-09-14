@@ -45,6 +45,10 @@ import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { colors, radii, spacing, typography } from "@/src/style/tokens";
 import {
+  DEFAULT_STAMP_COLOR,
+  STAMP_INK_COLORS,
+} from "@/src/utils/stamp/constants/constants";
+import {
   generateLineArtFromImage,
   measureBlackPixelRatio,
 } from "@/src/utils/stamp/lineArt";
@@ -53,9 +57,9 @@ import {
   renderStampFromLineArt,
 } from "@/src/utils/stamp/pipeline";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
-import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types";
 
-const STAMP_COLORS: StampColor[] = ["red", "blue", "black", "green"];
+const STAMP_COLORS: readonly string[] = STAMP_INK_COLORS;
 const STAMP_FRAMES: StampFrame[] = ["simple", "classic", "dash", "wave"];
 
 /**
@@ -143,7 +147,7 @@ type GenerateResult =
 
 type Mode = "variants" | "finish";
 
-function variantKey(color: StampColor, frame: StampFrame): string {
+function variantKey(color: string, frame: StampFrame): string {
   return `${color}_${frame}`;
 }
 
@@ -193,7 +197,7 @@ function generateAll(photo: SkImage): GenerateResult {
     const finish: Record<string, string> = {};
     for (const sample of FINISH_SAMPLES) {
       const base64 = renderStampFromLineArt(lineArt, {
-        color: "red",
+        color: DEFAULT_STAMP_COLOR,
         frame: "classic",
         scratchLevel: sample.scratchLevel,
         tiltAngle: sample.tiltAngle,
@@ -228,7 +232,8 @@ function generateAll(photo: SkImage): GenerateResult {
 
 export function StampPreview() {
   const [mode, setMode] = useState<Mode>("variants");
-  const [selectedColor, setSelectedColor] = useState<StampColor>("red");
+  const [selectedColor, setSelectedColor] =
+    useState<string>(DEFAULT_STAMP_COLOR);
   const [result, setResult] = useState<GenerateResult>({ status: "pending" });
 
   const photo = useImage(SOURCE_PHOTO);

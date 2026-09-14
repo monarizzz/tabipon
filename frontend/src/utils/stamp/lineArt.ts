@@ -1,11 +1,6 @@
 /**
  * 工程1: 写真から白黒2値の線画を Skia (SkSL) で生成する。
  *
- * `backend/app/services/stamp_processor.py` の `create_stamp_image()` のうち、
- * **線画化までの工程1〜4だけ**を移植したもの。
- * 色の置換・円フレーム・円マスク・掠れ・回転はこのファイルの責務ではない
- * （`ink.ts` / `frame.ts` / `scratch.ts` / `rotate.ts`）。
- *
  * ## 2種類のブラーが要る理由
  *
  * `adaptiveThreshold` のローカル平均は「blockSize = 31 のガウス窓での平均」であって、
@@ -48,7 +43,7 @@ import {
   type SkImage,
 } from "@shopify/react-native-skia";
 
-import { LINE_ART_SIZE } from "@/src/utils/stamp/constants";
+import { LINE_ART_SIZE } from "@/src/utils/stamp/constants/constants";
 import { createCachedEffect } from "@/src/utils/stamp/runtimeEffect";
 import { renderToSquareImage, toRasterImage } from "@/src/utils/stamp/surface";
 

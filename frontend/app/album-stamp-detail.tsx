@@ -7,12 +7,13 @@ import * as Sharing from "expo-sharing";
 import { DesignChangePanel } from "@/src/components/features/album/stamp-rally/DesignChangePanel/DesignChangePanel";
 import {
   FRAME_STYLE_OPTIONS,
-  STAMP_COLOR_OPTIONS,
-  API_COLOR_BY_HEX,
   API_FRAME_BY_ID,
-  HEX_BY_API_COLOR,
   FRAME_ID_BY_API,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+import {
+  DEFAULT_STAMP_COLOR,
+  STAMP_INK_COLORS,
+} from "@/src/utils/stamp/constants/constants";
 import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
@@ -22,7 +23,6 @@ import {
   updateStampDetails,
   updateStampImage,
   previewStampImage,
-  type StampColor,
   type StampFrame,
 } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
@@ -100,9 +100,7 @@ export default function StampDetailScreen() {
     ? parseFloat(paramScratchLevel)
     : 0;
   // 元スタンプの色・フレーム。デザイン変更パネルの初期選択に使う(未保存の旧スタンプは既定値)
-  const initialColor =
-    (paramColor && HEX_BY_API_COLOR[paramColor as StampColor]) ||
-    STAMP_COLOR_OPTIONS[0];
+  const initialColor = paramColor || DEFAULT_STAMP_COLOR;
   const initialFrameStyleId =
     (paramFrame && FRAME_ID_BY_API[paramFrame as StampFrame]) ||
     FRAME_STYLE_OPTIONS[0].id;
@@ -136,7 +134,7 @@ export default function StampDetailScreen() {
       setPreviewUri(null);
       return;
     }
-    const color = API_COLOR_BY_HEX[selectedColor] ?? "red";
+    const color = selectedColor;
     const frame = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
     let cancelled = false;
     setPreviewLoading(true);
@@ -187,7 +185,7 @@ export default function StampDetailScreen() {
 
   const handleConfirmDesign = async () => {
     if (!id || !originalUri || designUpdating) return;
-    const color = API_COLOR_BY_HEX[selectedColor];
+    const color = selectedColor;
     const frame = API_FRAME_BY_ID[selectedFrameStyleId];
     if (!color || !frame) return;
     setDesignUpdating(true);
@@ -433,7 +431,7 @@ export default function StampDetailScreen() {
           frameStyles={FRAME_STYLE_OPTIONS}
           selectedFrameStyleId={selectedFrameStyleId}
           onSelectFrameStyle={setSelectedFrameStyleId}
-          colorOptions={STAMP_COLOR_OPTIONS}
+          colorOptions={STAMP_INK_COLORS}
           selectedColor={selectedColor}
           onSelectColor={setSelectedColor}
           showLandmarkName={showLandmarkName}

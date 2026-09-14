@@ -8,7 +8,10 @@ import {
   type SkImage,
 } from "@shopify/react-native-skia";
 
-import { FRAME_CENTER, STAMP_SIZE } from "@/src/utils/stamp/constants";
+import {
+  FRAME_CENTER,
+  STAMP_SIZE,
+} from "@/src/utils/stamp/constants/constants";
 import { renderToSquareImage } from "@/src/utils/stamp/surface";
 
 /** `rotate_stamp()` が回転を掛ける下限。1 度以下は無視する */

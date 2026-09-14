@@ -1,12 +1,4 @@
-/**
- * `wave`: 波形円を描く。
- *
- * `_draw_wave_circle()` の「720 点を打って閉じた折れ線にする」実装をそのまま移した。
- * 半径は `r = radius + amplitude * sin(wave_count * angle)`。
- *
- * backend は各点を `int()` で切り捨てて整数座標にしているが、ここは float のまま
- * 渡している。アンチエイリアス有りで描く以上、座標を整数に丸める意味が無いため。
- */
+/** `wave`: 波形円を描く。 */
 import { Skia, type SkCanvas } from "@shopify/react-native-skia";
 
 import {
@@ -16,11 +8,10 @@ import {
   WAVE_COUNT,
   WAVE_POINT_COUNT,
   WAVE_THICKNESS,
-} from "@/src/utils/stamp/constants";
-import { framePaint } from "@/src/utils/stamp/frame/framePaint";
-import type { StampColor } from "@/src/utils/stamp/types";
+} from "@/src/utils/stamp/constants/constants";
+import { framePaint } from "@/src/utils/stamp/framePaint";
 
-export function drawWaveCircle(canvas: SkCanvas, color: StampColor): void {
+export function drawWaveCircle(canvas: SkCanvas, color: string): void {
   const path = Skia.Path.Make();
   for (let i = 0; i < WAVE_POINT_COUNT; i += 1) {
     const angle = (2 * Math.PI * i) / WAVE_POINT_COUNT;

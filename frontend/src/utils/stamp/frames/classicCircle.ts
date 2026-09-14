@@ -7,11 +7,10 @@ import {
   CLASSIC_OUTER_THICKNESS,
   FRAME_CENTER,
   FRAME_RADIUS,
-} from "@/src/utils/stamp/constants";
-import { framePaint } from "@/src/utils/stamp/frame/framePaint";
-import type { StampColor } from "@/src/utils/stamp/types";
+} from "@/src/utils/stamp/constants/constants";
+import { framePaint } from "@/src/utils/stamp/framePaint";
 
-export function drawClassicCircle(canvas: SkCanvas, color: StampColor): void {
+export function drawClassicCircle(canvas: SkCanvas, color: string): void {
   canvas.drawCircle(
     FRAME_CENTER,
     FRAME_CENTER,

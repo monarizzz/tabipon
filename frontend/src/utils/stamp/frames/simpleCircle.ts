@@ -5,11 +5,10 @@ import {
   FRAME_CENTER,
   FRAME_RADIUS,
   SIMPLE_THICKNESS,
-} from "@/src/utils/stamp/constants";
-import { framePaint } from "@/src/utils/stamp/frame/framePaint";
-import type { StampColor } from "@/src/utils/stamp/types";
+} from "@/src/utils/stamp/constants/constants";
+import { framePaint } from "@/src/utils/stamp/framePaint";
 
-export function drawSimpleCircle(canvas: SkCanvas, color: StampColor): void {
+export function drawSimpleCircle(canvas: SkCanvas, color: string): void {
   canvas.drawCircle(
     FRAME_CENTER,
     FRAME_CENTER,

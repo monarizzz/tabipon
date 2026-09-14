@@ -1,28 +1,14 @@
-/**
- * 工程3: 円マスクで切り抜き、フレームを重ねる。
- *
- * `backend/app/services/stamp_processor.py` の `apply_circular_stamp_frame()` に相当する。
- *
- * 移植元（OpenCV）:
- *
- * ```python
- * radius = 512 // 2 - 8          # 248
- * center = (256, 256)
- * mask = circle(center, radius, 255, -1)
- * out = full(255); out[mask == 255] = img[mask == 255]
- * # frame ごとに circle / ellipse / polylines を重ねる
- * ```
- */
+/** 工程3: 円マスクで切り抜き、フレームを重ねる。 */
 import { ClipOp, Skia, type SkImage } from "@shopify/react-native-skia";
 
 import {
   FRAME_CENTER,
   FRAME_RADIUS,
   STAMP_SIZE,
-} from "@/src/utils/stamp/constants";
-import { drawFrame } from "@/src/utils/stamp/frame/drawFrame";
+} from "@/src/utils/stamp/constants/constants";
+import { drawFrame } from "@/src/utils/stamp/frames/drawFrame";
 import { renderToSquareImage } from "@/src/utils/stamp/surface";
-import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types";
 
 /**
  * インク色を載せた画像を円マスクで切り抜き、フレームを重ねる。
@@ -36,7 +22,7 @@ import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
  */
 export function applyCircularFrame(
   inked: SkImage,
-  color: StampColor,
+  color: string,
   frame: StampFrame,
 ): SkImage {
   const circle = Skia.Path.Make();
