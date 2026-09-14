@@ -11,5 +11,6 @@
   ],
   "editor.quickSuggestions": {
     "strings": "on"
-  }
+  },
+  "typescript.tsdk": "frontend/node_modules/typescript/lib"
 }
