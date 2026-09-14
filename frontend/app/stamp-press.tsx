@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { createAudioPlayer } from "expo-audio";
+import { useAudioPlayer } from "expo-audio";
 import { DeviceMotion } from "expo-sensors";
 import Animated, {
   useSharedValue,
@@ -89,6 +89,21 @@ export default function StampPressScreen() {
       { rotate: `${stampRotation.value}deg` },
     ],
   }));
+
+  // 確定音は画面で 1 つのプレイヤーを保持して使い回す。createAudioPlayer で
+  // 都度生成するとネイティブ音声リソースが解放されず積み上がる(Refs #143)
+  const stampSoundPlayer = useAudioPlayer(require("@/assets/sounds/stamp.mp3"));
+
+  const playStampSound = React.useCallback(() => {
+    try {
+      // 末尾まで再生済みのプレイヤーをそのまま play() しても鳴らないため、
+      // 毎回先頭へ戻してから鳴らす(seekTo の完了は待たない)
+      void stampSoundPlayer.seekTo(0).catch(() => {});
+      stampSoundPlayer.play();
+    } catch {
+      // 効果音の再生に失敗してもスタンプ確定処理は継続する
+    }
+  }, [stampSoundPlayer]);
 
   const showUploadError = React.useCallback(
     (error: unknown) => {
@@ -221,14 +236,7 @@ export default function StampPressScreen() {
           if (tiltAngle < -180) tiltAngle += 360;
           runOnJS(setStampPressed)(true);
           applyScratch(scratchLevel, tiltAngle);
-          try {
-            const player = createAudioPlayer(
-              require("@/assets/sounds/stamp.mp3"),
-            );
-            player.play();
-          } catch {
-            // 効果音の再生に失敗してもスタンプ確定処理は継続する
-          }
+          playStampSound();
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           Vibration.vibrate([0, 40, 30, 80]);
           cancelAnimation(stampScale);
@@ -249,7 +257,7 @@ export default function StampPressScreen() {
       subscription.remove();
       Vibration.cancel();
     };
-  }, [goToStampDone, stampScale]);
+  }, [goToStampDone, playStampSound, stampScale]);
 
   const handleStampPressIn = () => {
     longPressTriggeredRef.current = false;
