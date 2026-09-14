@@ -4,8 +4,8 @@ import {
   TabBar,
   type TabBarIcon,
 } from "@/src/components/common/layout/TabBar/TabBar";
-import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors } from "@/src/constants/style-tokens";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { colors } from "@/src/style/tokens";
 
 const ICONS: Record<string, TabBarIcon> = {
   index: Camera,

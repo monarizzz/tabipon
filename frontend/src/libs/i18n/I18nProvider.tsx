@@ -9,29 +9,17 @@ import {
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocales } from "expo-localization";
-import {
-  DEFAULT_LOCALE,
-  i18n,
-  resolveDeviceLocale,
-  SUPPORTED_LOCALES,
-  type LocalePreference,
-  type SupportedLocale,
-  type TranslationKey,
-} from "./index";
+import { i18n, resolveDeviceLocale } from "./index";
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "./constants/locales";
+import type {
+  I18nContextValue,
+  LocalePreference,
+  SupportedLocale,
+  TranslateOptions,
+  TranslationKey,
+} from "./types/i18n";
 
 const STORAGE_KEY = "app.localePreference";
-
-type TranslateOptions = Record<string, string | number>;
-
-type I18nContextValue = {
-  /** 実際に表示に使われている言語 */
-  locale: SupportedLocale;
-  /** ユーザー設定（"system" なら端末設定に追従） */
-  preference: LocalePreference;
-  /** 言語設定を変更して永続化する */
-  setPreference: (pref: LocalePreference) => void;
-  t: (key: TranslationKey, options?: TranslateOptions) => string;
-};
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 

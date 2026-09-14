@@ -43,12 +43,7 @@ import { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
-import {
-  colors,
-  radii,
-  spacing,
-  typography,
-} from "@/src/constants/style-tokens";
+import { colors, radii, spacing, typography } from "@/src/style/tokens";
 import {
   generateLineArtFromImage,
   measureBlackPixelRatio,

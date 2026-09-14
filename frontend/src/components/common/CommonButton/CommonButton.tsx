@@ -8,12 +8,7 @@ import {
   ViewStyle,
   TextStyle,
 } from "react-native";
-import {
-  colors,
-  typography,
-  radii,
-  spacing,
-} from "@/src/constants/style-tokens";
+import { colors, typography, radii, spacing } from "@/src/style/tokens";
 
 type Variant = "primary" | "secondary" | "ghost" | "accent" | "danger";
 

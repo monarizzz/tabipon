@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal as RNModal, TouchableOpacity, StyleSheet } from "react-native";
-import { colors, radii, spacing } from "@/src/constants/style-tokens";
+import { colors, radii, spacing } from "@/src/style/tokens";
 
 type Props = {
   visible: boolean;

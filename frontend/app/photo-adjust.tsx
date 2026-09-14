@@ -11,9 +11,9 @@ import {
 } from "@/src/components/features/camera/PhotoCropArea/PhotoCropArea";
 import { PhotoAdjustControls } from "@/src/components/features/camera/PhotoAdjustControls/PhotoAdjustControls";
 import { startUpload } from "@/src/api/stampSession";
-import { getCurrentStampLocation } from "@/src/utils/location";
-import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors } from "@/src/constants/style-tokens";
+import { getCurrentStampLocation } from "@/src/utils/stamp/location";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { colors } from "@/src/style/tokens";
 
 export default function PhotoAdjustScreen() {
   const router = useRouter();

@@ -1,7 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Card } from "@/src/components/common/Card/Card";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
-import { colors, typography, spacing } from "@/src/constants/style-tokens";
+import { colors, typography, spacing } from "@/src/style/tokens";
 
 type Props = {
   name: string;

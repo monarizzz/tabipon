@@ -5,7 +5,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { Share2 } from "lucide-react-native";
-import { colors } from "@/src/constants/style-tokens";
+import { colors } from "@/src/style/tokens";
 
 type Props = {
   onPress?: () => void;

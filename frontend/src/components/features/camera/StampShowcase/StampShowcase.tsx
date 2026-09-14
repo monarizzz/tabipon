@@ -2,7 +2,7 @@ import { View, StyleSheet } from "react-native";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
 import { SpotNameLabel } from "@/src/components/common/SpotNameLabel/SpotNameLabel";
-import { spacing } from "@/src/constants/style-tokens";
+import { spacing } from "@/src/style/tokens";
 
 type Props = {
   imageUri?: string;

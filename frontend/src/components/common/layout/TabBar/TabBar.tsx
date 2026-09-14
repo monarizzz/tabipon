@@ -1,11 +1,6 @@
 import type { ComponentType } from "react";
 import { TouchableOpacity, Text, View, StyleSheet } from "react-native";
-import {
-  colors,
-  radii,
-  spacing,
-  typography,
-} from "@/src/constants/style-tokens";
+import { colors, radii, spacing, typography } from "@/src/style/tokens";
 
 export type TabBarIcon = ComponentType<{ size?: number; color?: string }>;
 

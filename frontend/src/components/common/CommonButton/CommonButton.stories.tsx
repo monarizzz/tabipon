@@ -4,7 +4,7 @@ import { fn } from "storybook/test";
 import { Palette } from "lucide-react-native";
 
 import { CommonButton } from "./CommonButton";
-import { colors } from "@/src/constants/style-tokens";
+import { colors } from "@/src/style/tokens";
 
 const meta = {
   component: CommonButton,

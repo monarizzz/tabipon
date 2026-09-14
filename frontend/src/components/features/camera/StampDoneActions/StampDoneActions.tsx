@@ -1,8 +1,8 @@
 import { View, StyleSheet } from "react-native";
 import { Camera, BookImage } from "lucide-react-native";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
-import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, radii, spacing } from "@/src/constants/style-tokens";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { colors, radii, spacing } from "@/src/style/tokens";
 
 type Props = {
   onContinueShooting: () => void;

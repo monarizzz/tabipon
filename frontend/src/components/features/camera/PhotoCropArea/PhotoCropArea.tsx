@@ -15,8 +15,8 @@ import {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Svg, { Defs, Mask, Rect, Circle } from "react-native-svg";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
-import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, typography } from "@/src/constants/style-tokens";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { colors, typography } from "@/src/style/tokens";
 
 type Props = {
   imageUri?: string;

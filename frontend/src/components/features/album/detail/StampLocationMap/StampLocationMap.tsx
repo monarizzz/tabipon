@@ -1,13 +1,8 @@
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { WebView } from "react-native-webview";
-import { useTranslation } from "@/src/i18n/I18nProvider";
-import {
-  colors,
-  radii,
-  spacing,
-  typography,
-} from "@/src/constants/style-tokens";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { colors, radii, spacing, typography } from "@/src/style/tokens";
 
 const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
 

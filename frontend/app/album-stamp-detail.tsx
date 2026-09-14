@@ -26,9 +26,9 @@ import {
   type StampFrame,
 } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
-import { getOriginalPhotoUri } from "@/src/utils/originalPhotoStore";
-import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, radii, spacing } from "@/src/constants/style-tokens";
+import { getOriginalPhotoUri } from "@/src/utils/stamp/originalPhotoStore";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { colors, radii, spacing } from "@/src/style/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/common/StampInfoCard/StampInfoCard";
 import { EditFieldSheet } from "@/src/components/common/EditFieldSheet/EditFieldSheet";

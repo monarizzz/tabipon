@@ -1,7 +1,7 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { MapPin } from "lucide-react-native";
-import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/constants/style-tokens";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { colors, typography, spacing } from "@/src/style/tokens";
 
 export type RecentCollectionItem = {
   id: string;

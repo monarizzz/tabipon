@@ -6,7 +6,7 @@ import { fn } from "storybook/test";
 
 import { DesignChangeSheet } from "./DesignChangeSheet";
 import { FRAME_STYLE_OPTIONS, STAMP_COLOR_OPTIONS } from "./frameStyleOptions";
-import { colors } from "@/src/constants/style-tokens";
+import { colors } from "@/src/style/tokens";
 
 const meta = {
   component: DesignChangeSheet,
