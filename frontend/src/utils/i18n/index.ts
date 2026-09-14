@@ -1,15 +1,20 @@
 import { I18n } from "i18n-js";
 import { getLocales } from "expo-localization";
-import { ja, type Translations } from "./translations/ja";
-import { en } from "./translations/en";
-import { zh } from "./translations/zh";
-import { ko } from "./translations/ko";
+import { SUPPORTED_LOCALES } from "./constants/locales";
+import { ja } from "./constants/ja";
+import { en } from "./constants/en";
+import { zh } from "./constants/zh";
+import { ko } from "./constants/ko";
+import type { LocalePreference, SupportedLocale } from "./types/i18n";
 
-export const SUPPORTED_LOCALES = ["ja", "en", "zh", "ko"] as const;
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
-
-/** 手動で言語を選んでいない場合は "system"（端末設定に追従）。 */
-export type LocalePreference = SupportedLocale | "system";
+export { SUPPORTED_LOCALES };
+export type {
+  I18nContextValue,
+  LocalePreference,
+  SupportedLocale,
+  TranslateOptions,
+  TranslationKey,
+} from "./types/i18n";
 
 export const DEFAULT_LOCALE: SupportedLocale = "ja";
 
@@ -43,10 +48,3 @@ export function resolveDeviceLocale(): SupportedLocale {
 export function effectiveLocale(pref: LocalePreference): SupportedLocale {
   return pref === "system" ? resolveDeviceLocale() : pref;
 }
-
-// Translations のネスト構造から "album.title" のようなドットキー型を導出する。
-type LeafKeys<T> = {
-  [K in keyof T & string]: T[K] extends string ? K : `${K}.${LeafKeys<T[K]>}`;
-}[keyof T & string];
-
-export type TranslationKey = LeafKeys<Translations>;
