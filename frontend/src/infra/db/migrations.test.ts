@@ -9,7 +9,7 @@ import {
   MIGRATIONS,
   migrateDbIfNeeded,
   type MigrationTarget,
-} from "@/src/libs/db/migrations";
+} from "@/src/infra/db/migrations";
 
 type SqliteDatabase = {
   exec(sql: string): void;
