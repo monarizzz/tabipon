@@ -4,7 +4,7 @@ import {
   typography,
   radii,
   spacing,
-} from "@/src/constants/design-tokens";
+} from "@/src/constants/style-tokens";
 
 type Props = {
   label: string;

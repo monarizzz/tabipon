@@ -48,7 +48,7 @@ import {
   radii,
   spacing,
   typography,
-} from "@/src/constants/design-tokens";
+} from "@/src/constants/style-tokens";
 import {
   generateLineArtFromImage,
   measureBlackPixelRatio,
