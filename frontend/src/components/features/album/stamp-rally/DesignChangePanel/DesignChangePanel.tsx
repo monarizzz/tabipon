@@ -15,7 +15,12 @@ import { CommonButton } from "@/src/components/common/CommonButton/CommonButton"
 import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, radii, typography, spacing } from "@/src/theme/tokens";
+import {
+  colors,
+  radii,
+  typography,
+  spacing,
+} from "@/src/constants/style-tokens";
 import type { FrameStyleOption } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
 
 type Props = {

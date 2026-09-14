@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { StampDetailPhoto } from "@/src/components/features/album/detail/StampDetailPhoto/StampDetailPhoto";
 import { StampLocationMap } from "@/src/components/features/album/detail/StampLocationMap/StampLocationMap";
-import { colors, spacing } from "@/src/theme/tokens";
+import { colors, spacing } from "@/src/constants/style-tokens";
 
 const PAGE_WIDTH = Dimensions.get("window").width;
 

@@ -4,7 +4,7 @@ import GorhomBottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, radii, spacing } from "@/src/theme/tokens";
+import { colors, radii, spacing } from "@/src/constants/style-tokens";
 
 type Props = {
   visible: boolean;

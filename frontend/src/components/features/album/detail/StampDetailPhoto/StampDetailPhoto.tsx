@@ -5,7 +5,7 @@ import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { SpotNameLabel } from "@/src/components/common/SpotNameLabel/SpotNameLabel";
 import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, spacing } from "@/src/theme/tokens";
+import { colors, spacing } from "@/src/constants/style-tokens";
 
 type Props = {
   spotName: string;

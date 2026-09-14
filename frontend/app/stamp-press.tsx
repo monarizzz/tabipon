@@ -47,7 +47,7 @@ import {
 } from "@/src/api/stampSession";
 import { playStampSound } from "@/src/utils/stampSound";
 import { useTranslation } from "@/src/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/theme/tokens";
+import { colors, typography, spacing } from "@/src/constants/style-tokens";
 
 export default function StampPressScreen() {
   const router = useRouter();
