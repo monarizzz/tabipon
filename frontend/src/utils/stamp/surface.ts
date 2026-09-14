@@ -3,7 +3,6 @@
  *
  * Refs: #134 / #122 / #98
  *
- * もとは `src/utils/skiaSurface.ts`。#134 で `src/utils/stamp/` に集約した。
  * 「同じサイズのサーフェスを作って描いてスナップショットを返す」以上のことはしない。
  *
  * ## `Skia.Surface.MakeOffscreen` は GPU バックエンド

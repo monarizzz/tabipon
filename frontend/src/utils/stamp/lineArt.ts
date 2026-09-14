@@ -3,8 +3,8 @@
  *
  * Refs: #134 / #121 / #98
  *
- * もとは `src/utils/skiaLineArt.ts`。現行 `backend/app/services/stamp_processor.py` の
- * `create_stamp_image()` のうち、**線画化までの工程1〜4だけ**を移植したもの。
+ * `backend/app/services/stamp_processor.py` の `create_stamp_image()` のうち、
+ * **線画化までの工程1〜4だけ**を移植したもの。
  * 色の置換・円フレーム・円マスク・掠れ・回転はこのファイルの責務ではない
  * （`ink.ts` / `frame.ts` / `scratch.ts` / `rotate.ts`）。
  *
@@ -72,8 +72,8 @@
  * ## リサイズ（ここが Canny より効いた）
  *
  * OpenCV は `INTER_AREA`（面積平均）だが Skia に相当物が無い。素の linear で
- * 済ませると高周波成分がずれて **黒画素 IoU が 88% → 82% まで落ちる**。
- * `makeGrayscaleSquare()` で面積平均を近似している（詳細はその関数のコメント）。
+ * 済ませると高周波成分がずれて線画の一致度が落ちるため、`makeGrayscaleSquare()` で
+ * 面積平均を近似している（詳細はその関数のコメント）。
  */
 import {
   AlphaType,
@@ -405,16 +405,7 @@ export function generateLineArtFromImage(image: SkImage): SkImage {
 }
 
 /**
- * 生成結果の黒画素率を返す（0..1）。
- *
- * 目視だけだと「なんとなく似ている」以上の判定ができないので、現行 backend 側と
- * 突き合わせられる数値を出すために #121 で入れた検証用の関数。
- *
- * **現在この関数を呼んでいる箇所は無い。**突き合わせ先だった
- * `docs/stamp-samples/manifest.json` と比較用ストーリーは #147 で削除済みで、
- * 期待値（平等院 31.0% / 雪山 10.3%）を確かめる手段が残っていない。
- * #134 は移動だけを行う変更なので消さずに持ってきているが、
- * 検証の土台を作り直さないのであれば削除してよい。
+ * 生成結果の黒画素率を返す（0..1）。移植の一致度を数値で突き合わせるための検証用。
  */
 export function measureBlackPixelRatio(image: SkImage): number | null {
   const pixels = image.readPixels(0, 0, {
