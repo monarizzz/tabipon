@@ -120,8 +120,20 @@ half4 main(float2 p) {
 }
 `;
 
-const getNoiseEffect = createCachedEffect(SCRATCH_NOISE_SKSL, "掠れノイズ");
-const getApplyEffect = createCachedEffect(SCRATCH_APPLY_SKSL, "掠れ適用");
+const getNoiseEffect = createCachedEffect(SCRATCH_NOISE_SKSL, "掠れ");
+const getApplyEffect = createCachedEffect(SCRATCH_APPLY_SKSL, "掠れ");
+
+/**
+ * 2 つのシェーダをまとめて取り出す。
+ *
+ * **片方だけ先にコンパイルしない**ために噛ませてある。個別に遅延させると、
+ * 適用シェーダのコンパイルが失敗したときに、ノイズ生成とぼかしの 2 パスを
+ * 走らせたあとで例外が飛ぶ。分割前の `getScratchEffects()` は両方を先に
+ * コンパイルしてから返していたので、その挙動に揃える。
+ */
+function getScratchEffects() {
+  return { noise: getNoiseEffect(), apply: getApplyEffect() };
+}
 
 /**
  * 掠れの閾値を求める。0..1 のピクセル値と直接比較できる形で返す。
@@ -150,8 +162,10 @@ export function applyScratch(
     return stamp;
   }
 
+  const effects = getScratchEffects();
+
   const noisePaint = Skia.Paint();
-  noisePaint.setShader(getNoiseEffect().makeShader([seed]));
+  noisePaint.setShader(effects.noise.makeShader([seed]));
   const rawNoise = renderToSquareImage(STAMP_SIZE, (canvas) => {
     canvas.drawRect(Skia.XYWHRect(0, 0, STAMP_SIZE, STAMP_SIZE), noisePaint);
   });
@@ -182,7 +196,7 @@ export function applyScratch(
       FilterMode.Nearest,
       MipmapMode.None,
     );
-  const shader = getApplyEffect().makeShaderWithChildren(
+  const shader = effects.apply.makeShaderWithChildren(
     [scratchThreshold(scratchLevel)],
     [toShader(stamp), toShader(blurredNoise)],
   );
