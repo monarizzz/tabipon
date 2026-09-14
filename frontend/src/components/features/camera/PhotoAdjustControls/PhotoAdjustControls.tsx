@@ -4,7 +4,7 @@ import Slider from "@react-native-community/slider";
 import { Minimize2, Maximize2 } from "lucide-react-native";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { useTranslation } from "@/src/utils/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/constants/style-tokens";
+import { colors, typography, spacing } from "@/src/style/tokens";
 
 const THUMB_SIZE = 20;
 const ZOOM_ICON_SIZE = 16;

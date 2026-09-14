@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import { colors } from "@/src/constants/style-tokens";
+import { colors } from "@/src/style/tokens";
 import type { StampColor, StampFrame } from "@/src/utils/stamp/types";
 import type { FrameStyleOption } from "./DesignChangeSheet";
 

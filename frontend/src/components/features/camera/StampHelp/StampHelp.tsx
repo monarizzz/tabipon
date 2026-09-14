@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from "react-native";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
 import { useTranslation } from "@/src/utils/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/constants/style-tokens";
+import { colors, typography, spacing } from "@/src/style/tokens";
 
 type Props = {
   visible: boolean;

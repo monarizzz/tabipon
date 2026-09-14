@@ -1,7 +1,7 @@
 import React from "react";
 import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import { ChevronRight, type LucideIcon } from "lucide-react-native";
-import { colors, typography, spacing } from "@/src/constants/style-tokens";
+import { colors, typography, spacing } from "@/src/style/tokens";
 
 type Props = {
   label: string;

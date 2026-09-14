@@ -1,12 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  colors,
-  typography,
-  radii,
-  spacing,
-} from "@/src/constants/style-tokens";
+import { colors, typography, radii, spacing } from "@/src/style/tokens";
 
 type Props = {
   title: string;

@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Animated, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Zap, ZapOff, SwitchCamera } from "lucide-react-native";
-import { colors, radii, spacing } from "@/src/constants/style-tokens";
+import { colors, radii, spacing } from "@/src/style/tokens";
 
 type Props = {
   flashOn: boolean;

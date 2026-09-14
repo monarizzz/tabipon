@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, typography, spacing } from "@/src/constants/style-tokens";
+import { colors, typography, spacing } from "@/src/style/tokens";
 
 type Props = {
   title: string;

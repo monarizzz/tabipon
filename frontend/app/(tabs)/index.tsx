@@ -14,7 +14,7 @@ import { CameraHintBar } from "@/src/components/features/camera/CameraHintBar/Ca
 import { CameraPreview } from "@/src/components/features/camera/CameraPreview/CameraPreview";
 import { CameraControls } from "@/src/components/features/camera/CameraControls/CameraControls";
 import { useTranslation } from "@/src/utils/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/constants/style-tokens";
+import { colors, typography, spacing } from "@/src/style/tokens";
 
 async function cropToPreview(
   photo: { uri: string },

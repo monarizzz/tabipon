@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import type { LucideIcon } from "lucide-react-native";
 import { Card } from "@/src/components/common/Card/Card";
 import { ListItem } from "@/src/components/common/ListItem/ListItem";
-import { colors, radii } from "@/src/constants/style-tokens";
+import { colors, radii } from "@/src/style/tokens";
 
 export type SettingsMenuItem = {
   id: string;
