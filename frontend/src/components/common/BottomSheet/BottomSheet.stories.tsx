@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { fn } from "storybook/test";
 
 import { BottomSheet } from "./BottomSheet";
-import { colors } from "@/src/constants/design-tokens";
+import { colors } from "@/src/constants/style-tokens";
 
 const meta = {
   component: BottomSheet,

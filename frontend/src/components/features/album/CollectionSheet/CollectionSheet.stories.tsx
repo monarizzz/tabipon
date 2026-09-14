@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { fn } from "storybook/test";
 
 import { CollectionSheet } from "./CollectionSheet";
-import { colors } from "@/src/constants/design-tokens";
+import { colors } from "@/src/constants/style-tokens";
 
 const meta = {
   component: CollectionSheet,

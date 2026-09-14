@@ -3,7 +3,7 @@ import { View, Text } from "react-native";
 import { fn } from "storybook/test";
 
 import { NavBar } from "./NavBar";
-import { colors } from "@/src/constants/design-tokens";
+import { colors } from "@/src/constants/style-tokens";
 
 const meta = {
   component: NavBar,
