@@ -36,7 +36,7 @@ frontend/
 src/components/
   common/                 # 複数箇所で共通して使用されるUIコンポーネント
   features/               # 特定の箇所のみで使用されるUIコンポーネント
-``
+```
 
 ### コンポーネントとStorybookファイルの配置
 
