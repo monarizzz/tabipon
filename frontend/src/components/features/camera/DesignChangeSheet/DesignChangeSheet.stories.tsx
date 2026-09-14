@@ -37,7 +37,9 @@ export const Interactive: Story = {
   args: {
     visible: false,
     selectedFrameStyleId: "classic",
-    selectedColor: "#333333",
+    // パレットから引く。hex を直書きすると、色を変えたときに
+    // どのスウォッチにも一致せず「選択なし」で描画される
+    selectedColor: STAMP_COLOR_OPTIONS[0],
     showLandmarkName: true,
   },
   render: function Render(args) {
