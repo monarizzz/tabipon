@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import { User } from "lucide-react-native";
-import { useTranslation } from "@/src/utils/i18n/I18nProvider";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/style/tokens";
 
 type Props = {

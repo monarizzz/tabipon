@@ -2,7 +2,7 @@ import type { Preview } from "@storybook/react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { I18nProvider } from "@/src/utils/i18n/I18nProvider";
+import { I18nProvider } from "@/src/libs/i18n/I18nProvider";
 
 const preview: Preview = {
   // アプリ本体 (app/_layout.tsx) と同じ Provider でストーリーを包む。

@@ -27,7 +27,7 @@ import {
 } from "@/src/api/stamps";
 import { markStampDeleted } from "@/src/api/deletedStamps";
 import { getOriginalPhotoUri } from "@/src/utils/stamp/originalPhotoStore";
-import { useTranslation } from "@/src/utils/i18n/I18nProvider";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, radii, spacing } from "@/src/style/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/common/StampInfoCard/StampInfoCard";

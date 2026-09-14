@@ -12,7 +12,7 @@ import {
 import { PhotoAdjustControls } from "@/src/components/features/camera/PhotoAdjustControls/PhotoAdjustControls";
 import { startUpload } from "@/src/api/stampSession";
 import { getCurrentStampLocation } from "@/src/utils/stamp/location";
-import { useTranslation } from "@/src/utils/i18n/I18nProvider";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors } from "@/src/style/tokens";
 
 export default function PhotoAdjustScreen() {

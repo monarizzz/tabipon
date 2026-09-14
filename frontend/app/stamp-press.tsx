@@ -46,7 +46,7 @@ import {
   waitForResult,
 } from "@/src/api/stampSession";
 import { playStampSound } from "@/src/utils/stamp/stampSound";
-import { useTranslation } from "@/src/utils/i18n/I18nProvider";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/style/tokens";
 
 export default function StampPressScreen() {

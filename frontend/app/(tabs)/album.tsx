@@ -17,7 +17,7 @@ import {
   isStampDeleted,
   reconcileDeletedStamps,
 } from "@/src/api/deletedStamps";
-import { useTranslation } from "@/src/utils/i18n/I18nProvider";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/style/tokens";
 
 // フィルターの id は固定。ラベルは描画時に翻訳・整形する。

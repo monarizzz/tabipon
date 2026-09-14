@@ -4,7 +4,7 @@ import { Palette } from "lucide-react-native";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { SpotNameLabel } from "@/src/components/common/SpotNameLabel/SpotNameLabel";
-import { useTranslation } from "@/src/utils/i18n/I18nProvider";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, spacing } from "@/src/style/tokens";
 
 type Props = {

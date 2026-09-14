@@ -6,7 +6,7 @@ import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
 import { ProfileSection } from "@/src/components/features/mypage/ProfileSection/ProfileSection";
 import { RecentCollectionsSection } from "@/src/components/features/mypage/RecentCollectionsSection/RecentCollectionsSection";
 import { SettingsMenuSection } from "@/src/components/features/mypage/SettingsMenuSection/SettingsMenuSection";
-import { useTranslation } from "@/src/utils/i18n/I18nProvider";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, spacing } from "@/src/style/tokens";
 
 const RECENT_COLLECTIONS = [

@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
-import { useTranslation } from "@/src/utils/i18n/I18nProvider";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors } from "@/src/style/tokens";
 
 export default function NotificationsScreen() {

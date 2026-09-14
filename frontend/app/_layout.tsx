@@ -4,7 +4,7 @@ import { SQLiteProvider } from "expo-sqlite";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { DATABASE_NAME, migrateDbIfNeeded } from "@/src/infra/db/migrations";
-import { I18nProvider } from "@/src/utils/i18n/I18nProvider";
+import { I18nProvider } from "@/src/libs/i18n/I18nProvider";
 
 function RootNavigator() {
   return (

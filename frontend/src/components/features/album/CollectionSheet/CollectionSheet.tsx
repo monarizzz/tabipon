@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BottomSheet } from "@/src/components/common/BottomSheet/BottomSheet";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
-import { useTranslation } from "@/src/utils/i18n/I18nProvider";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, typography, radii, spacing } from "@/src/style/tokens";
 
 type Props = {
