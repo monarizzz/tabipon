@@ -1,7 +1,6 @@
 import React from "react";
 import { View } from "react-native";
 import { colors } from "@/src/style/tokens";
-import { STAMP_INK_COLORS } from "@/src/utils/stamp/constants/constants";
 import type { StampFrame } from "@/src/utils/stamp/types";
 import type { FrameStyleOption } from "./DesignChangeSheet";
 
@@ -112,12 +111,6 @@ export const FRAME_STYLE_OPTIONS: FrameStyleOption[] = [
   },
   { id: "wave", label: "design.frameWave", preview: makePreview("wave") },
 ];
-
-// スウォッチに出す色は、実際に押されるインク色そのもの（`STAMP_INK_COLORS`）。
-// 以前はここに表示専用の別の hex を置き、識別子を挟んだ変換表 2 枚で
-// インク色と行き来していたが、スウォッチと仕上がりの色が食い違っていた。
-// 保存値も表示色も同じ hex になったので、変換は要らない
-export const STAMP_COLOR_OPTIONS = STAMP_INK_COLORS;
 
 export const API_FRAME_BY_ID: Record<string, StampFrame> = {
   classic: "classic",

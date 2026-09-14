@@ -4,7 +4,10 @@ export const STAMP_SIZE = 512;
 /** 線画のサイズ。*/
 export const LINE_ART_SIZE = STAMP_SIZE;
 
-/** 色選択に出すインク色。並び順 = UIの並び順 */
+/**
+ * 色選択に出すインク色。並び順 = UIの並び順。
+ * 大文字 6 桁でなければ `migrations.ts` の `color` 列の CHECK に弾かれて保存できない。
+ */
 export const STAMP_INK_COLORS: readonly string[] = [
   "#DC321E", // 赤
   "#1E3CB4", // 青

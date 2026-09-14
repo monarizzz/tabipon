@@ -7,10 +7,13 @@ import * as Sharing from "expo-sharing";
 import { DesignChangePanel } from "@/src/components/features/album/stamp-rally/DesignChangePanel/DesignChangePanel";
 import {
   FRAME_STYLE_OPTIONS,
-  STAMP_COLOR_OPTIONS,
   API_FRAME_BY_ID,
   FRAME_ID_BY_API,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+import {
+  DEFAULT_STAMP_COLOR,
+  STAMP_INK_COLORS,
+} from "@/src/utils/stamp/constants/constants";
 import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
@@ -97,8 +100,7 @@ export default function StampDetailScreen() {
     ? parseFloat(paramScratchLevel)
     : 0;
   // 元スタンプの色・フレーム。デザイン変更パネルの初期選択に使う(未保存の旧スタンプは既定値)
-  // 保存値がそのままインク色なので逆引きは要らない（未保存の旧スタンプは既定値）
-  const initialColor = paramColor || STAMP_COLOR_OPTIONS[0];
+  const initialColor = paramColor || DEFAULT_STAMP_COLOR;
   const initialFrameStyleId =
     (paramFrame && FRAME_ID_BY_API[paramFrame as StampFrame]) ||
     FRAME_STYLE_OPTIONS[0].id;
@@ -429,7 +431,7 @@ export default function StampDetailScreen() {
           frameStyles={FRAME_STYLE_OPTIONS}
           selectedFrameStyleId={selectedFrameStyleId}
           onSelectFrameStyle={setSelectedFrameStyleId}
-          colorOptions={STAMP_COLOR_OPTIONS}
+          colorOptions={STAMP_INK_COLORS}
           selectedColor={selectedColor}
           onSelectColor={setSelectedColor}
           showLandmarkName={showLandmarkName}
