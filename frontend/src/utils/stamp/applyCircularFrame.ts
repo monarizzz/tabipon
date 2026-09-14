@@ -1,18 +1,4 @@
-/**
- * 工程3: 円マスクで切り抜き、フレームを重ねる。
- *
- * `backend/app/services/stamp_processor.py` の `apply_circular_stamp_frame()` に相当する。
- *
- * 移植元（OpenCV）:
- *
- * ```python
- * radius = 512 // 2 - 8          # 248
- * center = (256, 256)
- * mask = circle(center, radius, 255, -1)
- * out = full(255); out[mask == 255] = img[mask == 255]
- * # frame ごとに circle / ellipse / polylines を重ねる
- * ```
- */
+/** 工程3: 円マスクで切り抜き、フレームを重ねる。 */
 import { ClipOp, Skia, type SkImage } from "@shopify/react-native-skia";
 
 import {

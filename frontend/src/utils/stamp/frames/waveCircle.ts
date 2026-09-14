@@ -1,12 +1,4 @@
-/**
- * `wave`: 波形円を描く。
- *
- * `_draw_wave_circle()` の「720 点を打って閉じた折れ線にする」実装をそのまま移した。
- * 半径は `r = radius + amplitude * sin(wave_count * angle)`。
- *
- * backend は各点を `int()` で切り捨てて整数座標にしているが、ここは float のまま
- * 渡している。アンチエイリアス有りで描く以上、座標を整数に丸める意味が無いため。
- */
+/** `wave`: 波形円を描く。 */
 import { Skia, type SkCanvas } from "@shopify/react-native-skia";
 
 import {

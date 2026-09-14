@@ -1,12 +1,4 @@
-/**
- * `dash`: 破線円を描く。
- *
- * `_draw_dashed_circle()` と同じく円周を 24 分割し、**奇数番の区間だけ**を描く
- * （`if i % 2 == 0: continue`）。結果として 15 度の弧が 12 本、15 度おきに並ぶ。
- *
- * 角度の起点と回転方向は OpenCV と Skia で一致している。どちらも 0 度が +x 方向で、
- * 画像座標系（y が下向き）なので画面上は時計回りに進む。
- */
+/** `dash`: 破線円を描く */
 import { Skia, StrokeCap, type SkCanvas } from "@shopify/react-native-skia";
 
 import {
