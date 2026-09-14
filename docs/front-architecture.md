@@ -22,6 +22,7 @@ frontend/
     lib/                  # 外部SDKの初期化（supabase クライアント）
     theme/                # tokens.ts（色・タイポグラフィ・spacing・角丸）
     utils/                # 画面に依存しない純粋なヘルパー
+      stamp/              # スタンプ画像の生成（Skia）。工程ごとに 1 ファイル（詳細は後述）
   .rnstorybook/           # Storybook の設定。story ファイル自体はここに置かない
   assets/                 # 画像・音声
   android/ , ios/         # prebuild で生成されるネイティブプロジェクト
@@ -107,6 +108,46 @@ src/components/
 - `index.ts` によるre-exportは置かない。他のファイルからは `import { CommonButton } from '@/src/components/common/CommonButton/CommonButton'` のように、コンポーネントファイルを直接importする
 - Storybook 側は `.rnstorybook/main.ts` の `stories` に `../src/components/**/*.stories.?(ts|tsx|js|jsx)` を指定し、この配置を自動検出する
 
+---
+
+## src/utils/stamp/ のディレクトリ構成
+
+写真からスタンプ画像を作る処理（`backend/app/services/stamp_processor.py` の移植）。
+もとは `skiaStamp.ts`（740 行）と `skiaLineArt.ts`（490 行）の 2 ファイルだったものを、
+#134 で工程ごとに分けた。
+
+```
+src/utils/stamp/
+  types.ts          # StampColor / StampFrame
+  constants.ts      # サイズ・インク色・フレーム寸法
+  surface.ts        # オフスクリーン描画と CPU コピー
+  runtimeEffect.ts  # SkSL のコンパイルとキャッシュ
+  lineArt.ts        # 工程1: 線画化
+  ink.ts            # 工程2: インク着色
+  frame.ts          # 工程3: 円マスク + フレーム
+  scratch.ts        # 工程4: 掠れ
+  rotate.ts         # 工程5: 傾き
+  seed.ts           # 掠れのシード（Skia に触れない純粋な関数）
+  pipeline.ts       # 工程の順序を決める層
+  io.ts             # uri のデコードと PNG への符号化
+```
+
+ルールは 3 つ。
+
+- **工程ファイルは順序を知らない。**どの工程の次に自分が来るかを書かない。
+  順序を持つのは `pipeline.ts` だけで、工程順の見直し（#138）で触るのはそこ 1 箇所になる
+- **`pipeline.ts` 以下はファイルシステムに触らない。**PNG のバイト列を返すところまでが
+  `io.ts` の責務で、`expo-file-system` で書き出すのは呼び出し側（永続化）の仕事
+- **SkSL 文字列は工程ファイルに同居させる。**`uniform` の宣言と、それを埋める JS 側の
+  平坦な配列は並び順で対応しており、離すと片方だけ直したときに気付けない。
+  共通化したのはコンパイルとキャッシュ（`runtimeEffect.ts`）だけ
+
+### モジュールのトップレベルで `Skia.*` を呼ばない
+
+Skia のネイティブモジュールが無い環境（Jest のモック）では、**import しただけで落ちる**。
+`Skia.Color()` や `Skia.XYWHRect()` を定数にせず、呼ばれた時点で作ること。
+`constants.ts` に素の数値しか置いていないのもこの理由による。
+
 ### テストの置き場
 
 `cd frontend && npm test`（`jest.config.js` の `testMatch`）が拾うのは
@@ -114,7 +155,7 @@ src/components/
 
 - **ストーリーのスモークテスト**: `src/components/stories.test.tsx` の 1 本（下記）
 - **ユーティリティの単体テスト**: 対象ファイルと同じフォルダに `<対象>.test.ts` を置く
-  （例: `src/utils/skiaStamp.ts` に対する `src/utils/skiaStamp.test.ts`）。
+  （例: `src/utils/stamp/seed.ts` に対する `src/utils/stamp/seed.test.ts`）。
   ネイティブモジュールや Skia の描画に触れない純粋な関数の性質を固定するのに使う
 
 ### ストーリーのテスト
