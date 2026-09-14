@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { createAudioPlayer } from "expo-audio";
 import { DeviceMotion } from "expo-sensors";
 import Animated, {
   useSharedValue,
@@ -46,6 +45,7 @@ import {
   retryUpload,
   waitForResult,
 } from "@/src/api/stampSession";
+import { playStampSound } from "@/src/utils/stampSound";
 import { useTranslation } from "@/src/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/theme/tokens";
 
@@ -221,14 +221,7 @@ export default function StampPressScreen() {
           if (tiltAngle < -180) tiltAngle += 360;
           runOnJS(setStampPressed)(true);
           applyScratch(scratchLevel, tiltAngle);
-          try {
-            const player = createAudioPlayer(
-              require("@/assets/sounds/stamp.mp3"),
-            );
-            player.play();
-          } catch {
-            // 効果音の再生に失敗してもスタンプ確定処理は継続する
-          }
+          playStampSound();
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           Vibration.vibrate([0, 40, 30, 80]);
           cancelAnimation(stampScale);
