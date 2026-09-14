@@ -17,6 +17,7 @@ frontend/
     api/                  # バックエンド API 呼び出し
     components/           # UIコンポーネント（詳細は次節）
     contexts/             # React Context（AuthContext）
+    db/                   # 端末ローカル DB（expo-sqlite）のスキーマ・マイグレーション。設計は docs/data-model.md
     i18n/                 # 多言語化。I18nProvider と translations/（ja / en / ko / zh）
     lib/                  # 外部SDKの初期化（supabase クライアント）
     theme/                # tokens.ts（色・タイポグラフィ・spacing・角丸）
