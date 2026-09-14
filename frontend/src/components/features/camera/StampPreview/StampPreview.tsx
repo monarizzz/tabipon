@@ -77,17 +77,39 @@ const EXPECTED_BLACK_PIXEL_RATIO = 0.31;
 
 /**
  * 仕上げ（掠れ・傾き）の確認用パターン。
- * 掠れだけ / 傾きだけ / 両方を 1 つずつ見れば、工程の掛かり方は判断できる。
+ *
+ * ## 掠れは 0.8 あたりまでほとんど効かない
+ *
+ * 閾値は backend 由来の `1.0 - level * 0.4` を σ 単位に戻したもの
+ * （`scratch.ts` の `scratchThreshold()`）。ぼかし後のノイズは平均 0.5 の
+ * ほぼ正規分布なので、白抜きされる画素の割合は level に対して極端に非線形になる。
+ *
+ * | level | 白抜き率（全画素） | インク部分に対して |
+ * | --- | --- | --- |
+ * | 0.2 | 0.0000% | ほぼゼロ |
+ * | 0.4 | 0.0030% | 0.0008% |
+ * | 0.6 | 0.1107% | 0.031% |
+ * | 0.8 | 1.7701% | 0.496% |
+ * | 0.9 | 5.2022% | 1.457% |
+ * | 1.0 | 12.5608% | 3.517% |
+ *
+ * backend の実測平均（0.2 → 0.004% / 0.6 → 0.364% / 1.0 → 16.06%）とも桁が合うので、
+ * **移植のずれではなく元の曲線がこうなっている。**
+ *
+ * そのため確認用のサンプルは 0.6 以上に寄せてある。0.6 は「効いていないこと」を
+ * 見るために残した比較用で、実際に掠れとして見えるのは 0.9 以上。
+ * 撮影フローが渡す値の範囲を含めた見直しは #155。
  */
 const FINISH_SAMPLES = [
   { key: "plain", label: "掠れ・傾きなし", scratchLevel: 0, tiltAngle: 0 },
-  { key: "scratch_light", label: "掠れ 0.2", scratchLevel: 0.2, tiltAngle: 0 },
-  { key: "scratch_heavy", label: "掠れ 0.6", scratchLevel: 0.6, tiltAngle: 0 },
+  { key: "scratch_060", label: "掠れ 0.6（ほぼ無変化）", scratchLevel: 0.6, tiltAngle: 0 }, // prettier-ignore
+  { key: "scratch_090", label: "掠れ 0.9", scratchLevel: 0.9, tiltAngle: 0 },
+  { key: "scratch_100", label: "掠れ 1.0", scratchLevel: 1.0, tiltAngle: 0 },
   { key: "tilt", label: "傾き 15°", scratchLevel: 0, tiltAngle: 15 },
   {
     key: "scratch_and_tilt",
-    label: "掠れ 0.4 + 傾き 20°",
-    scratchLevel: 0.4,
+    label: "掠れ 1.0 + 傾き 20°",
+    scratchLevel: 1.0,
     tiltAngle: 20,
   },
 ] as const;
@@ -324,6 +346,11 @@ export function StampPreview() {
         組み込まない。黒画素率は Canny とリサイズの近似ぶん数 %
         ずれるのが正常で、桁が変わるようなら線画化が壊れている。元写真は平等院（CC0
         1.0 / Wikimedia Commons / GiveMeMollusks）。
+        {"\n\n"}
+        掠れは level 0.8 あたりまでほとんど効かない（0.6 で白抜きされるインクは
+        全画素の 0.03%）。backend
+        由来の閾値がそういう曲線になっているためで、移植のずれではない。詳細と見直しは
+        #155。
       </Text>
     </ScrollView>
   );
