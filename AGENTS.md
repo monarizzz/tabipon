@@ -20,6 +20,7 @@
 
 - Autoで実装する場合は、Commitまで実行しPushはユーザーが明示的に示した場合のみとする
 - force push（`git push --force` / `--force-with-lease` 等）は行わない。実行するのは、ユーザーが明示的に指示した例外的な場合のみとする
+- **`--no-verify`（Git フックのスキップ）を使わない。**人間が緊急時に使うのは許容するが、エージェントは使わない。フックが落ちたら、握り潰さずに原因を直す
 
 ## ブランチ
 
@@ -32,16 +33,49 @@
 順序は依存の下から上へ。**各コミットの時点で型チェックが通る**こと
 
 コミットメッセージ：そのコミット単体で、何をどう変えたかが分かること。
-件名：「`feat`」「`design`」「`docs`」「`ref`」「`fix`」「`chore`」「`test`（テストのみ追加の場合）」「`design`（デザインファイル変更時のみ）」
 何を・どこに・どうしたかを書く。`実装` `追加` だけで終わらせない
 既存改修なら「〜に〜を追加」など
 
+件名は prefix で始める。使うのは次の 8 つだけ。
+
+| prefix   | 用途                                       |
+| -------- | ------------------------------------------ |
+| `feat`   | 機能の追加                                 |
+| `fix`    | 不具合の修正                               |
+| `ref`    | 振る舞いを変えないリファクタリング         |
+| `test`   | テストのみの追加・修正                     |
+| `docs`   | ドキュメントの変更                         |
+| `design` | デザインファイルの変更                     |
+| `style`  | 見た目の変更（挙動を変えない）             |
+| `chore`  | 上記以外の雑務（設定・依存・CI など）      |
+
+- prefix の後ろはスペースでもコロンでもよい（`ref 〜` / `ref: 〜`）
+- revert コミットは git が生成する件名のままでよく、prefix は不要
+
+## Git フック
+
+リポジトリルートで `npm ci`を実行すると `core.hooksPath` が `.husky/_` に設定される
+`frontend/` 側の `npm ci` では有効にならないため、必ずルートで実行する
+
+| フック       | 実行内容                                                                                                 |
+| ------------ | -------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | ステージした `frontend/` 配下の差分に `prettier --write`（自動修正して再ステージ）と `eslint`（検査のみ） |
+|              | TS / TSX / tsconfig がステージされているときだけ `npm run typecheck` を `frontend/` 全体に実行            |
+| `commit-msg` | 件名の prefix が「コミット > メッセージ」の 8 つのいずれかかを検査                                        |
+
+- 整形は**自動修正**される
+- 型チェックの対象：ステージ内容ではなく作業ツリー
+- `--no-verify` でのスキップは原則禁止
+
+> [!IMPORTANT]
+> フックの対象： `frontend/` 配下
+> **`backend/` など新しいディレクトリを追加するときは、`.husky/pre-commit` も必ず更新する。**
 
 ## Issue
 
 実装方針などの意思決定を勝手に行わない
 
-- 判断が要る点は、着手前にユーザーへ質問する（エージェントが自分で決めて進めない）
+- 判断が要る点は、着手前にユーザーへ質問する
 - 作業中に命名・責務の分割・ライブラリの選定などが出てきた場合も随時確認する
 - 判断が要る点はすべて質問する。往復が増えることは許容する。取りこぼしを無くす方を優先する。
   - やむを得ず自分で決めた箇所は、**Issue の「決めること」節に、誰が決めたかが分かる形で残す。**
@@ -89,7 +123,7 @@ gh pr edit <PR> --body-file <本文ファイル> \
 
 - 変更前後が分かるように並べる
 - 画面全体のスクショを貼る場合は、変更箇所を枠線などで囲む
-- UI 変更が無い場合は節を空のままにせず「UI 変更なし」と明記する
+- UI 変更が無い場合は節を空のままにせず「UI 変更なし」と明記
 
 ## WorkTree
 
@@ -100,15 +134,17 @@ git worktree remove <パス>   # 空になった親ディレクトリも消す
 git worktree list            # 消えたことを確認
 ```
 
-- 消すのは worktree だけで、ブランチは残す
 - 削除前に `git status` で未コミットの変更が無いことを確認する
-- 放置するとリポジトリ全体の複製がツリー内に残り、検索やレビューのノイズになる
+
+> [!IMPORTANT]
+> 作ったらルートで `npm ci` を実行する
 
 ## コードレビュー
 
 - レビューコメントは**必ず日本語で記述すること**
 - 指摘のタイトル・本文・要約(サマリ)のすべてを日本語にすること
 - コード片・識別子・ファイルパス・エラーメッセージの引用は原文のまま残してよい
+- また、レビューは鵜呑みにせず、妥当性を検証した上で修正に入ること
 
 ### 観点
 
@@ -131,16 +167,17 @@ UI コードを生成する際は、`design/DESIGN.md`に定義されたビジ�
 
 ### 初回起動時
 
-Node は `.nvmrc` のバージョン（24）
-`package-lock.json`準拠でインストールする
-
 ```bash
 npm ci
+cd frontend && npm ci
 ```
+
+リポジトリルートにも `package.json` があり、そちらの `npm ci` は Git フックを有効にするためのもの（「Git フック」節を参照）。
+アプリの依存とは別物なので、clone 後は両方で実行する。
 
 #### パッケージの追加
 
-**`npm install` ではなく `npx expo install` を使う。**
+`npm install` ではなく `npx expo install` を使用
 SDK に対応したバージョンが選ぶ必要があるため。
 
 ```bash
@@ -151,23 +188,24 @@ npx expo install <パッケージ名>
 
 #### Expo Go
 
+frontend配下で実行
+
 ```bash
  npm run start
 ```
 
 - **Expo Go 57 以降、Expo CLI と Expo Go アプリの両方に、同じアカウントでログインしている必要がある**
-- `@shopify/react-native-skia` は Expo Go に同梱されているため development build は不要
-- `.env` を変更したらキャッシュを消して再起動する: `npx expo start -c --tunnel`
+- `.env` を変更したらキャッシュを消して再起動する
 
 #### Storybook
 
-`STORYBOOK_ENABLED=true` が付くと、アプリの代わりに Storybook が起動する
-（`npm run storybook:ios` などが設定済み）。web は `--port 6006` で開く。
+`STORYBOOK_ENABLED=true` が付くと、アプリの代わりに Storybook が起動する（`npm run storybook:ios` などが設定済み）
+web は `--port 6006` で開く。
 
 ### コマンド
 
 いずれも `frontend/` で実行する。
-リポジトリルートには `package.json` も `tsconfig.json` も無いため、ルートから `npx tsc --noEmit` を実行すると frontend が検査されないまま**終了コード 0 で成功したように見える**。
+リポジトリルートに `tsconfig.json` は無いため、ルートから `npx tsc --noEmit` を実行すると frontend が検査されないまま**終了コード 0 で成功したように見える**
 
 |              |                                                       |
 | ------------ | ----------------------------------------------------- |
@@ -177,5 +215,4 @@ npx expo install <パッケージ名>
 | テスト       | `npm test`                                            |
 | Storybook    | `npm run storybook:ios` / `storybook:web`             |
 
-テストは `src/components/**/*.stories.tsx` を Jest で描画するスモークテスト（詳細は `docs/front-architecture.md`）。
-CI（`.github/workflows/ci.yml`）は PR に対して typecheck / lint / format:check / test を `frontend/` で実行する。
+テストは `src/components/**/*.stories.tsx` を Jest で描画するスモークテスト（詳細は `docs/front-architecture.md`）
