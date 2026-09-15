@@ -1,0 +1,316 @@
+import { randomUUID } from "expo-crypto";
+import { Directory, File, Paths } from "expo-file-system";
+import { openDatabaseSync } from "expo-sqlite";
+
+import { DATABASE_NAME } from "@/src/infra/db/migrations";
+import type { StampFrame } from "@/src/utils/stamp/types";
+
+/**
+ * 画面から呼ぶ素の関数として書くため、`useSQLiteContext()`（フック）ではなく
+ * 同期 API で 1 本開いて使い回す。マイグレーションは `app/_layout.tsx` の
+ * `SQLiteProvider` が済ませており、その子孫からしか呼ばれないので、
+ * この接続がスキーマの無い DB を見ることはない。
+ */
+const db = openDatabaseSync(DATABASE_NAME);
+
+/** スタンプ画像（PNG）の置き場。documentDirectory からの相対パス */
+const STAMP_IMAGES_DIR = "stamps";
+
+/** 元写真の置き場。v1 では `line_art_path` にこのパスが入る */
+const ORIGINAL_PHOTOS_DIR = "stamp-originals";
+
+export type StampLocation = {
+  latitude: number;
+  longitude: number;
+  country?: string | null;
+  region?: string | null;
+  city?: string | null;
+  detail?: string | null;
+};
+
+export type Stamp = {
+  id: string;
+  /** documentDirectory からの相対パス。表示に使う uri は `stampImageUri()` で作る */
+  stampImagePath: string;
+  lineArtPath: string;
+  title: string | null;
+  memo: string | null;
+  /** 表示・並び替えに使う撮影日時。利用者が編集できる */
+  capturedAt: string;
+  /** 撮影時の実際の日時。編集されない */
+  capturedAtOriginal: string;
+  createdAt: string;
+  location: StampLocation | null;
+  color: string;
+  frameId: StampFrame;
+  scratchLevel: number;
+  tiltAngle: number;
+};
+
+export type NewStamp = {
+  /** 仕上げ済みスタンプの PNG。`generateStampPngFromUri()` の戻り値 */
+  stampPng: Uint8Array;
+  /** 元写真の uri。デザイン変更で再生成するために取っておく */
+  photoUri: string;
+  capturedAt: string;
+  location: StampLocation | null;
+  color: string;
+  frameId: StampFrame;
+  scratchLevel: number;
+  tiltAngle: number;
+};
+
+/** 後から編集できる項目だけ。省略した項目は変更しない */
+export type StampPatch = {
+  title?: string | null;
+  memo?: string | null;
+  capturedAt?: string;
+  color?: string;
+  frameId?: StampFrame;
+};
+
+type StampRow = {
+  id: string;
+  line_art_path: string;
+  stamp_image_path: string;
+  title: string | null;
+  memo: string | null;
+  captured_at: string;
+  captured_at_original: string;
+  created_at: string;
+  latitude: number | null;
+  longitude: number | null;
+  address_country: string | null;
+  address_region: string | null;
+  address_city: string | null;
+  address_detail: string | null;
+  color: string;
+  frame_id: string;
+  scratch_level: number;
+  tilt_angle: number;
+};
+
+function toStamp(row: StampRow): Stamp {
+  return {
+    id: row.id,
+    stampImagePath: row.stamp_image_path,
+    lineArtPath: row.line_art_path,
+    title: row.title,
+    memo: row.memo,
+    capturedAt: row.captured_at,
+    capturedAtOriginal: row.captured_at_original,
+    createdAt: row.created_at,
+    location:
+      row.latitude === null || row.longitude === null
+        ? null
+        : {
+            latitude: row.latitude,
+            longitude: row.longitude,
+            country: row.address_country,
+            region: row.address_region,
+            city: row.address_city,
+            detail: row.address_detail,
+          },
+    color: row.color,
+    frameId: row.frame_id as StampFrame,
+    scratchLevel: row.scratch_level,
+    tiltAngle: row.tilt_angle,
+  };
+}
+
+function fileOf(relativePath: string): File {
+  return new File(Paths.document, relativePath);
+}
+
+/** 画像を `<Image>` などに渡せる uri にする */
+export function stampImageUri(stamp: Stamp): string {
+  return fileOf(stamp.stampImagePath).uri;
+}
+
+/** 元写真の uri。デザイン変更の再生成に使う。失われていれば null */
+export function originalPhotoUri(stamp: Stamp): string | null {
+  const file = fileOf(stamp.lineArtPath);
+  return file.exists ? file.uri : null;
+}
+
+/**
+ * スタンプを保存する。
+ *
+ * **画像を書いてから行を入れる。**逆にすると、書き込みに失敗したときに
+ * 存在しない画像を指す行が残り、一覧が壊れる。行が入らずファイルだけ残った場合は
+ * `deleteOrphanFiles()` が拾える。
+ */
+export async function saveStamp(input: NewStamp): Promise<Stamp> {
+  const id = randomUUID();
+  const now = new Date().toISOString();
+
+  const stampImagePath = `${STAMP_IMAGES_DIR}/${id}.png`;
+  const lineArtPath = `${ORIGINAL_PHOTOS_DIR}/${id}.jpg`;
+
+  new Directory(Paths.document, STAMP_IMAGES_DIR).create({ idempotent: true });
+  new Directory(Paths.document, ORIGINAL_PHOTOS_DIR).create({
+    idempotent: true,
+  });
+  fileOf(stampImagePath).write(input.stampPng);
+  new File(input.photoUri).copy(fileOf(lineArtPath));
+
+  const row: StampRow = {
+    id,
+    line_art_path: lineArtPath,
+    stamp_image_path: stampImagePath,
+    title: null,
+    memo: null,
+    captured_at: input.capturedAt,
+    captured_at_original: input.capturedAt,
+    created_at: now,
+    latitude: input.location?.latitude ?? null,
+    longitude: input.location?.longitude ?? null,
+    address_country: input.location?.country ?? null,
+    address_region: input.location?.region ?? null,
+    address_city: input.location?.city ?? null,
+    address_detail: input.location?.detail ?? null,
+    color: input.color,
+    frame_id: input.frameId,
+    scratch_level: input.scratchLevel,
+    tilt_angle: input.tiltAngle,
+  };
+
+  // 列名を並べて `$name` で束縛する。`?` の位置合わせだと、列を足したときに
+  // 値の並びだけずれても型で気付けない
+  const columns = Object.keys(row) as (keyof StampRow)[];
+  await db.runAsync(
+    `INSERT INTO stamps (${columns.join(", ")})
+     VALUES (${columns.map((column) => `$${column}`).join(", ")})`,
+    Object.fromEntries(columns.map((column) => [`$${column}`, row[column]])),
+  );
+
+  return toStamp(row);
+}
+
+/** 新しい順（撮影日時）。アルバム一覧が使う */
+export async function listStamps(): Promise<Stamp[]> {
+  const rows = await db.getAllAsync<StampRow>(
+    "SELECT * FROM stamps ORDER BY captured_at DESC, created_at DESC",
+  );
+  return rows.map(toStamp);
+}
+
+export async function getStamp(id: string): Promise<Stamp | null> {
+  const row = await db.getFirstAsync<StampRow>(
+    "SELECT * FROM stamps WHERE id = ?",
+    id,
+  );
+  return row ? toStamp(row) : null;
+}
+
+/**
+ * 編集できる項目だけを更新する。
+ *
+ * 色とフレームを変えても画像は差し替えない。呼び出し側が再生成した PNG で
+ * `replaceStampImage()` を呼ぶ。
+ */
+export async function updateStamp(
+  id: string,
+  patch: StampPatch,
+): Promise<Stamp> {
+  const columns: Record<keyof StampPatch, string> = {
+    title: "title",
+    memo: "memo",
+    capturedAt: "captured_at",
+    color: "color",
+    frameId: "frame_id",
+  };
+
+  const assignments: string[] = [];
+  const values: (string | null)[] = [];
+  for (const [key, column] of Object.entries(columns)) {
+    const value = patch[key as keyof StampPatch];
+    if (value !== undefined) {
+      assignments.push(`${column} = ?`);
+      values.push(value);
+    }
+  }
+
+  if (assignments.length > 0) {
+    await db.runAsync(
+      `UPDATE stamps SET ${assignments.join(", ")} WHERE id = ?`,
+      [...values, id],
+    );
+  }
+
+  const updated = await getStamp(id);
+  if (!updated) {
+    throw new Error(`スタンプが見つからない: ${id}`);
+  }
+  return updated;
+}
+
+/** デザイン変更で作り直した画像で差し替える。パスは変えないので行の更新は要らない */
+export async function replaceStampImage(
+  id: string,
+  stampPng: Uint8Array,
+): Promise<void> {
+  const stamp = await getStamp(id);
+  if (!stamp) {
+    throw new Error(`スタンプが見つからない: ${id}`);
+  }
+  fileOf(stamp.stampImagePath).write(stampPng);
+}
+
+/**
+ * スタンプを消す。
+ *
+ * **行を先に消し、画像はその後。**逆にすると、ファイルだけ消えて行が残ったとき
+ * 一覧に壊れた項目が出る。行が消えた後にファイル削除が失敗しても、残るのは
+ * どこからも参照されないファイルだけで、`deleteOrphanFiles()` が拾える。
+ */
+export async function deleteStamp(id: string): Promise<void> {
+  const stamp = await getStamp(id);
+  if (!stamp) {
+    return;
+  }
+
+  await db.runAsync("DELETE FROM stamps WHERE id = ?", id);
+
+  for (const path of [stamp.stampImagePath, stamp.lineArtPath]) {
+    const file = fileOf(path);
+    if (file.exists) {
+      file.delete();
+    }
+  }
+}
+
+/**
+ * どの行からも参照されていない画像を消す。
+ *
+ * 保存中や削除中に落ちると取り残しが出る。起動のたびに掃く前提の後始末で、
+ * 消し漏れがあっても次の起動で拾えるため、失敗しても呼び出し側は止めない。
+ */
+export async function deleteOrphanFiles(): Promise<number> {
+  const rows = await db.getAllAsync<{
+    stamp_image_path: string;
+    line_art_path: string;
+  }>("SELECT stamp_image_path, line_art_path FROM stamps");
+
+  const referenced = new Set(
+    rows.flatMap((row) => [row.stamp_image_path, row.line_art_path]),
+  );
+
+  let deleted = 0;
+  for (const dirName of [STAMP_IMAGES_DIR, ORIGINAL_PHOTOS_DIR]) {
+    const dir = new Directory(Paths.document, dirName);
+    if (!dir.exists) {
+      continue;
+    }
+    for (const entry of dir.list()) {
+      if (
+        entry instanceof File &&
+        !referenced.has(`${dirName}/${entry.name}`)
+      ) {
+        entry.delete();
+        deleted += 1;
+      }
+    }
+  }
+  return deleted;
+}
