@@ -15,7 +15,6 @@
 ```
 
 - ドキュメントの一覧と役割の詳細： `docs/README.md`
-- frontend 固有の指示は `frontend/AGENTS.md` を参照すること
 
 ## 基本ルール
 
