@@ -1,0 +1,30 @@
+# 件名の prefix が AGENTS.md「コミット > メッセージ」の 8 つのいずれかであることを検査する。
+# 区切りはスペースでもコロンでもよい（`ref 〜` / `ref: 〜`）。
+
+# 1 行目のうち、コメント行と空行を除いた最初の行を件名とみなす。
+subject=$(grep -v '^#' "$1" | grep -v '^[[:space:]]*$' | head -n 1)
+
+# revert / merge は git が件名を生成するため prefix を求めない。
+case "$subject" in
+  Revert\ * | Merge\ *) exit 0 ;;
+esac
+
+if ! printf '%s' "$subject" | grep -qE '^(feat|fix|ref|test|docs|design|style|chore):? .+'; then
+  echo "commit-msg: 件名の prefix が不正です。" >&2
+  echo >&2
+  echo "  件名: $subject" >&2
+  echo >&2
+  echo "  使えるのは次の 8 つだけです（詳細は AGENTS.md「コミット > メッセージ」）。" >&2
+  echo "    feat   機能の追加" >&2
+  echo "    fix    不具合の修正" >&2
+  echo "    ref    振る舞いを変えないリファクタリング" >&2
+  echo "    test   テストのみの追加・修正" >&2
+  echo "    docs   ドキュメントの変更" >&2
+  echo "    design デザインファイルの変更" >&2
+  echo "    style  見た目の変更（挙動を変えない）" >&2
+  echo "    chore  上記以外の雑務（設定・依存・CI など）" >&2
+  echo >&2
+  echo "  prefix の後ろはスペースでもコロンでもかまいません（例: 'ref 〜' / 'ref: 〜'）。" >&2
+  echo "  リファクタリングは 'refactor' ではなく 'ref' です。" >&2
+  exit 1
+fi
