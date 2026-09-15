@@ -30,9 +30,7 @@ export const ja = {
     title: "スタンプを押す",
     shakeHint: "スマホを上下に振ってスタンプ！",
     creating: "スタンプを作成中…",
-    uploadFailedTitle: "送信に失敗しました",
-    networkError: "通信環境を確認して、もう一度お試しください。",
-    apiError: "APIエラー: %{status} %{detail}",
+    saveFailedTitle: "スタンプを作れませんでした",
   },
   stampHelp: {
     title: "スタンプの押し方",

@@ -31,9 +31,7 @@ export const zh: Translations = {
     title: "盖章",
     shakeHint: "上下摇动手机来盖章！",
     creating: "正在生成印章…",
-    uploadFailedTitle: "发送失败",
-    networkError: "请检查网络连接后重试。",
-    apiError: "API 错误：%{status} %{detail}",
+    saveFailedTitle: "无法生成印章",
   },
   stampHelp: {
     title: "盖章方法",

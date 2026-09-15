@@ -2,7 +2,6 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { DesignChangePanel } from "@/src/components/features/album/stamp-rally/DesignChangePanel/DesignChangePanel";
 import {
@@ -20,13 +19,18 @@ import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog"
 import { Trash2 } from "lucide-react-native";
 import {
   deleteStamp,
-  updateStampDetails,
-  updateStampImage,
-  previewStampImage,
-  type StampFrame,
-} from "@/src/api/stamps";
-import { markStampDeleted } from "@/src/api/deletedStamps";
-import { getOriginalPhotoUri } from "@/src/utils/stamp/originalPhotoStore";
+  getStamp,
+  originalPhotoUri,
+  replaceStampImage,
+  stampImageUri,
+  updateStamp,
+  type Stamp,
+} from "@/src/infra/db/stamps";
+import {
+  generateStampFromUri,
+  generateStampPngFromUri,
+} from "@/src/utils/stamp/io";
+import { seedFromStampId } from "@/src/utils/stamp/seed";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, radii, spacing } from "@/src/style/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
@@ -51,11 +55,6 @@ function parseDate(value: string): Date {
   return new Date(year, (month || 1) - 1, day || 1);
 }
 
-function normalizeParam(value: string | string[] | undefined): string {
-  if (Array.isArray(value)) return value[0] ?? "";
-  return value ?? "";
-}
-
 function normalizeOptionalText(value: string): string | null {
   const trimmed = value.trim();
   return trimmed || null;
@@ -67,52 +66,29 @@ export default function StampDetailScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const {
-    id,
-    imageUri,
-    date: paramDate,
-    latitude: paramLat,
-    longitude: paramLon,
-    spotName: paramSpotName,
-    memo: paramMemo,
-    tiltAngle: paramTiltAngle,
-    scratchLevel: paramScratchLevel,
-    color: paramColor,
-    frame: paramFrame,
-  } = useLocalSearchParams<{
-    id?: string;
-    imageUri?: string;
-    date?: string;
-    latitude?: string;
-    longitude?: string;
-    spotName?: string;
-    memo?: string;
-    tiltAngle?: string;
-    scratchLevel?: string;
-    color?: string;
-    frame?: string;
-  }>();
-  const stampLatitude = paramLat ? parseFloat(paramLat) : null;
-  const stampLongitude = paramLon ? parseFloat(paramLon) : null;
-  // 元スタンプ作成時の演出値。デザイン変更時も引き継いで再適用する
-  const stampTiltAngle = paramTiltAngle ? parseFloat(paramTiltAngle) : 0;
-  const stampScratchLevel = paramScratchLevel
-    ? parseFloat(paramScratchLevel)
-    : 0;
-  // 元スタンプの色・フレーム。デザイン変更パネルの初期選択に使う(未保存の旧スタンプは既定値)
-  const initialColor = paramColor || DEFAULT_STAMP_COLOR;
-  const initialFrameStyleId =
-    (paramFrame && FRAME_ID_BY_API[paramFrame as StampFrame]) ||
-    FRAME_STYLE_OPTIONS[0].id;
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const [stamp, setStamp] = React.useState<Stamp | null>(null);
+  const stampLatitude = stamp?.location?.latitude ?? null;
+  const stampLongitude = stamp?.location?.longitude ?? null;
+  // 作成時の演出値。デザイン変更でも同じ見た目になるよう引き継いで再適用する
+  const stampTiltAngle = stamp?.tiltAngle ?? 0;
+  const stampScratchLevel = stamp?.scratchLevel ?? 0;
   const [designMode, setDesignMode] = React.useState(false);
-  const [selectedFrameStyleId, setSelectedFrameStyleId] =
-    React.useState(initialFrameStyleId);
-  const [selectedColor, setSelectedColor] = React.useState(initialColor);
+  const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
+    FRAME_STYLE_OPTIONS[0].id,
+  );
+  const [selectedColor, setSelectedColor] = React.useState(DEFAULT_STAMP_COLOR);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
-  // 表示中のスタンプ画像。デザイン変更後に即差し替える
-  const [currentImageUri, setCurrentImageUri] = React.useState(imageUri || "");
-  // この端末に保存された元写真の uri(無ければデザイン変更不可)
+  // 表示中のスタンプ画像の uri（file://）。共有もこの値を使う
+  const [currentImageUri, setCurrentImageUri] = React.useState("");
+  // デザイン変更しても画像のパスは変わらないため、同じ uri のままだと
+  // 画像側のキャッシュが効いて古い絵が出る。表示のときだけクエリを足して別物として読ませる
+  const [imageVersion, setImageVersion] = React.useState(0);
+  const displayImageUri = currentImageUri
+    ? `${currentImageUri}${imageVersion ? `?v=${imageVersion}` : ""}`
+    : "";
+  // この端末に残っている元写真の uri(無ければデザイン変更不可)
   const [originalUri, setOriginalUri] = React.useState<string | null>(null);
   const [designUpdating, setDesignUpdating] = React.useState(false);
   // デザイン変更中の、選択中デザインのリアルタイムプレビュー(data-URI)
@@ -120,12 +96,20 @@ export default function StampDetailScreen() {
   const [previewLoading, setPreviewLoading] = React.useState(false);
 
   React.useEffect(() => {
-    setCurrentImageUri(imageUri || "");
-  }, [imageUri]);
-
-  React.useEffect(() => {
     if (!id) return;
-    getOriginalPhotoUri(id).then(setOriginalUri);
+    getStamp(id).then((loaded) => {
+      if (!loaded) return;
+      setStamp(loaded);
+      setCurrentImageUri(stampImageUri(loaded));
+      setOriginalUri(originalPhotoUri(loaded));
+      setSelectedColor(loaded.color);
+      setSelectedFrameStyleId(
+        FRAME_ID_BY_API[loaded.frameId] ?? FRAME_STYLE_OPTIONS[0].id,
+      );
+      setSpotName(loaded.title ?? "");
+      setMemo(loaded.memo ?? "");
+      setDate(formatDateParam(loaded.capturedAt));
+    });
   }, [id]);
 
   // デザイン変更中は選択中の色/フレームでプレビューを生成する(作成画面と同じ cancelled フラグ方式)
@@ -138,18 +122,19 @@ export default function StampDetailScreen() {
     const frame = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
     let cancelled = false;
     setPreviewLoading(true);
-    previewStampImage(
-      originalUri,
+    // 掠れの seed は id から導くので、色やフレームを変えても模様は変わらない
+    generateStampFromUri(originalUri, {
       color,
-      stampScratchLevel,
       frame,
-      stampTiltAngle,
-    )
-      .then((dataUri) => {
-        if (!cancelled) {
-          setPreviewUri(dataUri);
-          setPreviewLoading(false);
-        }
+      scratchLevel: stampScratchLevel,
+      tiltAngle: stampTiltAngle,
+      seed: id ? seedFromStampId(id) : 0,
+    })
+      .then((image) => {
+        if (cancelled) return;
+        const base64 = image.encodeToBase64();
+        if (base64) setPreviewUri(`data:image/png;base64,${base64}`);
+        setPreviewLoading(false);
       })
       .catch((error) => {
         if (!cancelled) setPreviewLoading(false);
@@ -160,6 +145,7 @@ export default function StampDetailScreen() {
     };
   }, [
     designMode,
+    id,
     originalUri,
     selectedColor,
     selectedFrameStyleId,
@@ -181,6 +167,14 @@ export default function StampDetailScreen() {
   const handleCloseDesignChange = () => {
     setDesignMode(false);
     setPreviewUri(null);
+    // 適用せずに閉じたので選択を捨て、保存済みのデザインに戻す。
+    // 残したままだと、開き直したときに実際のスタンプと違う選択が出る
+    if (stamp) {
+      setSelectedColor(stamp.color);
+      setSelectedFrameStyleId(
+        FRAME_ID_BY_API[stamp.frameId] ?? FRAME_STYLE_OPTIONS[0].id,
+      );
+    }
   };
 
   const handleConfirmDesign = async () => {
@@ -190,15 +184,18 @@ export default function StampDetailScreen() {
     if (!color || !frame) return;
     setDesignUpdating(true);
     try {
-      const updated = await updateStampImage(
-        id,
-        originalUri,
+      const stampPng = await generateStampPngFromUri(originalUri, {
         color,
-        stampScratchLevel,
         frame,
-        stampTiltAngle,
-      );
-      setCurrentImageUri(updated.image_url);
+        scratchLevel: stampScratchLevel,
+        tiltAngle: stampTiltAngle,
+        seed: seedFromStampId(id),
+      });
+      await replaceStampImage(id, stampPng);
+      const updated = await updateStamp(id, { color, frameId: frame });
+      setStamp(updated);
+      setCurrentImageUri(stampImageUri(updated));
+      setImageVersion((version) => version + 1);
       setPreviewUri(null);
       setDesignMode(false);
     } catch (error) {
@@ -212,12 +209,10 @@ export default function StampDetailScreen() {
     }
   };
 
-  const [spotName, setSpotName] = React.useState(() =>
-    normalizeParam(paramSpotName),
-  );
-  const [date, setDate] = React.useState(() => normalizeParam(paramDate));
+  const [spotName, setSpotName] = React.useState("");
+  const [date, setDate] = React.useState("");
   const [location, setLocation] = React.useState("");
-  const [memo, setMemo] = React.useState(() => normalizeParam(paramMemo));
+  const [memo, setMemo] = React.useState("");
   const [detailUpdating, setDetailUpdating] = React.useState(false);
 
   React.useEffect(() => {
@@ -265,8 +260,8 @@ export default function StampDetailScreen() {
     const nextSpotName = normalizeOptionalText(draftSpotName);
     setDetailUpdating(true);
     try {
-      const updated = await updateStampDetails(id, { spot_name: nextSpotName });
-      setSpotName(updated.spot_name ?? "");
+      const updated = await updateStamp(id, { title: nextSpotName });
+      setSpotName(updated.title ?? "");
       closeEditor();
     } catch (error) {
       console.error("[stamp-detail] failed to update spot name", error);
@@ -284,7 +279,7 @@ export default function StampDetailScreen() {
     const nextMemo = normalizeOptionalText(draftMemo);
     setDetailUpdating(true);
     try {
-      const updated = await updateStampDetails(id, { memo: nextMemo });
+      const updated = await updateStamp(id, { memo: nextMemo });
       setMemo(updated.memo ?? "");
       closeEditor();
     } catch (error) {
@@ -302,10 +297,10 @@ export default function StampDetailScreen() {
     if (!id || detailUpdating) return;
     setDetailUpdating(true);
     try {
-      const updated = await updateStampDetails(id, {
-        acquired_at: draftDate.toISOString(),
+      const updated = await updateStamp(id, {
+        capturedAt: draftDate.toISOString(),
       });
-      setDate(formatDateParam(updated.acquired_at ?? draftDate.toISOString()));
+      setDate(formatDateParam(updated.capturedAt));
       closeEditor();
     } catch (error) {
       console.error("[stamp-detail] failed to update date", error);
@@ -320,15 +315,16 @@ export default function StampDetailScreen() {
 
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     setDeleteDialogVisible(false);
     if (id) {
-      // アルバム側で即座に一覧から除外し、削除反映前のリフェッチで再表示されるのを防ぐ
-      markStampDeleted(id);
-      // 削除はバックグラウンドで実行し、結果を待たずにアルバムへ戻る
-      deleteStamp(id).catch((error) => {
+      // 端末ローカルの削除は即座に効くので、完了を待ってからアルバムへ戻る。
+      // 一覧はフォーカス時に読み直すため、消えた行が再表示されることはない
+      try {
+        await deleteStamp(id);
+      } catch (error) {
         console.error("[stamp-detail] failed to delete stamp", error);
-      });
+      }
     }
     router.back();
   };
@@ -345,22 +341,8 @@ export default function StampDetailScreen() {
         return;
       }
 
-      let localUri = currentImageUri;
-      if (/^https?:\/\//.test(currentImageUri)) {
-        const ext = currentImageUri
-          .split(/[?#]/)[0]
-          .split(".")
-          .pop()
-          ?.toLowerCase();
-        const fileName = `share-${Date.now()}.${ext && ext.length <= 4 ? ext : "png"}`;
-        const downloaded = await File.downloadFileAsync(
-          currentImageUri,
-          new File(Paths.cache, fileName),
-        );
-        localUri = downloaded.uri;
-      }
-
-      await Sharing.shareAsync(localUri, {
+      // 画像は端末の documentDirectory にあるので、そのまま渡せる
+      await Sharing.shareAsync(currentImageUri, {
         dialogTitle: spotName || undefined,
       });
     } catch (error) {
@@ -386,7 +368,7 @@ export default function StampDetailScreen() {
       </View>
       <StampDetailMediaPager
         spotName={spotName}
-        imageUri={currentImageUri || undefined}
+        imageUri={displayImageUri || undefined}
         onPressDesignChange={handleOpenDesignChange}
         onPressSpotName={openSpotNameEditor}
         latitude={stampLatitude}

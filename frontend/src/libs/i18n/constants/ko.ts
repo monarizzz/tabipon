@@ -31,9 +31,7 @@ export const ko: Translations = {
     title: "스탬프 찍기",
     shakeHint: "휴대폰을 위아래로 흔들어 스탬프!",
     creating: "스탬프 생성 중…",
-    uploadFailedTitle: "전송에 실패했습니다",
-    networkError: "통신 환경을 확인한 후 다시 시도해 주세요.",
-    apiError: "API 오류: %{status} %{detail}",
+    saveFailedTitle: "스탬프를 만들지 못했습니다",
   },
   stampHelp: {
     title: "스탬프 찍는 법",
