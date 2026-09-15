@@ -48,6 +48,8 @@ export type Stamp = {
 };
 
 export type NewStamp = {
+  /** `newStampId()` で払い出した id。PNG を描くときの seed と同じものを渡す */
+  id: string;
   /** 仕上げ済みスタンプの PNG。`generateStampPngFromUri()` の戻り値 */
   stampPng: Uint8Array;
   /** 元写真の uri。デザイン変更で再生成するために取っておく */
@@ -134,6 +136,18 @@ export function originalPhotoUri(stamp: Stamp): string | null {
 }
 
 /**
+ * スタンプ id を払い出す。
+ *
+ * **PNG を描く前に呼ぶ。**掠れ模様の seed は `seedFromStampId(id)` で id から導出する
+ * 決まりで（`seed.ts`）、そうすることで色やフレームを変えて再生成しても模様が
+ * 変わらないようにしている。`saveStamp()` の中で採番すると、呼び出し側は初回だけ
+ * id を知らないまま描くことになり、**再生成した時点で掠れ模様が変わってしまう。**
+ */
+export function newStampId(): string {
+  return randomUUID();
+}
+
+/**
  * スタンプを保存する。
  *
  * **画像を書いてから行を入れる。**逆にすると、書き込みに失敗したときに
@@ -141,7 +155,7 @@ export function originalPhotoUri(stamp: Stamp): string | null {
  * `deleteOrphanFiles()` が拾える。
  */
 export async function saveStamp(input: NewStamp): Promise<Stamp> {
-  const id = randomUUID();
+  const { id } = input;
   const now = new Date().toISOString();
 
   const stampImagePath = `${STAMP_IMAGES_DIR}/${id}.png`;

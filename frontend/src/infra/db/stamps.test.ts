@@ -17,6 +17,7 @@ import {
   deleteStamp,
   getStamp,
   listStamps,
+  newStampId,
   replaceStampImage,
   saveStamp,
   updateStamp,
@@ -147,6 +148,7 @@ function newStamp(overrides: Partial<NewStamp> = {}): NewStamp {
     .requireActual<typeof import("node:fs")>("node:fs")
     .writeFileSync(photo, "photo");
   return {
+    id: newStampId(),
     stampPng: PNG,
     photoUri: photo,
     capturedAt: "2026-09-15T01:00:00.000Z",
@@ -216,6 +218,22 @@ describe("saveStamp", () => {
   it("スキーマの CHECK に反する値は保存できない", async () => {
     // 小文字の hex は `color` 列の CHECK に弾かれる
     await expect(saveStamp(newStamp({ color: "#dc321e" }))).rejects.toThrow();
+  });
+});
+
+describe("newStampId", () => {
+  it("払い出した id がそのまま保存される", async () => {
+    // 呼び出し側は PNG を描く前にこの id を得て、掠れの seed にも使う。
+    // ここで採番し直すと初回と再生成で模様が変わる
+    const id = newStampId();
+    const saved = await saveStamp(newStamp({ id }));
+
+    expect(saved.id).toBe(id);
+    expect((await getStamp(id))?.id).toBe(id);
+  });
+
+  it("呼ぶたびに違う id を返す", () => {
+    expect(newStampId()).not.toBe(newStampId());
   });
 });
 
