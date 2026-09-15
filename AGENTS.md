@@ -49,13 +49,13 @@
 | `style`  | 見た目の変更（挙動を変えない）             |
 | `chore`  | 上記以外の雑務（設定・依存・CI など）      |
 
-- リファクタリングは `ref`。`refactor` とは書かない
 - prefix の後ろはスペースでもコロンでもよい（`ref 〜` / `ref: 〜`）
 - revert コミットは git が生成する件名のままでよく、prefix は不要
 
 ## Git フック
 
-husky で管理している。リポジトリルートで `npm ci`（または `npm install`）を実行すると `core.hooksPath` が `.husky/_` に設定され、有効になる。`frontend/` 側の `npm ci` では有効にならない。
+リポジトリルートで `npm ci`を実行すると `core.hooksPath` が `.husky/_` に設定される
+`frontend/` 側の `npm ci` では有効にならないため、必ずルートで実行する
 
 | フック       | 実行内容                                                                                                 |
 | ------------ | -------------------------------------------------------------------------------------------------------- |
@@ -63,10 +63,9 @@ husky で管理している。リポジトリルートで `npm ci`（または `
 |              | TS / TSX がステージされているときだけ `npm run typecheck` を `frontend/` 全体に実行                       |
 | `commit-msg` | 件名の prefix が「コミット > メッセージ」の 8 つのいずれかかを検査                                        |
 
-- 整形は**自動修正**される。コミットした内容が手元の編集と変わるため、`git show` で確認する
-- 対象拡張子の指定は `frontend/.lintstagedrc.json` にある
-- **型チェックはステージ内容ではなく作業ツリーを見る。**`tsc` に差分実行の手段が無いため。ステージしていない変更の型エラーでもコミットが止まる。最終的な担保は CI 側に残る
-- `--no-verify` でのスキップは「基本ルール」節のとおりエージェントは禁止
+- 整形は**自動修正**される
+- 型チェックの対象：ステージ内容ではなく作業ツリー
+- `--no-verify` でのスキップは原則禁止
 
 > [!IMPORTANT]
 > フックの対象： `frontend/` 配下
@@ -76,7 +75,7 @@ husky で管理している。リポジトリルートで `npm ci`（または `
 
 実装方針などの意思決定を勝手に行わない
 
-- 判断が要る点は、着手前にユーザーへ質問する（エージェントが自分で決めて進めない）
+- 判断が要る点は、着手前にユーザーへ質問する
 - 作業中に命名・責務の分割・ライブラリの選定などが出てきた場合も随時確認する
 - 判断が要る点はすべて質問する。往復が増えることは許容する。取りこぼしを無くす方を優先する。
   - やむを得ず自分で決めた箇所は、**Issue の「決めること」節に、誰が決めたかが分かる形で残す。**
@@ -124,7 +123,7 @@ gh pr edit <PR> --body-file <本文ファイル> \
 
 - 変更前後が分かるように並べる
 - 画面全体のスクショを貼る場合は、変更箇所を枠線などで囲む
-- UI 変更が無い場合は節を空のままにせず「UI 変更なし」と明記する
+- UI 変更が無い場合は節を空のままにせず「UI 変更なし」と明記
 
 ## WorkTree
 
@@ -135,13 +134,10 @@ git worktree remove <パス>   # 空になった親ディレクトリも消す
 git worktree list            # 消えたことを確認
 ```
 
-- 消すのは worktree だけで、ブランチは残す
 - 削除前に `git status` で未コミットの変更が無いことを確認する
-- 放置するとリポジトリ全体の複製がツリー内に残り、検索やレビューのノイズになる
 
 > [!IMPORTANT]
-> **作ったらルートで `npm ci` を実行する。**しないと、その worktree では Git フックが警告なしに全て無効になる（`core.hooksPath` は共有されるが、その実体 `.husky/_` は追跡対象外のため）。
-> lint-staged を動かすには `frontend/` でも `npm ci` が要る。
+> 作ったらルートで `npm ci` を実行する
 
 ## コードレビュー
 
@@ -170,18 +166,17 @@ UI コードを生成する際は、`design/DESIGN.md`に定義されたビジ�
 
 ### 初回起動時
 
-Node は `.nvmrc` のバージョン（24）
-`package-lock.json`準拠でインストールする
-
 ```bash
 npm ci
+cd frontend && npm ci
 ```
 
-リポジトリルートにも `package.json` があり、そちらの `npm ci` は Git フックを有効にするためのもの（「Git フック」節を参照）。アプリの依存とは別物なので、clone 後は両方で実行する。
+リポジトリルートにも `package.json` があり、そちらの `npm ci` は Git フックを有効にするためのもの（「Git フック」節を参照）。
+アプリの依存とは別物なので、clone 後は両方で実行する。
 
 #### パッケージの追加
 
-**`npm install` ではなく `npx expo install` を使う。**
+`npm install` ではなく `npx expo install` を使用
 SDK に対応したバージョンが選ぶ必要があるため。
 
 ```bash
@@ -192,23 +187,24 @@ npx expo install <パッケージ名>
 
 #### Expo Go
 
+frontend配下で実行
+
 ```bash
  npm run start
 ```
 
 - **Expo Go 57 以降、Expo CLI と Expo Go アプリの両方に、同じアカウントでログインしている必要がある**
-- `@shopify/react-native-skia` は Expo Go に同梱されているため development build は不要
-- `.env` を変更したらキャッシュを消して再起動する: `npx expo start -c --tunnel`
+- `.env` を変更したらキャッシュを消して再起動する
 
 #### Storybook
 
-`STORYBOOK_ENABLED=true` が付くと、アプリの代わりに Storybook が起動する
-（`npm run storybook:ios` などが設定済み）。web は `--port 6006` で開く。
+`STORYBOOK_ENABLED=true` が付くと、アプリの代わりに Storybook が起動する（`npm run storybook:ios` などが設定済み）
+web は `--port 6006` で開く。
 
 ### コマンド
 
 いずれも `frontend/` で実行する。
-リポジトリルートに `tsconfig.json` は無いため、ルートから `npx tsc --noEmit` を実行すると frontend が検査されないまま**終了コード 0 で成功したように見える**（ルートの `package.json` は Git フック用で、アプリの設定は持たない）。
+リポジトリルートに `tsconfig.json` は無いため、ルートから `npx tsc --noEmit` を実行すると frontend が検査されないまま**終了コード 0 で成功したように見える**
 
 |              |                                                       |
 | ------------ | ----------------------------------------------------- |
@@ -218,5 +214,4 @@ npx expo install <パッケージ名>
 | テスト       | `npm test`                                            |
 | Storybook    | `npm run storybook:ios` / `storybook:web`             |
 
-テストは `src/components/**/*.stories.tsx` を Jest で描画するスモークテスト（詳細は `docs/front-architecture.md`）。
-CI（`.github/workflows/ci.yml`）は PR に対して typecheck / lint / format:check / test を `frontend/` で実行する。
+テストは `src/components/**/*.stories.tsx` を Jest で描画するスモークテスト（詳細は `docs/front-architecture.md`）
