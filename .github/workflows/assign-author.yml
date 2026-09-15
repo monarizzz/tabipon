@@ -1,0 +1,27 @@
+name: Assign author
+
+# PR を開いた本人を assignee に入れる。Web UI / gh / エージェントのどれで作っても
+# 必ず付くようにするため、作成側の運用ルールではなくワークフローで付ける。
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  assign:
+    name: Assign author
+    runs-on: ubuntu-latest
+    # fork からの PR では GITHUB_TOKEN が読み取り専用になり gh pr edit が必ず落ちる。
+    # pull_request_target に切り替えれば書き込めるが、そこまでする必要が無いので
+    # 同一リポジトリからの PR だけを対象にして、fork の PR はジョブごとスキップする。
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Add author as assignee
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr edit "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --add-assignee "${{ github.event.pull_request.user.login }}"
