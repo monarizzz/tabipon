@@ -1,5 +1,5 @@
 import * as Location from "expo-location";
-import type { StampLocation } from "@/src/api/stamps";
+import type { StampLocation } from "@/src/infra/db/stamps";
 
 /**
  * スタンプ取得時の現在地(GPS)を取得する。

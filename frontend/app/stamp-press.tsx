@@ -32,21 +32,14 @@ import {
   API_FRAME_BY_ID,
   FRAME_STYLE_OPTIONS,
 } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
-import { type StampCreateResponse } from "@/src/api/stamps";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,
 } from "@/src/utils/stamp/constants/constants";
 import { StampOrientationGuide } from "@/src/components/features/camera/StampOrientationGuide/StampOrientationGuide";
-import { ApiError } from "@/src/api/client";
-import {
-  applyScratch,
-  changeColor,
-  changeFrame,
-  getSession,
-  retryUpload,
-  waitForResult,
-} from "@/src/api/stampSession";
+import { newStampId, saveStamp } from "@/src/infra/db/stamps";
+import { generateStampPngFromUri } from "@/src/utils/stamp/io";
+import { seedFromStampId } from "@/src/utils/stamp/seed";
 import { playStampSound } from "@/src/utils/stamp/stampSound";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/style/tokens";
@@ -54,7 +47,11 @@ import { colors, typography, spacing } from "@/src/style/tokens";
 export default function StampPressScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { uri } = useLocalSearchParams<{ uri?: string }>();
+  const { uri, latitude, longitude } = useLocalSearchParams<{
+    uri?: string;
+    latitude?: string;
+    longitude?: string;
+  }>();
   const [helpVisible, setHelpVisible] = React.useState(false);
   const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
@@ -63,12 +60,8 @@ export default function StampPressScreen() {
   );
   const [selectedColor, setSelectedColor] = React.useState(DEFAULT_STAMP_COLOR);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
-  const [stampResult, setStampResult] =
-    React.useState<StampCreateResponse | null>(null);
-  const [uploadFailed, setUploadFailed] = React.useState(false);
-  const [uploadErrorMessage, setUploadErrorMessage] = React.useState(() =>
-    t("stampPress.networkError"),
-  );
+  const [saveFailed, setSaveFailed] = React.useState(false);
+  const [saveErrorMessage, setSaveErrorMessage] = React.useState("");
   const [waiting, setWaiting] = React.useState(false);
   const [stampPressed, setStampPressed] = React.useState(false);
   const longPressTriggeredRef = React.useRef(false);
@@ -80,6 +73,8 @@ export default function StampPressScreen() {
     null,
   );
   const stampDownPeakRef = React.useRef(0);
+  // 押した瞬間に決まる演出値。長押しで押した場合は 0 のまま（掠れも傾きも無し）
+  const finishRef = React.useRef({ scratchLevel: 0, tiltAngle: 0 });
   const currentRotationAlphaRef = React.useRef(0);
   const referenceAlphaRef = React.useRef<number | null>(null);
   const stampRotation = useSharedValue(0);
@@ -90,74 +85,66 @@ export default function StampPressScreen() {
     ],
   }));
 
-  const showUploadError = React.useCallback(
-    (error: unknown) => {
-      let message = t("stampPress.networkError");
-      if (error instanceof ApiError) {
-        message = t("stampPress.apiError", {
-          status: error.status,
-          detail: String(error.detail),
-        });
-      } else if (error instanceof Error) {
-        message = `${error.name}: ${error.message}`;
-      }
-      setUploadErrorMessage(message);
-      setUploadFailed(true);
-    },
-    [t],
-  );
-
-  // 送信結果を購読し、長押し前でもエラーを先出しする(色変更でチェーンが
-  // 差し替わった後の結果は無視して、常に最新のものだけ反映する)
-  const watchSession = React.useCallback(() => {
-    const session = getSession();
-    if (!session) return;
-    const watched = session.promise;
-    watched.then(
-      (created) => {
-        if (getSession()?.promise !== watched) return;
-        setStampResult(created);
-        setUploadFailed(false);
-      },
-      (error) => {
-        if (getSession()?.promise !== watched) return;
-        console.error("[stamp-press] watched upload failed", error);
-        showUploadError(error);
-      },
-    );
-  }, [showUploadError]);
-
-  React.useEffect(() => {
-    watchSession();
-  }, [watchSession]);
-
-  const goToStampDone = React.useCallback(() => {
-    // 次の画面(animation: 'none')でも同じ画面座標にスタンプが来るよう、押した位置を引き継ぐ
-    stampWrapRef.current?.measureInWindow(async (_x, y) => {
-      const baseParams = { stampTop: String(Math.round(y)) };
-      if (!getSession()) {
-        router.push({ pathname: "/stamp-done", params: baseParams });
+  // 生成と保存をまとめて行い、スタンプ完成画面へ進む。
+  //
+  // **id を先に払い出す。**掠れ模様の seed は id から導くので（`seed.ts`）、
+  // 描く前に確定していないと、あとで色やフレームを変えて再生成したときに
+  // 模様が変わってしまう
+  const createAndSave = React.useCallback(
+    async (stampTop: string) => {
+      if (!uri) {
+        router.push({ pathname: "/stamp-done", params: { stampTop } });
         return;
       }
       setWaiting(true);
       try {
-        const created = await waitForResult();
+        const id = newStampId();
+        const { scratchLevel, tiltAngle } = finishRef.current;
+        const frameId = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
+        const stampPng = await generateStampPngFromUri(uri, {
+          color: selectedColor,
+          frame: frameId,
+          scratchLevel,
+          tiltAngle,
+          seed: seedFromStampId(id),
+        });
+        await saveStamp({
+          id,
+          stampPng,
+          photoUri: uri,
+          capturedAt: new Date().toISOString(),
+          location:
+            latitude && longitude
+              ? { latitude: Number(latitude), longitude: Number(longitude) }
+              : null,
+          color: selectedColor,
+          frameId,
+          scratchLevel,
+          tiltAngle,
+        });
         router.push({
           pathname: "/stamp-done",
-          params: {
-            ...baseParams,
-            stampId: created.id,
-            imageUrl: created.image_url,
-          },
+          params: { stampTop, stampId: id },
         });
       } catch (error) {
-        console.error("[stamp-press] waitForResult failed", error);
-        showUploadError(error);
+        console.error("[stamp-press] failed to create stamp", error);
+        setSaveErrorMessage(
+          error instanceof Error ? `${error.name}: ${error.message}` : "",
+        );
+        setSaveFailed(true);
       } finally {
         setWaiting(false);
       }
+    },
+    [latitude, longitude, router, selectedColor, selectedFrameStyleId, uri],
+  );
+
+  const goToStampDone = React.useCallback(() => {
+    // 次の画面(animation: 'none')でも同じ画面座標にスタンプが来るよう、押した位置を引き継ぐ
+    stampWrapRef.current?.measureInWindow((_x, y) => {
+      void createAndSave(String(Math.round(y)));
     });
-  }, [router]);
+  }, [createAndSave]);
 
   React.useEffect(() => {
     DeviceMotion.setUpdateInterval(50);
@@ -220,7 +207,9 @@ export default function StampPressScreen() {
           if (tiltAngle > 180) tiltAngle -= 360;
           if (tiltAngle < -180) tiltAngle += 360;
           runOnJS(setStampPressed)(true);
-          applyScratch(scratchLevel, tiltAngle);
+          // 生成は押し込みアニメーションの完了後（goToStampDone）に走るので、
+          // このとき決まった値を持ち回す
+          finishRef.current = { scratchLevel, tiltAngle };
           playStampSound();
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           Vibration.vibrate([0, 40, 30, 80]);
@@ -304,14 +293,7 @@ export default function StampPressScreen() {
         >
           <Animated.View style={stampAnimatedStyle}>
             {stampPressed ? (
-              <>
-                <Stamp imageUri={stampResult?.image_url ?? uri} />
-                {!stampResult && (
-                  <View style={styles.previewLoadingOverlay}>
-                    <ActivityIndicator size="small" color={colors.white} />
-                  </View>
-                )}
-              </>
+              <Stamp imageUri={uri} />
             ) : (
               <StampOrientationGuide
                 color={selectedColor}
@@ -368,12 +350,8 @@ export default function StampPressScreen() {
         onSelectColor={setSelectedColor}
         showLandmarkName={showLandmarkName}
         onToggleShowLandmarkName={setShowLandmarkName}
-        onConfirm={() => {
-          setDesignSheetVisible(false);
-          changeColor(selectedColor);
-          changeFrame(API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic");
-          watchSession();
-        }}
+        // 生成はスタンプを押した時点で走るので、ここでは選択を閉じるだけでよい
+        onConfirm={() => setDesignSheetVisible(false)}
       />
       <CommonDialog
         visible={pendingTab !== null}
@@ -387,16 +365,14 @@ export default function StampPressScreen() {
         }}
       />
       <CommonDialog
-        visible={uploadFailed}
-        title={t("stampPress.uploadFailedTitle")}
-        message={uploadErrorMessage}
+        visible={saveFailed}
+        title={t("stampPress.saveFailedTitle")}
+        message={saveErrorMessage}
         confirmLabel={t("common.retry")}
-        onCancel={() => setUploadFailed(false)}
+        onCancel={() => setSaveFailed(false)}
         onConfirm={() => {
-          setUploadFailed(false);
-          setUploadErrorMessage(t("stampPress.networkError"));
-          retryUpload();
-          watchSession();
+          setSaveFailed(false);
+          goToStampDone();
         }}
       />
       {waiting && (

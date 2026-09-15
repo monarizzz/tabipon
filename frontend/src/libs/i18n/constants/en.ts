@@ -31,9 +31,7 @@ export const en: Translations = {
     title: "Press stamp",
     shakeHint: "Shake your phone up and down to stamp!",
     creating: "Creating stamp…",
-    uploadFailedTitle: "Upload failed",
-    networkError: "Please check your connection and try again.",
-    apiError: "API error: %{status} %{detail}",
+    saveFailedTitle: "Could not create the stamp",
   },
   stampHelp: {
     title: "How to stamp",

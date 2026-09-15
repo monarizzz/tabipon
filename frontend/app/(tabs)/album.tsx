@@ -12,11 +12,7 @@ import {
 import { CollectionSheet } from "@/src/components/features/album/CollectionSheet/CollectionSheet";
 import { Header } from "@/src/components/common/layout/Header/Header";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
-import { fetchStamps, type StampListItem } from "@/src/api/stamps";
-import {
-  isStampDeleted,
-  reconcileDeletedStamps,
-} from "@/src/api/deletedStamps";
+import { listStamps, stampImageUri, type Stamp } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/style/tokens";
 
@@ -35,21 +31,21 @@ function formatDate(isoDate: string): string {
   return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
 }
 
-function toGridItem(stamp: StampListItem, defaultName: string): StampGridItem {
-  const spotName = stamp.spot_name?.trim() || "";
+function toGridItem(stamp: Stamp, defaultName: string): StampGridItem {
+  const spotName = stamp.title?.trim() || "";
   return {
     id: stamp.id,
     name: spotName || defaultName,
     nameUnset: !spotName,
-    date: formatDate(stamp.acquired_at),
-    imageUri: stamp.image_url,
+    date: formatDate(stamp.capturedAt),
+    imageUri: stampImageUri(stamp),
     spotName,
     memo: stamp.memo?.trim() || "",
     obtained: true,
-    tiltAngle: stamp.tilt_angle ?? 0,
-    scratchLevel: stamp.scratch_level ?? 0,
-    color: stamp.color ?? "",
-    frame: stamp.frame ?? "",
+    tiltAngle: stamp.tiltAngle,
+    scratchLevel: stamp.scratchLevel,
+    color: stamp.color,
+    frame: stamp.frameId,
   };
 }
 
@@ -66,24 +62,24 @@ export default function AlbumScreen() {
   const [collectionSheetVisible, setCollectionSheetVisible] =
     React.useState(false);
   const [collectionName, setCollectionName] = React.useState("");
-  const [fetchedStamps, setFetchedStamps] = React.useState<StampListItem[]>([]);
   const [stamps, setStamps] = React.useState<StampGridItem[] | null>(null);
   const [loadFailed, setLoadFailed] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
 
   const loadStamps = React.useCallback(() => {
     setLoadFailed(false);
-    return fetchStamps()
-      .then((items) => {
-        reconcileDeletedStamps(items.map((item) => item.id));
-        setFetchedStamps(items);
+    // 削除は端末ローカルで即座に効くので、消したはずの行が返ってくることはない。
+    // サーバー反映を待つ間だけ一覧から隠す仕組みは要らなくなった
+    return listStamps()
+      .then((items) =>
         setStamps(
-          items
-            .filter((item) => !isStampDeleted(item.id))
-            .map((item) => toGridItem(item, t("album.unknownSpotName"))),
-        );
-      })
-      .catch(() => setLoadFailed(true));
+          items.map((item) => toGridItem(item, t("album.unknownSpotName"))),
+        ),
+      )
+      .catch((error) => {
+        console.error("[album] failed to load stamps", error);
+        setLoadFailed(true);
+      });
   }, [t]);
 
   // 一覧を下に引っ張ったときの再読み込み
@@ -129,28 +125,13 @@ export default function AlbumScreen() {
           stamps={stamps}
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          onPressStamp={(item) => {
-            const stamp =
-              stamps && Array.isArray(stamps)
-                ? (fetchedStamps.find((s) => s.id === item.id) ?? null)
-                : null;
+          // 詳細画面は id から DB を引くので、渡すのは id だけでよい
+          onPressStamp={(item) =>
             router.push({
               pathname: "/album-stamp-detail",
-              params: {
-                id: item.id,
-                imageUri: item.imageUri ?? "",
-                date: item.date ?? "",
-                latitude: String(stamp?.latitude ?? ""),
-                longitude: String(stamp?.longitude ?? ""),
-                spotName: item.spotName ?? "",
-                memo: item.memo ?? "",
-                tiltAngle: String(item.tiltAngle ?? 0),
-                scratchLevel: String(item.scratchLevel ?? 0),
-                color: item.color ?? "",
-                frame: item.frame ?? "",
-              },
-            });
-          }}
+              params: { id: item.id },
+            })
+          }
         />
       )}
       <CollectionSheet

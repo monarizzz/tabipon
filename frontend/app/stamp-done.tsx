@@ -20,12 +20,12 @@ import { StampResultHeader } from "@/src/components/features/camera/StampResultH
 import { StampShowcase } from "@/src/components/features/camera/StampShowcase/StampShowcase";
 import { StampDoneActions } from "@/src/components/features/camera/StampDoneActions/StampDoneActions";
 import {
-  clearSession,
-  getChosenPreviewUri,
-  getSession,
-} from "@/src/api/stampSession";
-import { deleteStamp, updateStampDetails } from "@/src/api/stamps";
-import { markStampDeleted } from "@/src/api/deletedStamps";
+  deleteStamp,
+  getStamp,
+  stampImageUri,
+  updateStamp,
+  type Stamp,
+} from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, spacing } from "@/src/style/tokens";
 
@@ -36,8 +36,10 @@ function normalizeOptionalText(value: string): string | null {
 
 type EditingField = "spotName" | "location" | "memo" | null;
 
-const today = new Date();
-const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, "0")}.${String(today.getDate()).padStart(2, "0")}`;
+function formatDate(isoDate: string): string {
+  const date = new Date(isoDate);
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+}
 
 export default function StampDoneScreen() {
   const router = useRouter();
@@ -45,26 +47,35 @@ export default function StampDoneScreen() {
   const {
     stampTop: stampTopParam,
     stampId,
-    imageUrl,
     scratchLevel,
     peak,
   } = useLocalSearchParams<{
     stampTop?: string;
     stampId?: string;
-    imageUrl?: string;
     scratchLevel?: string;
     peak?: string;
   }>();
-  const previewUri = getChosenPreviewUri();
+  const [stamp, setStamp] = React.useState<Stamp | null>(null);
   const [spotName, setSpotName] = React.useState("");
   const [location, setLocation] = React.useState("");
   const [memo, setMemo] = React.useState("");
   const [detailUpdating, setDetailUpdating] = React.useState(false);
   const [retakeDialogVisible, setRetakeDialogVisible] = React.useState(false);
 
+  // 保存済みのスタンプを読み込む。前の画面で保存まで済ませてあるので必ず在る
+  React.useEffect(() => {
+    if (!stampId) return;
+    getStamp(stampId).then((loaded) => {
+      if (!loaded) return;
+      setStamp(loaded);
+      setSpotName(loaded.title ?? "");
+      setMemo(loaded.memo ?? "");
+    });
+  }, [stampId]);
+
   // 撮影時に記録した位置情報から住所を逆引きする(アルバム詳細画面と同じ方式)
   React.useEffect(() => {
-    const sessionLocation = getSession()?.location;
+    const sessionLocation = stamp?.location;
     if (!sessionLocation) return;
     const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
     fetch(
@@ -76,7 +87,7 @@ export default function StampDoneScreen() {
         if (address) setLocation(address);
       })
       .catch(() => {});
-  }, []);
+  }, [stamp]);
 
   const [editingField, setEditingField] = React.useState<EditingField>(null);
   const [draftSpotName, setDraftSpotName] = React.useState(spotName);
@@ -102,10 +113,8 @@ export default function StampDoneScreen() {
     const nextSpotName = normalizeOptionalText(draftSpotName);
     setDetailUpdating(true);
     try {
-      const updated = await updateStampDetails(stampId, {
-        spot_name: nextSpotName,
-      });
-      setSpotName(updated.spot_name ?? "");
+      const updated = await updateStamp(stampId, { title: nextSpotName });
+      setSpotName(updated.title ?? "");
       closeEditor();
     } catch (error) {
       console.error("[stamp-done] failed to update spot name", error);
@@ -123,7 +132,7 @@ export default function StampDoneScreen() {
     const nextMemo = normalizeOptionalText(draftMemo);
     setDetailUpdating(true);
     try {
-      const updated = await updateStampDetails(stampId, { memo: nextMemo });
+      const updated = await updateStamp(stampId, { memo: nextMemo });
       setMemo(updated.memo ?? "");
       closeEditor();
     } catch (error) {
@@ -137,17 +146,17 @@ export default function StampDoneScreen() {
     }
   };
 
-  const handleConfirmRetake = () => {
+  const handleConfirmRetake = async () => {
     setRetakeDialogVisible(false);
     if (stampId) {
-      // アルバムで即座に一覧から除外し、削除反映前のリフェッチで再表示されるのを防ぐ
-      markStampDeleted(stampId);
-      // 削除はバックグラウンドで実行し、結果を待たずにカメラへ戻る
-      deleteStamp(stampId).catch((error) => {
+      // 端末ローカルの削除は即座に効くので、完了を待ってから戻る。
+      // サーバー反映を待つ必要が無くなったため、一覧から隠すための細工も要らない
+      try {
+        await deleteStamp(stampId);
+      } catch (error) {
         console.error("[stamp-done] failed to delete stamp", error);
-      });
+      }
     }
-    clearSession();
     router.replace("/(tabs)");
   };
 
@@ -185,7 +194,7 @@ export default function StampDoneScreen() {
             <StampResultHeader />
           </View>
           <StampShowcase
-            imageUri={imageUrl ?? previewUri ?? undefined}
+            imageUri={stamp ? stampImageUri(stamp) : undefined}
             onShare={() =>
               Share.share({ message: t("stampDone.shareMessage") })
             }
@@ -201,7 +210,7 @@ export default function StampDoneScreen() {
           )}
           <View style={styles.actionsAnchor}>
             <StampInfoCard
-              date={formattedDate}
+              date={stamp ? formatDate(stamp.capturedAt) : ""}
               location={location}
               memo={memo}
               onPressLocation={openLocationEditor}
@@ -209,11 +218,9 @@ export default function StampDoneScreen() {
             />
             <StampDoneActions
               onContinueShooting={() => {
-                clearSession();
                 router.replace("/(tabs)");
               }}
               onGoToAlbum={() => {
-                clearSession();
                 router.push("/(tabs)/album");
               }}
             />
@@ -280,7 +287,6 @@ export default function StampDoneScreen() {
             icon: Camera,
             active: true,
             onPress: () => {
-              clearSession();
               router.replace("/(tabs)");
             },
           },
@@ -290,7 +296,6 @@ export default function StampDoneScreen() {
             icon: Image,
             active: false,
             onPress: () => {
-              clearSession();
               router.push("/(tabs)/album");
             },
           },
@@ -300,7 +305,6 @@ export default function StampDoneScreen() {
             icon: User,
             active: false,
             onPress: () => {
-              clearSession();
               router.push("/(tabs)/mypage");
             },
           },

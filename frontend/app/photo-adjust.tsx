@@ -10,8 +10,6 @@ import {
   type PhotoCropAreaHandle,
 } from "@/src/components/features/camera/PhotoCropArea/PhotoCropArea";
 import { PhotoAdjustControls } from "@/src/components/features/camera/PhotoAdjustControls/PhotoAdjustControls";
-import { startUpload } from "@/src/api/stampSession";
-import { DEFAULT_STAMP_COLOR } from "@/src/utils/stamp/constants/constants";
 import { getCurrentStampLocation } from "@/src/utils/stamp/location";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors } from "@/src/style/tokens";
@@ -37,18 +35,24 @@ export default function PhotoAdjustScreen() {
         zoom={zoom}
         onChangeZoom={setZoom}
         onConfirm={async () => {
-          // 円ガイド内に実際に見えている範囲を切り出してからアップロードする。
-          // 待たずに送信開始し、結果はスタンプを押す画面で待ち合わせる
+          // 円ガイド内に実際に見えている範囲を切り出す
           const croppedUri = uri
             ? await cropAreaRef.current?.getCroppedImageUri()
             : null;
-          const uploadUri = croppedUri ?? uri;
-          if (uploadUri) {
-            // 取得時の現在地(GPS)を記録する。権限拒否や失敗時は null のまま続行する
-            const location = await getCurrentStampLocation();
-            startUpload(uploadUri, DEFAULT_STAMP_COLOR, location);
-          }
-          router.push({ pathname: "/stamp-press", params: { uri: uploadUri } });
+          const photoUri = croppedUri ?? uri;
+          // 取得時の現在地(GPS)を記録する。権限拒否や失敗時は null のまま続行する。
+          // スタンプの生成と保存は次の画面（押した瞬間）で行うので、ここでは渡すだけ
+          const location = photoUri ? await getCurrentStampLocation() : null;
+          router.push({
+            pathname: "/stamp-press",
+            params: {
+              uri: photoUri,
+              ...(location && {
+                latitude: String(location.latitude),
+                longitude: String(location.longitude),
+              }),
+            },
+          });
         }}
       />
       <TabBar
