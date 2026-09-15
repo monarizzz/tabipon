@@ -1,0 +1,11 @@
+{
+  "name": "tabipon",
+  "private": true,
+  "description": "Git フックを管理するためのリポジトリルートの package.json。アプリのコードは frontend/ にある",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}
