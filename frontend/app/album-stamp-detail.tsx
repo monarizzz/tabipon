@@ -167,6 +167,14 @@ export default function StampDetailScreen() {
   const handleCloseDesignChange = () => {
     setDesignMode(false);
     setPreviewUri(null);
+    // 適用せずに閉じたので選択を捨て、保存済みのデザインに戻す。
+    // 残したままだと、開き直したときに実際のスタンプと違う選択が出る
+    if (stamp) {
+      setSelectedColor(stamp.color);
+      setSelectedFrameStyleId(
+        FRAME_ID_BY_API[stamp.frameId] ?? FRAME_STYLE_OPTIONS[0].id,
+      );
+    }
   };
 
   const handleConfirmDesign = async () => {

@@ -55,11 +55,24 @@ export default function StampPressScreen() {
   const [helpVisible, setHelpVisible] = React.useState(false);
   const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
-  const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
+  // 確定済みのデザイン。スタンプを押したときに生成へ渡すのはこちら
+  const [frameStyleId, setFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
   );
-  const [selectedColor, setSelectedColor] = React.useState(DEFAULT_STAMP_COLOR);
+  const [color, setColor] = React.useState(DEFAULT_STAMP_COLOR);
+  // シートで選択中のデザイン。**確定と分けてある。**
+  // シートはスワイプや背景タップでも閉じられるので、選択をそのまま確定扱いにすると
+  // 「適用」を押さずに閉じたつもりでも生成に使われてしまう
+  const [draftFrameStyleId, setDraftFrameStyleId] =
+    React.useState(frameStyleId);
+  const [draftColor, setDraftColor] = React.useState(color);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
+
+  const openDesignSheet = () => {
+    setDraftFrameStyleId(frameStyleId);
+    setDraftColor(color);
+    setDesignSheetVisible(true);
+  };
   const [saveFailed, setSaveFailed] = React.useState(false);
   const [saveErrorMessage, setSaveErrorMessage] = React.useState("");
   const [waiting, setWaiting] = React.useState(false);
@@ -100,9 +113,9 @@ export default function StampPressScreen() {
       try {
         const id = newStampId();
         const { scratchLevel, tiltAngle } = finishRef.current;
-        const frameId = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
+        const frameId = API_FRAME_BY_ID[frameStyleId] ?? "classic";
         const stampPng = await generateStampPngFromUri(uri, {
-          color: selectedColor,
+          color,
           frame: frameId,
           scratchLevel,
           tiltAngle,
@@ -117,7 +130,7 @@ export default function StampPressScreen() {
             latitude && longitude
               ? { latitude: Number(latitude), longitude: Number(longitude) }
               : null,
-          color: selectedColor,
+          color,
           frameId,
           scratchLevel,
           tiltAngle,
@@ -136,7 +149,7 @@ export default function StampPressScreen() {
         setWaiting(false);
       }
     },
-    [latitude, longitude, router, selectedColor, selectedFrameStyleId, uri],
+    [color, frameStyleId, latitude, longitude, router, uri],
   );
 
   const goToStampDone = React.useCallback(() => {
@@ -296,10 +309,9 @@ export default function StampPressScreen() {
               <Stamp imageUri={uri} />
             ) : (
               <StampOrientationGuide
-                color={selectedColor}
+                color={color}
                 frameId={
-                  selectedFrameStyleId as
-                    "classic" | "vintage" | "minimal" | "wave"
+                  frameStyleId as "classic" | "vintage" | "minimal" | "wave"
                 }
               />
             )}
@@ -308,7 +320,7 @@ export default function StampPressScreen() {
         <Text style={styles.hint}>{t("stampPress.shakeHint")}</Text>
         <CommonButton
           label={t("design.changeDesign")}
-          onPress={() => setDesignSheetVisible(true)}
+          onPress={openDesignSheet}
           variant="secondary"
           icon={<Palette size={14} color={colors.secondary} />}
         />
@@ -341,17 +353,22 @@ export default function StampPressScreen() {
       <StampHelp visible={helpVisible} onClose={() => setHelpVisible(false)} />
       <DesignChangeSheet
         visible={designSheetVisible}
+        // 「適用」を押さずに閉じた場合は選択を捨てる
         onClose={() => setDesignSheetVisible(false)}
         frameStyles={FRAME_STYLE_OPTIONS}
-        selectedFrameStyleId={selectedFrameStyleId}
-        onSelectFrameStyle={setSelectedFrameStyleId}
+        selectedFrameStyleId={draftFrameStyleId}
+        onSelectFrameStyle={setDraftFrameStyleId}
         colorOptions={STAMP_INK_COLORS}
-        selectedColor={selectedColor}
-        onSelectColor={setSelectedColor}
+        selectedColor={draftColor}
+        onSelectColor={setDraftColor}
         showLandmarkName={showLandmarkName}
         onToggleShowLandmarkName={setShowLandmarkName}
-        // 生成はスタンプを押した時点で走るので、ここでは選択を閉じるだけでよい
-        onConfirm={() => setDesignSheetVisible(false)}
+        // 生成はスタンプを押した時点で走るので、ここでは選択を確定するだけでよい
+        onConfirm={() => {
+          setFrameStyleId(draftFrameStyleId);
+          setColor(draftColor);
+          setDesignSheetVisible(false);
+        }}
       />
       <CommonDialog
         visible={pendingTab !== null}
