@@ -1,29 +1,64 @@
-# Expo HAS CHANGED
+# AGENTS.md
 
-Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any code.
+## フロントエンドのアーキテクチャ
+
+`docs/front-architecture.md`準拠
 
 ## コンポーネント作成時のルール
 
-新しいコンポーネントを作成する前に、必ず `docs/front-architecture.md`（リポジトリルートから見た相対パス）を
-読んでルールを確認すること。
+新規コンポーネント作成時はコンポーネント（`.tsx`）とStorybook（`.stories.tsx`）を追加すること
 
 ## デザインシステム
 
-UI コードを生成する際は、`design/DESIGN.MD`（リポジトリルートから見た相対パス。拡張子は大文字の `.MD`）に
-定義されたビジュアルデザインシステムに必ず従うこと。
+UI コードを生成する際は、`design/DESIGN.md`に定義されたビジュアルデザインシステムに必ず従うこと。
+
+## 初回起動時
+
+Node は `.nvmrc` のバージョン（24）
+`package-lock.json`準拠でインストールする
+
+```bash
+npm ci
+```
+
+### パッケージの追加
+
+**`npm install` ではなく `npx expo install` を使う。**
+SDK に対応したバージョンが選ぶ必要があるため。
+
+```bash
+npx expo install <パッケージ名>
+```
+
+## 起動
+
+### Expo Go
+
+```bash
+ npm run start
+```
+
+- **Expo Go 57 以降、Expo CLI と Expo Go アプリの両方に、同じアカウントでログインしている必要がある**
+- `@shopify/react-native-skia` は Expo Go に同梱されているため development build は不要
+- `.env` を変更したらキャッシュを消して再起動する: `npx expo start -c --tunnel`
+
+### Storybook
+
+`STORYBOOK_ENABLED=true` が付くと、アプリの代わりに Storybook が起動する
+（`npm run storybook:ios` などが設定済み）。web は `--port 6006` で開く。
 
 ## コマンド
 
-いずれも `frontend/` で実行する。リポジトリルートには `package.json` も `tsconfig.json` も無いため、
-ルートから `npx tsc --noEmit` を実行すると frontend が検査されないまま**終了コード 0 で成功したように見える**。
-作業ディレクトリを取り違えないよう、コマンドに `cd frontend` を含めた形で記載する。
+いずれも `frontend/` で実行する。
+リポジトリルートには `package.json` も `tsconfig.json` も無いため、ルートから `npx tsc --noEmit` を実行すると frontend が検査されないまま**終了コード 0 で成功したように見える**。
 
-- 型チェック: `cd frontend && npm run typecheck`
-- Lint: `cd frontend && npm run lint`
-- フォーマット確認: `cd frontend && npm run format:check`（自動修正は `npm run format`）
-- ストーリーのスモークテスト: `cd frontend && npm test`
-  （`src/components/**/*.stories.tsx` を Jest で描画する。詳細は `docs/front-architecture.md`）
-- Storybook: `cd frontend && npm run storybook:ios` / `storybook:android` / `storybook:web`
+| | |
+| --- | --- |
+| 型チェック | `npm run typecheck` |
+| Lint | `npm run lint` |
+| フォーマット | `npm run format:check`（自動修正は `npm run format`） |
+| テスト | `npm test` |
+| Storybook | `npm run storybook:ios` / `storybook:web` |
 
-CI（`.github/workflows/ci.yml`）は PR に対して上の typecheck / lint / format:check / test を
-`frontend/` で実行する。`backend/` 向けのジョブは無い。
+テストは `src/components/**/*.stories.tsx` を Jest で描画するスモークテスト（詳細は `docs/front-architecture.md`）。
+CI（`.github/workflows/ci.yml`）は PR に対して typecheck / lint / format:check / test を `frontend/` で実行する。

@@ -1,4 +1,5 @@
 # たびぽん
+
 <img width="1600" height="900" alt="26" src="https://github.com/user-attachments/assets/29fc2e0b-bdbe-462e-86ad-4333a425a6a4" />
 
 ## プロジェクト概要
@@ -25,7 +26,6 @@
 | 領域 | 使用技術 |
 | --- | --- |
 | フロントエンド | React Native / Expo / TypeScript（expo-camera, expo-sensors, expo-haptics, react-native-reanimated ほか） |
-| バックエンド | Python / FastAPI / OpenCV |
 | DB・ストレージ | Supabase Postgres / Supabase Storage |
 | デプロイ | Railway |
 
@@ -36,40 +36,20 @@
 ```text
 /
 ├── frontend/   # React Native / Expo アプリ (TypeScript)
-├── backend/    # Python / FastAPI サーバー
 ├── docs/       # 仕様書・アーキテクチャドキュメント
 └── design/     # デザインファイル・スタイルガイド
 ```
 
 ## フロントエンド
 
-役割: Expo / React Native アプリを起動します。スマホや Expo Go から画面確認します。
+Expo / React Native アプリを起動方法
+注意：Expo Go 57 以降は、開発モードでアプリを起動する際に Expo CLI と Expo Go アプリの両方へ同じアカウントでログインしている必要があります（詳細: https://expo.dev/changelog/expo-go-57-login）
 
-`@shopify/react-native-skia`（#119）は Expo SDK 57 の Expo Go に同梱されているため、
-development build は不要です（詳細: https://docs.expo.dev/versions/v57.0.0/sdk/skia/）。
-
-なお Expo Go 57 以降は、開発モードでアプリを起動する際に Expo CLI と Expo Go アプリの
-両方へ同じアカウントでログインしている必要があります
-（詳細: https://expo.dev/changelog/expo-go-57-login）。
-
-Railway デプロイ済みバックエンド:
-
-```env
-EXPO_PUBLIC_API_URL=https://progate-20266-oogishima-production.up.railway.app
-```
-
-`frontend/.env` を変更したあとは、Expo をキャッシュクリア付きで再起動してください。
+初回パッケージインストール:
 
 ```bash
 cd frontend
-npx expo start -c --tunnel
-```
-
-初回セットアップ:
-
-```bash
-cd frontend
-npm install expo --legacy-peer-deps && npx expo install
+npm ci
 ```
 
 通常起動:
@@ -79,30 +59,16 @@ cd frontend
 npm run start
 ```
 
-## バックエンド
-
-役割: FastAPI の API サーバーを起動します。スタンプ画像処理や API エンドポイントを担当します。
-
-Railway に設定する環境変数:
-
-```env
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_SERVICE_KEY=your-service-role-key
-```
-
-写真送信時に失敗する場合は、Railway の Variables に上記が入っているか確認してください。古い名前の `SUPABASE_KEY` もコード側では読めますが、基本は `SUPABASE_SERVICE_KEY` に揃えます。
-
-初回セットアップ:
+トンネル起動（公共Wifiなど）：
 
 ```bash
-cd backend
-python -m venv .venv
-.venv/bin/pip install -r requirements.txt
+cd frontend
+npx expo start --tunnel
 ```
 
-通常起動:
+キャッシュクリアして起動：
 
 ```bash
-cd backend
-.venv/bin/uvicorn main:app --reload
+cd frontend
+npx expo start -c
 ```
