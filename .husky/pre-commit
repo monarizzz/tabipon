@@ -1,0 +1,13 @@
+# ステージした差分にフォーマット（自動修正）と Lint をかける。
+# prettier / eslint は frontend/node_modules にしか無く、.prettierignore も
+# frontend/ を基準に解決されるため、frontend/ に降りてから実行する。
+# lint-staged は cwd の外にあるファイルを対象から外すので、これで frontend/ 配下の
+# 差分だけが対象になる。対象の指定は frontend/.lintstagedrc.json にある。
+(cd frontend && npx lint-staged) || exit 1
+
+# 型チェックは差分だけでは回せないため frontend/ 全体を 1 回走らせる。
+# TS / TSX が 1 つもステージされていないコミットではスキップする。
+if git diff --cached --name-only --diff-filter=ACMR | grep -qE '^frontend/.+\.tsx?$'; then
+  echo "▶ typecheck (frontend 全体)"
+  npm --prefix frontend run typecheck || exit 1
+fi
