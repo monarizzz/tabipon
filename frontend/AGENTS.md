@@ -52,13 +52,13 @@ npx expo install <パッケージ名>
 いずれも `frontend/` で実行する。
 リポジトリルートには `package.json` も `tsconfig.json` も無いため、ルートから `npx tsc --noEmit` を実行すると frontend が検査されないまま**終了コード 0 で成功したように見える**。
 
-| | |
-| --- | --- |
-| 型チェック | `npm run typecheck` |
-| Lint | `npm run lint` |
+|              |                                                       |
+| ------------ | ----------------------------------------------------- |
+| 型チェック   | `npm run typecheck`                                   |
+| Lint         | `npm run lint`                                        |
 | フォーマット | `npm run format:check`（自動修正は `npm run format`） |
-| テスト | `npm test` |
-| Storybook | `npm run storybook:ios` / `storybook:web` |
+| テスト       | `npm test`                                            |
+| Storybook    | `npm run storybook:ios` / `storybook:web`             |
 
 テストは `src/components/**/*.stories.tsx` を Jest で描画するスモークテスト（詳細は `docs/front-architecture.md`）。
 CI（`.github/workflows/ci.yml`）は PR に対して typecheck / lint / format:check / test を `frontend/` で実行する。
