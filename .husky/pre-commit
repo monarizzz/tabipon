@@ -6,8 +6,10 @@
 (cd frontend && npx lint-staged) || exit 1
 
 # 型チェックは差分だけでは回せないため frontend/ 全体を 1 回走らせる。
-# TS / TSX が 1 つもステージされていないコミットではスキップする。
-if git diff --cached --name-only --diff-filter=ACMR | grep -qE '^frontend/.+\.tsx?$'; then
+# TS / TSX も tsconfig も 1 つもステージされていないコミットではスキップする。
+# tsconfig は paths や types を持っており、変えると既存コードが壊れうるため含める。
+if git diff --cached --name-only --diff-filter=ACMR |
+  grep -qE '^frontend/.+\.tsx?$|^frontend/([^/]+/)*tsconfig[^/]*\.json$'; then
   echo "▶ typecheck (frontend 全体)"
   npm --prefix frontend run typecheck || exit 1
 fi
