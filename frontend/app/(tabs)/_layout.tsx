@@ -1,17 +1,12 @@
 import { Tabs } from "expo-router";
-import { Camera, Image, User } from "lucide-react-native";
+import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
 import {
-  TabBar,
-  type TabBarIcon,
-} from "@/src/components/common/layout/TabBar/TabBar";
+  TAB_DEFINITIONS,
+  type TabKey,
+} from "@/src/components/common/layout/TabBar/tabDefinitions";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { colors } from "@/src/style/tokens";
 
-const ICONS: Record<string, TabBarIcon> = {
-  index: Camera,
-  album: Image,
-  mypage: User,
-};
+const TAB_BY_KEY = new Map(TAB_DEFINITIONS.map((tab) => [tab.key, tab]));
 
 export default function TabsLayout() {
   const { t } = useTranslation();
@@ -23,13 +18,16 @@ export default function TabsLayout() {
           items={state.routes.map((route, index) => {
             const isFocused = state.index === index;
             const { options } = descriptors[route.key];
+            // 並び・文言・アイコンは TAB_DEFINITIONS に集約してある
+            const definition = TAB_BY_KEY.get(route.name as TabKey);
             return {
               key: route.key,
-              label: (options.title ?? route.name) as string,
-              icon: ICONS[route.name] ?? Camera,
+              label: definition
+                ? t(definition.labelKey)
+                : ((options.title ?? route.name) as string),
+              icon: definition?.icon ?? TAB_DEFINITIONS[0].icon,
               active: isFocused,
-              activeColor:
-                route.name === "mypage" ? colors.textPrimary : colors.primary,
+              activeColor: definition?.activeColor,
               onPress: () => {
                 const event = navigation.emit({
                   type: "tabPress",
@@ -45,9 +43,13 @@ export default function TabsLayout() {
         />
       )}
     >
-      <Tabs.Screen name="index" options={{ title: t("tabs.camera") }} />
-      <Tabs.Screen name="album" options={{ title: t("tabs.album") }} />
-      <Tabs.Screen name="mypage" options={{ title: t("tabs.mypage") }} />
+      {TAB_DEFINITIONS.map((tab) => (
+        <Tabs.Screen
+          key={tab.key}
+          name={tab.key}
+          options={{ title: t(tab.labelKey) }}
+        />
+      ))}
     </Tabs>
   );
 }
