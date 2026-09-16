@@ -360,6 +360,17 @@ describe("deleteOrphanFiles", () => {
     );
   });
 
+  // 元写真は `saveStamp()` が `line_art_path` に載せる行と必ず対で書かれる。
+  // DB を経由せずに `stamp-originals/` へ書く経路があると、その行が無いために
+  // ここで孤児と判定されて消える（#179）。書き込みを一本化した状態を固定する。
+  it("saveStamp が書いた元写真は孤児と判定されない", async () => {
+    const fs = jest.requireActual<typeof import("node:fs")>("node:fs");
+    const saved = await saveStamp(newStamp());
+
+    expect(await deleteOrphanFiles()).toBe(0);
+    expect(fs.existsSync(join(mockDocumentRoot, saved.lineArtPath))).toBe(true);
+  });
+
   it("保存の途中で落ちて残ったファイルを拾える", async () => {
     const fs = jest.requireActual<typeof import("node:fs")>("node:fs");
     const saved = await saveStamp(newStamp());
