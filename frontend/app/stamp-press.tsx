@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { DeviceMotion } from "expo-sensors";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -38,6 +37,8 @@ import { StampOrientationGuide } from "@/src/components/features/camera/StampOri
 import { newStampId, saveStamp } from "@/src/infra/db/stamps";
 import { generateStampPngFromUri } from "@/src/utils/stamp/io";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
+import { useStampPressGesture } from "@/src/utils/stampPress/useStampPressGesture";
+import type { PressGestureFinish } from "@/src/utils/stampPress/pressGesture";
 import { playStampSound } from "@/src/libs/sound";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/style/tokens";
@@ -82,23 +83,11 @@ export default function StampPressScreen() {
   const longPressTriggeredRef = React.useRef(false);
   const stampScale = useSharedValue(1);
   const stampWrapRef = React.useRef<View>(null);
-  const shakeTriggeredRef = React.useRef(false);
-  const stampLiftDetectedRef = React.useRef(false);
-  const stampLiftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
-  const stampDownPeakRef = React.useRef(0);
   // 押した瞬間に決まる演出値。長押しで押した場合は 0 のまま（掠れも傾きも無し）
-  const finishRef = React.useRef({ scratchLevel: 0, tiltAngle: 0 });
-  const currentRotationAlphaRef = React.useRef(0);
-  const referenceAlphaRef = React.useRef<number | null>(null);
-  const stampRotation = useSharedValue(0);
-  const stampAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: stampScale.value },
-      { rotate: `${stampRotation.value}deg` },
-    ],
-  }));
+  const finishRef = React.useRef<PressGestureFinish>({
+    scratchLevel: 0,
+    tiltAngle: 0,
+  });
 
   // 生成と保存をまとめて行い、スタンプ完成画面へ進む。
   //
@@ -160,92 +149,46 @@ export default function StampPressScreen() {
     });
   }, [createAndSave]);
 
-  React.useEffect(() => {
-    DeviceMotion.setUpdateInterval(50);
-    const subscription = DeviceMotion.addListener(
-      ({ acceleration, rotation }) => {
-        if (rotation?.alpha != null) {
-          if (referenceAlphaRef.current === null)
-            referenceAlphaRef.current = rotation.alpha;
-          const relativeAlpha = rotation.alpha - referenceAlphaRef.current;
-          currentRotationAlphaRef.current = relativeAlpha;
-          // -180〜180度に正規化してプレビューをリアルタイム回転
-          let deg = -(relativeAlpha * (180 / Math.PI));
-          if (deg > 180) deg -= 360;
-          if (deg < -180) deg += 360;
-          stampRotation.value = deg;
-        }
-        if (shakeTriggeredRef.current) return;
-
-        const z = acceleration?.z ?? 0;
-
-        // ①持ち上げ検知（z がプラスに振れたら準備OK、800ms以内に押し付けが来なければリセット）
-        if (z > 2) {
-          stampLiftDetectedRef.current = true;
-          stampDownPeakRef.current = 0;
-          if (stampLiftTimerRef.current)
-            clearTimeout(stampLiftTimerRef.current);
-          stampLiftTimerRef.current = setTimeout(() => {
-            stampLiftDetectedRef.current = false;
-          }, 800);
-        }
-
-        // ②持ち上げ後に z < -2 まで下がったら押し付け中とみなしてpeak記録
-        if (
-          stampLiftDetectedRef.current &&
-          z < -2 &&
-          z < stampDownPeakRef.current
-        ) {
-          stampDownPeakRef.current = z;
-        }
-
-        // ③押し付けピーク後にニュートラル(z > -0.5)に戻ったらスタンプ確定（縦持ち方式）
-        if (
-          stampLiftDetectedRef.current &&
-          stampDownPeakRef.current < -2 &&
-          z > -0.5
-        ) {
-          shakeTriggeredRef.current = true;
-          stampLiftDetectedRef.current = false;
-          if (stampLiftTimerRef.current)
-            clearTimeout(stampLiftTimerRef.current);
-          const peak = stampDownPeakRef.current;
-          stampDownPeakRef.current = 0;
-
-          // 弱い押し付け(peak=-2) → scratch=1.0、強い押し付け(peak=-75) → scratch=0.0
-          const scratchLevel = Math.max(
-            0,
-            Math.min(1.0, (peak - -75) / (-2 - -75)),
-          );
-          let tiltAngle = -(currentRotationAlphaRef.current * (180 / Math.PI));
-          if (tiltAngle > 180) tiltAngle -= 360;
-          if (tiltAngle < -180) tiltAngle += 360;
-          runOnJS(setStampPressed)(true);
-          // 生成は押し込みアニメーションの完了後（goToStampDone）に走るので、
-          // このとき決まった値を持ち回す
-          finishRef.current = { scratchLevel, tiltAngle };
-          playStampSound();
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          Vibration.vibrate([0, 40, 30, 80]);
-          cancelAnimation(stampScale);
-          stampScale.value = withSequence(
-            withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
-            withTiming(1.06, {
-              duration: 20,
-              easing: Easing.out(Easing.back(2)),
-            }),
-            withTiming(1, { duration: 120 }, (finished) => {
-              if (finished) runOnJS(goToStampDone)();
-            }),
-          );
-        }
-      },
+  // 「ドン」と押し込んで戻る演出。完了したら生成へ進む。
+  // 振り下ろしと長押しのどちらで押しても同じ動きにする
+  const playPressAnimation = React.useCallback(() => {
+    cancelAnimation(stampScale);
+    stampScale.set(
+      withSequence(
+        withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
+        withTiming(1.06, { duration: 20, easing: Easing.out(Easing.back(2)) }),
+        withTiming(1, { duration: 120 }, (finished) => {
+          if (finished) runOnJS(goToStampDone)();
+        }),
+      ),
     );
-    return () => {
-      subscription.remove();
-      Vibration.cancel();
-    };
   }, [goToStampDone, stampScale]);
+
+  const { rotationDeg, markPressedByLongPress } = useStampPressGesture({
+    onPressed: React.useCallback(
+      (finish: PressGestureFinish) => {
+        setStampPressed(true);
+        // 生成は押し込みアニメーションの完了後（goToStampDone）に走るので、
+        // このとき決まった値を持ち回す
+        finishRef.current = finish;
+        playStampSound();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Vibration.vibrate([0, 40, 30, 80]);
+        playPressAnimation();
+      },
+      [playPressAnimation],
+    ),
+  });
+
+  const stampAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: stampScale.value },
+      { rotate: `${rotationDeg.value}deg` },
+    ],
+  }));
+
+  // 画面を離れるときに押し込み中の振動を止める
+  React.useEffect(() => () => Vibration.cancel(), []);
 
   const handleStampPressIn = () => {
     longPressTriggeredRef.current = false;
@@ -263,24 +206,15 @@ export default function StampPressScreen() {
   };
 
   const handleStampLongPress = () => {
-    if (shakeTriggeredRef.current) return;
-    shakeTriggeredRef.current = true;
+    // 振り下ろしで既に確定していたら二重に押さない
+    if (!markPressedByLongPress()) return;
     longPressTriggeredRef.current = true;
     setStampPressed(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     // 押し込み中の振動を止めて、「ドン」と強めの二段振動を鳴らす
     Vibration.cancel();
     Vibration.vibrate([0, 40, 30, 80]);
-    cancelAnimation(stampScale);
-    stampScale.set(
-      withSequence(
-        withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
-        withTiming(1.06, { duration: 20, easing: Easing.out(Easing.back(2)) }),
-        withTiming(1, { duration: 120 }, (finished) => {
-          if (finished) runOnJS(goToStampDone)();
-        }),
-      ),
-    );
+    playPressAnimation();
   };
 
   const handleStampPressOut = () => {
