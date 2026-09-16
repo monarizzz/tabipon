@@ -32,17 +32,11 @@ import { colors, radii, spacing } from "@/src/style/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/common/StampInfoCard/StampInfoCard";
 import { EditFieldSheet } from "@/src/components/common/EditFieldSheet/EditFieldSheet";
-import { formatDateTime } from "@/src/utils/datetime/format";
+import { formatIsoDateTime, parseIso } from "@/src/utils/datetime/format";
 
-function formatCapturedAt(isoDate: string): string {
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return "";
-  return formatDateTime(date);
-}
-
+// 撮影日時が壊れている場合でもピッカーは開けるようにし、現在時刻から選ばせる
 function parseCapturedAt(isoDate: string): Date {
-  const date = new Date(isoDate);
-  return Number.isNaN(date.getTime()) ? new Date() : date;
+  return parseIso(isoDate) ?? new Date();
 }
 
 function normalizeOptionalText(value: string): string | null {
@@ -365,7 +359,7 @@ export default function StampDetailScreen() {
         longitude={stampLongitude}
       />
       <StampInfoCard
-        date={formatCapturedAt(capturedAt)}
+        date={formatIsoDateTime(capturedAt)}
         location={location}
         memo={memo}
         onPressDate={openDateEditor}
