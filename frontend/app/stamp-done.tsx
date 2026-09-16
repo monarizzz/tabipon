@@ -28,6 +28,7 @@ import {
   type Stamp,
 } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { formatIsoDateTime } from "@/src/utils/datetime/format";
 import { colors, spacing } from "@/src/style/tokens";
 
 function normalizeOptionalText(value: string): string | null {
@@ -36,11 +37,6 @@ function normalizeOptionalText(value: string): string | null {
 }
 
 type EditingField = "spotName" | "location" | "memo" | null;
-
-function formatDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
-}
 
 export default function StampDoneScreen() {
   const router = useRouter();
@@ -225,7 +221,7 @@ export default function StampDoneScreen() {
           )}
           <View style={styles.actionsAnchor}>
             <StampInfoCard
-              date={stamp ? formatDate(stamp.capturedAt) : ""}
+              date={stamp ? formatIsoDateTime(stamp.capturedAt) : ""}
               location={location}
               memo={memo}
               onPressLocation={openLocationEditor}
