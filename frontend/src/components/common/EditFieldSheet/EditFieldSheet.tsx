@@ -44,7 +44,7 @@ export function EditFieldSheet({
   onSave,
   ...field
 }: Props) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   // react-native の TextInput ではなく BottomSheetTextInput の ref 型を使う。
   // 後者は react-native-gesture-handler の TextInput を包んでおり、両者は別の型
   const inputRef =
@@ -122,7 +122,10 @@ export function EditFieldSheet({
         <DateTimePicker
           value={field.value}
           mode="datetime"
-          display="spinner"
+          // ホイールに日付と時刻を詰めると列が細くなって掴めない。
+          // カレンダー＋時刻入力なら、どちらもタップで選べる
+          display="inline"
+          locale={locale}
           onChange={(_event, selectedDate) => {
             if (selectedDate) {
               field.onChangeValue(selectedDate);
@@ -178,7 +181,9 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   datePicker: {
-    alignSelf: "center",
+    // カレンダーはシートの幅いっぱいに置く。中央寄せだと親の幅からはみ出し、
+    // はみ出た部分にタップが届かなくなる
+    alignSelf: "stretch",
     marginBottom: spacing.xl,
   },
   saveButton: {
