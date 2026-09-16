@@ -8,7 +8,8 @@
 # 型チェックは差分だけでは回せないため frontend/ 全体を 1 回走らせる。
 # TS / TSX も tsconfig も 1 つもステージされていないコミットではスキップする。
 # tsconfig は paths や types を持っており、変えると既存コードが壊れうるため含める。
-if git diff --cached --name-only --diff-filter=ACMR |
+# 削除（D）も含める。import 元が残ったままの削除は型エラーになるため。
+if git diff --cached --name-only --diff-filter=ACMRD |
   grep -qE '^frontend/.+\.tsx?$|^frontend/([^/]+/)*tsconfig[^/]*\.json$'; then
   echo "▶ typecheck (frontend 全体)"
   npm --prefix frontend run typecheck || exit 1
