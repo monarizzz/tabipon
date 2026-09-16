@@ -3,7 +3,11 @@ import { Directory, File, Paths } from "expo-file-system";
 import { openDatabaseSync } from "expo-sqlite";
 
 import { DATABASE_NAME } from "@/src/infra/db/migrations";
-import type { StampFrame } from "@/src/utils/stamp/types";
+import {
+  DEFAULT_STAMP_FRAME,
+  isStampFrame,
+  type StampFrame,
+} from "@/src/utils/stamp/types";
 
 /**
  * 画面から呼ぶ素の関数として書くため、`useSQLiteContext()`（フック）ではなく
@@ -114,7 +118,9 @@ function toStamp(row: StampRow): Stamp {
             detail: row.address_detail,
           },
     color: row.color,
-    frameId: row.frame_id as StampFrame,
+    // 知らない識別子（廃止済みのフレームなど）が入っていても描画側が分岐を持たないので、
+    // 型どおりの値まで読み出しの時点で寄せる
+    frameId: isStampFrame(row.frame_id) ? row.frame_id : DEFAULT_STAMP_FRAME,
     scratchLevel: row.scratch_level,
     tiltAngle: row.tilt_angle,
   };

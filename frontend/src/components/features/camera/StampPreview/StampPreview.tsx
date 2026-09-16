@@ -57,10 +57,9 @@ import {
   renderStampFromLineArt,
 } from "@/src/utils/stamp/pipeline";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
-import type { StampFrame } from "@/src/utils/stamp/types";
+import { STAMP_FRAMES, type StampFrame } from "@/src/utils/stamp/types";
 
 const STAMP_COLORS: readonly string[] = STAMP_INK_COLORS;
-const STAMP_FRAMES: StampFrame[] = ["simple", "classic", "dash", "wave"];
 
 /**
  * 元写真。平等院（京都府宇治市）。Wikimedia Commons の CC0 1.0、著作者 GiveMeMollusks。

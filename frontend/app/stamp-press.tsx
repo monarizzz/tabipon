@@ -20,18 +20,16 @@ import Animated, {
   Easing,
   runOnJS,
 } from "react-native-reanimated";
-import { Camera, Image, Palette, User } from "lucide-react-native";
+import { Palette } from "lucide-react-native";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
+import { useTabBarItems } from "@/src/components/common/layout/TabBar/useTabBarItems";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
-import {
-  API_FRAME_BY_ID,
-  FRAME_STYLE_OPTIONS,
-} from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+import { FRAME_STYLE_OPTIONS } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,
@@ -55,6 +53,10 @@ export default function StampPressScreen() {
   const [helpVisible, setHelpVisible] = React.useState(false);
   const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
+  // 押す前のスタンプを捨てることになるので、遷移前に確認ダイアログを出す
+  const tabItems = useTabBarItems(
+    React.useCallback((tab) => setPendingTab(tab.href), []),
+  );
   // 確定済みのデザイン。スタンプを押したときに生成へ渡すのはこちら
   const [frameStyleId, setFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
@@ -113,10 +115,9 @@ export default function StampPressScreen() {
       try {
         const id = newStampId();
         const { scratchLevel, tiltAngle } = finishRef.current;
-        const frameId = API_FRAME_BY_ID[frameStyleId] ?? "classic";
         const stampPng = await generateStampPngFromUri(uri, {
           color,
-          frame: frameId,
+          frame: frameStyleId,
           scratchLevel,
           tiltAngle,
           seed: seedFromStampId(id),
@@ -131,7 +132,7 @@ export default function StampPressScreen() {
               ? { latitude: Number(latitude), longitude: Number(longitude) }
               : null,
           color,
-          frameId,
+          frameId: frameStyleId,
           scratchLevel,
           tiltAngle,
         });
@@ -312,12 +313,7 @@ export default function StampPressScreen() {
             {stampPressed ? (
               <Stamp imageUri={uri} />
             ) : (
-              <StampOrientationGuide
-                color={color}
-                frameId={
-                  frameStyleId as "classic" | "vintage" | "minimal" | "wave"
-                }
-              />
+              <StampOrientationGuide color={color} frameId={frameStyleId} />
             )}
           </Animated.View>
         </Pressable>
@@ -329,31 +325,7 @@ export default function StampPressScreen() {
           icon={<Palette size={14} color={colors.secondary} />}
         />
       </View>
-      <TabBar
-        items={[
-          {
-            key: "index",
-            label: t("tabs.camera"),
-            icon: Camera,
-            active: true,
-            onPress: () => setPendingTab("/(tabs)"),
-          },
-          {
-            key: "album",
-            label: t("tabs.album"),
-            icon: Image,
-            active: false,
-            onPress: () => setPendingTab("/(tabs)/album"),
-          },
-          {
-            key: "mypage",
-            label: t("tabs.mypage"),
-            icon: User,
-            active: false,
-            onPress: () => setPendingTab("/(tabs)/mypage"),
-          },
-        ]}
-      />
+      <TabBar items={tabItems} />
       <StampHelp visible={helpVisible} onClose={() => setHelpVisible(false)} />
       <DesignChangeSheet
         visible={designSheetVisible}

@@ -4,11 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Sharing from "expo-sharing";
 import { DesignChangePanel } from "@/src/components/features/album/stamp-rally/DesignChangePanel/DesignChangePanel";
-import {
-  FRAME_STYLE_OPTIONS,
-  API_FRAME_BY_ID,
-  FRAME_ID_BY_API,
-} from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+import { FRAME_STYLE_OPTIONS } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,
@@ -80,6 +76,12 @@ export default function StampDetailScreen() {
   const [selectedColor, setSelectedColor] = React.useState(DEFAULT_STAMP_COLOR);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
+  const [spotName, setSpotName] = React.useState("");
+  const [date, setDate] = React.useState("");
+  const [location, setLocation] = React.useState("");
+  const [memo, setMemo] = React.useState("");
+  const [detailUpdating, setDetailUpdating] = React.useState(false);
+
   // 表示中のスタンプ画像の uri（file://）。共有もこの値を使う
   const [currentImageUri, setCurrentImageUri] = React.useState("");
   // デザイン変更しても画像のパスは変わらないため、同じ uri のままだと
@@ -103,9 +105,7 @@ export default function StampDetailScreen() {
       setCurrentImageUri(stampImageUri(loaded));
       setOriginalUri(originalPhotoUri(loaded));
       setSelectedColor(loaded.color);
-      setSelectedFrameStyleId(
-        FRAME_ID_BY_API[loaded.frameId] ?? FRAME_STYLE_OPTIONS[0].id,
-      );
+      setSelectedFrameStyleId(loaded.frameId);
       setSpotName(loaded.title ?? "");
       setMemo(loaded.memo ?? "");
       setDate(formatDateParam(loaded.capturedAt));
@@ -115,11 +115,14 @@ export default function StampDetailScreen() {
   // デザイン変更中は選択中の色/フレームでプレビューを生成する(作成画面と同じ cancelled フラグ方式)
   React.useEffect(() => {
     if (!designMode || !originalUri) {
+      // プレビューの生成を止めたときの後始末。描画は外部（Skia）で走らせており、
+      // 捨てる操作をレンダー側に寄せられないためここで消す
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPreviewUri(null);
       return;
     }
     const color = selectedColor;
-    const frame = API_FRAME_BY_ID[selectedFrameStyleId] ?? "classic";
+    const frame = selectedFrameStyleId;
     let cancelled = false;
     setPreviewLoading(true);
     // 掠れの seed は id から導くので、色やフレームを変えても模様は変わらない
@@ -171,17 +174,15 @@ export default function StampDetailScreen() {
     // 残したままだと、開き直したときに実際のスタンプと違う選択が出る
     if (stamp) {
       setSelectedColor(stamp.color);
-      setSelectedFrameStyleId(
-        FRAME_ID_BY_API[stamp.frameId] ?? FRAME_STYLE_OPTIONS[0].id,
-      );
+      setSelectedFrameStyleId(stamp.frameId);
     }
   };
 
   const handleConfirmDesign = async () => {
     if (!id || !originalUri || designUpdating) return;
     const color = selectedColor;
-    const frame = API_FRAME_BY_ID[selectedFrameStyleId];
-    if (!color || !frame) return;
+    const frame = selectedFrameStyleId;
+    if (!color) return;
     setDesignUpdating(true);
     try {
       const stampPng = await generateStampPngFromUri(originalUri, {
@@ -208,12 +209,6 @@ export default function StampDetailScreen() {
       setDesignUpdating(false);
     }
   };
-
-  const [spotName, setSpotName] = React.useState("");
-  const [date, setDate] = React.useState("");
-  const [location, setLocation] = React.useState("");
-  const [memo, setMemo] = React.useState("");
-  const [detailUpdating, setDetailUpdating] = React.useState(false);
 
   React.useEffect(() => {
     if (!stampLatitude || !stampLongitude) return;

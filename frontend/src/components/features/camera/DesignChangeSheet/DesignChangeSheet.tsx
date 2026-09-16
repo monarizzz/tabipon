@@ -8,9 +8,10 @@ import { CommonButton } from "@/src/components/common/CommonButton/CommonButton"
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import type { TranslationKey } from "@/src/libs/i18n/types/i18n";
 import { colors, typography, spacing } from "@/src/style/tokens";
+import type { StampFrame } from "@/src/utils/stamp/types";
 
 export type FrameStyleOption = {
-  id: string;
+  id: StampFrame;
   /** design.frameClassic のような翻訳キー。表示時に t() で解決する。 */
   label: TranslationKey;
   preview: (selected: boolean) => React.ReactNode;
@@ -20,8 +21,8 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   frameStyles: FrameStyleOption[];
-  selectedFrameStyleId: string;
-  onSelectFrameStyle: (id: string) => void;
+  selectedFrameStyleId: StampFrame;
+  onSelectFrameStyle: (id: StampFrame) => void;
   colorOptions: readonly string[];
   selectedColor: string;
   onSelectColor: (color: string) => void;
