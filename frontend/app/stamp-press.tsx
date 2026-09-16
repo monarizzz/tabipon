@@ -28,10 +28,7 @@ import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog"
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
-import {
-  API_FRAME_BY_ID,
-  FRAME_STYLE_OPTIONS,
-} from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+import { FRAME_STYLE_OPTIONS } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,
@@ -113,10 +110,9 @@ export default function StampPressScreen() {
       try {
         const id = newStampId();
         const { scratchLevel, tiltAngle } = finishRef.current;
-        const frameId = API_FRAME_BY_ID[frameStyleId] ?? "classic";
         const stampPng = await generateStampPngFromUri(uri, {
           color,
-          frame: frameId,
+          frame: frameStyleId,
           scratchLevel,
           tiltAngle,
           seed: seedFromStampId(id),
@@ -131,7 +127,7 @@ export default function StampPressScreen() {
               ? { latitude: Number(latitude), longitude: Number(longitude) }
               : null,
           color,
-          frameId,
+          frameId: frameStyleId,
           scratchLevel,
           tiltAngle,
         });
@@ -317,12 +313,7 @@ export default function StampPressScreen() {
             {stampPressed ? (
               <Stamp imageUri={uri} />
             ) : (
-              <StampOrientationGuide
-                color={color}
-                frameId={
-                  frameStyleId as "classic" | "vintage" | "minimal" | "wave"
-                }
-              />
+              <StampOrientationGuide color={color} frameId={frameStyleId} />
             )}
           </Animated.View>
         </Pressable>
