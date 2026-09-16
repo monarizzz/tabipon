@@ -82,7 +82,7 @@ export const ja = {
     editTitlePlaceholder: "スポット名を入力",
     editPlace: "場所を編集",
     editPlacePlaceholder: "場所を入力",
-    editDate: "日付を編集",
+    editDate: "日時を編集",
     editMemo: "メモを編集",
     editMemoPlaceholder: "メモを入力",
     labelDate: "日付",

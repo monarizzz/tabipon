@@ -63,11 +63,11 @@ export const TextField = {
   },
 };
 
-export const DateField = {
+export const DateTimeField = {
   args: {
     visible: false,
-    title: "日付を編集",
-    mode: "date",
+    title: "日時を編集",
+    mode: "datetime",
     value: new Date(),
     onChangeValue: fn(),
     onClose: fn(),
@@ -76,7 +76,7 @@ export const DateField = {
   render: function Render(args: EditFieldSheetProps) {
     const [visible, setVisible] = React.useState(false);
     const [value, setValue] = React.useState(
-      args.mode === "date" ? args.value : new Date(),
+      args.mode === "datetime" ? args.value : new Date(),
     );
 
     return (
@@ -89,11 +89,11 @@ export const DateField = {
             borderRadius: 12,
           }}
         >
-          <Text style={{ color: colors.textPrimary }}>日付を編集する</Text>
+          <Text style={{ color: colors.textPrimary }}>日時を編集する</Text>
         </TouchableOpacity>
         <EditFieldSheet
           {...args}
-          mode="date"
+          mode="datetime"
           visible={visible}
           value={value}
           onChangeValue={setValue}

@@ -32,23 +32,17 @@ import { colors, radii, spacing } from "@/src/style/tokens";
 import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/components/common/StampInfoCard/StampInfoCard";
 import { EditFieldSheet } from "@/src/components/common/EditFieldSheet/EditFieldSheet";
+import { formatDateTime } from "@/src/utils/datetime/format";
 
-function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-  return `${year}/${month}/${day}`;
-}
-
-function formatDateParam(isoDate: string): string {
+function formatCapturedAt(isoDate: string): string {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return "";
-  return formatDate(date);
+  return formatDateTime(date);
 }
 
-function parseDate(value: string): Date {
-  const [year, month, day] = value.split(/[/.]/).map(Number);
-  return new Date(year, (month || 1) - 1, day || 1);
+function parseCapturedAt(isoDate: string): Date {
+  const date = new Date(isoDate);
+  return Number.isNaN(date.getTime()) ? new Date() : date;
 }
 
 function normalizeOptionalText(value: string): string | null {
@@ -77,7 +71,8 @@ export default function StampDetailScreen() {
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
   const [spotName, setSpotName] = React.useState("");
-  const [date, setDate] = React.useState("");
+  // 撮影日時は ISO 文字列のまま保持する。表示のときだけ整形する
+  const [capturedAt, setCapturedAt] = React.useState("");
   const [location, setLocation] = React.useState("");
   const [memo, setMemo] = React.useState("");
   const [detailUpdating, setDetailUpdating] = React.useState(false);
@@ -108,7 +103,7 @@ export default function StampDetailScreen() {
       setSelectedFrameStyleId(loaded.frameId);
       setSpotName(loaded.title ?? "");
       setMemo(loaded.memo ?? "");
-      setDate(formatDateParam(loaded.capturedAt));
+      setCapturedAt(loaded.capturedAt);
     });
   }, [id]);
 
@@ -228,7 +223,7 @@ export default function StampDetailScreen() {
   const [draftSpotName, setDraftSpotName] = React.useState(spotName);
   const [draftLocation, setDraftLocation] = React.useState(location);
   const [draftDate, setDraftDate] = React.useState(() =>
-    date ? parseDate(date) : new Date(),
+    parseCapturedAt(capturedAt),
   );
   const [draftMemo, setDraftMemo] = React.useState(memo);
 
@@ -237,7 +232,7 @@ export default function StampDetailScreen() {
     setEditingField("spotName");
   };
   const openDateEditor = () => {
-    setDraftDate(date ? parseDate(date) : new Date());
+    setDraftDate(parseCapturedAt(capturedAt));
     setEditingField("date");
   };
   const openLocationEditor = () => {
@@ -295,7 +290,7 @@ export default function StampDetailScreen() {
       const updated = await updateStamp(id, {
         capturedAt: draftDate.toISOString(),
       });
-      setDate(formatDateParam(updated.capturedAt));
+      setCapturedAt(updated.capturedAt);
       closeEditor();
     } catch (error) {
       console.error("[stamp-detail] failed to update date", error);
@@ -370,7 +365,7 @@ export default function StampDetailScreen() {
         longitude={stampLongitude}
       />
       <StampInfoCard
-        date={date}
+        date={formatCapturedAt(capturedAt)}
         location={location}
         memo={memo}
         onPressDate={openDateEditor}
@@ -443,7 +438,7 @@ export default function StampDetailScreen() {
         visible={editingField === "date"}
         onClose={closeEditor}
         title={t("stampDetail.editDate")}
-        mode="date"
+        mode="datetime"
         value={draftDate}
         onChangeValue={setDraftDate}
         onSave={handleSaveDate}
