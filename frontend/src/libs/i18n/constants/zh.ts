@@ -83,7 +83,7 @@ export const zh: Translations = {
     editTitlePlaceholder: "请输入地点名称",
     editPlace: "编辑地点",
     editPlacePlaceholder: "请输入地点",
-    editDate: "编辑日期",
+    editDate: "编辑日期时间",
     editMemo: "编辑备注",
     editMemoPlaceholder: "请输入备注",
     labelDate: "日期",

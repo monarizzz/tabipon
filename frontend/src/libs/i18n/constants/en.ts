@@ -84,7 +84,7 @@ export const en: Translations = {
     editTitlePlaceholder: "Enter a spot name",
     editPlace: "Edit place",
     editPlacePlaceholder: "Enter a place",
-    editDate: "Edit date",
+    editDate: "Edit date and time",
     editMemo: "Edit memo",
     editMemoPlaceholder: "Enter a memo",
     labelDate: "Date",

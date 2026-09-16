@@ -83,7 +83,7 @@ export const ko: Translations = {
     editTitlePlaceholder: "장소 이름 입력",
     editPlace: "장소 편집",
     editPlacePlaceholder: "장소 입력",
-    editDate: "날짜 편집",
+    editDate: "날짜·시간 편집",
     editMemo: "메모 편집",
     editMemoPlaceholder: "메모 입력",
     labelDate: "날짜",
