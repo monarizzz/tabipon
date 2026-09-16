@@ -1,9 +1,9 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
-import { Camera, Image, User } from "lucide-react-native";
 import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
+import { useTabBarItems } from "@/src/components/common/layout/TabBar/useTabBarItems";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
 import {
   PhotoCropArea,
@@ -21,6 +21,10 @@ export default function PhotoAdjustScreen() {
   const [zoom, setZoom] = React.useState(0);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
   const cropAreaRef = React.useRef<PhotoCropAreaHandle>(null);
+  // 調整中の内容を捨てることになるので、遷移前に確認ダイアログを出す
+  const tabItems = useTabBarItems(
+    React.useCallback((tab) => setPendingTab(tab.href), []),
+  );
 
   return (
     <View style={styles.container}>
@@ -55,31 +59,7 @@ export default function PhotoAdjustScreen() {
           });
         }}
       />
-      <TabBar
-        items={[
-          {
-            key: "index",
-            label: t("tabs.camera"),
-            icon: Camera,
-            active: true,
-            onPress: () => setPendingTab("/(tabs)"),
-          },
-          {
-            key: "album",
-            label: t("tabs.album"),
-            icon: Image,
-            active: false,
-            onPress: () => setPendingTab("/(tabs)/album"),
-          },
-          {
-            key: "mypage",
-            label: t("tabs.mypage"),
-            icon: User,
-            active: false,
-            onPress: () => setPendingTab("/(tabs)/mypage"),
-          },
-        ]}
-      />
+      <TabBar items={tabItems} />
       <CommonDialog
         visible={pendingTab !== null}
         title={t("discardDialog.title")}

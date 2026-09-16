@@ -20,10 +20,11 @@ import Animated, {
   Easing,
   runOnJS,
 } from "react-native-reanimated";
-import { Camera, Image, Palette, User } from "lucide-react-native";
+import { Palette } from "lucide-react-native";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
+import { useTabBarItems } from "@/src/components/common/layout/TabBar/useTabBarItems";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
@@ -52,6 +53,10 @@ export default function StampPressScreen() {
   const [helpVisible, setHelpVisible] = React.useState(false);
   const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
+  // 押す前のスタンプを捨てることになるので、遷移前に確認ダイアログを出す
+  const tabItems = useTabBarItems(
+    React.useCallback((tab) => setPendingTab(tab.href), []),
+  );
   // 確定済みのデザイン。スタンプを押したときに生成へ渡すのはこちら
   const [frameStyleId, setFrameStyleId] = React.useState(
     FRAME_STYLE_OPTIONS[0].id,
@@ -249,8 +254,7 @@ export default function StampPressScreen() {
     Vibration.vibrate(500);
     cancelAnimation(stampScale);
     // 長押し判定時間(500ms)にかけてゆっくり沈み込ませる
-    // SharedValue は .value への代入で更新するのが Reanimated の API。
-    // react-hooks/immutability はこれを通常の再代入として見てしまう
+    // Reanimated の SharedValue への代入。react-hooks/immutability は検知できない
     // eslint-disable-next-line react-hooks/immutability
     stampScale.value = withTiming(0.82, {
       duration: 500,
@@ -268,8 +272,6 @@ export default function StampPressScreen() {
     Vibration.cancel();
     Vibration.vibrate([0, 40, 30, 80]);
     cancelAnimation(stampScale);
-    // SharedValue は .value への代入で更新するのが Reanimated の API。
-    // react-hooks/immutability はこれを通常の再代入として見てしまう
     // eslint-disable-next-line react-hooks/immutability
     stampScale.value = withSequence(
       withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
@@ -288,8 +290,6 @@ export default function StampPressScreen() {
     // 長押し確定前に離した場合は振動を止めて元の大きさへ戻す
     Vibration.cancel();
     cancelAnimation(stampScale);
-    // SharedValue は .value への代入で更新するのが Reanimated の API。
-    // react-hooks/immutability はこれを通常の再代入として見てしまう
     // eslint-disable-next-line react-hooks/immutability
     stampScale.value = withSpring(1, { damping: 14, stiffness: 180 });
   };
@@ -325,31 +325,7 @@ export default function StampPressScreen() {
           icon={<Palette size={14} color={colors.secondary} />}
         />
       </View>
-      <TabBar
-        items={[
-          {
-            key: "index",
-            label: t("tabs.camera"),
-            icon: Camera,
-            active: true,
-            onPress: () => setPendingTab("/(tabs)"),
-          },
-          {
-            key: "album",
-            label: t("tabs.album"),
-            icon: Image,
-            active: false,
-            onPress: () => setPendingTab("/(tabs)/album"),
-          },
-          {
-            key: "mypage",
-            label: t("tabs.mypage"),
-            icon: User,
-            active: false,
-            onPress: () => setPendingTab("/(tabs)/mypage"),
-          },
-        ]}
-      />
+      <TabBar items={tabItems} />
       <StampHelp visible={helpVisible} onClose={() => setHelpVisible(false)} />
       <DesignChangeSheet
         visible={designSheetVisible}
