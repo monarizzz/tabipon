@@ -253,6 +253,8 @@ export default function StampPressScreen() {
     Vibration.vibrate(500);
     cancelAnimation(stampScale);
     // 長押し判定時間(500ms)にかけてゆっくり沈み込ませる
+    // Reanimated の SharedValue への代入。react-hooks/immutability は検知できない
+    // eslint-disable-next-line react-hooks/immutability
     stampScale.value = withTiming(0.82, {
       duration: 500,
       easing: Easing.out(Easing.quad),
@@ -269,6 +271,7 @@ export default function StampPressScreen() {
     Vibration.cancel();
     Vibration.vibrate([0, 40, 30, 80]);
     cancelAnimation(stampScale);
+    // eslint-disable-next-line react-hooks/immutability
     stampScale.value = withSequence(
       withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
       withTiming(1.06, { duration: 20, easing: Easing.out(Easing.back(2)) }),
@@ -286,6 +289,7 @@ export default function StampPressScreen() {
     // 長押し確定前に離した場合は振動を止めて元の大きさへ戻す
     Vibration.cancel();
     cancelAnimation(stampScale);
+    // eslint-disable-next-line react-hooks/immutability
     stampScale.value = withSpring(1, { damping: 14, stiffness: 180 });
   };
 
