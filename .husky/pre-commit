@@ -1,0 +1,18 @@
+# ステージした差分にフォーマット（自動修正）と Lint をかける。
+# prettier / eslint は frontend/node_modules にしか無く、.prettierignore も
+# frontend/ を基準に解決されるため、frontend/ に降りてから実行する。
+# lint-staged は cwd の外にあるファイルを対象から外すので、これで frontend/ 配下の
+# 差分だけが対象になる。対象の指定は frontend/.lintstagedrc.json にある。
+# --no-install: ローカルに lint-staged が無いときにレジストリから取得させない。
+# ルートで npm ci していない状態では、取りに行かずその場で失敗させる。
+(cd frontend && npx --no-install lint-staged) || exit 1
+
+# 型チェックは差分だけでは回せないため frontend/ 全体を 1 回走らせる。
+# TS / TSX も tsconfig も 1 つもステージされていないコミットではスキップする。
+# tsconfig は paths や types を持っており、変えると既存コードが壊れうるため含める。
+# 削除（D）も含める。import 元が残ったままの削除は型エラーになるため。
+if git diff --cached --name-only --diff-filter=ACMRD |
+  grep -qE '^frontend/.+\.tsx?$|^frontend/([^/]+/)*tsconfig[^/]*\.json$'; then
+  echo "▶ typecheck (frontend 全体)"
+  npm --prefix frontend run typecheck || exit 1
+fi
