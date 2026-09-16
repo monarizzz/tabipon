@@ -28,10 +28,7 @@ import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog"
 import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
 import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
-import {
-  API_FRAME_BY_ID,
-  FRAME_STYLE_OPTIONS,
-} from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+import { FRAME_STYLE_OPTIONS } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,
@@ -113,10 +110,9 @@ export default function StampPressScreen() {
       try {
         const id = newStampId();
         const { scratchLevel, tiltAngle } = finishRef.current;
-        const frameId = API_FRAME_BY_ID[frameStyleId] ?? "classic";
         const stampPng = await generateStampPngFromUri(uri, {
           color,
-          frame: frameId,
+          frame: frameStyleId,
           scratchLevel,
           tiltAngle,
           seed: seedFromStampId(id),
@@ -131,7 +127,7 @@ export default function StampPressScreen() {
               ? { latitude: Number(latitude), longitude: Number(longitude) }
               : null,
           color,
-          frameId,
+          frameId: frameStyleId,
           scratchLevel,
           tiltAngle,
         });
@@ -253,6 +249,9 @@ export default function StampPressScreen() {
     Vibration.vibrate(500);
     cancelAnimation(stampScale);
     // 長押し判定時間(500ms)にかけてゆっくり沈み込ませる
+    // SharedValue は .value への代入で更新するのが Reanimated の API。
+    // react-hooks/immutability はこれを通常の再代入として見てしまう
+    // eslint-disable-next-line react-hooks/immutability
     stampScale.value = withTiming(0.82, {
       duration: 500,
       easing: Easing.out(Easing.quad),
@@ -269,6 +268,9 @@ export default function StampPressScreen() {
     Vibration.cancel();
     Vibration.vibrate([0, 40, 30, 80]);
     cancelAnimation(stampScale);
+    // SharedValue は .value への代入で更新するのが Reanimated の API。
+    // react-hooks/immutability はこれを通常の再代入として見てしまう
+    // eslint-disable-next-line react-hooks/immutability
     stampScale.value = withSequence(
       withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
       withTiming(1.06, { duration: 20, easing: Easing.out(Easing.back(2)) }),
@@ -286,6 +288,9 @@ export default function StampPressScreen() {
     // 長押し確定前に離した場合は振動を止めて元の大きさへ戻す
     Vibration.cancel();
     cancelAnimation(stampScale);
+    // SharedValue は .value への代入で更新するのが Reanimated の API。
+    // react-hooks/immutability はこれを通常の再代入として見てしまう
+    // eslint-disable-next-line react-hooks/immutability
     stampScale.value = withSpring(1, { damping: 14, stiffness: 180 });
   };
 
@@ -308,12 +313,7 @@ export default function StampPressScreen() {
             {stampPressed ? (
               <Stamp imageUri={uri} />
             ) : (
-              <StampOrientationGuide
-                color={color}
-                frameId={
-                  frameStyleId as "classic" | "vintage" | "minimal" | "wave"
-                }
-              />
+              <StampOrientationGuide color={color} frameId={frameStyleId} />
             )}
           </Animated.View>
         </Pressable>

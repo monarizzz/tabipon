@@ -1,23 +1,22 @@
 import React from "react";
 import { View } from "react-native";
-
-type FrameId = "classic" | "vintage" | "minimal" | "wave";
+import type { StampFrame } from "@/src/utils/stamp/types";
 
 type Props = {
   size?: number;
   color: string;
-  frameId: FrameId;
+  frameId: StampFrame;
 };
 
 export function StampOrientationGuide({ size = 260, color, frameId }: Props) {
   const pad = 8;
   const outerSize = size - pad * 2;
   const outerRadius = outerSize / 2;
-  const outerBorderWidth = frameId === "minimal" ? 2 : 8;
+  const outerBorderWidth = frameId === "simple" ? 2 : 8;
   const innerInset = 30;
   const innerSize = outerSize - innerInset * 2;
   const innerRadius = innerSize / 2;
-  const showInnerRing = frameId === "classic" || frameId === "vintage";
+  const showInnerRing = frameId === "classic" || frameId === "dash";
 
   // ウェーブフレームの4方向ドット位置
   const waveDots =
@@ -50,11 +49,11 @@ export function StampOrientationGuide({ size = 260, color, frameId }: Props) {
           borderRadius: outerRadius,
           borderWidth: outerBorderWidth,
           borderColor: color,
-          borderStyle: frameId === "vintage" ? "dashed" : "solid",
+          borderStyle: frameId === "dash" ? "dashed" : "solid",
         }}
       />
 
-      {/* 内枠（classic / vintage） */}
+      {/* 内枠（classic / dash） */}
       {showInnerRing && (
         <View
           style={{
