@@ -4,13 +4,11 @@ import { colors } from "@/src/style/tokens";
 import type { StampFrame } from "@/src/utils/stamp/types";
 import type { FrameStyleOption } from "./DesignChangeSheet";
 
-type FrameThumbVariant = "classic" | "vintage" | "minimal" | "wave";
-
 function FrameThumb({
   variant,
   color = colors.textPlaceholder,
 }: {
-  variant: FrameThumbVariant;
+  variant: StampFrame;
   color?: string;
 }) {
   const dot = (x: number, y: number) => (
@@ -37,12 +35,12 @@ function FrameThumb({
           width: 44,
           height: 44,
           borderRadius: 22,
-          borderWidth: variant === "minimal" ? 1 : 2.5,
+          borderWidth: variant === "simple" ? 1 : 2.5,
           borderColor: color,
-          borderStyle: variant === "vintage" ? "dashed" : "solid",
+          borderStyle: variant === "dash" ? "dashed" : "solid",
         }}
       />
-      {/* API上の classic (二重丸) に対応するプレビュー */}
+      {/* classic は二重丸 */}
       {variant === "classic" && (
         <View
           style={{
@@ -81,7 +79,7 @@ function FrameThumb({
   );
 }
 
-function makePreview(variant: FrameThumbVariant) {
+function makePreview(variant: StampFrame) {
   // 返しているのは props ではなく selected: boolean を受け取る描画関数(render prop)。
   // React コンポーネントではないので displayName は付けられない
   // eslint-disable-next-line react/display-name
@@ -93,6 +91,7 @@ function makePreview(variant: FrameThumbVariant) {
   );
 }
 
+// 表示名を持つのは label（翻訳キー）だけ。id は描画側と同じ StampFrame をそのまま使う
 export const FRAME_STYLE_OPTIONS: FrameStyleOption[] = [
   {
     id: "classic",
@@ -100,29 +99,14 @@ export const FRAME_STYLE_OPTIONS: FrameStyleOption[] = [
     preview: makePreview("classic"),
   },
   {
-    id: "vintage",
+    id: "dash",
     label: "design.frameVintage",
-    preview: makePreview("vintage"),
+    preview: makePreview("dash"),
   },
   {
-    id: "minimal",
+    id: "simple",
     label: "design.frameMinimal",
-    preview: makePreview("minimal"),
+    preview: makePreview("simple"),
   },
   { id: "wave", label: "design.frameWave", preview: makePreview("wave") },
 ];
-
-export const API_FRAME_BY_ID: Record<string, StampFrame> = {
-  classic: "classic",
-  vintage: "dash",
-  minimal: "simple",
-  wave: "wave",
-};
-
-// 保存済み frame(api値) からフレームスタイル id を逆引きする
-export const FRAME_ID_BY_API: Record<StampFrame, string> = {
-  classic: "classic",
-  dash: "vintage",
-  simple: "minimal",
-  wave: "wave",
-};

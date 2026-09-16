@@ -17,6 +17,7 @@ import { Stamp } from "@/src/components/common/Stamp/Stamp";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, radii, typography, spacing } from "@/src/style/tokens";
 import type { FrameStyleOption } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
+import type { StampFrame } from "@/src/utils/stamp/types";
 
 type Props = {
   onBack: () => void;
@@ -24,8 +25,8 @@ type Props = {
   imageUri?: string;
   loading?: boolean;
   frameStyles: FrameStyleOption[];
-  selectedFrameStyleId: string;
-  onSelectFrameStyle: (id: string) => void;
+  selectedFrameStyleId: StampFrame;
+  onSelectFrameStyle: (id: StampFrame) => void;
   colorOptions: readonly string[];
   selectedColor: string;
   onSelectColor: (color: string) => void;
