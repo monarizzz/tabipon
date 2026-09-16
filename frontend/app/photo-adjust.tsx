@@ -10,7 +10,7 @@ import {
   type PhotoCropAreaHandle,
 } from "@/src/components/features/camera/PhotoCropArea/PhotoCropArea";
 import { PhotoAdjustControls } from "@/src/components/features/camera/PhotoAdjustControls/PhotoAdjustControls";
-import { getCurrentStampLocation } from "@/src/utils/stamp/location";
+import { getCurrentStampLocation } from "@/src/libs/location";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors } from "@/src/style/tokens";
 
