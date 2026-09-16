@@ -14,6 +14,7 @@ import { Header } from "@/src/components/common/layout/Header/Header";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { listStamps, stampImageUri, type Stamp } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { formatIsoDate } from "@/src/utils/datetime/format";
 import { colors, typography, spacing } from "@/src/style/tokens";
 
 // フィルターの id は固定。ラベルは描画時に翻訳・整形する。
@@ -25,19 +26,14 @@ const FILTER_IDS: { id: string; label?: string }[] = [
   { id: "walk", label: "散歩" },
 ];
 
-function formatDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return "";
-  return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
-}
-
 function toGridItem(stamp: Stamp, defaultName: string): StampGridItem {
   const spotName = stamp.title?.trim() || "";
   return {
     id: stamp.id,
     name: spotName || defaultName,
     nameUnset: !spotName,
-    date: formatDate(stamp.capturedAt),
+    // 一覧のカードは日付だけ。時刻は詳細画面で出す
+    date: formatIsoDate(stamp.capturedAt),
     imageUri: stampImageUri(stamp),
     spotName,
     memo: stamp.memo?.trim() || "",
