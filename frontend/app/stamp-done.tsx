@@ -10,8 +10,9 @@ import {
   Platform,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Camera, Image, User, RotateCcw } from "lucide-react-native";
+import { RotateCcw } from "lucide-react-native";
 import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
+import { useTabBarItems } from "@/src/components/common/layout/TabBar/useTabBarItems";
 import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
 import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
 import { StampInfoCard } from "@/src/components/common/StampInfoCard/StampInfoCard";
@@ -61,6 +62,20 @@ export default function StampDoneScreen() {
   const [memo, setMemo] = React.useState("");
   const [detailUpdating, setDetailUpdating] = React.useState(false);
   const [retakeDialogVisible, setRetakeDialogVisible] = React.useState(false);
+  // 撮影フローはここで終わりなので確認は挟まない。
+  // カメラへ戻るときだけ履歴を積まないよう replace する
+  const tabItems = useTabBarItems(
+    React.useCallback(
+      (tab) => {
+        if (tab.key === "index") {
+          router.replace(tab.href);
+          return;
+        }
+        router.push(tab.href);
+      },
+      [router],
+    ),
+  );
 
   // 保存済みのスタンプを読み込む。前の画面で保存まで済ませてあるので必ず在る
   React.useEffect(() => {
@@ -279,37 +294,7 @@ export default function StampDoneScreen() {
         multiline
         onSave={handleSaveMemo}
       />
-      <TabBar
-        items={[
-          {
-            key: "index",
-            label: t("tabs.camera"),
-            icon: Camera,
-            active: true,
-            onPress: () => {
-              router.replace("/(tabs)");
-            },
-          },
-          {
-            key: "album",
-            label: t("tabs.album"),
-            icon: Image,
-            active: false,
-            onPress: () => {
-              router.push("/(tabs)/album");
-            },
-          },
-          {
-            key: "mypage",
-            label: t("tabs.mypage"),
-            icon: User,
-            active: false,
-            onPress: () => {
-              router.push("/(tabs)/mypage");
-            },
-          },
-        ]}
-      />
+      <TabBar items={tabItems} />
     </View>
   );
 }
