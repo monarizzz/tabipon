@@ -3,7 +3,9 @@
 # frontend/ を基準に解決されるため、frontend/ に降りてから実行する。
 # lint-staged は cwd の外にあるファイルを対象から外すので、これで frontend/ 配下の
 # 差分だけが対象になる。対象の指定は frontend/.lintstagedrc.json にある。
-(cd frontend && npx lint-staged) || exit 1
+# --no-install: ローカルに lint-staged が無いときにレジストリから取得させない。
+# ルートで npm ci していない状態では、取りに行かずその場で失敗させる。
+(cd frontend && npx --no-install lint-staged) || exit 1
 
 # 型チェックは差分だけでは回せないため frontend/ 全体を 1 回走らせる。
 # TS / TSX も tsconfig も 1 つもステージされていないコミットではスキップする。
