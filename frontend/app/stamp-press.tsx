@@ -253,10 +253,12 @@ export default function StampPressScreen() {
     Vibration.vibrate(500);
     cancelAnimation(stampScale);
     // 長押し判定時間(500ms)にかけてゆっくり沈み込ませる
-    stampScale.value = withTiming(0.82, {
-      duration: 500,
-      easing: Easing.out(Easing.quad),
-    });
+    stampScale.set(
+      withTiming(0.82, {
+        duration: 500,
+        easing: Easing.out(Easing.quad),
+      }),
+    );
   };
 
   const handleStampLongPress = () => {
@@ -269,12 +271,14 @@ export default function StampPressScreen() {
     Vibration.cancel();
     Vibration.vibrate([0, 40, 30, 80]);
     cancelAnimation(stampScale);
-    stampScale.value = withSequence(
-      withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
-      withTiming(1.06, { duration: 20, easing: Easing.out(Easing.back(2)) }),
-      withTiming(1, { duration: 120 }, (finished) => {
-        if (finished) runOnJS(goToStampDone)();
-      }),
+    stampScale.set(
+      withSequence(
+        withTiming(0.74, { duration: 90, easing: Easing.out(Easing.quad) }),
+        withTiming(1.06, { duration: 20, easing: Easing.out(Easing.back(2)) }),
+        withTiming(1, { duration: 120 }, (finished) => {
+          if (finished) runOnJS(goToStampDone)();
+        }),
+      ),
     );
   };
 
@@ -286,7 +290,7 @@ export default function StampPressScreen() {
     // 長押し確定前に離した場合は振動を止めて元の大きさへ戻す
     Vibration.cancel();
     cancelAnimation(stampScale);
-    stampScale.value = withSpring(1, { damping: 14, stiffness: 180 });
+    stampScale.set(withSpring(1, { damping: 14, stiffness: 180 }));
   };
 
   return (
