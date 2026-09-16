@@ -80,6 +80,12 @@ export default function StampDetailScreen() {
   const [selectedColor, setSelectedColor] = React.useState(DEFAULT_STAMP_COLOR);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
+  const [spotName, setSpotName] = React.useState("");
+  const [date, setDate] = React.useState("");
+  const [location, setLocation] = React.useState("");
+  const [memo, setMemo] = React.useState("");
+  const [detailUpdating, setDetailUpdating] = React.useState(false);
+
   // 表示中のスタンプ画像の uri（file://）。共有もこの値を使う
   const [currentImageUri, setCurrentImageUri] = React.useState("");
   // デザイン変更しても画像のパスは変わらないため、同じ uri のままだと
@@ -115,6 +121,9 @@ export default function StampDetailScreen() {
   // デザイン変更中は選択中の色/フレームでプレビューを生成する(作成画面と同じ cancelled フラグ方式)
   React.useEffect(() => {
     if (!designMode || !originalUri) {
+      // プレビューの生成を止めたときの後始末。描画は外部（Skia）で走らせており、
+      // 捨てる操作をレンダー側に寄せられないためここで消す
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPreviewUri(null);
       return;
     }
@@ -208,12 +217,6 @@ export default function StampDetailScreen() {
       setDesignUpdating(false);
     }
   };
-
-  const [spotName, setSpotName] = React.useState("");
-  const [date, setDate] = React.useState("");
-  const [location, setLocation] = React.useState("");
-  const [memo, setMemo] = React.useState("");
-  const [detailUpdating, setDetailUpdating] = React.useState(false);
 
   React.useEffect(() => {
     if (!stampLatitude || !stampLongitude) return;
