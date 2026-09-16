@@ -40,7 +40,7 @@ import { StampOrientationGuide } from "@/src/components/features/camera/StampOri
 import { newStampId, saveStamp } from "@/src/infra/db/stamps";
 import { generateStampPngFromUri } from "@/src/utils/stamp/io";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
-import { playStampSound } from "@/src/utils/stamp/stampSound";
+import { playStampSound } from "@/src/libs/sound";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, typography, spacing } from "@/src/style/tokens";
 
