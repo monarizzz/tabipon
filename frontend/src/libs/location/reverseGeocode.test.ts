@@ -109,7 +109,9 @@ describe("reverseGeocode", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  // 外部の JSON なので、型注釈どおりに来ない場合まで見る
+  // 外部の JSON なので、型注釈どおりに来ない場合まで見る。
+  // 住所が無いだけの座標には ZERO_RESULTS が返るので、OK なのに住所が取り出せないのは
+  // 「住所が無い」ではなく「レスポンスの形が違う」。empty にすると黙って空欄になる
   test.each([
     ["results が配列でない", { status: "OK", results: null }],
     ["results が空", { status: "OK", results: [] }],
@@ -119,10 +121,10 @@ describe("reverseGeocode", () => {
       "formatted_address が空文字",
       { status: "OK", results: [{ formatted_address: "" }] },
     ],
-  ])("形が崩れたレスポンス(%s)は empty になる", async (_name, body) => {
+  ])("形が崩れたレスポンス(%s)は failed になる", async (_name, body) => {
     mockFetch(body);
-    await expect(reverseGeocode(TOKYO, "ja")).resolves.toEqual({
-      status: "empty",
+    await expect(reverseGeocode(TOKYO, "ja")).resolves.toMatchObject({
+      status: "failed",
     });
   });
 });

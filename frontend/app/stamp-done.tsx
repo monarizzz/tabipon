@@ -211,6 +211,9 @@ export default function StampDoneScreen() {
             <StampInfoCard
               date={stamp ? formatIsoDateTime(stamp.capturedAt) : ""}
               location={location}
+              locationPlaceholder={
+                geocoded.failed ? t("stampDetail.placeLookupFailed") : undefined
+              }
               memo={memo}
               onPressLocation={openLocationEditor}
               onPressMemo={openMemoEditor}

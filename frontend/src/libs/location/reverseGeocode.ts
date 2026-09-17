@@ -98,6 +98,11 @@ export async function reverseGeocode(
     return { status: "failed", reason: failureReason(body) };
   }
 
+  // 住所が無いだけの座標には ZERO_RESULTS が返る。OK なのに住所が取り出せないのは
+  // レスポンスの形が想定と違うということなので、empty ではなく failed にして
+  // ログに残す。empty にすると、スキーマが変わったときに黙って空欄になる
   const address = firstFormattedAddress(body.results);
-  return address ? { status: "ok", address } : { status: "empty" };
+  return address
+    ? { status: "ok", address }
+    : { status: "failed", reason: "OK だが results から住所を取り出せない" };
 }

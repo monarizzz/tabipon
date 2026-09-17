@@ -13,27 +13,39 @@ export type ReverseGeocodeState = {
 
 const IDLE: ReverseGeocodeState = { address: "", failed: false };
 
+/** 取得結果と、それがどの入力に対するものか */
+type Resolved = { key: string; state: ReverseGeocodeState };
+
 /**
  * 座標から住所を引く。
  *
  * ロケールが変わったら引き直す。設定画面で言語を切り替えたあと、
  * 住所だけ前の言語のまま残るのを避けるため。
  *
- * **中断は `AbortController` で行う。**画面を離れたあとに `setState` が走ると
+ * **結果は入力（座標 + ロケール）をキーにして持つ。**別のスタンプに切り替わったり
+ * 座標が外れたりしたときに、前の座標の住所がそのまま出続けるのを防ぐ。
+ * effect の中で state を消す形にすると、消してから入れ直すまでの 1 レンダーぶん
+ * 余計に描き直すことになり、`react-hooks/set-state-in-effect` にも触れる。
+ *
+ * 中断は `AbortController` で行う。画面を離れたあとに `setState` が走ると
  * 警告が出るうえ、捨てるはずの結果で表示が入れ替わる。
  */
 export function useReverseGeocode(
   location: StampLocation | null,
 ): ReverseGeocodeState {
   const { locale } = useTranslation();
-  const [state, setState] = useState<ReverseGeocodeState>(IDLE);
+  const [resolved, setResolved] = useState<Resolved | null>(null);
 
   // オブジェクトのままだと、同じ座標でも参照が変わるたびに引き直してしまう
   const latitude = location?.latitude ?? null;
   const longitude = location?.longitude ?? null;
+  const key =
+    latitude === null || longitude === null
+      ? null
+      : `${latitude},${longitude},${locale}`;
 
   useEffect(() => {
-    if (latitude === null || longitude === null) {
+    if (key === null || latitude === null || longitude === null) {
       return;
     }
     const controller = new AbortController();
@@ -45,15 +57,18 @@ export function useReverseGeocode(
           return;
         }
         if (result.status === "ok") {
-          setState({ address: result.address, failed: false });
+          setResolved({
+            key,
+            state: { address: result.address, failed: false },
+          });
           return;
         }
         if (result.status === "empty") {
-          setState(IDLE);
+          setResolved({ key, state: IDLE });
           return;
         }
         console.warn("[location] reverse geocoding failed", result.reason);
-        setState({ address: "", failed: true });
+        setResolved({ key, state: { address: "", failed: true } });
       })
       .catch((error: unknown) => {
         // 中断は想定どおりの経路なので、失敗として扱わない
@@ -61,10 +76,11 @@ export function useReverseGeocode(
           return;
         }
         console.warn("[location] reverse geocoding failed", error);
-        setState({ address: "", failed: true });
+        setResolved({ key, state: { address: "", failed: true } });
       });
     return () => controller.abort();
-  }, [latitude, longitude, locale]);
+  }, [key, latitude, longitude, locale]);
 
-  return state;
+  // 今の入力に対する結果でなければ、まだ何も引けていないものとして扱う
+  return resolved?.key === key ? resolved.state : IDLE;
 }
