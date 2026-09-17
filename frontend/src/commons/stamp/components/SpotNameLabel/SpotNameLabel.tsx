@@ -15,6 +15,11 @@ const HIT_SLOP = { top: 12, bottom: 12 } as const;
 
 export function SpotNameLabel({ spotName, onPress }: Props) {
   const { t } = useTranslation();
+  // accessibilityLabel は子孫の Text から組まれる既定ラベルを上書きする。
+  // 操作の説明だけを入れると現在のスポット名が読み上げられなくなるため、
+  // ラベルには画面に出ている文字列（未入力ならプレースホルダー）を入れ、
+  // 操作は accessibilityHint 側で伝える。
+  const displayText = spotName || t("stampDetail.addSpotName");
   return (
     <TouchableOpacity
       style={styles.row}
@@ -23,12 +28,13 @@ export function SpotNameLabel({ spotName, onPress }: Props) {
       activeOpacity={0.7}
       hitSlop={HIT_SLOP}
       accessibilityRole={onPress ? "button" : undefined}
-      accessibilityLabel={onPress ? t("stampDetail.editTitle") : undefined}
+      accessibilityLabel={onPress ? displayText : undefined}
+      accessibilityHint={onPress ? t("stampDetail.editTitle") : undefined}
     >
       {spotName ? (
         <Text style={styles.spotName}>{spotName}</Text>
       ) : (
-        <Text style={styles.placeholder}>{t("stampDetail.addSpotName")}</Text>
+        <Text style={styles.placeholder}>{displayText}</Text>
       )}
       {onPress ? <Pencil size={14} color={colors.textMuted} /> : null}
     </TouchableOpacity>

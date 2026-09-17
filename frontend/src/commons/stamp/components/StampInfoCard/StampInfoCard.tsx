@@ -27,6 +27,13 @@ export function StampInfoCard({
   onPressMemo,
 }: Props) {
   const { t } = useTranslation();
+  // accessibilityLabel は子孫の Text から組まれる既定ラベルを上書きする。
+  // 操作の説明だけを入れると項目名と現在値が読み上げられなくなるため、
+  // ラベルは「項目名 + 画面に出ている値（未入力ならプレースホルダー）」とし、
+  // 操作は accessibilityHint 側で伝える。
+  const dateText = date || t("stampDetail.addDate");
+  const locationText = location || t("stampDetail.addPlace");
+  const memoText = memo || t("stampDetail.addMemo");
   return (
     <View>
       <View style={styles.infoRow}>
@@ -38,6 +45,11 @@ export function StampInfoCard({
           hitSlop={CELL_HIT_SLOP}
           accessibilityRole={onPressDate ? "button" : undefined}
           accessibilityLabel={
+            onPressDate
+              ? `${t("stampDetail.labelDate")} ${dateText}`
+              : undefined
+          }
+          accessibilityHint={
             onPressDate ? t("stampDetail.editDate") : undefined
           }
         >
@@ -48,7 +60,7 @@ export function StampInfoCard({
           {date ? (
             <Text style={styles.value}>{date}</Text>
           ) : (
-            <Text style={styles.placeholder}>{t("stampDetail.addDate")}</Text>
+            <Text style={styles.placeholder}>{dateText}</Text>
           )}
         </TouchableOpacity>
         <View style={styles.divider} />
@@ -60,6 +72,11 @@ export function StampInfoCard({
           hitSlop={CELL_HIT_SLOP}
           accessibilityRole={onPressLocation ? "button" : undefined}
           accessibilityLabel={
+            onPressLocation
+              ? `${t("stampDetail.labelPlace")} ${locationText}`
+              : undefined
+          }
+          accessibilityHint={
             onPressLocation ? t("stampDetail.editPlace") : undefined
           }
         >
@@ -72,7 +89,7 @@ export function StampInfoCard({
           {location ? (
             <Text style={styles.value}>{location}</Text>
           ) : (
-            <Text style={styles.placeholder}>{t("stampDetail.addPlace")}</Text>
+            <Text style={styles.placeholder}>{locationText}</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -83,7 +100,10 @@ export function StampInfoCard({
         disabled={!onPressMemo}
         activeOpacity={0.7}
         accessibilityRole={onPressMemo ? "button" : undefined}
-        accessibilityLabel={onPressMemo ? t("stampDetail.editMemo") : undefined}
+        accessibilityLabel={
+          onPressMemo ? `${t("stampDetail.labelMemo")} ${memoText}` : undefined
+        }
+        accessibilityHint={onPressMemo ? t("stampDetail.editMemo") : undefined}
       >
         <View style={styles.labelRow}>
           <Text style={styles.label}>{t("stampDetail.labelMemo")}</Text>
@@ -92,7 +112,7 @@ export function StampInfoCard({
         {memo ? (
           <Text style={styles.value}>{memo}</Text>
         ) : (
-          <Text style={styles.placeholder}>{t("stampDetail.addMemo")}</Text>
+          <Text style={styles.placeholder}>{memoText}</Text>
         )}
       </TouchableOpacity>
     </View>
