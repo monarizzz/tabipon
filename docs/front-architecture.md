@@ -115,6 +115,9 @@ src/commons/layout/
 
 `StampLocationMap` の `spotName` は地図のピンの吹き出し（`Marker` の `title`）専用で、見出しとは別物。
 
+横幅の制約は `SpotNameLabel` 自身が持つ（名前が長いときは名前側だけを縮めて省略し、鉛筆アイコンを
+押し出さない）。置く側は中央寄せと余白だけを決めればよい。
+
 ---
 
 ## src/utils/stamp/ のディレクトリ構成
