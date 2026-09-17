@@ -10,11 +10,11 @@ import {
   type StampGridItem,
 } from "@/src/features/album/components/StampGrid/StampGrid";
 import { CollectionSheet } from "@/src/features/album/components/CollectionSheet/CollectionSheet";
+import { toGridItem } from "@/src/features/album/utils/toGridItem";
 import { Header } from "@/src/commons/layout/components/Header/Header";
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
-import { listStamps, stampImageUri, type Stamp } from "@/src/infra/db/stamps";
+import { listStamps } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { formatIsoDate } from "@/src/utils/datetime/format";
 import { colors, typography, spacing } from "@/src/style/tokens";
 
 // フィルターの id は固定。ラベルは描画時に翻訳・整形する。
@@ -25,19 +25,6 @@ const FILTER_IDS: { id: string; label?: string }[] = [
   { id: "kyoto", label: "京都" },
   { id: "walk", label: "散歩" },
 ];
-
-function toGridItem(stamp: Stamp, defaultName: string): StampGridItem {
-  const spotName = stamp.title?.trim() || "";
-  return {
-    id: stamp.id,
-    name: spotName || defaultName,
-    nameUnset: !spotName,
-    // 一覧のカードは日付だけ。時刻は詳細画面で出す
-    date: formatIsoDate(stamp.capturedAt),
-    imageUri: stampImageUri(stamp),
-    obtained: true,
-  };
-}
 
 export default function AlbumScreen() {
   const router = useRouter();
