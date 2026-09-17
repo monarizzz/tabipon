@@ -259,7 +259,9 @@ export default function StampDetailScreen() {
         <Text style={styles.statusText}>{t("stampDetail.notFound")}</Text>
         <CommonButton
           label={t("stampDetail.backToAlbum")}
-          onPress={() => router.replace("/(tabs)/album")}
+          // replace だと履歴に残っているアルバムの上へ積むだけで同じ画面が 2 枚になる。
+          // dismissTo は履歴のアルバムまで戻り、履歴に無ければ現在の画面を置き換える
+          onPress={() => router.dismissTo("/(tabs)/album")}
           variant="secondary"
         />
       </View>
