@@ -146,6 +146,36 @@ describe("reverseGeocode", () => {
     await expect(reverseGeocode(TOKYO)).resolves.toBe("高知県 高岡郡日高村");
   });
 
+  // 欠損が null ではなく空文字で返る場合。`??` は空文字を拾ってしまうので、
+  // フォールバックを選ぶ前に空白を落としておく必要がある
+  test("city が空文字でも subregion にフォールバックする", async () => {
+    resolveWith({ region: "北海道", city: "", subregion: "虻田郡" });
+
+    await expect(reverseGeocode(TOKYO)).resolves.toBe("北海道 虻田郡");
+  });
+
+  test("street が空白だけでも name にフォールバックする", async () => {
+    resolveWith({
+      region: "滋賀県",
+      city: "高島市",
+      street: " ",
+      name: "琵琶湖",
+    });
+
+    await expect(reverseGeocode(TOKYO)).resolves.toBe("滋賀県 高島市 琵琶湖");
+  });
+
+  test("street が空文字なら streetNumber も使わない", async () => {
+    resolveWith({
+      city: "高島市",
+      street: "",
+      streetNumber: "1",
+      name: "琵琶湖",
+    });
+
+    await expect(reverseGeocode(TOKYO)).resolves.toBe("高島市 琵琶湖");
+  });
+
   test("隣り合う同じ語は 1 つにまとめる", async () => {
     resolveWith({ region: "滋賀県", city: "高島市", name: "高島市" });
 

@@ -20,19 +20,30 @@ import * as Location from "expo-location";
  * 埋まらないので `city ?? subregion` の 1 要素として扱う。両方つなぐと
  * `city` 側が郡を含むため（`高岡郡日高村`）、やはり二重になる。
  */
+/**
+ * 空文字と空白だけの値を「無い」として扱う。
+ *
+ * **`??` の前に通す。**`??` は null と undefined しか拾わないので、`city: ""` の
+ * ように空文字で欠損を表されると、それをそのまま選んで `subregion`（郡）への
+ * フォールバックが効かず、住所から郡が丸ごと落ちる。住所は取得時に一度だけ
+ * 引いて保存するため、落ちたまま直る機会が無い
+ */
+function presence(value: string | null): string | null {
+  return value?.trim() || null;
+}
+
 function addressParts(place: Location.LocationGeocodedAddress): string[] {
+  // 住所が割り当たっていない地点では street が空になる。その場合だけ name に
+  // 頼る（湖や山では `name` に `高島市` のような広い地名が入る）
+  const street = presence(place.street);
   return [
-    place.country,
-    place.region,
-    place.city ?? place.subregion,
-    // 住所が割り当たっていない地点では street が空になる。その場合だけ name に
-    // 頼る（湖や山では `name` に `高島市` のような広い地名が入る）
-    place.street ?? place.name,
-    place.street ? place.streetNumber : null,
-  ].flatMap((part) => {
-    const trimmed = part?.trim();
-    return trimmed ? [trimmed] : [];
-  });
+    presence(place.country),
+    presence(place.region),
+    presence(place.city) ?? presence(place.subregion),
+    street ?? presence(place.name),
+    // 番地は street を使えたときだけ。name に頼った地点では住所ではないので付けない
+    street ? presence(place.streetNumber) : null,
+  ].flatMap((part) => (part ? [part] : []));
 }
 
 /**
