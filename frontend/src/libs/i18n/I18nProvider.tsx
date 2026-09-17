@@ -21,7 +21,11 @@ import type {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreferenceState] = useState<LocalePreference>("system");
+  // null は「保存済みの設定をまだ読めていない」。初期値を "system" に
+  // しないのは、読み終わる前に端末の言語で 1 フレーム描いてしまわないため
+  const [preference, setPreferenceState] = useState<LocalePreference | null>(
+    null,
+  );
   // preference が "system" のとき端末設定の変更に追従するための依存値。
   const deviceLocales = useLocales();
 
@@ -30,7 +34,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const locale = useMemo<SupportedLocale>(() => {
-    if (preference !== "system") return preference;
+    if (preference !== null && preference !== "system") return preference;
     return resolveDeviceLocale();
     // deviceLocales は端末設定の変更検知用（値は resolveDeviceLocale 内で参照）。
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -51,9 +55,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<I18nContextValue>(
-    () => ({ locale, preference, setPreference, t }),
+    () => ({ locale, preference: preference ?? "system", setPreference, t }),
     [locale, preference, setPreference, t],
   );
+
+  // 読み終わるまで子を描かない。SQLiteProvider がマイグレーション中に
+  // 子を描かないのと同じ扱いで、待つのは AsyncStorage の 1 キー分
+  if (preference === null) return null;
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
