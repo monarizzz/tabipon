@@ -7,10 +7,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocales } from "expo-localization";
 import { i18n, resolveDeviceLocale } from "./index";
-import { SUPPORTED_LOCALES } from "./constants/locales";
+import { loadLocalePreference, saveLocalePreference } from "./localePreference";
 import type {
   I18nContextValue,
   LocalePreference,
@@ -19,16 +18,7 @@ import type {
   TranslationKey,
 } from "./types/i18n";
 
-const STORAGE_KEY = "app.localePreference";
-
 const I18nContext = createContext<I18nContextValue | null>(null);
-
-function isPreference(value: string | null): value is LocalePreference {
-  return (
-    value === "system" ||
-    (SUPPORTED_LOCALES as readonly string[]).includes(value ?? "")
-  );
-}
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [preference, setPreferenceState] = useState<LocalePreference>("system");
@@ -36,9 +26,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const deviceLocales = useLocales();
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
-      if (isPreference(stored)) setPreferenceState(stored);
-    });
+    void loadLocalePreference().then(setPreferenceState);
   }, []);
 
   const locale = useMemo<SupportedLocale>(() => {
@@ -50,7 +38,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const setPreference = useCallback((pref: LocalePreference) => {
     setPreferenceState(pref);
-    void AsyncStorage.setItem(STORAGE_KEY, pref);
+    void saveLocalePreference(pref);
   }, []);
 
   // i18n はモジュールスコープの共有インスタンスなので locale を代入して使うと
