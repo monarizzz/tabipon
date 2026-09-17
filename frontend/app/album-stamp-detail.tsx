@@ -33,6 +33,7 @@ import { StampDetailMediaPager } from "@/src/features/album/components/detail/St
 import { StampInfoCard } from "@/src/commons/stamp/components/StampInfoCard/StampInfoCard";
 import { EditFieldSheet } from "@/src/commons/sheet/components/EditFieldSheet/EditFieldSheet";
 import { formatIsoDateTime, parseIso } from "@/src/utils/datetime/format";
+import { useReverseGeocode } from "@/src/libs/location/useReverseGeocode";
 
 // 撮影日時が壊れている場合でもピッカーは開けるようにし、現在時刻から選ばせる
 function parseCapturedAt(isoDate: string): Date {
@@ -67,7 +68,10 @@ export default function StampDetailScreen() {
   const [spotName, setSpotName] = React.useState("");
   // 撮影日時は ISO 文字列のまま保持する。表示のときだけ整形する
   const [capturedAt, setCapturedAt] = React.useState("");
-  const [location, setLocation] = React.useState("");
+  // 利用者が入力した場所。入っていれば逆引きした住所より優先する
+  const [editedLocation, setEditedLocation] = React.useState("");
+  const geocoded = useReverseGeocode(stamp?.location ?? null);
+  const location = editedLocation || geocoded.address;
   const [memo, setMemo] = React.useState("");
   const [detailUpdating, setDetailUpdating] = React.useState(false);
 
@@ -198,20 +202,6 @@ export default function StampDetailScreen() {
       setDesignUpdating(false);
     }
   };
-
-  React.useEffect(() => {
-    if (!stampLatitude || !stampLongitude) return;
-    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
-    fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${stampLatitude},${stampLongitude}&key=${apiKey}&language=ja`,
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const address = data.results?.[0]?.formatted_address;
-        if (address) setLocation(address);
-      })
-      .catch(() => {});
-  }, [stampLatitude, stampLongitude]);
 
   const [editingField, setEditingField] = React.useState<EditingField>(null);
   const [draftSpotName, setDraftSpotName] = React.useState(spotName);
@@ -361,6 +351,9 @@ export default function StampDetailScreen() {
       <StampInfoCard
         date={formatIsoDateTime(capturedAt)}
         location={location}
+        locationPlaceholder={
+          geocoded.failed ? t("stampDetail.placeLookupFailed") : undefined
+        }
         memo={memo}
         onPressDate={openDateEditor}
         onPressLocation={openLocationEditor}
@@ -424,7 +417,7 @@ export default function StampDetailScreen() {
         onChangeValue={setDraftLocation}
         placeholder={t("stampDetail.editPlacePlaceholder")}
         onSave={() => {
-          setLocation(draftLocation.trim() || location);
+          setEditedLocation(draftLocation.trim() || location);
           closeEditor();
         }}
       />

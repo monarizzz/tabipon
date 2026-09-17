@@ -29,6 +29,7 @@ import {
 } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { formatIsoDateTime } from "@/src/utils/datetime/format";
+import { useReverseGeocode } from "@/src/libs/location/useReverseGeocode";
 import { colors, spacing } from "@/src/style/tokens";
 
 function normalizeOptionalText(value: string): string | null {
@@ -54,7 +55,10 @@ export default function StampDoneScreen() {
   }>();
   const [stamp, setStamp] = React.useState<Stamp | null>(null);
   const [spotName, setSpotName] = React.useState("");
-  const [location, setLocation] = React.useState("");
+  // 利用者が入力した場所。入っていれば逆引きした住所より優先する
+  const [editedLocation, setEditedLocation] = React.useState("");
+  const geocoded = useReverseGeocode(stamp?.location ?? null);
+  const location = editedLocation || geocoded.address;
   const [memo, setMemo] = React.useState("");
   const [detailUpdating, setDetailUpdating] = React.useState(false);
   const [retakeDialogVisible, setRetakeDialogVisible] = React.useState(false);
@@ -83,22 +87,6 @@ export default function StampDoneScreen() {
       setMemo(loaded.memo ?? "");
     });
   }, [stampId]);
-
-  // 撮影時に記録した位置情報から住所を逆引きする(アルバム詳細画面と同じ方式)
-  React.useEffect(() => {
-    const sessionLocation = stamp?.location;
-    if (!sessionLocation) return;
-    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
-    fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${sessionLocation.latitude},${sessionLocation.longitude}&key=${apiKey}&language=ja`,
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const address = data.results?.[0]?.formatted_address;
-        if (address) setLocation(address);
-      })
-      .catch(() => {});
-  }, [stamp]);
 
   const [editingField, setEditingField] = React.useState<EditingField>(null);
   const [draftSpotName, setDraftSpotName] = React.useState(spotName);
@@ -275,7 +263,7 @@ export default function StampDoneScreen() {
         onChangeValue={setDraftLocation}
         placeholder={t("stampDetail.editPlacePlaceholder")}
         onSave={() => {
-          setLocation(draftLocation.trim() || location);
+          setEditedLocation(draftLocation.trim() || location);
           closeEditor();
         }}
       />

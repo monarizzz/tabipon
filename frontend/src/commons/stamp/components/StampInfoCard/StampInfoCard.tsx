@@ -7,6 +7,8 @@ import { colors, typography, spacing } from "@/src/style/tokens";
 type Props = {
   date: string;
   location: string;
+  /** 場所が空のときに出す文言。既定は「場所を追加」。逆引きに失敗したときの表示に使う */
+  locationPlaceholder?: string;
   memo?: string;
   onPressDate?: () => void;
   onPressLocation?: () => void;
@@ -16,6 +18,7 @@ type Props = {
 export function StampInfoCard({
   date,
   location,
+  locationPlaceholder,
   memo,
   onPressDate,
   onPressLocation,
@@ -57,7 +60,9 @@ export function StampInfoCard({
           {location ? (
             <Text style={styles.value}>{location}</Text>
           ) : (
-            <Text style={styles.placeholder}>{t("stampDetail.addPlace")}</Text>
+            <Text style={styles.placeholder}>
+              {locationPlaceholder ?? t("stampDetail.addPlace")}
+            </Text>
           )}
         </TouchableOpacity>
       </View>
