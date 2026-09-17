@@ -28,6 +28,7 @@ const back = jest.fn();
 
 const PARAMS = {
   imageUri: "file:///photos/1.jpg",
+  capturedAt: "2026-09-18T14:58:00.000Z",
   latitude: "35.6586",
   longitude: "139.7454",
   address: "東京都港区芝公園",
@@ -61,6 +62,7 @@ describe("useStampPress", () => {
 
     expect(createStampMock).toHaveBeenCalledWith({
       photoUri: "file:///photos/1.jpg",
+      capturedAt: "2026-09-18T14:58:00.000Z",
       color: result.current.color,
       frameId: result.current.frameStyleId,
       scratchLevel: 0.42,
@@ -69,6 +71,38 @@ describe("useStampPress", () => {
       location: { latitude: 35.6586, longitude: 139.7454 },
       address: "東京都港区芝公園",
     });
+  });
+
+  it("撮影時刻は押した時刻で上書きせず、運ばれてきた値のまま渡す", async () => {
+    // 撮影から押印までのあいだに日付をまたぐと、押した時刻では日付がずれる
+    jest.useFakeTimers().setSystemTime(new Date("2026-09-19T00:01:00.000Z"));
+    try {
+      const { result } = await setup();
+
+      await press(() => result.current.createStamp(FINISH, 412.6));
+    } finally {
+      jest.useRealTimers();
+    }
+
+    expect(createStampMock).toHaveBeenCalledWith(
+      expect.objectContaining({ capturedAt: "2026-09-18T14:58:00.000Z" }),
+    );
+  });
+
+  it("撮影時刻が運ばれてこなければ、その場の時刻で埋める", async () => {
+    // 撮影画面を通らずに入る経路。ここで止めると押印そのものが保存できない
+    jest.useFakeTimers().setSystemTime(new Date("2026-09-19T00:01:00.000Z"));
+    try {
+      const { result } = await setup({ capturedAt: undefined });
+
+      await press(() => result.current.createStamp(FINISH, 412.6));
+    } finally {
+      jest.useRealTimers();
+    }
+
+    expect(createStampMock).toHaveBeenCalledWith(
+      expect.objectContaining({ capturedAt: "2026-09-19T00:01:00.000Z" }),
+    );
   });
 
   it("作れたら id と押した位置を持って完成画面へ進む", async () => {
