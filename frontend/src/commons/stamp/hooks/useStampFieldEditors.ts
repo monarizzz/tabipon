@@ -159,6 +159,10 @@ export function useStampFieldEditors({
     saveDate: () => {
       void save("date", { capturedAt: draftDate.toISOString() });
     },
+    // **住所を直しても座標は動かさない。**座標は「実際にスタンプを押した地点」の
+    // 記録で、住所はそこから導いた表示用のラベル。`geocodeAsync()` で住所から
+    // 引き直すと、押した地点が番地の代表点に丸められて復元できなくなる。
+    // 座標を住所に追従させるかは #87 で決める
     saveLocation: () => {
       void save("location", { address: normalizeOptionalText(draftLocation) });
     },

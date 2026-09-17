@@ -36,18 +36,82 @@ describe("reverseGeocode", () => {
     reverseGeocodeAsync.mockReset();
   });
 
+  // 以下、iOS の CLPlacemark の実測値を使う。expo-location は CLPlacemark を
+  // 加工せず素通しする（ios/Geocoder.swift）ので、項目どうしが入れ子になっている
   test("大きい方から空白で連結する", async () => {
     resolveWith({
       country: "日本",
-      region: "東京都",
-      city: "千代田区",
-      district: "丸の内",
-      name: "1-1",
+      region: "愛知県",
+      city: "名古屋市中村区",
+      district: "名駅",
+      street: "名駅1丁目",
+      streetNumber: "1番4号",
+      name: "名駅1丁目1番4号",
     });
 
     await expect(reverseGeocode(TOKYO)).resolves.toBe(
-      "日本 東京都 千代田区 丸の内 1-1",
+      "日本 愛知県 名古屋市中村区 名駅1丁目 1番4号",
     );
+  });
+
+  // street は district を接頭辞として含む（district: 永田町 / street: 永田町1丁目）。
+  // 両方つなぐと町名が二重に出る
+  test("district は使わない", async () => {
+    resolveWith({
+      region: "東京都",
+      city: "千代田区",
+      district: "永田町",
+      street: "永田町1丁目",
+      streetNumber: "7",
+    });
+
+    await expect(reverseGeocode(TOKYO)).resolves.toBe(
+      "東京都 千代田区 永田町1丁目 7",
+    );
+  });
+
+  // name は street + streetNumber の連結なので、つなぐと住所が丸ごと二重になる
+  test("street があれば name は使わない", async () => {
+    resolveWith({
+      city: "名古屋市中村区",
+      street: "名駅1丁目",
+      streetNumber: "1番4号",
+      name: "名駅1丁目1番4号",
+    });
+
+    await expect(reverseGeocode(TOKYO)).resolves.toBe(
+      "名古屋市中村区 名駅1丁目 1番4号",
+    );
+  });
+
+  // 地物がある地点では name に施設名が入り、番地が落ちる（大阪駅の実測値）
+  test("name に施設名が入る地点でも street から番地を組む", async () => {
+    resolveWith({
+      region: "大阪府",
+      city: "大阪市北区",
+      district: "梅田",
+      street: "梅田3丁目",
+      streetNumber: "1番1号",
+      name: "大阪駅",
+    });
+
+    await expect(reverseGeocode(TOKYO)).resolves.toBe(
+      "大阪府 大阪市北区 梅田3丁目 1番1号",
+    );
+  });
+
+  // 湖や山では street も streetNumber も空で、name に広い地名が入る（琵琶湖の実測値）
+  test("street が無ければ name にフォールバックする", async () => {
+    resolveWith({ region: "滋賀県", city: "高島市", name: "高島市" });
+
+    await expect(reverseGeocode(TOKYO)).resolves.toBe("滋賀県 高島市");
+  });
+
+  // street が無い地点の streetNumber は番地として意味を成さない
+  test("street が無ければ streetNumber も使わない", async () => {
+    resolveWith({ city: "高島市", streetNumber: "1", name: "琵琶湖" });
+
+    await expect(reverseGeocode(TOKYO)).resolves.toBe("高島市 琵琶湖");
   });
 
   test("座標をそのまま渡す", async () => {
@@ -64,24 +128,28 @@ describe("reverseGeocode", () => {
     await expect(reverseGeocode(TOKYO)).resolves.toBe("日本 千代田区");
   });
 
-  // iOS の一部の地域では city が空で、代わりに subregion（郡）に入る
   test("city が無ければ subregion を使う", async () => {
     resolveWith({ region: "北海道", subregion: "虻田郡" });
 
     await expect(reverseGeocode(TOKYO)).resolves.toBe("北海道 虻田郡");
   });
 
+  // 郡部では city が郡を含むフル表記になる（高岡郡日高村）。subregion も
+  // つなぐと「高岡郡 高岡郡日高村」と二重になる
   test("city があれば subregion は使わない", async () => {
-    resolveWith({ region: "北海道", city: "倶知安町", subregion: "虻田郡" });
+    resolveWith({
+      region: "高知県",
+      city: "高岡郡日高村",
+      subregion: "高岡郡",
+    });
 
-    await expect(reverseGeocode(TOKYO)).resolves.toBe("北海道 倶知安町");
+    await expect(reverseGeocode(TOKYO)).resolves.toBe("高知県 高岡郡日高村");
   });
 
-  // name には district と同じ町名がそのまま入ることがある
   test("隣り合う同じ語は 1 つにまとめる", async () => {
-    resolveWith({ city: "宇治市", district: "宇治", name: "宇治" });
+    resolveWith({ region: "滋賀県", city: "高島市", name: "高島市" });
 
-    await expect(reverseGeocode(TOKYO)).resolves.toBe("宇治市 宇治");
+    await expect(reverseGeocode(TOKYO)).resolves.toBe("滋賀県 高島市");
   });
 
   test("空白だけの要素は落とす", async () => {
