@@ -36,7 +36,6 @@ export function useStampPress({
   const [draftColor, setDraftColor] = React.useState(color);
   const [draftFrameStyleId, setDraftFrameStyleId] =
     React.useState(frameStyleId);
-  const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const [waiting, setWaiting] = React.useState(false);
   const [saveFailed, setSaveFailed] = React.useState(false);
   const [saveErrorMessage, setSaveErrorMessage] = React.useState("");
@@ -122,9 +121,6 @@ export function useStampPress({
       setFrameStyleId(draftFrameStyleId);
       setDesignSheetVisible(false);
     },
-
-    showLandmarkName,
-    toggleShowLandmarkName: setShowLandmarkName,
 
     helpVisible,
     toggleHelp: () => setHelpVisible((visible) => !visible),
