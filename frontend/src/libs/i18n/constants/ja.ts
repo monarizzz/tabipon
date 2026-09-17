@@ -75,6 +75,8 @@ export const ja = {
     namePlaceholder: "コレクション名を入力",
   },
   stampDetail: {
+    notFound: "スタンプが見つかりません",
+    backToAlbum: "アルバムへ戻る",
     delete: "削除する",
     deleteConfirmTitle: "スタンプを削除しますか?",
     deleteConfirmMessage: "削除したスタンプは元に戻せません。",

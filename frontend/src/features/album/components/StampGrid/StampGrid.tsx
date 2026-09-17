@@ -9,13 +9,7 @@ export type StampGridItem = {
   nameUnset?: boolean;
   date?: string;
   imageUri?: string;
-  spotName?: string;
-  memo?: string;
   obtained?: boolean;
-  tiltAngle?: number;
-  scratchLevel?: number;
-  color?: string;
-  frame?: string;
 };
 
 type Props = {

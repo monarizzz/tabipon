@@ -77,6 +77,8 @@ export const en: Translations = {
     namePlaceholder: "Enter a collection name",
   },
   stampDetail: {
+    notFound: "Stamp not found",
+    backToAlbum: "Back to album",
     delete: "Delete",
     deleteConfirmTitle: "Delete this stamp?",
     deleteConfirmMessage: "Deleted stamps cannot be restored.",

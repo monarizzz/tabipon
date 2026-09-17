@@ -76,6 +76,8 @@ export const ko: Translations = {
     namePlaceholder: "컬렉션 이름 입력",
   },
   stampDetail: {
+    notFound: "스탬프를 찾을 수 없습니다",
+    backToAlbum: "앨범으로 돌아가기",
     delete: "삭제",
     deleteConfirmTitle: "스탬프를 삭제하시겠습니까?",
     deleteConfirmMessage: "삭제한 스탬프는 되돌릴 수 없습니다.",

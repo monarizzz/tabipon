@@ -35,13 +35,7 @@ function toGridItem(stamp: Stamp, defaultName: string): StampGridItem {
     // 一覧のカードは日付だけ。時刻は詳細画面で出す
     date: formatIsoDate(stamp.capturedAt),
     imageUri: stampImageUri(stamp),
-    spotName,
-    memo: stamp.memo?.trim() || "",
     obtained: true,
-    tiltAngle: stamp.tiltAngle,
-    scratchLevel: stamp.scratchLevel,
-    color: stamp.color,
-    frame: stamp.frameId,
   };
 }
 

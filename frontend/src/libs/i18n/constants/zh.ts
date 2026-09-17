@@ -76,6 +76,8 @@ export const zh: Translations = {
     namePlaceholder: "请输入合集名称",
   },
   stampDetail: {
+    notFound: "找不到该印章",
+    backToAlbum: "返回相册",
     delete: "删除",
     deleteConfirmTitle: "要删除这枚印章吗？",
     deleteConfirmMessage: "删除后的印章无法恢复。",
