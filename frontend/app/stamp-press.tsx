@@ -23,12 +23,12 @@ import { Palette } from "lucide-react-native";
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { NavBar } from "@/src/commons/layout/components/NavBar/NavBar";
 import { TabBar } from "@/src/commons/layout/components/TabBar/TabBar";
-import { useTabBarItems } from "@/src/commons/layout/components/TabBar/useTabBarItems";
+import { useTabBarItems } from "@/src/commons/layout/hooks/useTabBarItems";
 import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
 import { Stamp } from "@/src/commons/stamp/components/Stamp/Stamp";
 import { StampHelp } from "@/src/features/camera/components/StampHelp/StampHelp";
 import { DesignChangeSheet } from "@/src/features/camera/components/DesignChangeSheet/DesignChangeSheet";
-import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/components/DesignChangeSheet/frameStyleOptions";
+import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/constants/frameStyleOptions";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,

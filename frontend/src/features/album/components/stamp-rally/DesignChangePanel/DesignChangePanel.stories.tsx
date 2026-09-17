@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { fn } from "storybook/test";
 
 import { DesignChangePanel } from "./DesignChangePanel";
-import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/components/DesignChangeSheet/frameStyleOptions";
+import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/constants/frameStyleOptions";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,

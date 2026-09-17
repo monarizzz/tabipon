@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Sharing from "expo-sharing";
 import { DesignChangePanel } from "@/src/features/album/components/stamp-rally/DesignChangePanel/DesignChangePanel";
-import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/components/DesignChangeSheet/frameStyleOptions";
+import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/constants/frameStyleOptions";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,

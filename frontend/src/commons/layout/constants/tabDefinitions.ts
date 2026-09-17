@@ -2,7 +2,7 @@ import type { Href } from "expo-router";
 import { Camera, Image, User } from "lucide-react-native";
 import type { TranslationKey } from "@/src/libs/i18n/types/i18n";
 import { colors } from "@/src/style/tokens";
-import type { TabBarIcon } from "./TabBar";
+import type { TabBarIcon } from "@/src/commons/layout/components/TabBar/TabBar";
 
 export type TabKey = "index" | "album" | "mypage";
 

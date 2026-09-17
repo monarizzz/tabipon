@@ -12,7 +12,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { RotateCcw } from "lucide-react-native";
 import { TabBar } from "@/src/commons/layout/components/TabBar/TabBar";
-import { useTabBarItems } from "@/src/commons/layout/components/TabBar/useTabBarItems";
+import { useTabBarItems } from "@/src/commons/layout/hooks/useTabBarItems";
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
 import { StampInfoCard } from "@/src/commons/stamp/components/StampInfoCard/StampInfoCard";

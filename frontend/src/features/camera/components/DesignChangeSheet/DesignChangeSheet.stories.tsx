@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { fn } from "storybook/test";
 
 import { DesignChangeSheet } from "./DesignChangeSheet";
-import { FRAME_STYLE_OPTIONS } from "./frameStyleOptions";
+import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/constants/frameStyleOptions";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,

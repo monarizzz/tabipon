@@ -3,7 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import { NavBar } from "@/src/commons/layout/components/NavBar/NavBar";
 import { TabBar } from "@/src/commons/layout/components/TabBar/TabBar";
-import { useTabBarItems } from "@/src/commons/layout/components/TabBar/useTabBarItems";
+import { useTabBarItems } from "@/src/commons/layout/hooks/useTabBarItems";
 import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
 import {
   PhotoCropArea,
