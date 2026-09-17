@@ -142,13 +142,9 @@ export function useStampFieldEditors({
     saveDate: () => {
       void save("date", () => ({ capturedAt: draftDate.toISOString() }));
     },
-    // **住所を直したら座標も引き直す。**そうしないと地図が前の場所を指したまま
-    // 住所だけ変わり、表示が食い違う（#87）。
-    //
-    // 引けなかったときは座標を据え置いたうえで、警告を出して保存を保留する。
-    // 「おばあちゃんち」のような住所として引けない文字列は入りうるし、そこで
-    // 座標を消すと地図ごと出なくなる。ただし据え置けば住所と地図が食い違うので、
-    // そのまま保存するかどうかは利用者に選ばせる（#241）
+    // 住所を直したら `geocodeAddress()` で座標も引き直し、引けなければ座標を
+    // 据え置いたまま保存を保留して警告を出す
+    // （方針は docs/front-architecture.md「場所の編集と座標の追従」）
     saveLocation: () => {
       void save("location", async () => {
         const address = normalizeOptionalText(draftLocation);
@@ -165,8 +161,6 @@ export function useStampFieldEditors({
     },
 
     geocodeWarning,
-    // 住所も保存しない。食い違いが困るから選んだのに住所だけ残ると同じ状態になる。
-    // 編集欄は開いたままにして、引ける表記に直して出し直せるようにする
     cancelGeocodeWarning: () => setGeocodeWarning(null),
     saveLocationAnyway: () => {
       const pending = geocodeWarning;

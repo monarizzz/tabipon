@@ -1,6 +1,7 @@
 // 住所の保存だけを見る。座標を引く側は `libs/location/geocode.test.ts`、
 // 列への書き込みは `infra/db/stamps.test.ts` がそれぞれ見ている。
-// ここで確かめるのは、引けなかったときに保存を止めて警告を出すかどうか（#241）
+// ここで確かめるのは `saveLocation()` の分岐（引けなかったときに保存を止めて
+// 警告を出すか）。方針は docs/front-architecture.md「場所の編集と座標の追従」
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 
 import { useStampFieldEditors } from "@/src/commons/stamp/hooks/useStampFieldEditors";
