@@ -8,50 +8,13 @@ import {
 } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { geocodeAddress } from "@/src/libs/location/geocode";
-import { parseIso } from "@/src/utils/datetime/format";
-
-/** 空文字は「未設定」として null で保存する。DB 側で "" と null が混ざらないようにする */
-function normalizeOptionalText(value: string): string | null {
-  return value.trim() || null;
-}
-
-/** 撮影日時が壊れている場合でもピッカーは開けるようにし、現在時刻から選ばせる */
-function parseCapturedAt(isoDate: string): Date {
-  return parseIso(isoDate) ?? new Date();
-}
-
-type EditableField = "spotName" | "date" | "location" | "memo";
-type EditingField = EditableField | null;
-
-export type StampFieldEditors = {
-  /** 表示に使う値。`stamp` から導出する */
-  spotName: string;
-  memo: string;
-  capturedAt: string;
-  location: string;
-
-  openSpotName: () => void;
-  openDate: () => void;
-  openLocation: () => void;
-  openMemo: () => void;
-
-  /** `<StampFieldSheets editors={...} />` に渡す。画面から直接は触らない */
-  editingField: EditingField;
-  editableDate: boolean;
-  draftSpotName: string;
-  draftLocation: string;
-  draftDate: Date;
-  draftMemo: string;
-  setDraftSpotName: (value: string) => void;
-  setDraftLocation: (value: string) => void;
-  setDraftDate: (value: Date) => void;
-  setDraftMemo: (value: string) => void;
-  closeEditor: () => void;
-  saveSpotName: () => void;
-  saveDate: () => void;
-  saveLocation: () => void;
-  saveMemo: () => void;
-};
+import type {
+  EditableField,
+  EditingField,
+  StampFieldEditors,
+} from "@/src/commons/stamp/types/stampField";
+import { normalizeOptionalText } from "@/src/commons/stamp/utils/normalizeOptionalText";
+import { parseCapturedAt } from "@/src/commons/stamp/utils/parseCapturedAt";
 
 type Options = {
   stampId: string | undefined;

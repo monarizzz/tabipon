@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "storybook/test";
 import { View } from "react-native";
 import { StampFieldSheets } from "./StampFieldSheets";
-import type { StampFieldEditors } from "@/src/commons/stamp/hooks/useStampFieldEditors";
+import type { StampFieldEditors } from "@/src/commons/stamp/types/stampField";
 
 /**
  * `useStampFieldEditors()` の戻り値のモック。
