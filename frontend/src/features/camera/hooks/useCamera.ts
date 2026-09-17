@@ -1,5 +1,6 @@
 import React from "react";
 import { useFocusEffect, useRouter } from "expo-router";
+import { openSettings } from "expo-linking";
 import {
   useCameraPermissions,
   type CameraType,
@@ -13,7 +14,7 @@ import { cropToPreview } from "@/src/features/camera/utils/cropToPreview";
 /** カメラ画面の状態と操作をまとめて持つ */
 export function useCamera(): Camera {
   const router = useRouter();
-  const [permission, requestPermission] = useCameraPermissions();
+  const [permission, requestPermission, getPermission] = useCameraPermissions();
   const [facing, setFacing] = React.useState<CameraType>("back");
   const [flash, setFlash] = React.useState<FlashMode>("off");
   const cameraRef = React.useRef<CameraView>(null);
@@ -31,9 +32,27 @@ export function useCamera(): Camera {
   // 撮影後に戻ってきたときは、また撮れる状態にしておく
   useFocusEffect(stopCapturing);
 
+  const permissionGranted = permission?.granted ?? false;
+
+  // 設定アプリで権限を変えてから戻ってきたときに反映する。
+  // useCameraPermissions() が自動で読むのはマウント時の 1 度だけで、
+  // 画面が残ったままだと古い拒否状態を表示し続ける
+  useFocusEffect(
+    React.useCallback(() => {
+      if (permissionGranted) return;
+      void getPermission();
+    }, [permissionGranted, getPermission]),
+  );
+
   return {
-    permissionGranted: permission?.granted ?? false,
+    permissionGranted,
+    // 読み込み中 (permission === null) は拒否済みと決めつけず、
+    // アプリ内で許可を求められる側に倒す
+    permissionCanAskAgain: permission?.canAskAgain ?? true,
     requestPermission,
+    openSettings: () => {
+      void openSettings();
+    },
 
     facing,
     flash,

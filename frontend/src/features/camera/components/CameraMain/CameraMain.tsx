@@ -1,19 +1,20 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { CameraControls } from "@/src/features/camera/components/CameraControls/CameraControls";
 import { CameraHintBar } from "@/src/features/camera/components/CameraHintBar/CameraHintBar";
+import { CameraPermissionNotice } from "@/src/features/camera/components/CameraPermissionNotice/CameraPermissionNotice";
 import { CameraPreview } from "@/src/features/camera/components/CameraPreview/CameraPreview";
 import type { Camera } from "@/src/features/camera/types/camera";
-import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/style/tokens";
+import { colors, spacing } from "@/src/style/tokens";
 
 type Props = Camera;
 
 export function CameraMain({
   permissionGranted,
+  permissionCanAskAgain,
   requestPermission,
+  openSettings,
   facing,
   flash,
   capturing,
@@ -23,18 +24,15 @@ export function CameraMain({
   toggleFlash,
   flipCamera,
 }: Props) {
-  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   if (!permissionGranted) {
     return (
-      <View style={styles.permissionContainer}>
-        <Text style={styles.title}>{t("camera.accessRequiredTitle")}</Text>
-        <CommonButton
-          label={t("camera.accessAllow")}
-          onPress={requestPermission}
-        />
-      </View>
+      <CameraPermissionNotice
+        canAskAgain={permissionCanAskAgain}
+        onRequestPermission={requestPermission}
+        onOpenSettings={openSettings}
+      />
     );
   }
 
@@ -78,19 +76,5 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-  },
-  permissionContainer: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.xxl,
-    paddingHorizontal: spacing.xl,
-  },
-  title: {
-    fontSize: typography.screenTitle.fontSize,
-    fontWeight: typography.screenTitle.fontWeight,
-    color: colors.textPrimary,
-    textAlign: "center",
   },
 });
