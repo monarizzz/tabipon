@@ -1,9 +1,9 @@
 import { Tabs } from "expo-router";
-import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
+import { TabBar } from "@/src/commons/layout/components/TabBar/TabBar";
 import {
   TAB_DEFINITIONS,
   type TabKey,
-} from "@/src/components/common/layout/TabBar/tabDefinitions";
+} from "@/src/commons/layout/components/TabBar/tabDefinitions";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 
 const TAB_BY_KEY = new Map(TAB_DEFINITIONS.map((tab) => [tab.key, tab]));

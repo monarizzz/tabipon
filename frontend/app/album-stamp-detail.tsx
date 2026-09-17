@@ -3,15 +3,15 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Sharing from "expo-sharing";
-import { DesignChangePanel } from "@/src/components/features/album/stamp-rally/DesignChangePanel/DesignChangePanel";
-import { FRAME_STYLE_OPTIONS } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+import { DesignChangePanel } from "@/src/features/album/components/stamp-rally/DesignChangePanel/DesignChangePanel";
+import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/components/DesignChangeSheet/frameStyleOptions";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,
 } from "@/src/utils/stamp/constants/constants";
-import { ShareButton } from "@/src/components/common/ShareButton/ShareButton";
-import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
-import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
+import { ShareButton } from "@/src/commons/button/components/ShareButton/ShareButton";
+import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
+import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
 import { Trash2 } from "lucide-react-native";
 import {
   deleteStamp,
@@ -29,9 +29,9 @@ import {
 import { seedFromStampId } from "@/src/utils/stamp/seed";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, radii, spacing } from "@/src/style/tokens";
-import { StampDetailMediaPager } from "@/src/components/features/album/detail/StampDetailMediaPager/StampDetailMediaPager";
-import { StampInfoCard } from "@/src/components/common/StampInfoCard/StampInfoCard";
-import { EditFieldSheet } from "@/src/components/common/EditFieldSheet/EditFieldSheet";
+import { StampDetailMediaPager } from "@/src/features/album/components/detail/StampDetailMediaPager/StampDetailMediaPager";
+import { StampInfoCard } from "@/src/commons/stamp/components/StampInfoCard/StampInfoCard";
+import { EditFieldSheet } from "@/src/commons/sheet/components/EditFieldSheet/EditFieldSheet";
 import { formatIsoDateTime, parseIso } from "@/src/utils/datetime/format";
 
 // 撮影日時が壊れている場合でもピッカーは開けるようにし、現在時刻から選ばせる

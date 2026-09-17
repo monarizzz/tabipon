@@ -11,15 +11,15 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { RotateCcw } from "lucide-react-native";
-import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
-import { useTabBarItems } from "@/src/components/common/layout/TabBar/useTabBarItems";
-import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
-import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
-import { StampInfoCard } from "@/src/components/common/StampInfoCard/StampInfoCard";
-import { EditFieldSheet } from "@/src/components/common/EditFieldSheet/EditFieldSheet";
-import { StampResultHeader } from "@/src/components/features/camera/StampResultHeader/StampResultHeader";
-import { StampShowcase } from "@/src/components/features/camera/StampShowcase/StampShowcase";
-import { StampDoneActions } from "@/src/components/features/camera/StampDoneActions/StampDoneActions";
+import { TabBar } from "@/src/commons/layout/components/TabBar/TabBar";
+import { useTabBarItems } from "@/src/commons/layout/components/TabBar/useTabBarItems";
+import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
+import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
+import { StampInfoCard } from "@/src/commons/stamp/components/StampInfoCard/StampInfoCard";
+import { EditFieldSheet } from "@/src/commons/sheet/components/EditFieldSheet/EditFieldSheet";
+import { StampResultHeader } from "@/src/features/camera/components/StampResultHeader/StampResultHeader";
+import { StampShowcase } from "@/src/features/camera/components/StampShowcase/StampShowcase";
+import { StampDoneActions } from "@/src/features/camera/components/StampDoneActions/StampDoneActions";
 import {
   deleteStamp,
   getStamp,

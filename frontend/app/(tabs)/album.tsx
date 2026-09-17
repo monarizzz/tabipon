@@ -4,14 +4,14 @@ import { useRouter, useFocusEffect } from "expo-router";
 import {
   FilterRow,
   type FilterOption,
-} from "@/src/components/features/album/FilterRow/FilterRow";
+} from "@/src/features/album/components/FilterRow/FilterRow";
 import {
   StampGrid,
   type StampGridItem,
-} from "@/src/components/features/album/StampGrid/StampGrid";
-import { CollectionSheet } from "@/src/components/features/album/CollectionSheet/CollectionSheet";
-import { Header } from "@/src/components/common/layout/Header/Header";
-import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
+} from "@/src/features/album/components/StampGrid/StampGrid";
+import { CollectionSheet } from "@/src/features/album/components/CollectionSheet/CollectionSheet";
+import { Header } from "@/src/commons/layout/components/Header/Header";
+import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { listStamps, stampImageUri, type Stamp } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { formatIsoDate } from "@/src/utils/datetime/format";
