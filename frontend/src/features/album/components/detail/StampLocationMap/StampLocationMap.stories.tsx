@@ -25,3 +25,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+// 座標が無いスタンプ。それらしい地図を出すと行ってもいない場所を見せることになるので、
+// 文字で「出せない」とだけ伝える
+export const NoLocation: Story = {
+  args: { latitude: null, longitude: null },
+};
+
+export const NoSpotName: Story = {
+  args: { spotName: "" },
+};

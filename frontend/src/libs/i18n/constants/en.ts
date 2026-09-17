@@ -96,6 +96,7 @@ export const en: Translations = {
     addPlace: "Add place",
     addMemo: "Add memo",
     addSpotName: "Add spot name",
+    mapUnavailable: "Couldn't show the map",
     designUnavailableTitle: "Can't change the design",
     designUnavailableMessage:
       "This stamp wasn't created on this device, so its design can't be changed.",

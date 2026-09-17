@@ -95,6 +95,7 @@ export const ko: Translations = {
     addPlace: "장소 추가",
     addMemo: "메모 추가",
     addSpotName: "장소 이름 추가",
+    mapUnavailable: "지도를 표시할 수 없습니다",
     designUnavailableTitle: "디자인을 변경할 수 없습니다",
     designUnavailableMessage:
       "이 스탬프는 이 기기에서 만들어지지 않아 디자인을 변경할 수 없습니다.",
