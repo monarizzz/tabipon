@@ -6,7 +6,6 @@ import {
   replaceStampImage,
   stampImageUri,
   updateStamp,
-  type Stamp,
 } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import {
@@ -16,36 +15,10 @@ import {
 import { seedFromStampId } from "@/src/utils/stamp/seed";
 import { DEFAULT_STAMP_COLOR } from "@/src/utils/stamp/constants/constants";
 import { DEFAULT_STAMP_FRAME, type StampFrame } from "@/src/utils/stamp/types";
-
-export type StampDesignChange = {
-  /** 画面に出す uri。デザイン変更のたびに変わる（キャッシュ避け） */
-  displayImageUri: string;
-  /** ファイルそのものを渡すときの uri。共有はこちらを使う */
-  imageUri: string;
-
-  designMode: boolean;
-  /** 選択中デザインのプレビュー（data-URI）。生成前と変更中でない間は null */
-  previewUri: string | null;
-  previewLoading: boolean;
-  /** 確定の処理中。二度押しはこの間だけ弾く */
-  updating: boolean;
-
-  selectedColor: string;
-  selectedFrameStyleId: StampFrame;
-  setSelectedColor: (color: string) => void;
-  setSelectedFrameStyleId: (frameId: StampFrame) => void;
-
-  open: () => void;
-  close: () => void;
-  confirm: () => void;
-};
-
-type Options = {
-  stampId: string | undefined;
-  stamp: Stamp | null;
-  /** 確定に成功したときに呼ぶ。画面側の `stamp` を差し替える */
-  onUpdated: (stamp: Stamp) => void;
-};
+import type {
+  StampDesignChange,
+  StampDesignChangeOptions,
+} from "@/src/features/album/types/stampDesignChange";
 
 /**
  * スタンプのデザイン（色・フレーム）変更をまとめて持つ。
@@ -62,7 +35,7 @@ export function useStampDesignChange({
   stampId,
   stamp,
   onUpdated,
-}: Options): StampDesignChange {
+}: StampDesignChangeOptions): StampDesignChange {
   const { t } = useTranslation();
 
   const [designMode, setDesignMode] = React.useState(false);
