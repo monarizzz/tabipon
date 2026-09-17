@@ -1,6 +1,8 @@
 // 削除そのもの（行とファイルをどの順で消すか）は `stamps.test.ts` で見ている。
 // ここで確かめるのは画面から外した後始末 — 撮り直しの削除が失敗したときに
 // カメラへ戻さないこと。
+// `deleteStamp()` が投げるのは行を消せなかったときだけで、画像の後始末の失敗は
+// 投げずに成功として返る。ここでの棄却は「行が残っている」場合を指す
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
