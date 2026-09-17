@@ -19,4 +19,10 @@ module.exports = defineConfig([
   // eslint-plugin-prettier を挟まず、prettier CLI (`npm run format:check`) に任せる。
   // lint を走らせるたびに整形チェックまで動かすと、見たいエラーが埋もれるため
   eslintConfigPrettier,
+  // jest.mock はファクトリごと import より上へ巻き上げられるため、中では
+  // import した束縛を参照できず require でしか書けない。このファイルだけ許可する
+  {
+    files: ["jest.setup.ts"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
 ]);

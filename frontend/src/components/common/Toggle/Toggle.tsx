@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Animated, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "@/src/style/tokens";
 
@@ -14,7 +14,10 @@ const THUMB_SIZE = 22;
 const THUMB_MARGIN = 2;
 
 export function Toggle({ value, onValueChange, disabled = false }: Props) {
-  const translateX = useRef(new Animated.Value(value ? 1 : 0)).current;
+  // Animated.Value はレンダーをまたいで同じインスタンスを保つ必要があるが、ref に
+  // 置くと interpolate() のためにレンダー中 .current を読むことになる。state の
+  // 遅延初期化なら生成は初回だけで、レンダー中に読んでも純粋性を壊さない
+  const [translateX] = useState(() => new Animated.Value(value ? 1 : 0));
 
   useEffect(() => {
     Animated.timing(translateX, {
