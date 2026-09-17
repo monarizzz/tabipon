@@ -22,6 +22,8 @@ export const ko: Translations = {
     accessAllow: "카메라 접근 허용",
     hint: "원 안에 들어오도록 촬영하세요",
     capturedPhoto: "[ 촬영한 사진 ]",
+    captureFailedTitle: "촬영하지 못했습니다",
+    captureFailedMessage: "셔터를 다시 눌러 주세요.",
   },
   photoAdjust: {
     title: "사진 조정",

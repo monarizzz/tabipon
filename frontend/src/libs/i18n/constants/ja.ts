@@ -21,6 +21,8 @@ export const ja = {
     accessAllow: "カメラへのアクセスを許可",
     hint: "円に入るように撮影してください",
     capturedPhoto: "[ 撮影した写真 ]",
+    captureFailedTitle: "撮影できませんでした",
+    captureFailedMessage: "もう一度シャッターを押してください。",
   },
   photoAdjust: {
     title: "写真を調整",

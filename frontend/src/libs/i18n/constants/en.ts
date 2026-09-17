@@ -22,6 +22,8 @@ export const en: Translations = {
     accessAllow: "Allow camera access",
     hint: "Frame your subject inside the circle",
     capturedPhoto: "[ Captured photo ]",
+    captureFailedTitle: "Could not take the photo",
+    captureFailedMessage: "Please press the shutter again.",
   },
   photoAdjust: {
     title: "Adjust photo",
