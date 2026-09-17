@@ -60,7 +60,7 @@ export function StampDetailMediaPager({
           />
         </View>
       </ScrollView>
-      {/* スポット名はページ固有の情報ではないので、ページャの外に 1 つだけ置く */}
+      {/* 置き場の方針は docs/front-architecture.md「スポット名の描画」を参照 */}
       <View style={styles.spotName}>
         <SpotNameLabel spotName={spotName} onPress={onPressSpotName} />
       </View>

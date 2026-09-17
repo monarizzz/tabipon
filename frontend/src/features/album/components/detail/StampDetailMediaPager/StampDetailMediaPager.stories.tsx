@@ -29,8 +29,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// スポット名はページャの外に 1 つだけ置くので、未入力・長い名前のときの
-// 見え方は写真ページと地図ページで共通になる
 export const NoSpotName: Story = {
   args: { spotName: "" },
 };

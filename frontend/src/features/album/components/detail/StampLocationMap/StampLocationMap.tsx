@@ -5,10 +5,7 @@ import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, radii, spacing, typography } from "@/src/style/tokens";
 
 type Props = {
-  /**
-   * ピンをタップしたときの吹き出しに出す名前。画面の見出しとしてのスポット名は
-   * ページャ側（`StampDetailMediaPager`）が 1 つだけ描く
-   */
+  /** ピンをタップしたときの吹き出しに出す名前（docs/front-architecture.md「スポット名の描画」） */
   spotName: string;
   latitude: number | null;
   longitude: number | null;
