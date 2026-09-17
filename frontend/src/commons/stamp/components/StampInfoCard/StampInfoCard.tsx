@@ -36,6 +36,10 @@ export function StampInfoCard({
           disabled={!onPressDate}
           activeOpacity={0.7}
           hitSlop={CELL_HIT_SLOP}
+          accessibilityRole={onPressDate ? "button" : undefined}
+          accessibilityLabel={
+            onPressDate ? t("stampDetail.editDate") : undefined
+          }
         >
           <View style={styles.labelRow}>
             <Text style={styles.label}>{t("stampDetail.labelDate")}</Text>
@@ -54,6 +58,10 @@ export function StampInfoCard({
           disabled={!onPressLocation}
           activeOpacity={0.7}
           hitSlop={CELL_HIT_SLOP}
+          accessibilityRole={onPressLocation ? "button" : undefined}
+          accessibilityLabel={
+            onPressLocation ? t("stampDetail.editPlace") : undefined
+          }
         >
           <View style={styles.labelRow}>
             <Text style={styles.label}>{t("stampDetail.labelPlace")}</Text>
@@ -74,6 +82,8 @@ export function StampInfoCard({
         onPress={onPressMemo}
         disabled={!onPressMemo}
         activeOpacity={0.7}
+        accessibilityRole={onPressMemo ? "button" : undefined}
+        accessibilityLabel={onPressMemo ? t("stampDetail.editMemo") : undefined}
       >
         <View style={styles.labelRow}>
           <Text style={styles.label}>{t("stampDetail.labelMemo")}</Text>

@@ -22,6 +22,8 @@ export function SpotNameLabel({ spotName, onPress }: Props) {
       disabled={!onPress}
       activeOpacity={0.7}
       hitSlop={HIT_SLOP}
+      accessibilityRole={onPress ? "button" : undefined}
+      accessibilityLabel={onPress ? t("stampDetail.editTitle") : undefined}
     >
       {spotName ? (
         <Text style={styles.spotName}>{spotName}</Text>
