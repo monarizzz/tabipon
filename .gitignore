@@ -24,6 +24,9 @@ frontend/node_modules/
 frontend/.expo/
 frontend/dist/
 frontend/build/
+# node_modules の canvaskit-wasm からコピーしてくる 8MB の生成物。
+# `npm run setup:skia-web`（web の起動時に自動で走る）が置き直す
+frontend/public/canvaskit.wasm
 
 # OS
 .DS_Store
