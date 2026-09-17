@@ -10,17 +10,21 @@ import {
 } from "@/src/utils/stamp/constants/constants";
 import { framePaint } from "@/src/utils/stamp/framePaint";
 
-export function drawClassicCircle(canvas: SkCanvas, color: string): void {
+export function drawClassicCircle(
+  canvas: SkCanvas,
+  color: string,
+  minThickness: number,
+): void {
   canvas.drawCircle(
     FRAME_CENTER,
     FRAME_CENTER,
     FRAME_RADIUS,
-    framePaint(color, CLASSIC_OUTER_THICKNESS),
+    framePaint(color, Math.max(CLASSIC_OUTER_THICKNESS, minThickness)),
   );
   canvas.drawCircle(
     FRAME_CENTER,
     FRAME_CENTER,
     FRAME_RADIUS - CLASSIC_INNER_RADIUS_OFFSET,
-    framePaint(color, CLASSIC_INNER_THICKNESS),
+    framePaint(color, Math.max(CLASSIC_INNER_THICKNESS, minThickness)),
   );
 }
