@@ -1,6 +1,7 @@
 import React from "react";
-import { Share } from "react-native";
+import { Alert } from "react-native";
 import { useRouter } from "expo-router";
+import * as Sharing from "expo-sharing";
 
 import { useTabBarItems } from "@/src/commons/layout/hooks/useTabBarItems";
 import { useStampFieldEditors } from "@/src/commons/stamp/hooks/useStampFieldEditors";
@@ -57,15 +58,39 @@ export function useStampDone({ stampId, stampTop }: Params): StampDone {
     });
   }, [stampId]);
 
+  const imageUri = stamp ? stampImageUri(stamp) : undefined;
+
   return {
-    imageUri: stamp ? stampImageUri(stamp) : undefined,
+    imageUri,
     editors,
     tabItems,
     headerAnchorHeight: headerAnchorHeight(stampTop),
     retakeDialogVisible,
 
     share: () => {
-      Share.share({ message: t("stampDone.shareMessage") });
+      void (async () => {
+        if (!imageUri) return;
+        try {
+          if (!(await Sharing.isAvailableAsync())) {
+            Alert.alert(
+              t("stampDone.shareUnavailableTitle"),
+              t("stampDone.shareUnavailableMessage"),
+            );
+            return;
+          }
+          // 画像は端末の documentDirectory にあるので、そのまま渡せる。
+          // shareAsync は本文テキストを渡せないため、文言は dialogTitle に入れる
+          await Sharing.shareAsync(imageUri, {
+            dialogTitle: editors.spotName || t("stampDone.shareMessage"),
+          });
+        } catch (error) {
+          console.error("[stamp-done] failed to share image", error);
+          Alert.alert(
+            t("stampDone.shareFailedTitle"),
+            t("stampDone.shareFailedMessage"),
+          );
+        }
+      })();
     },
     openRetakeDialog: () => setRetakeDialogVisible(true),
     cancelRetake: () => setRetakeDialogVisible(false),

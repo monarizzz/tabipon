@@ -50,6 +50,11 @@ export const en: Translations = {
     retakeConfirmTitle: "Retake this stamp?",
     retakeConfirmMessage:
       "This stamp will be deleted so you can shoot it again.",
+    shareUnavailableTitle: "Sharing unavailable",
+    shareUnavailableMessage: "Sharing isn't available on this device.",
+    shareFailedTitle: "Error",
+    shareFailedMessage:
+      "Failed to share the image. Please wait a moment and try again.",
   },
   design: {
     frame: "Frame",

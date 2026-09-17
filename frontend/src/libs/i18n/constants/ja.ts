@@ -48,6 +48,11 @@ export const ja = {
     retake: "撮り直す",
     retakeConfirmTitle: "スタンプを撮り直しますか?",
     retakeConfirmMessage: "このスタンプは削除され、もう一度撮影し直せます。",
+    shareUnavailableTitle: "共有できません",
+    shareUnavailableMessage: "この端末では共有機能を利用できません。",
+    shareFailedTitle: "エラー",
+    shareFailedMessage:
+      "画像の共有に失敗しました。時間をおいて再度お試しください。",
   },
   design: {
     frame: "フレーム",
