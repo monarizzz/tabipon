@@ -1,4 +1,5 @@
 import { View } from "react-native";
+import { FrameDot } from "@/src/commons/stamp/components/FrameDot/FrameDot";
 import { colors } from "@/src/style/tokens";
 import type { StampFrame } from "@/src/utils/stamp/types";
 
@@ -7,22 +8,6 @@ type Props = {
   /** 選択中は濃い色で描く */
   selected?: boolean;
 };
-
-function Dot({ x, y, color }: { x: number; y: number; color: string }) {
-  return (
-    <View
-      style={{
-        position: "absolute",
-        left: x,
-        top: y,
-        width: 5,
-        height: 5,
-        borderRadius: 2.5,
-        backgroundColor: color,
-      }}
-    />
-  );
-}
 
 /** フレームの意匠を 48x48 で示すサムネイル。デザイン変更UIの選択肢に並べる */
 export function FrameThumb({ variant, selected = false }: Props) {
@@ -72,10 +57,10 @@ export function FrameThumb({ variant, selected = false }: Props) {
               borderColor: color,
             }}
           />
-          <Dot x={21} y={0} color={color} />
-          <Dot x={21} y={43} color={color} />
-          <Dot x={0} y={21} color={color} />
-          <Dot x={43} y={21} color={color} />
+          <FrameDot x={21} y={0} color={color} />
+          <FrameDot x={21} y={43} color={color} />
+          <FrameDot x={0} y={21} color={color} />
+          <FrameDot x={43} y={21} color={color} />
         </>
       )}
     </View>
