@@ -26,8 +26,7 @@
 | 領域 | 使用技術 |
 | --- | --- |
 | フロントエンド | React Native / Expo / TypeScript（expo-camera, expo-sensors, expo-haptics, react-native-reanimated ほか） |
-| DB・ストレージ | Supabase Postgres / Supabase Storage |
-| デプロイ | Railway |
+| データ保存 | 端末ローカル（expo-sqlite / expo-file-system） |
 
 ドキュメントの一覧と役割は [`docs/README.md`](docs/README.md) にまとめています。詳しい仕様は [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md)、アーキテクチャは [`docs/front-architecture.md`](docs/front-architecture.md)　デザインは [`design/DESIGN.MD`](design/DESIGN.MD) を参照してください。
 
@@ -61,6 +60,15 @@ npm ci
 - コミット件名の prefix の検査
 
 いずれかが失敗するとコミットは中断されます。
+
+環境変数の設定:
+
+```bash
+cd frontend
+cp .env.example .env    # Google Maps の API キーを設定する
+```
+
+住所表示と地図表示に `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` を使います。キーの取得手順は `.env.example` のコメントを参照してください（**Maps JavaScript API と Geocoding API の両方**を有効化する必要があります）。未設定でもアプリは起動しますが、スタンプの住所と地図は表示されません。`.env` を変更したら `npx expo start -c` でキャッシュを消して起動し直します。
 
 通常起動:
 
