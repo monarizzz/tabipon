@@ -43,47 +43,53 @@ export function useStampFieldEditors({
   const [draftMemo, setDraftMemo] = React.useState("");
 
   /**
-   * 保存中のフィールド。二度押しの guard にだけ使う。
+   * フィールドごとの保存の順番待ち。最後に流した保存の Promise を持つ。
    *
    * **フィールドごとに持つ。**場所の保存はジオコーディングの通信を挟むので、
-   * 1 つの真偽値にすると、その待ち時間のあいだメモなど他の項目の保存まで弾かれる。
-   * 早期 return なので押しても何も起きず、失敗したことも分からない。
+   * 1 本の待ち行列にすると、その待ち時間のあいだメモなど他の項目の保存まで待たされる。
    *
    * 表示には使わないので state ではなく ref で持つ。
    */
-  const savingFields = React.useRef(new Set<EditableField>());
+  const saveQueues = React.useRef(new Map<EditableField, Promise<void>>());
 
   const closeEditor = React.useCallback(() => setEditingField(null), []);
 
   /**
    * 1 項目を保存する。
    *
-   * 同じ項目の保存中は二度押しを弾き、失敗したらログと Alert を出して編集欄を
-   * 開いたままにする。閉じてしまうと、入力した内容が消えたうえに失敗したことも
-   * 分からなくなる。
+   * 同じ項目の保存中に来た保存は捨てずに順番待ちにし、前の保存が終わってから流す。
+   * 弾くと、押した保存が黙って無かったことになるうえ、先に走っていた保存の完了で
+   * 編集欄が閉じるので、保存されたように見えてしまう。
+   *
+   * 失敗したらログと Alert を出して編集欄を開いたままにする。閉じてしまうと、
+   * 入力した内容が消えたうえに失敗したことも分からなくなる。
    *
    * **patch は関数で受け取る。**場所の保存は書き込む前にジオコーディングを挟むので、
-   * patch を先に組ませると、その通信中だけ二度押しの guard が外れる
+   * patch を先に組ませると、順番待ちに入る前の古い入力値で書き込むことになる
    */
   const save = React.useCallback(
     async (
       field: EditableField,
       buildPatch: () => StampPatch | Promise<StampPatch>,
     ) => {
-      if (!stampId || savingFields.current.has(field)) return;
-      savingFields.current.add(field);
-      try {
-        onUpdated(await updateStamp(stampId, await buildPatch()));
-        closeEditor();
-      } catch (error) {
-        console.error(`${logTag} failed to update ${field}`, error);
-        Alert.alert(
-          t("stampDetail.saveFailedTitle"),
-          t("stampDetail.saveFailedMessage"),
-        );
-      } finally {
-        savingFields.current.delete(field);
-      }
+      if (!stampId) return;
+      const run = async () => {
+        try {
+          onUpdated(await updateStamp(stampId, await buildPatch()));
+          closeEditor();
+        } catch (error) {
+          console.error(`${logTag} failed to update ${field}`, error);
+          Alert.alert(
+            t("stampDetail.saveFailedTitle"),
+            t("stampDetail.saveFailedMessage"),
+          );
+        }
+      };
+      // 前の保存が失敗しても後続は流す（`run` は自分で握るので reject しないが、念のため両方に渡す）
+      const previous = saveQueues.current.get(field) ?? Promise.resolve();
+      const next = previous.then(run, run);
+      saveQueues.current.set(field, next);
+      await next;
     },
     [closeEditor, logTag, onUpdated, stampId, t],
   );
