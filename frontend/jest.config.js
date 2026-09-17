@@ -11,6 +11,10 @@ module.exports = {
   // Skia の描画 API を使うコンポーネントのために CanvasKit を読み込む環境を使う
   // （詳細は jest.environment.js）
   testEnvironment: "<rootDir>/jest.environment.js",
+  // react-native-worklets (Reanimated 4 の基盤) は `.native.ts` 側を解決すると
+  // ネイティブモジュールを掴みに行って落ちる。公式の resolver が native 拡張子を
+  // 外してくれるので、それに委ねる
+  resolver: "react-native-worklets/jest/resolver.js",
   setupFilesAfterEnv: [
     "<rootDir>/jest.setup.ts",
     "<rootDir>/jest.setup.storybook.ts",

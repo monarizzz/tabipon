@@ -49,3 +49,15 @@ jest.mock("react-native-maps", () => {
 // 提供する jest 用モック (CanvasKit を使わない JS 実装への差し替え) を使う
 // https://shopify.github.io/react-native-skia/docs/setup/jest/
 require("@shopify/react-native-skia/jestSetup");
+
+// expo-audio はネイティブの音声モジュールを読み込む時点で落ちる
+// (`loadUnpackers` が未定義)。公式のモックが無いので、再生を受け取るだけの
+// プレイヤーに置き換える。音が鳴るかはテストの対象外で、ここで確かめるのは
+// 「押印音を使う画面が組み立てられること」まで
+jest.mock("expo-audio", () => ({
+  createAudioPlayer: () => ({
+    play: () => {},
+    seekTo: () => Promise.resolve(),
+    remove: () => {},
+  }),
+}));
