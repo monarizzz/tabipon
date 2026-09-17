@@ -2,7 +2,7 @@
 // 以前はどちらも無く、シャッターが効かないようにしか見えなかった（Issue #258）。
 import { act, renderHook } from "@testing-library/react-native";
 import { Alert } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 
 import { useCamera } from "@/src/features/camera/hooks/useCamera";
 import { cropToPreview } from "@/src/features/camera/utils/cropToPreview";
@@ -23,6 +23,7 @@ jest.mock("@/src/libs/i18n/I18nProvider", () => ({
 
 const cropToPreviewMock = jest.mocked(cropToPreview);
 const useRouterMock = jest.mocked(useRouter);
+const useFocusEffectMock = jest.mocked(useFocusEffect);
 
 const push = jest.fn();
 const takePictureAsync = jest.fn();
@@ -45,6 +46,34 @@ async function setup() {
     takePictureAsync,
   } as never;
   return rendered;
+}
+
+/**
+ * カメラ画面から別のタブへ移る。
+ * 実機では useFocusEffect に渡した後始末が blur で走るので、それを直に呼ぶ
+ */
+async function leaveCameraScreen() {
+  const effect = useFocusEffectMock.mock.calls.at(-1)?.[0];
+  await act(async () => {
+    const cleanup = effect?.();
+    if (typeof cleanup === "function") cleanup();
+  });
+}
+
+/** 撮影の成否を後から決められるようにする */
+function pendingShot() {
+  let resolveShot: (photo: unknown) => void = () => {};
+  let rejectShot: (reason: unknown) => void = () => {};
+  takePictureAsync.mockReturnValue(
+    new Promise((resolve, reject) => {
+      resolveShot = resolve;
+      rejectShot = reject;
+    }),
+  );
+  return {
+    succeed: (photo: unknown) => resolveShot(photo),
+    fail: (reason: unknown) => rejectShot(reason),
+  };
 }
 
 beforeEach(() => {
@@ -122,6 +151,71 @@ describe("useCamera", () => {
     );
     expect(errorSpy).toHaveBeenCalledWith("[camera] failed to capture", error);
     expect(push).not.toHaveBeenCalled();
+  });
+
+  // タブを移っても useCamera はマウントされたまま残るため、あとから解決した
+  // 撮影が今表示している画面に割り込んでしまう
+  describe("撮影中にカメラ画面を離れた場合", () => {
+    it("失敗しても Alert は出さず、ログだけ残す", async () => {
+      const error = new Error("カメラを掴めなかった");
+      const shot = pendingShot();
+      const { result } = await setup();
+      let capturing: Promise<void> | undefined;
+      await act(async () => {
+        capturing = result.current.capture();
+      });
+
+      await leaveCameraScreen();
+      await act(async () => {
+        shot.fail(error);
+        await capturing;
+      });
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        "[camera] failed to capture",
+        error,
+      );
+      expect(alertSpy).not.toHaveBeenCalled();
+    });
+
+    it("撮れていても、離れた先の画面へ勝手に遷移しない", async () => {
+      const shot = pendingShot();
+      const { result } = await setup();
+      let capturing: Promise<void> | undefined;
+      await act(async () => {
+        capturing = result.current.capture();
+      });
+
+      await leaveCameraScreen();
+      await act(async () => {
+        shot.succeed({ uri: "file:///photos/raw.jpg" });
+        await capturing;
+      });
+
+      expect(push).not.toHaveBeenCalled();
+      expect(alertSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  it("カメラ画面にいるまま失敗した場合は、これまでどおり Alert を出す", async () => {
+    const error = new Error("カメラを掴めなかった");
+    const shot = pendingShot();
+    const { result } = await setup();
+    let capturing: Promise<void> | undefined;
+    await act(async () => {
+      capturing = result.current.capture();
+    });
+
+    await act(async () => {
+      shot.fail(error);
+      await capturing;
+    });
+
+    expect(errorSpy).toHaveBeenCalledWith("[camera] failed to capture", error);
+    expect(alertSpy).toHaveBeenCalledWith(
+      "camera.captureFailedTitle",
+      "camera.captureFailedMessage",
+    );
   });
 
   it("失敗したあとでもう一度押すと、撮り直せる", async () => {
