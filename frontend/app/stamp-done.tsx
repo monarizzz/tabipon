@@ -1,7 +1,6 @@
 import React from "react";
 import {
   View,
-  Text,
   StyleSheet,
   Share,
   KeyboardAvoidingView,
@@ -33,16 +32,9 @@ import { colors, spacing } from "@/src/style/tokens";
 export default function StampDoneScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const {
-    stampTop: stampTopParam,
-    stampId,
-    scratchLevel,
-    peak,
-  } = useLocalSearchParams<{
+  const { stampTop: stampTopParam, stampId } = useLocalSearchParams<{
     stampTop?: string;
     stampId?: string;
-    scratchLevel?: string;
-    peak?: string;
   }>();
   const [stamp, setStamp] = React.useState<Stamp | null>(null);
   const editors = useStampFieldEditors({
@@ -130,13 +122,6 @@ export default function StampDoneScreen() {
             spotName={editors.spotName}
             onPressSpotName={editors.openSpotName}
           />
-          {/* styles.debugText は定義されておらず、これまでも未適用のまま描画されていた。
-              見た目を変えないよう参照だけ外している。この DEBUG 表示自体の要否は別途判断する */}
-          {scratchLevel !== undefined && (
-            <Text>
-              [DEBUG] scratch: {scratchLevel} / peak: {peak}
-            </Text>
-          )}
           <View style={styles.actionsAnchor}>
             <StampInfoCard
               date={formatIsoDateTime(editors.capturedAt)}
