@@ -31,21 +31,10 @@ import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, radii, spacing } from "@/src/style/tokens";
 import { StampDetailMediaPager } from "@/src/features/album/components/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/commons/stamp/components/StampInfoCard/StampInfoCard";
-import { EditFieldSheet } from "@/src/commons/sheet/components/EditFieldSheet/EditFieldSheet";
-import { formatIsoDateTime, parseIso } from "@/src/utils/datetime/format";
+import { StampFieldSheets } from "@/src/commons/stamp/components/StampFieldSheets/StampFieldSheets";
+import { useStampFieldEditors } from "@/src/commons/stamp/hooks/useStampFieldEditors";
+import { formatIsoDateTime } from "@/src/utils/datetime/format";
 import { useReverseGeocode } from "@/src/libs/location/useReverseGeocode";
-
-// 撮影日時が壊れている場合でもピッカーは開けるようにし、現在時刻から選ばせる
-function parseCapturedAt(isoDate: string): Date {
-  return parseIso(isoDate) ?? new Date();
-}
-
-function normalizeOptionalText(value: string): string | null {
-  const trimmed = value.trim();
-  return trimmed || null;
-}
-
-type EditingField = "spotName" | "date" | "location" | "memo" | null;
 
 export default function StampDetailScreen() {
   const router = useRouter();
@@ -65,15 +54,15 @@ export default function StampDetailScreen() {
   const [selectedColor, setSelectedColor] = React.useState(DEFAULT_STAMP_COLOR);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
-  const [spotName, setSpotName] = React.useState("");
-  // 撮影日時は ISO 文字列のまま保持する。表示のときだけ整形する
-  const [capturedAt, setCapturedAt] = React.useState("");
-  // 利用者が入力した場所。入っていれば逆引きした住所より優先する
-  const [editedLocation, setEditedLocation] = React.useState("");
   const geocoded = useReverseGeocode(stamp?.location ?? null);
-  const location = editedLocation || geocoded.address;
-  const [memo, setMemo] = React.useState("");
-  const [detailUpdating, setDetailUpdating] = React.useState(false);
+  const editors = useStampFieldEditors({
+    stampId: id,
+    stamp,
+    geocodedAddress: geocoded.address,
+    editableDate: true,
+    onUpdated: setStamp,
+    logTag: "[stamp-detail]",
+  });
 
   // 表示中のスタンプ画像の uri（file://）。共有もこの値を使う
   const [currentImageUri, setCurrentImageUri] = React.useState("");
@@ -99,9 +88,6 @@ export default function StampDetailScreen() {
       setOriginalUri(originalPhotoUri(loaded));
       setSelectedColor(loaded.color);
       setSelectedFrameStyleId(loaded.frameId);
-      setSpotName(loaded.title ?? "");
-      setMemo(loaded.memo ?? "");
-      setCapturedAt(loaded.capturedAt);
     });
   }, [id]);
 
@@ -203,90 +189,6 @@ export default function StampDetailScreen() {
     }
   };
 
-  const [editingField, setEditingField] = React.useState<EditingField>(null);
-  const [draftSpotName, setDraftSpotName] = React.useState(spotName);
-  const [draftLocation, setDraftLocation] = React.useState(location);
-  const [draftDate, setDraftDate] = React.useState(() =>
-    parseCapturedAt(capturedAt),
-  );
-  const [draftMemo, setDraftMemo] = React.useState(memo);
-
-  const openSpotNameEditor = () => {
-    setDraftSpotName(spotName);
-    setEditingField("spotName");
-  };
-  const openDateEditor = () => {
-    setDraftDate(parseCapturedAt(capturedAt));
-    setEditingField("date");
-  };
-  const openLocationEditor = () => {
-    setDraftLocation(location);
-    setEditingField("location");
-  };
-  const openMemoEditor = () => {
-    setDraftMemo(memo);
-    setEditingField("memo");
-  };
-  const closeEditor = () => setEditingField(null);
-
-  const handleSaveSpotName = async () => {
-    if (!id || detailUpdating) return;
-    const nextSpotName = normalizeOptionalText(draftSpotName);
-    setDetailUpdating(true);
-    try {
-      const updated = await updateStamp(id, { title: nextSpotName });
-      setSpotName(updated.title ?? "");
-      closeEditor();
-    } catch (error) {
-      console.error("[stamp-detail] failed to update spot name", error);
-      Alert.alert(
-        t("stampDetail.saveFailedTitle"),
-        t("stampDetail.saveFailedMessage"),
-      );
-    } finally {
-      setDetailUpdating(false);
-    }
-  };
-
-  const handleSaveMemo = async () => {
-    if (!id || detailUpdating) return;
-    const nextMemo = normalizeOptionalText(draftMemo);
-    setDetailUpdating(true);
-    try {
-      const updated = await updateStamp(id, { memo: nextMemo });
-      setMemo(updated.memo ?? "");
-      closeEditor();
-    } catch (error) {
-      console.error("[stamp-detail] failed to update memo", error);
-      Alert.alert(
-        t("stampDetail.saveFailedTitle"),
-        t("stampDetail.saveFailedMessage"),
-      );
-    } finally {
-      setDetailUpdating(false);
-    }
-  };
-
-  const handleSaveDate = async () => {
-    if (!id || detailUpdating) return;
-    setDetailUpdating(true);
-    try {
-      const updated = await updateStamp(id, {
-        capturedAt: draftDate.toISOString(),
-      });
-      setCapturedAt(updated.capturedAt);
-      closeEditor();
-    } catch (error) {
-      console.error("[stamp-detail] failed to update date", error);
-      Alert.alert(
-        t("stampDetail.saveFailedTitle"),
-        t("stampDetail.saveFailedMessage"),
-      );
-    } finally {
-      setDetailUpdating(false);
-    }
-  };
-
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
 
   const handleConfirmDelete = async () => {
@@ -317,7 +219,7 @@ export default function StampDetailScreen() {
 
       // 画像は端末の documentDirectory にあるので、そのまま渡せる
       await Sharing.shareAsync(currentImageUri, {
-        dialogTitle: spotName || undefined,
+        dialogTitle: editors.spotName || undefined,
       });
     } catch (error) {
       console.error("[stamp-detail] failed to share image", error);
@@ -341,23 +243,23 @@ export default function StampDetailScreen() {
         <ShareButton onPress={handleShare} size={44} />
       </View>
       <StampDetailMediaPager
-        spotName={spotName}
+        spotName={editors.spotName}
         imageUri={displayImageUri || undefined}
         onPressDesignChange={handleOpenDesignChange}
-        onPressSpotName={openSpotNameEditor}
+        onPressSpotName={editors.openSpotName}
         latitude={stampLatitude}
         longitude={stampLongitude}
       />
       <StampInfoCard
-        date={formatIsoDateTime(capturedAt)}
-        location={location}
+        date={formatIsoDateTime(editors.capturedAt)}
+        location={editors.location}
         locationPlaceholder={
           geocoded.failed ? t("stampDetail.placeLookupFailed") : undefined
         }
-        memo={memo}
-        onPressDate={openDateEditor}
-        onPressLocation={openLocationEditor}
-        onPressMemo={openMemoEditor}
+        memo={editors.memo}
+        onPressDate={editors.openDate}
+        onPressLocation={editors.openLocation}
+        onPressMemo={editors.openMemo}
       />
       <View style={styles.deleteSection}>
         <CommonButton
@@ -398,49 +300,7 @@ export default function StampDetailScreen() {
           onConfirm={handleConfirmDesign}
         />
       )}
-      <EditFieldSheet
-        visible={editingField === "spotName"}
-        onClose={closeEditor}
-        title={t("stampDetail.editTitle")}
-        mode="text"
-        value={draftSpotName}
-        onChangeValue={setDraftSpotName}
-        placeholder={t("stampDetail.editTitlePlaceholder")}
-        onSave={handleSaveSpotName}
-      />
-      <EditFieldSheet
-        visible={editingField === "location"}
-        onClose={closeEditor}
-        title={t("stampDetail.editPlace")}
-        mode="text"
-        value={draftLocation}
-        onChangeValue={setDraftLocation}
-        placeholder={t("stampDetail.editPlacePlaceholder")}
-        onSave={() => {
-          setEditedLocation(draftLocation.trim() || location);
-          closeEditor();
-        }}
-      />
-      <EditFieldSheet
-        visible={editingField === "date"}
-        onClose={closeEditor}
-        title={t("stampDetail.editDate")}
-        mode="datetime"
-        value={draftDate}
-        onChangeValue={setDraftDate}
-        onSave={handleSaveDate}
-      />
-      <EditFieldSheet
-        visible={editingField === "memo"}
-        onClose={closeEditor}
-        title={t("stampDetail.editMemo")}
-        mode="text"
-        value={draftMemo}
-        onChangeValue={setDraftMemo}
-        placeholder={t("stampDetail.editMemoPlaceholder")}
-        multiline
-        onSave={handleSaveMemo}
-      />
+      <StampFieldSheets editors={editors} />
     </View>
   );
 }

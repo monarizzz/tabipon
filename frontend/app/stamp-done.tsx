@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   Share,
-  Alert,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
@@ -16,7 +15,8 @@ import { useTabBarItems } from "@/src/commons/layout/hooks/useTabBarItems";
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
 import { StampInfoCard } from "@/src/commons/stamp/components/StampInfoCard/StampInfoCard";
-import { EditFieldSheet } from "@/src/commons/sheet/components/EditFieldSheet/EditFieldSheet";
+import { StampFieldSheets } from "@/src/commons/stamp/components/StampFieldSheets/StampFieldSheets";
+import { useStampFieldEditors } from "@/src/commons/stamp/hooks/useStampFieldEditors";
 import { StampResultHeader } from "@/src/features/camera/components/StampResultHeader/StampResultHeader";
 import { StampShowcase } from "@/src/features/camera/components/StampShowcase/StampShowcase";
 import { StampDoneActions } from "@/src/features/camera/components/StampDoneActions/StampDoneActions";
@@ -24,20 +24,12 @@ import {
   deleteStamp,
   getStamp,
   stampImageUri,
-  updateStamp,
   type Stamp,
 } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { formatIsoDateTime } from "@/src/utils/datetime/format";
 import { useReverseGeocode } from "@/src/libs/location/useReverseGeocode";
 import { colors, spacing } from "@/src/style/tokens";
-
-function normalizeOptionalText(value: string): string | null {
-  const trimmed = value.trim();
-  return trimmed || null;
-}
-
-type EditingField = "spotName" | "location" | "memo" | null;
 
 export default function StampDoneScreen() {
   const router = useRouter();
@@ -54,13 +46,14 @@ export default function StampDoneScreen() {
     peak?: string;
   }>();
   const [stamp, setStamp] = React.useState<Stamp | null>(null);
-  const [spotName, setSpotName] = React.useState("");
-  // 利用者が入力した場所。入っていれば逆引きした住所より優先する
-  const [editedLocation, setEditedLocation] = React.useState("");
   const geocoded = useReverseGeocode(stamp?.location ?? null);
-  const location = editedLocation || geocoded.address;
-  const [memo, setMemo] = React.useState("");
-  const [detailUpdating, setDetailUpdating] = React.useState(false);
+  const editors = useStampFieldEditors({
+    stampId,
+    stamp,
+    geocodedAddress: geocoded.address,
+    onUpdated: setStamp,
+    logTag: "[stamp-done]",
+  });
   const [retakeDialogVisible, setRetakeDialogVisible] = React.useState(false);
   // 撮影フローはここで終わりなので確認は挟まない。
   // カメラへ戻るときだけ履歴を積まないよう replace する
@@ -81,69 +74,9 @@ export default function StampDoneScreen() {
   React.useEffect(() => {
     if (!stampId) return;
     getStamp(stampId).then((loaded) => {
-      if (!loaded) return;
-      setStamp(loaded);
-      setSpotName(loaded.title ?? "");
-      setMemo(loaded.memo ?? "");
+      if (loaded) setStamp(loaded);
     });
   }, [stampId]);
-
-  const [editingField, setEditingField] = React.useState<EditingField>(null);
-  const [draftSpotName, setDraftSpotName] = React.useState(spotName);
-  const [draftLocation, setDraftLocation] = React.useState(location);
-  const [draftMemo, setDraftMemo] = React.useState(memo);
-
-  const openSpotNameEditor = () => {
-    setDraftSpotName(spotName);
-    setEditingField("spotName");
-  };
-  const openLocationEditor = () => {
-    setDraftLocation(location);
-    setEditingField("location");
-  };
-  const openMemoEditor = () => {
-    setDraftMemo(memo);
-    setEditingField("memo");
-  };
-  const closeEditor = () => setEditingField(null);
-
-  const handleSaveSpotName = async () => {
-    if (!stampId || detailUpdating) return;
-    const nextSpotName = normalizeOptionalText(draftSpotName);
-    setDetailUpdating(true);
-    try {
-      const updated = await updateStamp(stampId, { title: nextSpotName });
-      setSpotName(updated.title ?? "");
-      closeEditor();
-    } catch (error) {
-      console.error("[stamp-done] failed to update spot name", error);
-      Alert.alert(
-        t("stampDetail.saveFailedTitle"),
-        t("stampDetail.saveFailedMessage"),
-      );
-    } finally {
-      setDetailUpdating(false);
-    }
-  };
-
-  const handleSaveMemo = async () => {
-    if (!stampId || detailUpdating) return;
-    const nextMemo = normalizeOptionalText(draftMemo);
-    setDetailUpdating(true);
-    try {
-      const updated = await updateStamp(stampId, { memo: nextMemo });
-      setMemo(updated.memo ?? "");
-      closeEditor();
-    } catch (error) {
-      console.error("[stamp-done] failed to update memo", error);
-      Alert.alert(
-        t("stampDetail.saveFailedTitle"),
-        t("stampDetail.saveFailedMessage"),
-      );
-    } finally {
-      setDetailUpdating(false);
-    }
-  };
 
   const handleConfirmRetake = async () => {
     setRetakeDialogVisible(false);
@@ -197,8 +130,8 @@ export default function StampDoneScreen() {
             onShare={() =>
               Share.share({ message: t("stampDone.shareMessage") })
             }
-            spotName={spotName}
-            onPressSpotName={openSpotNameEditor}
+            spotName={editors.spotName}
+            onPressSpotName={editors.openSpotName}
           />
           {/* styles.debugText は定義されておらず、これまでも未適用のまま描画されていた。
               見た目を変えないよう参照だけ外している。この DEBUG 表示自体の要否は別途判断する */}
@@ -209,14 +142,14 @@ export default function StampDoneScreen() {
           )}
           <View style={styles.actionsAnchor}>
             <StampInfoCard
-              date={stamp ? formatIsoDateTime(stamp.capturedAt) : ""}
-              location={location}
+              date={formatIsoDateTime(editors.capturedAt)}
+              location={editors.location}
               locationPlaceholder={
                 geocoded.failed ? t("stampDetail.placeLookupFailed") : undefined
               }
-              memo={memo}
-              onPressLocation={openLocationEditor}
-              onPressMemo={openMemoEditor}
+              memo={editors.memo}
+              onPressLocation={editors.openLocation}
+              onPressMemo={editors.openMemo}
             />
             <StampDoneActions
               onContinueShooting={() => {
@@ -247,40 +180,7 @@ export default function StampDoneScreen() {
         onCancel={() => setRetakeDialogVisible(false)}
         onConfirm={handleConfirmRetake}
       />
-      <EditFieldSheet
-        visible={editingField === "spotName"}
-        onClose={closeEditor}
-        title={t("stampDetail.editTitle")}
-        mode="text"
-        value={draftSpotName}
-        onChangeValue={setDraftSpotName}
-        placeholder={t("stampDetail.editTitlePlaceholder")}
-        onSave={handleSaveSpotName}
-      />
-      <EditFieldSheet
-        visible={editingField === "location"}
-        onClose={closeEditor}
-        title={t("stampDetail.editPlace")}
-        mode="text"
-        value={draftLocation}
-        onChangeValue={setDraftLocation}
-        placeholder={t("stampDetail.editPlacePlaceholder")}
-        onSave={() => {
-          setEditedLocation(draftLocation.trim() || location);
-          closeEditor();
-        }}
-      />
-      <EditFieldSheet
-        visible={editingField === "memo"}
-        onClose={closeEditor}
-        title={t("stampDetail.editMemo")}
-        mode="text"
-        value={draftMemo}
-        onChangeValue={setDraftMemo}
-        placeholder={t("stampDetail.editMemoPlaceholder")}
-        multiline
-        onSave={handleSaveMemo}
-      />
+      <StampFieldSheets editors={editors} />
       <TabBar items={tabItems} />
     </View>
   );
