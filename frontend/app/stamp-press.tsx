@@ -120,6 +120,7 @@ export default function StampPressScreen() {
             latitude && longitude
               ? { latitude: Number(latitude), longitude: Number(longitude) }
               : null,
+          address: null,
           color,
           frameId: frameStyleId,
           scratchLevel,

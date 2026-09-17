@@ -61,10 +61,7 @@ const validStamp = {
   created_at: "2026-09-14T03:00:00.000Z",
   latitude: 35.68,
   longitude: 139.76,
-  address_country: "日本",
-  address_region: "東京都",
-  address_city: "千代田区",
-  address_detail: null,
+  address: "日本 東京都 千代田区",
   color: "#DC321E",
   frame_id: "classic",
   scratch_level: 0.4,
@@ -118,7 +115,82 @@ describe("migrateDbIfNeeded", () => {
   });
 });
 
-describe("v1 の stamps テーブルの制約", () => {
+describe("v2: 住所の 4 列を address 1 列にまとめる", () => {
+  let sqlite: SqliteDatabase;
+
+  /** v1 までしか進んでいない DB を作る。v2 が既存の行をどう移すかを見るため */
+  function migrateToV1() {
+    sqlite.exec(MIGRATIONS[0]);
+    sqlite.exec("PRAGMA user_version = 1");
+  }
+
+  function insertV1Stamp(address: Record<string, string | null>) {
+    const row = {
+      ...validStamp,
+      address: undefined,
+      address_country: null,
+      address_region: null,
+      address_city: null,
+      address_detail: null,
+      ...address,
+    };
+    delete (row as { address?: unknown }).address;
+    const columns = Object.keys(row);
+    sqlite
+      .prepare(
+        `INSERT INTO stamps (${columns.join(", ")}) VALUES (${columns.map(() => "?").join(", ")})`,
+      )
+      .run(...Object.values(row));
+  }
+
+  function addressOf(): unknown {
+    return sqlite.prepare("SELECT address FROM stamps").get()?.address;
+  }
+
+  beforeEach(() => {
+    sqlite = new DatabaseSync(":memory:");
+    migrateToV1();
+  });
+
+  it("4 列を大きい方から空白で連結する", async () => {
+    insertV1Stamp({
+      address_country: "日本",
+      address_region: "東京都",
+      address_city: "千代田区",
+      address_detail: "丸の内1-1",
+    });
+
+    await migrateDbIfNeeded(createTarget(sqlite));
+
+    expect(addressOf()).toBe("日本 東京都 千代田区 丸の内1-1");
+  });
+
+  it("欠けている要素があっても区切りの空白が残らない", async () => {
+    insertV1Stamp({ address_country: "日本", address_city: "千代田区" });
+
+    await migrateDbIfNeeded(createTarget(sqlite));
+
+    expect(addressOf()).toBe("日本 千代田区");
+  });
+
+  it("4 列とも NULL なら address も NULL にする（空文字にしない）", async () => {
+    insertV1Stamp({});
+
+    await migrateDbIfNeeded(createTarget(sqlite));
+
+    expect(addressOf()).toBeNull();
+  });
+
+  it("古い 4 列は残さない", async () => {
+    await migrateDbIfNeeded(createTarget(sqlite));
+
+    expect(() =>
+      sqlite.prepare("SELECT address_country FROM stamps").get(),
+    ).toThrow();
+  });
+});
+
+describe("stamps テーブルの制約", () => {
   let sqlite: SqliteDatabase;
 
   beforeEach(async () => {
@@ -135,9 +207,17 @@ describe("v1 の stamps テーブルの制約", () => {
       insertStamp(sqlite, {
         latitude: null,
         longitude: null,
-        address_country: null,
-        address_region: null,
-        address_city: null,
+        address: null,
+      }),
+    ).not.toThrow();
+  });
+
+  it("座標が無くても住所だけの行は入る（利用者が手で入れた場合）", () => {
+    expect(() =>
+      insertStamp(sqlite, {
+        latitude: null,
+        longitude: null,
+        address: "京都駅",
       }),
     ).not.toThrow();
   });
