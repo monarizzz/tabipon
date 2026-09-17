@@ -6,7 +6,7 @@ import { createAudioPlayer, type AudioPlayer } from "expo-audio";
 // 画面のマウント期間に縛られる。撮影フローは photo-adjust → stamp-press →
 // stamp-done と push で積み、stamp-done が replace で自分だけを差し替えるため、
 // stamp-press はスタックに残ったままアンマウントされない。つまり撮影のたびに
-// 画面ごとプレイヤーが 1 つずつ増える(#143 のレビュー指摘)。
+// 画面ごとプレイヤーが 1 つずつ増える。
 //
 // 効果音は単一ファイルの短い再生で、同時に複数鳴らす必要が無い。ここで
 // モジュールスコープに 1 つだけ持てば、画面が何枚積まれても実体は 1 つに収まる。

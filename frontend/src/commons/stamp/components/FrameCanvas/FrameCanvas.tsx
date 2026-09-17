@@ -26,7 +26,7 @@ type Props = {
  * フレームの枠を描く。本番の画像生成と同じ `drawFrame()` を縮小して使う。
  *
  * 枠を表示する箇所（サムネイル・押す画面のガイド）はここを通す。
- * 各所で RN View の円を組み直すと、寸法も枠の有無も本番とずれる（#171）。
+ * 各所で RN View の円を組み直すと、寸法も枠の有無も本番とずれる。
  */
 export function FrameCanvas({ frame, color, size, minStrokeWidth }: Props) {
   const picture = useMemo(() => {

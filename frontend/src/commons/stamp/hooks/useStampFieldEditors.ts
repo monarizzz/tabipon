@@ -69,7 +69,7 @@ type Options = {
  * 完了に合わせて `setState` する effect が要る。
  *
  * **場所だけは保存していない。**元の 2 画面がどちらもそうなっており、
- * 挙動を変えないためここでも DB に書かない（#175）。
+ * 挙動を変えないためここでも DB に書かない。
  */
 export function useStampFieldEditors({
   stampId,
