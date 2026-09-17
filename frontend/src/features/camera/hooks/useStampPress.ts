@@ -107,6 +107,10 @@ export function useStampPress({
     draftFrameStyleId,
     selectDraftColor: setDraftColor,
     selectDraftFrameStyle: setDraftFrameStyleId,
+    // ガイドは選択中の見た目を確かめるためのものなので、シートを開いている間だけ選択中を映す。
+    // 閉じている間に選択中を映すと、「適用」せずに閉じたときガイドと押されるスタンプが食い違う
+    guideColor: designSheetVisible ? draftColor : color,
+    guideFrameStyleId: designSheetVisible ? draftFrameStyleId : frameStyleId,
 
     designSheetVisible,
     openDesignSheet: () => {

@@ -20,6 +20,12 @@ export type StampPress = {
   draftFrameStyleId: StampFrame;
   selectDraftColor: (color: string) => void;
   selectDraftFrameStyle: (frameId: StampFrame) => void;
+  /**
+   * 背面の向きガイドに映すデザイン。シートを開いている間は選択中のものを映し、
+   * 閉じたら確定済みへ戻る。**生成には使わない**（生成は `color` / `frameStyleId`）
+   */
+  guideColor: string;
+  guideFrameStyleId: StampFrame;
 
   designSheetVisible: boolean;
   openDesignSheet: () => void;

@@ -14,6 +14,8 @@ const meta = {
     draftFrameStyleId: "classic",
     selectDraftColor: () => {},
     selectDraftFrameStyle: () => {},
+    guideColor: "#1F2937",
+    guideFrameStyleId: "classic",
     designSheetVisible: false,
     openDesignSheet: () => {},
     closeDesignSheet: () => {},
@@ -51,6 +53,17 @@ export const SaveFailed: Story = {
   args: {
     saveFailed: true,
     saveErrorMessage: "Error: PNG への符号化に失敗した",
+  },
+};
+
+/** シートで選んでいる途中。まだ確定していない色・フレームをガイドだけが映す */
+export const DesignSheetPreview: Story = {
+  args: {
+    designSheetVisible: true,
+    draftColor: "#288264",
+    draftFrameStyleId: "wave",
+    guideColor: "#288264",
+    guideFrameStyleId: "wave",
   },
 };
 
