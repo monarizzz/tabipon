@@ -49,6 +49,9 @@ export const ko: Translations = {
     retake: "다시 찍기",
     retakeConfirmTitle: "스탬프를 다시 찍으시겠어요?",
     retakeConfirmMessage: "이 스탬프는 삭제되며 다시 촬영할 수 있습니다.",
+    retakeFailedTitle: "다시 찍을 수 없습니다",
+    retakeFailedMessage:
+      "스탬프 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
   },
   design: {
     frame: "프레임",
@@ -109,6 +112,9 @@ export const ko: Translations = {
       "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     saveFailedTitle: "저장할 수 없습니다",
     saveFailedMessage: "잠시 후 다시 시도해 주세요.",
+    deleteFailedTitle: "삭제할 수 없습니다",
+    deleteFailedMessage:
+      "스탬프 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
   },
   discardDialog: {
     title: "편집 내용을 취소하시겠습니까?",

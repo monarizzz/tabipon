@@ -49,6 +49,8 @@ export const zh: Translations = {
     retake: "重新拍摄",
     retakeConfirmTitle: "要重新拍摄这枚印章吗？",
     retakeConfirmMessage: "该印章将被删除，你可以重新拍摄。",
+    retakeFailedTitle: "无法重新拍摄",
+    retakeFailedMessage: "删除印章失败。请稍后再试。",
   },
   design: {
     frame: "边框",
@@ -106,6 +108,8 @@ export const zh: Translations = {
     shareFailedMessage: "图片共享失败。请稍后再试。",
     saveFailedTitle: "无法保存",
     saveFailedMessage: "请稍后再试。",
+    deleteFailedTitle: "无法删除",
+    deleteFailedMessage: "删除印章失败。请稍后再试。",
   },
   discardDialog: {
     title: "要放弃编辑内容吗？",
