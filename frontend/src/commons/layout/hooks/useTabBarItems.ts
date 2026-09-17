@@ -2,11 +2,9 @@ import { useMemo } from "react";
 import { usePathname } from "expo-router";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import type { TabBarItemData } from "@/src/commons/layout/components/TabBar/TabBar";
-import {
-  activeTabKey,
-  TAB_DEFINITIONS,
-  type TabDefinition,
-} from "@/src/commons/layout/constants/tabDefinitions";
+import { TAB_DEFINITIONS } from "@/src/commons/layout/constants/tabDefinitions";
+import type { TabDefinition } from "@/src/commons/layout/types/tabDefinition";
+import { activeTabKey } from "@/src/commons/layout/utils/activeTabKey";
 
 /**
  * タブ外の画面に置く TabBar の items を組み立てる。
