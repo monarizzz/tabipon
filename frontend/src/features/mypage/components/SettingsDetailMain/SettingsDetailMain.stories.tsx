@@ -7,7 +7,7 @@ const meta = {
   tags: ["autodocs"],
   args: {
     titleKey: "mypage.help",
-    onBack: () => {},
+    back: () => {},
   },
 } satisfies Meta<typeof SettingsDetailMain>;
 

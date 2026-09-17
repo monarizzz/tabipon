@@ -1,11 +1,6 @@
-import { useRouter } from "expo-router";
-
 import { SettingsDetailMain } from "@/src/features/mypage/components/SettingsDetailMain/SettingsDetailMain";
+import { useSettingsDetail } from "@/src/features/mypage/hooks/useSettingsDetail";
 
 export default function NotificationsScreen() {
-  const router = useRouter();
-
-  return (
-    <SettingsDetailMain titleKey="mypage.notifications" onBack={router.back} />
-  );
+  return <SettingsDetailMain {...useSettingsDetail("mypage.notifications")} />;
 }
