@@ -4,6 +4,7 @@
  * **ここは振り分けだけを持つ。**描き方はフレームごとのファイルにある。
  * フレームを増やすときは `StampFrame`（`types.ts`）に値を足し、
  * 同じ階層にファイルを 1 つ作ってここに case を足す。
+ * case を足し忘れると `default` の `never` 代入が型エラーになる。
  */
 import { type SkCanvas } from "@shopify/react-native-skia";
 
@@ -31,5 +32,12 @@ export function drawFrame(
     case "wave":
       drawWaveCircle(canvas, color);
       break;
+    // 枠だけ描かれないスタンプが黙って出来上がるより、止めて気付ける方を採る。
+    // DB からの読み出しは `isStampFrame()` で型どおりの値へ寄せているので、
+    // ここに来るのは case の足し忘れか、型を迂回して渡した場合だけ
+    default: {
+      const unknownFrame: never = frame;
+      throw new Error(`未知のフレーム: ${String(unknownFrame)}`);
+    }
   }
 }
