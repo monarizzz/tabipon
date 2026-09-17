@@ -4,7 +4,7 @@ import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 export type StampRenderOptions = {
   color: string;
   frame: StampFrame;
-  /** 0..1。押し付けの弱さから決まる（`app/stamp-press.tsx` の DeviceMotion） */
+  /** 0..1。押し付けの弱さから決まる（`stampPress/pressGesture.ts` の `scratchLevelFromPeak()`） */
   scratchLevel?: number;
   /** 度。時計回りが正 */
   tiltAngle?: number;

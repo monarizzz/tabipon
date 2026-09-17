@@ -2,7 +2,7 @@ import { createAudioPlayer, type AudioPlayer } from "expo-audio";
 
 // スタンプ確定音のプレイヤーをアプリ全体で 1 つだけ持つためのユーティリティ。
 //
-// 画面側 (app/stamp-press.tsx) で useAudioPlayer を使うと、プレイヤーの寿命が
+// 押印画面 (features/camera/) で useAudioPlayer を使うと、プレイヤーの寿命が
 // 画面のマウント期間に縛られる。撮影フローは photo-adjust → stamp-press →
 // stamp-done と push で積み、stamp-done が replace で自分だけを差し替えるため、
 // stamp-press はスタックに残ったままアンマウントされない。つまり撮影のたびに
