@@ -32,19 +32,39 @@ frontend/
 
 ### `app/` が持ってよいもの
 
-**画面が持ってよいのは、状態の保持とコンポーネントの配置まで。**
-それ以外は `src/` の関数・フック・コンポーネントに出し、画面はそれを呼ぶだけにする。
+**画面ファイルはルートパラメータを読んで Main に渡すだけにする。**
+JSX も状態もハンドラも持たない。
+
+```tsx
+// app/album-stamp-detail.tsx
+export default function StampDetailScreen() {
+  const { id } = useLocalSearchParams<{ id?: string }>();
+
+  return <StampDetailMain {...useStampDetail(id)} />;
+}
+```
 
 判断に迷ったら、**テストしたいものは `app/` に置かない。**
 `jest.config.js` の `testMatch` が拾うのは `frontend/src/` 配下だけなので、
 `app/` に書いた時点で Jest からも Storybook からも触れなくなる。
 
-例外は 2 つ。
+`useLocalSearchParams()` だけは `app/` の仕事。ルーティングの一部であり、
+`src/` に持ち込むと画面の遷移構造が `src/` に漏れる。
 
-- **画面固有の演出は `app/` に残してよい。**押し込みアニメーションのように、
-  その画面のレイアウトと一体で、他から呼ばれないもの。切り出しても呼び出し側が 1 つのまま
-- **ルートパラメータの読み出しと復元は `app/` の仕事。**`useLocalSearchParams()` は
-  ルーティングの一部であり、`src/` に持ち込むと画面の遷移構造が `src/` に漏れる
+### 画面を 3 つに分ける
+
+| 置き場 | 持つもの |
+| --- | --- |
+| `app/<画面>.tsx` | ルートパラメータの読み出しと Main の呼び出し |
+| `src/features/<領域>/hooks/use<画面名>.ts` | 状態・DB・遷移。戻り値の型は `types/` に置く |
+| `src/features/<領域>/components/<画面名>Main/` | 描画。props で受け取り、自分では状態を持たない |
+
+**Main は props だけで描けるようにする。**そうすれば `*.stories.tsx` が
+モック無しで書け、読み込み中・失敗・空といった状態も並べられる。
+フックが DB と router を直接叩くので、その境目が props になる。
+
+例外は **画面固有の演出**。押し込みアニメーションのように、その画面のレイアウトと
+一体で他から呼ばれないものは Main に置いてよい（例: `StampPressMain`）。
 
 切り出す側では、**ネイティブに触る層と触らない層を分ける。**
 センサーやアニメーションを購読するフックと、そのフックが使う判定ロジックを別ファイルにすると、
