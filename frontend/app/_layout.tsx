@@ -3,6 +3,8 @@ import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { DbErrorScreen } from "@/src/commons/layout/components/DbErrorScreen/DbErrorScreen";
+import { useDbInitGuard } from "@/src/commons/layout/hooks/useDbInitGuard";
 import { DATABASE_NAME, migrateDbIfNeeded } from "@/src/infra/db/migrations";
 import { useOrphanFileCleanup } from "@/src/infra/db/useOrphanFileCleanup";
 import { I18nProvider } from "@/src/libs/i18n/I18nProvider";
@@ -43,18 +45,31 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
+  const { error, attempt, handleError, retry } = useDbInitGuard();
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      {/* マイグレーションが終わるまで子は描画されない。DB に触る画面はすべてこの内側に置く */}
-      <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
-        {/* マイグレーション後に置く。行を読んでからファイルを消すため */}
-        <OrphanFileCleanup />
-        <I18nProvider>
-          <SafeAreaProvider>
-            <RootNavigator />
-          </SafeAreaProvider>
-        </I18nProvider>
-      </SQLiteProvider>
+      {/* DB に依存しないので SQLiteProvider の外に置く。失敗時の画面もこれらを使う */}
+      <I18nProvider>
+        <SafeAreaProvider>
+          {error ? (
+            <DbErrorScreen detail={error.message} onRetry={retry} />
+          ) : (
+            // マイグレーションが終わるまで子は描画されない。DB に触る画面はすべてこの内側に置く。
+            // key は再試行のたびに変わり、Provider を付け替えて DB を開き直させる
+            <SQLiteProvider
+              key={attempt}
+              databaseName={DATABASE_NAME}
+              onInit={migrateDbIfNeeded}
+              onError={handleError}
+            >
+              {/* マイグレーション後に置く。行を読んでからファイルを消すため */}
+              <OrphanFileCleanup />
+              <RootNavigator />
+            </SQLiteProvider>
+          )}
+        </SafeAreaProvider>
+      </I18nProvider>
     </GestureHandlerRootView>
   );
 }
