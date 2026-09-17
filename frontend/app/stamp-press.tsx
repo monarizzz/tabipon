@@ -329,11 +329,6 @@ const styles = StyleSheet.create({
     fontSize: typography.caption.fontSize,
     color: colors.textMuted,
   },
-  debug: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontFamily: "monospace",
-  },
   helpIcon: {
     fontSize: 14,
     color: colors.textMuted,
@@ -352,16 +347,5 @@ const styles = StyleSheet.create({
   waitingText: {
     fontSize: typography.body.fontSize,
     color: colors.white,
-  },
-  previewLoadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.3)",
-    borderRadius: 999,
   },
 });
