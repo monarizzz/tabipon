@@ -7,7 +7,8 @@ export type StampFrame = (typeof STAMP_FRAMES)[number];
 export const DEFAULT_STAMP_FRAME: StampFrame = "classic";
 
 /**
- * DB には廃止済みの識別子も残り続ける（`migrations.ts` の `frame_id` は値を縛らない）。
+ * DB には廃止済みの識別子も残り続ける
+ * （`src/infra/db/migrations.ts` の `frame_id` は値を縛らない）。
  * 外から来た文字列を `StampFrame` として扱う前に必ずここを通す。
  */
 export function isStampFrame(value: string): value is StampFrame {

@@ -1,11 +1,8 @@
 /**
  * 画像の入出力（uri のデコードと PNG への符号化）。
  *
- * Refs: #134 / #123 / #98
- *
- * **ファイルシステムには触らない。**PNG のバイト列を返すところまでがここの責務で、
- * `expo-file-system` で書き出すのは呼び出し側（#148 の永続化）の仕事。
- * 描画側（`pipeline.ts` 以下）を Skia だけに閉じておくために分けてある。
+ * **ファイルシステムには触らない。**PNG のバイト列を返すところまでがここの責務
+ * （`docs/stamp-pipeline.md`「ルール」）。
  */
 import { ImageFormat, Skia, type SkImage } from "@shopify/react-native-skia";
 
@@ -45,8 +42,7 @@ export async function generateStampFromUri(
 /**
  * 写真の uri からスタンプの PNG バイト列を生成する。
  *
- * `process_stamp_image()` の戻り値（`encode_png()` した bytes）に相当し、
- * 撮影フローの差し替え（#125）と永続化（#148）が呼ぶのはこの関数になる。
+ * 保存する側（`src/infra/db/stamps.ts` の `saveStamp()`）が呼ぶのはこの関数。
  */
 export async function generateStampPngFromUri(
   uri: string,

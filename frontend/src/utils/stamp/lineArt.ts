@@ -361,9 +361,7 @@ export function generateLineArtFromImage(image: SkImage): SkImage {
   return toRasterImage(rendered, "線画画像");
 }
 
-/**
- * 生成結果の黒画素率を返す（0..1）。移植の一致度を数値で突き合わせるための検証用。
- */
+/** 生成結果の黒画素率を返す（0..1）。線画化が壊れていないことの目安に使う */
 export function measureBlackPixelRatio(image: SkImage): number | null {
   const pixels = image.readPixels(0, 0, {
     width: image.width(),
