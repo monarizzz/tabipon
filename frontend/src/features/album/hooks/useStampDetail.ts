@@ -20,6 +20,8 @@ export function useStampDetail(id: string | undefined): StampDetail {
    * null のままのときに読み込み中と区別が付かず、スピナーのまま止まる
    */
   const [loading, setLoading] = React.useState(true);
+  /** 増やすと読み込みの effect をもう一度走らせる。再試行の起点 */
+  const [loadAttempt, setLoadAttempt] = React.useState(0);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
 
@@ -56,7 +58,7 @@ export function useStampDetail(id: string | undefined): StampDetail {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, loadAttempt]);
 
   return {
     // id が無ければ読み込むものが無いので、待たせずに `unavailable` の表示へ倒す
@@ -65,6 +67,12 @@ export function useStampDetail(id: string | undefined): StampDetail {
 
     latitude: stamp?.location?.latitude ?? null,
     longitude: stamp?.location?.longitude ?? null,
+
+    reload: React.useCallback(() => {
+      setUnavailable(false);
+      setLoading(true);
+      setLoadAttempt((attempt) => attempt + 1);
+    }, []),
 
     editors,
     design,
