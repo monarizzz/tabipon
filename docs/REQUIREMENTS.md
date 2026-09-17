@@ -95,7 +95,7 @@
 ### 位置情報
 
 - **逆ジオコーディング**: `expo-location` の `reverseGeocodeAsync()`（端末の逆ジオコーダ。API キーは不要）
-- **地図表示**: Google Maps JavaScript API。APIキーは `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`（`frontend/.env.example` を参照）
+- **地図表示**: `react-native-maps`（端末の地図。iOS は Apple Maps、Android は Google Maps）。API キーは不要。Android のスタンドアロンビルドのみ `app.json` に Google Maps のキーが要る（Expo Go では不要）
 - **方針**: 逆引きはスタンプ取得時に一度だけ行い、結果を DB に保存する。表示のたびに引き直さない（通信できない場所でもアルバムから住所が読めるようにするため）。
 - **住所の持ち方**: 1 行の文字列として 1 列に持つ。国・都道府県・市区町村を個別に読む機能は無く、利用者が「場所」を手で直したときに入るのも 1 行のため。
 - **言語**: 端末の設定で決まる。`reverseGeocodeAsync()` に言語を渡す口が無いため、アプリ内の言語切り替えには追従しない。

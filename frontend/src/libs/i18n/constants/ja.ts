@@ -94,6 +94,7 @@ export const ja = {
     addPlace: "場所を追加",
     addMemo: "メモを追加",
     addSpotName: "スポット名を追加",
+    mapUnavailable: "地図を表示できませんでした",
     designUnavailableTitle: "デザインを変更できません",
     designUnavailableMessage:
       "このスタンプはこの端末で作成されていないため、デザインを変更できません。",

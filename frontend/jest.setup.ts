@@ -27,12 +27,21 @@ jest.spyOn(Image, "getSize").mockImplementation((_uri, success) => {
   success?.(320, 240);
 });
 
-// WebView はネイティブ実装 (RNCWebViewModule) を要求するため、
-// 中身を描画しない View に置き換える。地図は WebView 上の Leaflet なので、
-// このテストで確認できるのは「WebView を含む画面が組み立てられること」まで
-jest.mock("react-native-webview", () => {
+// react-native-maps はネイティブ実装 (RNMapsAirModule) を要求するため、
+// 読み込んだ時点で落ちる。公式のモックが無いので、中身を描画しない View に
+// 置き換える。このテストで確認できるのは「地図を含む画面が組み立てられること」まで
+jest.mock("react-native-maps", () => {
   const { View } = require("react-native");
-  return { WebView: View, default: View };
+  return {
+    __esModule: true,
+    default: View,
+    MapView: View,
+    Marker: View,
+    Callout: View,
+    Polyline: View,
+    PROVIDER_DEFAULT: undefined,
+    PROVIDER_GOOGLE: "google",
+  };
 });
 
 // Skia (@shopify/react-native-skia) は GPU 描画のネイティブモジュールに

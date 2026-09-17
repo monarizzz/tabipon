@@ -61,15 +61,6 @@ npm ci
 
 いずれかが失敗するとコミットは中断されます。
 
-環境変数の設定:
-
-```bash
-cd frontend
-cp .env.example .env    # Google Maps の API キーを設定する
-```
-
-地図表示に `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` を使います。キーの取得手順は `.env.example` のコメントを参照してください（有効化するのは **Maps JavaScript API だけ**です。Geocoding API は有効化しないでください）。未設定でもアプリは起動しますが、スタンプの地図は表示されません。住所は端末の逆ジオコーダで引くため、キーは要りません。`.env` を変更したら `npx expo start -c` でキャッシュを消して起動し直します。
-
 通常起動:
 
 ```bash
