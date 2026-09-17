@@ -31,8 +31,8 @@ import type {
  * 未選択を `null` で表し、表示のたびに `stamp` へフォールバックすれば、適用せずに
  * 閉じる操作は `null` に戻すだけで済む。
  *
- * 表示用の uri（`displayImageUri`）だけはクエリを足して返す。デザインを変えても
- * ファイルのパスは変わらないので、同じ uri のままだと画像側のキャッシュが効いて古い絵が出る。
+ * 表示用の uri にキャッシュ避けは足さない。デザインを変えると画像のパスごと変わるので
+ * （`replaceStampImage()`）、行を読み直せばそのまま新しい uri になる。
  */
 export function useStampDesignChange({
   stampId,
@@ -46,15 +46,11 @@ export function useStampDesignChange({
   const [draftFrameId, setDraftFrameId] = React.useState<StampFrame | null>(
     null,
   );
-  const [imageVersion, setImageVersion] = React.useState(0);
   const [updating, setUpdating] = React.useState(false);
   const [previewUri, setPreviewUri] = React.useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = React.useState(false);
 
   const imageUri = stamp ? stampImageUri(stamp) : "";
-  const displayImageUri = imageUri
-    ? `${imageUri}${imageVersion ? `?v=${imageVersion}` : ""}`
-    : "";
 
   // この端末に残っている元写真の uri（無ければデザイン変更できない）。
   // 実ファイルの有無を見にいくので、行が入れ替わったときだけ引き直す
@@ -126,11 +122,10 @@ export function useStampDesignChange({
         tiltAngle,
         seed: seedFromStampId(stampId),
       });
-      // 画像を差し替えてから行を書く。逆にすると、書き込みに失敗したときに
+      // 画像を書いてから行を書く。逆にすると、書き込みに失敗したときに
       // 行だけ新しいデザインになり、実際の絵と食い違う
-      await replaceStampImage(stampId, stampPng);
-      onUpdated(await updateStamp(stampId, { color, frameId }));
-      setImageVersion((version) => version + 1);
+      const stampImagePath = await replaceStampImage(stampId, stampPng);
+      onUpdated(await updateStamp(stampId, { color, frameId, stampImagePath }));
       setPreviewUri(null);
       setDraftColor(null);
       setDraftFrameId(null);
@@ -157,7 +152,6 @@ export function useStampDesignChange({
   ]);
 
   return {
-    displayImageUri,
     imageUri,
 
     designMode,
