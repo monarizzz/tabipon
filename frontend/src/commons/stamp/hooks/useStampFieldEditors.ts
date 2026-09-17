@@ -1,68 +1,17 @@
 import React from "react";
 import { Alert } from "react-native";
 
-import {
-  updateStamp,
-  type Stamp,
-  type StampPatch,
-} from "@/src/infra/db/stamps";
+import { updateStamp, type StampPatch } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { geocodeAddress } from "@/src/libs/location/geocode";
-import { parseIso } from "@/src/utils/datetime/format";
-
-/** 空文字は「未設定」として null で保存する。DB 側で "" と null が混ざらないようにする */
-function normalizeOptionalText(value: string): string | null {
-  return value.trim() || null;
-}
-
-/** 撮影日時が壊れている場合でもピッカーは開けるようにし、現在時刻から選ばせる */
-function parseCapturedAt(isoDate: string): Date {
-  return parseIso(isoDate) ?? new Date();
-}
-
-type EditableField = "spotName" | "date" | "location" | "memo";
-type EditingField = EditableField | null;
-
-export type StampFieldEditors = {
-  /** 表示に使う値。`stamp` から導出する */
-  spotName: string;
-  memo: string;
-  capturedAt: string;
-  location: string;
-
-  openSpotName: () => void;
-  openDate: () => void;
-  openLocation: () => void;
-  openMemo: () => void;
-
-  /** `<StampFieldSheets editors={...} />` に渡す。画面から直接は触らない */
-  editingField: EditingField;
-  editableDate: boolean;
-  draftSpotName: string;
-  draftLocation: string;
-  draftDate: Date;
-  draftMemo: string;
-  setDraftSpotName: (value: string) => void;
-  setDraftLocation: (value: string) => void;
-  setDraftDate: (value: Date) => void;
-  setDraftMemo: (value: string) => void;
-  closeEditor: () => void;
-  saveSpotName: () => void;
-  saveDate: () => void;
-  saveLocation: () => void;
-  saveMemo: () => void;
-};
-
-type Options = {
-  stampId: string | undefined;
-  stamp: Stamp | null;
-  /** 日時の編集欄を出すか。完了画面では出さない */
-  editableDate?: boolean;
-  /** 保存に成功したときに呼ぶ。画面側の `stamp` を差し替える */
-  onUpdated: (stamp: Stamp) => void;
-  /** 失敗ログの接頭辞。どの画面から失敗したか分かるようにする */
-  logTag: string;
-};
+import type {
+  EditableField,
+  EditingField,
+  StampFieldEditors,
+  StampFieldEditorsOptions,
+} from "@/src/commons/stamp/types/stampField";
+import { normalizeOptionalText } from "@/src/commons/stamp/utils/normalizeOptionalText";
+import { parseCapturedAt } from "@/src/commons/stamp/utils/parseCapturedAt";
 
 /**
  * スタンプ情報（スポット名 / 日時 / 場所 / メモ）の編集状態をまとめて持つ。
@@ -78,7 +27,7 @@ export function useStampFieldEditors({
   editableDate = false,
   onUpdated,
   logTag,
-}: Options): StampFieldEditors {
+}: StampFieldEditorsOptions): StampFieldEditors {
   const { t } = useTranslation();
 
   const spotName = stamp?.title ?? "";

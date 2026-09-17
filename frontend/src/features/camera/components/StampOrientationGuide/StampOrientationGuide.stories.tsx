@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-native";
 import { View } from "react-native";
 import { colors } from "@/src/style/tokens";
-import { STAMP_FRAMES } from "@/src/utils/stamp/types";
+import { STAMP_FRAMES } from "@/src/utils/stamp/types/stampFrame";
 
 import { StampOrientationGuide } from "./StampOrientationGuide";
 

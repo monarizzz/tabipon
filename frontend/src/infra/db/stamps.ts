@@ -17,7 +17,7 @@ import {
   DEFAULT_STAMP_FRAME,
   isStampFrame,
   type StampFrame,
-} from "@/src/utils/stamp/types";
+} from "@/src/utils/stamp/types/stampFrame";
 
 /**
  * 画面から呼ぶ素の関数として書くため、`useSQLiteContext()`（フック）ではなく

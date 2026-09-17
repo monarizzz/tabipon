@@ -25,7 +25,10 @@ import {
   renderStampFromLineArt,
 } from "@/src/utils/stamp/pipeline";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
-import { STAMP_FRAMES, type StampFrame } from "@/src/utils/stamp/types";
+import {
+  STAMP_FRAMES,
+  type StampFrame,
+} from "@/src/utils/stamp/types/stampFrame";
 
 const STAMP_COLORS: readonly string[] = STAMP_INK_COLORS;
 

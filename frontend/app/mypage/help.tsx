@@ -1,23 +1,6 @@
-import { View, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
-import { NavBar } from "@/src/commons/layout/components/NavBar/NavBar";
-import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { colors } from "@/src/style/tokens";
+import { SettingsDetailMain } from "@/src/features/mypage/components/SettingsDetailMain/SettingsDetailMain";
+import { useSettingsDetail } from "@/src/features/mypage/hooks/useSettingsDetail";
 
 export default function HelpScreen() {
-  const router = useRouter();
-  const { t } = useTranslation();
-
-  return (
-    <View style={styles.container}>
-      <NavBar title={t("mypage.help")} onBack={() => router.back()} />
-    </View>
-  );
+  return <SettingsDetailMain {...useSettingsDetail("mypage.help")} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-});

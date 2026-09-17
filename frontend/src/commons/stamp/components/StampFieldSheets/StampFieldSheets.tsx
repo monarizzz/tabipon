@@ -1,7 +1,7 @@
 import React from "react";
 
 import { EditFieldSheet } from "@/src/commons/sheet/components/EditFieldSheet/EditFieldSheet";
-import type { StampFieldEditors } from "@/src/commons/stamp/hooks/useStampFieldEditors";
+import type { StampFieldEditors } from "@/src/commons/stamp/types/stampField";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 
 type Props = {

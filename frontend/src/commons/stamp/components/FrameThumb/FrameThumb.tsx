@@ -1,6 +1,6 @@
 import { FrameCanvas } from "@/src/commons/stamp/components/FrameCanvas/FrameCanvas";
 import { colors } from "@/src/style/tokens";
-import type { StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 /** サムネイルの一辺 */
 const THUMB_SIZE = 48;

@@ -1,14 +1,18 @@
 import {
-  PRESS_GESTURE_THRESHOLDS,
-  SCRATCH_LEVEL_RANGE,
   createPressGestureState,
   markPressed,
   reducePressGesture,
   scratchLevelFromPeak,
-  type PressGestureResult,
-  type PressGestureSample,
-  type PressGestureState,
 } from "@/src/utils/stampPress/pressGesture";
+import {
+  PRESS_GESTURE_THRESHOLDS,
+  SCRATCH_LEVEL_RANGE,
+} from "@/src/utils/stampPress/constants/pressGesture";
+import type {
+  PressGestureResult,
+  PressGestureSample,
+  PressGestureState,
+} from "@/src/utils/stampPress/types/pressGesture";
 
 const { lift, press, neutral, liftTimeoutMs } = PRESS_GESTURE_THRESHOLDS;
 

@@ -12,7 +12,7 @@ import { drawClassicCircle } from "@/src/utils/stamp/frames/classicCircle";
 import { drawDashedCircle } from "@/src/utils/stamp/frames/dashedCircle";
 import { drawSimpleCircle } from "@/src/utils/stamp/frames/simpleCircle";
 import { drawWaveCircle } from "@/src/utils/stamp/frames/waveCircle";
-import type { StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 /**
  * @param minThickness 線幅の下限。この 512px 空間での値で、各フレームは
