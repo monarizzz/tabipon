@@ -62,6 +62,15 @@ describe("SpotNameLabel", () => {
     expect(hint).not.toBe(button.props.accessibilityLabel);
   });
 
+  test("1 文字でも横方向の当たり判定が 44pt を下回らない", async () => {
+    const screen = await renderLabel({ spotName: "山", onPress: () => {} });
+
+    // 行の中身は 鉛筆 14pt ＋ gap 6pt ＋ 文字ぶん。文字幅を 0 と見ても
+    // 左右の hitSlop が 24pt あれば 44pt に届く
+    const hitSlop = screen.getByRole("button").props.hitSlop;
+    expect(hitSlop.left + hitSlop.right).toBeGreaterThanOrEqual(24);
+  });
+
   test("onPress が無いときはボタンとして読み上げない", async () => {
     const screen = await renderLabel({ spotName: "東京スカイツリー" });
 

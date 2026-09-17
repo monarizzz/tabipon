@@ -9,9 +9,12 @@ type Props = {
   onPress?: () => void;
 };
 
-// 行の高さは fontSize 18 の行高ぶん（約 22pt）しかない。
-// 上下 12pt 広げて、見た目を変えずに実効 44pt 以上を確保する。
-const HIT_SLOP = { top: 12, bottom: 12 } as const;
+// 行の高さは fontSize 18 の行高ぶん（約 22pt）しかなく、幅もスポット名の文字数で
+// 決まる（1 文字だと 鉛筆 14pt ＋ gap 6pt ＋ 文字ぶんで 44pt に届かない）。
+// 四辺を 12pt 広げて、見た目を変えずに実効 44pt 以上を確保する。
+// 横は文字幅が 0 でも 鉛筆 14 ＋ gap 6 ＋ 左右 24 で 44pt になる。
+// 左右に隣接する要素は無い（スポット名は中央寄せの列に単独で並ぶ）。
+const HIT_SLOP = { top: 12, bottom: 12, left: 12, right: 12 } as const;
 
 export function SpotNameLabel({ spotName, onPress }: Props) {
   const { t } = useTranslation();
