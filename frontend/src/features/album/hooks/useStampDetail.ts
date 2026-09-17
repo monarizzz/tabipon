@@ -26,7 +26,6 @@ export function useStampDetail(id: string | undefined): StampDetail {
     attempt: number;
     stamp: Stamp | null;
   } | null>(null);
-  /** 増やすと読み込みの effect をもう一度走らせる。再試行の起点 */
   const [loadAttempt, setLoadAttempt] = React.useState(0);
   const current =
     loaded && loaded.id === id && loaded.attempt === loadAttempt
