@@ -64,6 +64,11 @@ export function useStampFieldEditors({
    * 失敗したらログと Alert を出して編集欄を開いたままにする。閉じてしまうと、
    * 入力した内容が消えたうえに失敗したことも分からなくなる。
    *
+   * **編集欄を閉じるのは、その項目の待ち行列の最後の保存が成功したときだけ。**
+   * 古い保存の成功で閉じると、閉じて開き直したあとに積んだ保存用の編集欄まで
+   * 閉じてしまう。その保存が失敗しても編集欄は閉じたままなので、開き直したときに
+   * `openMemo()` などが古い保存済みの値でドラフトを初期化し、入力が消える。
+   *
    * **patch は関数で受け取る。**場所の保存は書き込む前にジオコーディングを挟むので、
    * patch を先に組ませると、順番待ちに入る前の古い入力値で書き込むことになる
    */
@@ -76,7 +81,9 @@ export function useStampFieldEditors({
       const run = async () => {
         try {
           onUpdated(await updateStamp(stampId, await buildPatch()));
-          closeEditor();
+          // 自分がこの項目の待ち行列の最後なら閉じる。後ろに保存が積まれていれば、
+          // その編集欄は後続の保存が自分で閉じる
+          if (saveQueues.current.get(field) === next) closeEditor();
         } catch (error) {
           console.error(`${logTag} failed to update ${field}`, error);
           Alert.alert(
