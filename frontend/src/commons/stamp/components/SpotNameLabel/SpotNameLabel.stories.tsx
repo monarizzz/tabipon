@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-native";
 import { View } from "react-native";
 import { fn } from "storybook/test";
 
+import { colors } from "@/src/style/tokens";
 import { SpotNameLabel } from "./SpotNameLabel";
 
 const meta = {
@@ -41,7 +42,7 @@ const tapAreaDecorator = (Story: () => React.ReactElement) => (
       justifyContent: "center",
       borderWidth: 1,
       borderStyle: "dashed",
-      borderColor: "#c3d6cf",
+      borderColor: colors.border,
     }}
   >
     <Story />
