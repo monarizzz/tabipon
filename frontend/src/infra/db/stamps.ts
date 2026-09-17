@@ -1,8 +1,18 @@
 import { randomUUID } from "expo-crypto";
-import { Directory, File, Paths } from "expo-file-system";
 import { openDatabaseSync } from "expo-sqlite";
 
 import { DATABASE_NAME } from "@/src/infra/db/migrations";
+import {
+  copyOriginalPhoto,
+  deleteFiles,
+  deleteUnreferencedFiles,
+  ensureImageDirs,
+  existingFileUriOf,
+  fileUriOf,
+  originalPhotoPathOf,
+  stampImagePathOf,
+  writeStampImage,
+} from "@/src/libs/stampFile";
 import {
   DEFAULT_STAMP_FRAME,
   isStampFrame,
@@ -16,12 +26,6 @@ import {
  * この接続がスキーマの無い DB を見ることはない。
  */
 const db = openDatabaseSync(DATABASE_NAME);
-
-/** スタンプ画像（PNG）の置き場。documentDirectory からの相対パス */
-const STAMP_IMAGES_DIR = "stamps";
-
-/** 元写真の置き場。v1 では `line_art_path` にこのパスが入る */
-const ORIGINAL_PHOTOS_DIR = "stamp-originals";
 
 export type StampLocation = {
   latitude: number;
@@ -126,19 +130,14 @@ function toStamp(row: StampRow): Stamp {
   };
 }
 
-function fileOf(relativePath: string): File {
-  return new File(Paths.document, relativePath);
-}
-
 /** 画像を `<Image>` などに渡せる uri にする */
 export function stampImageUri(stamp: Stamp): string {
-  return fileOf(stamp.stampImagePath).uri;
+  return fileUriOf(stamp.stampImagePath);
 }
 
 /** 元写真の uri。デザイン変更の再生成に使う。失われていれば null */
 export function originalPhotoUri(stamp: Stamp): string | null {
-  const file = fileOf(stamp.lineArtPath);
-  return file.exists ? file.uri : null;
+  return existingFileUriOf(stamp.lineArtPath);
 }
 
 /**
@@ -154,7 +153,7 @@ export function newStampId(): string {
 }
 
 /**
- * スタンプを保存する。
+ * スタンプを保存する。ファイルへの書き出しと行の追加を順に組み立てる。
  *
  * **画像を書いてから行を入れる。**逆にすると、書き込みに失敗したときに
  * 存在しない画像を指す行が残り、一覧が壊れる。行が入らずファイルだけ残った場合は
@@ -164,15 +163,12 @@ export async function saveStamp(input: NewStamp): Promise<Stamp> {
   const { id } = input;
   const now = new Date().toISOString();
 
-  const stampImagePath = `${STAMP_IMAGES_DIR}/${id}.png`;
-  const lineArtPath = `${ORIGINAL_PHOTOS_DIR}/${id}.jpg`;
+  const stampImagePath = stampImagePathOf(id);
+  const lineArtPath = originalPhotoPathOf(id);
 
-  new Directory(Paths.document, STAMP_IMAGES_DIR).create({ idempotent: true });
-  new Directory(Paths.document, ORIGINAL_PHOTOS_DIR).create({
-    idempotent: true,
-  });
-  fileOf(stampImagePath).write(input.stampPng);
-  new File(input.photoUri).copy(fileOf(lineArtPath));
+  ensureImageDirs();
+  writeStampImage(stampImagePath, input.stampPng);
+  copyOriginalPhoto(input.photoUri, lineArtPath);
 
   const row: StampRow = {
     id,
@@ -274,11 +270,11 @@ export async function replaceStampImage(
   if (!stamp) {
     throw new Error(`スタンプが見つからない: ${id}`);
   }
-  fileOf(stamp.stampImagePath).write(stampPng);
+  writeStampImage(stamp.stampImagePath, stampPng);
 }
 
 /**
- * スタンプを消す。
+ * スタンプを消す。行の削除とファイルの削除を順に組み立てる。
  *
  * **行を先に消し、画像はその後。**逆にすると、ファイルだけ消えて行が残ったとき
  * 一覧に壊れた項目が出る。行が消えた後にファイル削除が失敗しても、残るのは
@@ -292,12 +288,7 @@ export async function deleteStamp(id: string): Promise<void> {
 
   await db.runAsync("DELETE FROM stamps WHERE id = ?", id);
 
-  for (const path of [stamp.stampImagePath, stamp.lineArtPath]) {
-    const file = fileOf(path);
-    if (file.exists) {
-      file.delete();
-    }
-  }
+  deleteFiles([stamp.stampImagePath, stamp.lineArtPath]);
 }
 
 /**
@@ -305,6 +296,9 @@ export async function deleteStamp(id: string): Promise<void> {
  *
  * 保存中や削除中に落ちると取り残しが出る。起動のたびに掃く前提の後始末で、
  * 消し漏れがあっても次の起動で拾えるため、失敗しても呼び出し側は止めない。
+ *
+ * **行を読んでからファイルを消す。**参照されているパスの一覧は DB にしか無いので、
+ * それを渡してファイル側に掃かせる。
  */
 export async function deleteOrphanFiles(): Promise<number> {
   const rows = await db.getAllAsync<{
@@ -316,21 +310,5 @@ export async function deleteOrphanFiles(): Promise<number> {
     rows.flatMap((row) => [row.stamp_image_path, row.line_art_path]),
   );
 
-  let deleted = 0;
-  for (const dirName of [STAMP_IMAGES_DIR, ORIGINAL_PHOTOS_DIR]) {
-    const dir = new Directory(Paths.document, dirName);
-    if (!dir.exists) {
-      continue;
-    }
-    for (const entry of dir.list()) {
-      if (
-        entry instanceof File &&
-        !referenced.has(`${dirName}/${entry.name}`)
-      ) {
-        entry.delete();
-        deleted += 1;
-      }
-    }
-  }
-  return deleted;
+  return deleteUnreferencedFiles(referenced);
 }
