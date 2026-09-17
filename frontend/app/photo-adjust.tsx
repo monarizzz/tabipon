@@ -10,7 +10,7 @@ import {
   type PhotoCropAreaHandle,
 } from "@/src/features/camera/components/PhotoCropArea/PhotoCropArea";
 import { PhotoAdjustControls } from "@/src/features/camera/components/PhotoAdjustControls/PhotoAdjustControls";
-import { getCurrentStampLocation } from "@/src/libs/location";
+import { getCurrentStampPlace } from "@/src/libs/location";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors } from "@/src/style/tokens";
 
@@ -44,17 +44,21 @@ export default function PhotoAdjustScreen() {
             ? await cropAreaRef.current?.getCroppedImageUri()
             : null;
           const photoUri = croppedUri ?? uri;
-          // 取得時の現在地(GPS)を記録する。権限拒否や失敗時は null のまま続行する。
+          // 取得時の現在地(GPS)と、そこから引いた住所を記録する。
+          // 権限拒否や失敗時は null のまま続行する。
           // スタンプの生成と保存は次の画面（押した瞬間）で行うので、ここでは渡すだけ
-          const location = photoUri ? await getCurrentStampLocation() : null;
+          const place = photoUri
+            ? await getCurrentStampPlace()
+            : { location: null, address: null };
           router.push({
             pathname: "/stamp-press",
             params: {
               uri: photoUri,
-              ...(location && {
-                latitude: String(location.latitude),
-                longitude: String(location.longitude),
+              ...(place.location && {
+                latitude: String(place.location.latitude),
+                longitude: String(place.location.longitude),
               }),
+              ...(place.address && { address: place.address }),
             },
           });
         }}

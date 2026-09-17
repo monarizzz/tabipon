@@ -46,10 +46,11 @@ import { colors, typography, spacing } from "@/src/style/tokens";
 export default function StampPressScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { uri, latitude, longitude } = useLocalSearchParams<{
+  const { uri, latitude, longitude, address } = useLocalSearchParams<{
     uri?: string;
     latitude?: string;
     longitude?: string;
+    address?: string;
   }>();
   const [helpVisible, setHelpVisible] = React.useState(false);
   const [designSheetVisible, setDesignSheetVisible] = React.useState(false);
@@ -120,6 +121,7 @@ export default function StampPressScreen() {
             latitude && longitude
               ? { latitude: Number(latitude), longitude: Number(longitude) }
               : null,
+          address: address ?? null,
           color,
           frameId: frameStyleId,
           scratchLevel,
@@ -139,7 +141,7 @@ export default function StampPressScreen() {
         setWaiting(false);
       }
     },
-    [color, frameStyleId, latitude, longitude, router, uri],
+    [address, color, frameStyleId, latitude, longitude, router, uri],
   );
 
   const goToStampDone = React.useCallback(() => {

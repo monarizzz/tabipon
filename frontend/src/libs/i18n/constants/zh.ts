@@ -93,7 +93,6 @@ export const zh: Translations = {
     labelMemo: "备注",
     addDate: "添加日期",
     addPlace: "添加地点",
-    placeLookupFailed: "无法获取地点",
     addMemo: "添加备注",
     addSpotName: "添加地点名称",
     designUnavailableTitle: "无法更改设计",

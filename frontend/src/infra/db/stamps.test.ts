@@ -157,6 +157,7 @@ function newStamp(overrides: Partial<NewStamp> = {}): NewStamp {
     photoUri: photo,
     capturedAt: "2026-09-15T01:00:00.000Z",
     location: null,
+    address: null,
     color: "#DC321E",
     frameId: "classic",
     scratchLevel: 0.5,
@@ -197,26 +198,32 @@ describe("saveStamp", () => {
     expect(saved.capturedAtOriginal).toBe(saved.capturedAt);
   });
 
-  it("位置情報を持たせると住所ごと往復する", async () => {
+  it("座標と住所を持たせると往復する", async () => {
     const saved = await saveStamp(
       newStamp({
-        location: {
-          latitude: 34.8894,
-          longitude: 135.8077,
-          country: "日本",
-          region: "京都府",
-          city: "宇治市",
-          detail: "平等院",
-        },
+        location: { latitude: 34.8894, longitude: 135.8077 },
+        address: "日本 京都府 宇治市 平等院",
       }),
     );
-    expect((await getStamp(saved.id))?.location).toEqual(saved.location);
+    const loaded = await getStamp(saved.id);
+    expect(loaded?.location).toEqual(saved.location);
+    expect(loaded?.address).toBe("日本 京都府 宇治市 平等院");
   });
 
   it("位置情報が無ければ null のまま", async () => {
     const saved = await saveStamp(newStamp({ location: null }));
     expect(saved.location).toBeNull();
     expect((await getStamp(saved.id))?.location).toBeNull();
+  });
+
+  // 逆引きに失敗しても手で入れられる。座標の有無と住所の有無は独立している
+  it("座標が無くても住所だけ保存できる", async () => {
+    const saved = await saveStamp(
+      newStamp({ location: null, address: "京都駅" }),
+    );
+    const loaded = await getStamp(saved.id);
+    expect(loaded?.location).toBeNull();
+    expect(loaded?.address).toBe("京都駅");
   });
 
   it("スキーマの CHECK に反する値は保存できない", async () => {

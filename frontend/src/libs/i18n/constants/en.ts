@@ -94,7 +94,6 @@ export const en: Translations = {
     labelMemo: "Memo",
     addDate: "Add date",
     addPlace: "Add place",
-    placeLookupFailed: "Couldn't get the place",
     addMemo: "Add memo",
     addSpotName: "Add spot name",
     designUnavailableTitle: "Can't change the design",

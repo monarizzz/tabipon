@@ -50,8 +50,6 @@ export type StampFieldEditors = {
 type Options = {
   stampId: string | undefined;
   stamp: Stamp | null;
-  /** 逆引きした住所。利用者が入力していないときに表示する */
-  geocodedAddress: string;
   /** 日時の編集欄を出すか。完了画面では出さない */
   editableDate?: boolean;
   /** 保存に成功したときに呼ぶ。画面側の `stamp` を差し替える */
@@ -67,14 +65,10 @@ type Options = {
  * `updateStamp()` の戻り値を `onUpdated` で返し、画面側の `stamp` を差し替える。
  * 値をこちらでも持つと、DB と画面のどちらが正かが増えるうえ、`stamp` の読み込み
  * 完了に合わせて `setState` する effect が要る。
- *
- * **場所だけは保存していない。**元の 2 画面がどちらもそうなっており、
- * 挙動を変えないためここでも DB に書かない。
  */
 export function useStampFieldEditors({
   stampId,
   stamp,
-  geocodedAddress,
   editableDate = false,
   onUpdated,
   logTag,
@@ -84,11 +78,8 @@ export function useStampFieldEditors({
   const spotName = stamp?.title ?? "";
   const memo = stamp?.memo ?? "";
   const capturedAt = stamp?.capturedAt ?? "";
-
-  // 場所は DB に列が無いので、入力をこのフックで抱える。
-  // 入っていれば逆引きした住所より優先する
-  const [editedLocation, setEditedLocation] = React.useState("");
-  const location = editedLocation || geocodedAddress;
+  // 取得時に逆引きして保存済みの住所。手で直せば同じ列が上書きされる
+  const location = stamp?.address ?? "";
 
   const [editingField, setEditingField] = React.useState<EditingField>(null);
   const [draftSpotName, setDraftSpotName] = React.useState("");
@@ -168,10 +159,12 @@ export function useStampFieldEditors({
     saveDate: () => {
       void save("date", { capturedAt: draftDate.toISOString() });
     },
-    // 保存先が無いので、その場の表示を差し替えるだけ。空入力なら元の値を残す
+    // **住所を直しても座標は動かさない。**座標は「実際にスタンプを押した地点」の
+    // 記録で、住所はそこから導いた表示用のラベル。`geocodeAsync()` で住所から
+    // 引き直すと、押した地点が番地の代表点に丸められて復元できなくなる。
+    // 座標を住所に追従させるかは #87 で決める
     saveLocation: () => {
-      setEditedLocation(draftLocation.trim() || location);
-      closeEditor();
+      void save("location", { address: normalizeOptionalText(draftLocation) });
     },
   };
 }

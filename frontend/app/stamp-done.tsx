@@ -28,7 +28,6 @@ import {
 } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { formatIsoDateTime } from "@/src/utils/datetime/format";
-import { useReverseGeocode } from "@/src/libs/location/useReverseGeocode";
 import { colors, spacing } from "@/src/style/tokens";
 
 export default function StampDoneScreen() {
@@ -46,11 +45,9 @@ export default function StampDoneScreen() {
     peak?: string;
   }>();
   const [stamp, setStamp] = React.useState<Stamp | null>(null);
-  const geocoded = useReverseGeocode(stamp?.location ?? null);
   const editors = useStampFieldEditors({
     stampId,
     stamp,
-    geocodedAddress: geocoded.address,
     onUpdated: setStamp,
     logTag: "[stamp-done]",
   });
@@ -144,9 +141,6 @@ export default function StampDoneScreen() {
             <StampInfoCard
               date={formatIsoDateTime(editors.capturedAt)}
               location={editors.location}
-              locationPlaceholder={
-                geocoded.failed ? t("stampDetail.placeLookupFailed") : undefined
-              }
               memo={editors.memo}
               onPressLocation={editors.openLocation}
               onPressMemo={editors.openMemo}

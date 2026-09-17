@@ -92,7 +92,6 @@ export const ja = {
     labelMemo: "メモ",
     addDate: "日付を追加",
     addPlace: "場所を追加",
-    placeLookupFailed: "場所を取得できませんでした",
     addMemo: "メモを追加",
     addSpotName: "スポット名を追加",
     designUnavailableTitle: "デザインを変更できません",

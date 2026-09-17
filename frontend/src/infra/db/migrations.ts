@@ -59,7 +59,31 @@ CREATE TABLE stamps (
 ) STRICT;
 `;
 
-export const MIGRATIONS: readonly string[] = [V1_CREATE_STAMPS];
+// 住所は画面上「場所」の 1 行として出し入れするだけで、国・都道府県・市区町村を
+// 個別に読む機能は無い。利用者が「場所」を手で直したときも入るのは 1 行の文字列で、
+// 4 列へ分解し直す手立てが無い。分けて持つと、書かれるが誰も読まない列が 3 つ残る
+const V2_MERGE_ADDRESS_COLUMNS = `
+ALTER TABLE stamps ADD COLUMN address TEXT;
+
+-- 大きい方から空白で連結する。'x || 空白' は x が NULL なら NULL になるので、
+-- coalesce で落とせば欠けている要素のぶんだけ区切りも消える
+UPDATE stamps SET address = nullif(trim(
+  coalesce(address_country || ' ', '') ||
+  coalesce(address_region  || ' ', '') ||
+  coalesce(address_city    || ' ', '') ||
+  coalesce(address_detail        , '')
+), '');
+
+ALTER TABLE stamps DROP COLUMN address_country;
+ALTER TABLE stamps DROP COLUMN address_region;
+ALTER TABLE stamps DROP COLUMN address_city;
+ALTER TABLE stamps DROP COLUMN address_detail;
+`;
+
+export const MIGRATIONS: readonly string[] = [
+  V1_CREATE_STAMPS,
+  V2_MERGE_ADDRESS_COLUMNS,
+];
 
 /**
  * DB を最新のスキーマまで進める。`SQLiteProvider` の `onInit` に渡す。

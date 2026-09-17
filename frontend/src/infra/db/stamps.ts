@@ -30,10 +30,6 @@ const db = openDatabaseSync(DATABASE_NAME);
 export type StampLocation = {
   latitude: number;
   longitude: number;
-  country?: string | null;
-  region?: string | null;
-  city?: string | null;
-  detail?: string | null;
 };
 
 export type Stamp = {
@@ -49,6 +45,14 @@ export type Stamp = {
   capturedAtOriginal: string;
   createdAt: string;
   location: StampLocation | null;
+  /**
+   * 「場所」として出す 1 行。取得時に座標から逆引きした住所が入る。
+   * 利用者が編集すればその文字列で置き換わる。
+   *
+   * **座標とは独立に持つ。**逆引きに失敗しても手で入れられるし、
+   * 手で入れた場所を座標の有無で消したくない
+   */
+  address: string | null;
   color: string;
   frameId: StampFrame;
   scratchLevel: number;
@@ -64,6 +68,8 @@ export type NewStamp = {
   photoUri: string;
   capturedAt: string;
   location: StampLocation | null;
+  /** 取得時に逆引きした住所。引けなければ null で保存し、あとから手で入れられる */
+  address: string | null;
   color: string;
   frameId: StampFrame;
   scratchLevel: number;
@@ -75,6 +81,7 @@ export type StampPatch = {
   title?: string | null;
   memo?: string | null;
   capturedAt?: string;
+  address?: string | null;
   color?: string;
   frameId?: StampFrame;
 };
@@ -90,10 +97,7 @@ type StampRow = {
   created_at: string;
   latitude: number | null;
   longitude: number | null;
-  address_country: string | null;
-  address_region: string | null;
-  address_city: string | null;
-  address_detail: string | null;
+  address: string | null;
   color: string;
   frame_id: string;
   scratch_level: number;
@@ -113,14 +117,8 @@ function toStamp(row: StampRow): Stamp {
     location:
       row.latitude === null || row.longitude === null
         ? null
-        : {
-            latitude: row.latitude,
-            longitude: row.longitude,
-            country: row.address_country,
-            region: row.address_region,
-            city: row.address_city,
-            detail: row.address_detail,
-          },
+        : { latitude: row.latitude, longitude: row.longitude },
+    address: row.address,
     color: row.color,
     // 知らない識別子（廃止済みのフレームなど）が入っていても描画側が分岐を持たないので、
     // 型どおりの値まで読み出しの時点で寄せる
@@ -181,10 +179,7 @@ export async function saveStamp(input: NewStamp): Promise<Stamp> {
     created_at: now,
     latitude: input.location?.latitude ?? null,
     longitude: input.location?.longitude ?? null,
-    address_country: input.location?.country ?? null,
-    address_region: input.location?.region ?? null,
-    address_city: input.location?.city ?? null,
-    address_detail: input.location?.detail ?? null,
+    address: input.address,
     color: input.color,
     frame_id: input.frameId,
     scratch_level: input.scratchLevel,
@@ -233,6 +228,7 @@ export async function updateStamp(
     title: "title",
     memo: "memo",
     capturedAt: "captured_at",
+    address: "address",
     color: "color",
     frameId: "frame_id",
   };

@@ -93,7 +93,6 @@ export const ko: Translations = {
     labelMemo: "메모",
     addDate: "날짜 추가",
     addPlace: "장소 추가",
-    placeLookupFailed: "장소를 가져오지 못했습니다",
     addMemo: "메모 추가",
     addSpotName: "장소 이름 추가",
     designUnavailableTitle: "디자인을 변경할 수 없습니다",
