@@ -20,7 +20,8 @@ function parseCapturedAt(isoDate: string): Date {
   return parseIso(isoDate) ?? new Date();
 }
 
-type EditingField = "spotName" | "date" | "location" | "memo" | null;
+type EditableField = "spotName" | "date" | "location" | "memo";
+type EditingField = EditableField | null;
 
 export type StampFieldEditors = {
   /** 表示に使う値。`stamp` から導出する */
@@ -91,26 +92,37 @@ export function useStampFieldEditors({
   const [draftLocation, setDraftLocation] = React.useState("");
   const [draftDate, setDraftDate] = React.useState(() => new Date());
   const [draftMemo, setDraftMemo] = React.useState("");
-  const [updating, setUpdating] = React.useState(false);
+
+  /**
+   * 保存中のフィールド。二度押しの guard にだけ使う。
+   *
+   * **フィールドごとに持つ。**場所の保存はジオコーディングの通信を挟むので、
+   * 1 つの真偽値にすると、その待ち時間のあいだメモなど他の項目の保存まで弾かれる。
+   * 早期 return なので押しても何も起きず、失敗したことも分からない。
+   *
+   * 表示には使わないので state ではなく ref で持つ。
+   */
+  const savingFields = React.useRef(new Set<EditableField>());
 
   const closeEditor = React.useCallback(() => setEditingField(null), []);
 
   /**
    * 1 項目を保存する。
    *
-   * 保存中の二度押しを弾き、失敗したらログと Alert を出して編集欄を開いたままにする。
-   * 閉じてしまうと、入力した内容が消えたうえに失敗したことも分からなくなる。
+   * 同じ項目の保存中は二度押しを弾き、失敗したらログと Alert を出して編集欄を
+   * 開いたままにする。閉じてしまうと、入力した内容が消えたうえに失敗したことも
+   * 分からなくなる。
    *
    * **patch は関数で受け取る。**場所の保存は書き込む前にジオコーディングを挟むので、
    * patch を先に組ませると、その通信中だけ二度押しの guard が外れる
    */
   const save = React.useCallback(
     async (
-      field: string,
+      field: EditableField,
       buildPatch: () => StampPatch | Promise<StampPatch>,
     ) => {
-      if (!stampId || updating) return;
-      setUpdating(true);
+      if (!stampId || savingFields.current.has(field)) return;
+      savingFields.current.add(field);
       try {
         onUpdated(await updateStamp(stampId, await buildPatch()));
         closeEditor();
@@ -121,10 +133,10 @@ export function useStampFieldEditors({
           t("stampDetail.saveFailedMessage"),
         );
       } finally {
-        setUpdating(false);
+        savingFields.current.delete(field);
       }
     },
-    [closeEditor, logTag, onUpdated, stampId, t, updating],
+    [closeEditor, logTag, onUpdated, stampId, t],
   );
 
   return {
@@ -162,7 +174,7 @@ export function useStampFieldEditors({
     setDraftMemo,
     closeEditor,
     saveSpotName: () => {
-      void save("spot name", () => ({
+      void save("spotName", () => ({
         title: normalizeOptionalText(draftSpotName),
       }));
     },
