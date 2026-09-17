@@ -5,32 +5,30 @@ import { Check } from "lucide-react-native";
 import { NavBar } from "@/src/commons/layout/components/NavBar/NavBar";
 import { Card } from "@/src/commons/other/components/Card/Card";
 import { ListItem } from "@/src/commons/other/components/ListItem/ListItem";
-import { localeOptions } from "@/src/features/mypage/utils/localeOptions";
+import type { Language } from "@/src/features/mypage/types/language";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, radii, spacing } from "@/src/style/tokens";
 
-type Props = {
-  onBack: () => void;
-};
+type Props = Language;
 
-/**
- * 言語設定。選択中の言語と切り替えは I18nProvider が持つので、
- * この画面が持つ状態は無い
- */
-export function LanguageMain({ onBack }: Props) {
-  const { t, preference, setPreference } = useTranslation();
-  const options = localeOptions(t);
+export function LanguageMain({
+  options,
+  preference,
+  selectPreference,
+  back,
+}: Props) {
+  const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
-      <NavBar title={t("language.title")} onBack={onBack} />
+      <NavBar title={t("language.title")} onBack={back} />
       <ScrollView contentContainerStyle={styles.content}>
         <Card style={styles.card}>
           {options.map((option, index) => (
             <Fragment key={option.key}>
               <ListItem
                 label={option.label}
-                onPress={() => setPreference(option.key)}
+                onPress={() => selectPreference(option.key)}
                 rightElement={
                   preference === option.key ? (
                     <Check size={18} color={colors.primary} />

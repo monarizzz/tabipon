@@ -2,15 +2,8 @@ import {
   LOCALE_LABELS,
   SUPPORTED_LOCALES,
 } from "@/src/libs/i18n/constants/locales";
-import type {
-  I18nContextValue,
-  LocalePreference,
-} from "@/src/libs/i18n/types/i18n";
-
-export type LocaleOption = {
-  key: LocalePreference;
-  label: string;
-};
+import type { I18nContextValue } from "@/src/libs/i18n/types/i18n";
+import type { LocaleOption } from "@/src/features/mypage/types/language";
 
 /**
  * 言語設定の選択肢を組み立てる。
