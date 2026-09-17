@@ -44,6 +44,12 @@ export function StampLocationMap({
       <View style={styles.mapCard}>
         {hasLocation ? (
           <MapView
+            // 座標が変わったら地図ごと貼り替える。`initialRegion` はマウント時に
+            // しか効かないので、住所を直して座標を引き直したとき（`saveLocation`
+            // in `src/commons/stamp/hooks/useStampFieldEditors.ts`）にピンだけが
+            // 動いて地図は前の場所のままになる。操作は全て無効にしてあるため、
+            // 追従しないと新しいピンを画面に出す手段が無い
+            key={`${latitude},${longitude}`}
             style={styles.map}
             // 端末の地図（iOS は Apple Maps）を使う。API キーが要らず、
             // 圏外でも OS のキャッシュが効く範囲では出る
