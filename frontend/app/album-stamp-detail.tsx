@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Sharing from "expo-sharing";
@@ -28,7 +35,7 @@ import {
 } from "@/src/utils/stamp/io";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { colors, radii, spacing } from "@/src/style/tokens";
+import { colors, radii, spacing, typography } from "@/src/style/tokens";
 import { StampDetailMediaPager } from "@/src/features/album/components/detail/StampDetailMediaPager/StampDetailMediaPager";
 import { StampInfoCard } from "@/src/commons/stamp/components/StampInfoCard/StampInfoCard";
 import { StampFieldSheets } from "@/src/commons/stamp/components/StampFieldSheets/StampFieldSheets";
@@ -42,6 +49,9 @@ export default function StampDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const [stamp, setStamp] = React.useState<Stamp | null>(null);
+  // id が無い／DB に該当行が無い／読み込みに失敗した、のいずれか。
+  // どれも「このスタンプは出せない」なので同じ表示にまとめる
+  const [stampUnavailable, setStampUnavailable] = React.useState(false);
   const stampLatitude = stamp?.location?.latitude ?? null;
   const stampLongitude = stamp?.location?.longitude ?? null;
   // 作成時の演出値。デザイン変更でも同じ見た目になるよう引き継いで再適用する
@@ -81,14 +91,27 @@ export default function StampDetailScreen() {
 
   React.useEffect(() => {
     if (!id) return;
-    getStamp(id).then((loaded) => {
-      if (!loaded) return;
-      setStamp(loaded);
-      setCurrentImageUri(stampImageUri(loaded));
-      setOriginalUri(originalPhotoUri(loaded));
-      setSelectedColor(loaded.color);
-      setSelectedFrameStyleId(loaded.frameId);
-    });
+    let cancelled = false;
+    getStamp(id)
+      .then((loaded) => {
+        if (cancelled) return;
+        if (!loaded) {
+          setStampUnavailable(true);
+          return;
+        }
+        setStamp(loaded);
+        setCurrentImageUri(stampImageUri(loaded));
+        setOriginalUri(originalPhotoUri(loaded));
+        setSelectedColor(loaded.color);
+        setSelectedFrameStyleId(loaded.frameId);
+      })
+      .catch((error) => {
+        console.error("[stamp-detail] failed to load stamp", error);
+        if (!cancelled) setStampUnavailable(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   // デザイン変更中は選択中の色/フレームでプレビューを生成する(作成画面と同じ cancelled フラグ方式)
@@ -230,6 +253,27 @@ export default function StampDetailScreen() {
     }
   };
 
+  if (!id || stampUnavailable) {
+    return (
+      <View style={[styles.container, styles.status]}>
+        <Text style={styles.statusText}>{t("stampDetail.notFound")}</Text>
+        <CommonButton
+          label={t("stampDetail.backToAlbum")}
+          onPress={() => router.replace("/(tabs)/album")}
+          variant="secondary"
+        />
+      </View>
+    );
+  }
+
+  if (!stamp) {
+    return (
+      <View style={[styles.container, styles.status]}>
+        <ActivityIndicator color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={[styles.topBar, { paddingTop: insets.top + spacing.xl }]}>
@@ -309,6 +353,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
+  },
+  status: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.l,
+  },
+  statusText: {
+    fontSize: typography.caption.fontSize,
+    color: colors.textMuted,
   },
   topBar: {
     flexDirection: "row",
