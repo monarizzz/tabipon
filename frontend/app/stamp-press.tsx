@@ -34,9 +34,7 @@ import {
   STAMP_INK_COLORS,
 } from "@/src/utils/stamp/constants/constants";
 import { StampOrientationGuide } from "@/src/features/camera/components/StampOrientationGuide/StampOrientationGuide";
-import { newStampId, saveStamp } from "@/src/infra/db/stamps";
-import { generateStampPngFromUri } from "@/src/utils/stamp/io";
-import { seedFromStampId } from "@/src/utils/stamp/seed";
+import { createStamp } from "@/src/features/camera/utils/createStamp";
 import { useStampPressGesture } from "@/src/utils/stampPress/useStampPressGesture";
 import type { PressGestureFinish } from "@/src/utils/stampPress/pressGesture";
 import { playStampSound } from "@/src/libs/sound";
@@ -90,11 +88,8 @@ export default function StampPressScreen() {
     tiltAngle: 0,
   });
 
-  // 生成と保存をまとめて行い、スタンプ完成画面へ進む。
-  //
-  // **id を先に払い出す。**掠れ模様の seed は id から導くので（`seed.ts`）、
-  // 描く前に確定していないと、あとで色やフレームを変えて再生成したときに
-  // 模様が変わってしまう
+  // スタンプを作って完成画面へ進む。生成と保存は `createStamp()` に任せ、
+  // ここは待機中の表示と遷移だけを持つ
   const createAndSave = React.useCallback(
     async (stampTop: string) => {
       if (!uri) {
@@ -103,29 +98,19 @@ export default function StampPressScreen() {
       }
       setWaiting(true);
       try {
-        const id = newStampId();
         const { scratchLevel, tiltAngle } = finishRef.current;
-        const stampPng = await generateStampPngFromUri(uri, {
+        const { id } = await createStamp({
+          photoUri: uri,
           color,
-          frame: frameStyleId,
+          frameId: frameStyleId,
           scratchLevel,
           tiltAngle,
-          seed: seedFromStampId(id),
-        });
-        await saveStamp({
-          id,
-          stampPng,
-          photoUri: uri,
-          capturedAt: new Date().toISOString(),
+          // 座標はルートパラメータなので文字列で来る
           location:
             latitude && longitude
               ? { latitude: Number(latitude), longitude: Number(longitude) }
               : null,
           address: address ?? null,
-          color,
-          frameId: frameStyleId,
-          scratchLevel,
-          tiltAngle,
         });
         router.push({
           pathname: "/stamp-done",
@@ -329,11 +314,6 @@ const styles = StyleSheet.create({
     fontSize: typography.caption.fontSize,
     color: colors.textMuted,
   },
-  debug: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontFamily: "monospace",
-  },
   helpIcon: {
     fontSize: 14,
     color: colors.textMuted,
@@ -352,16 +332,5 @@ const styles = StyleSheet.create({
   waitingText: {
     fontSize: typography.body.fontSize,
     color: colors.white,
-  },
-  previewLoadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.3)",
-    borderRadius: 999,
   },
 });

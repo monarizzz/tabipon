@@ -11,29 +11,14 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Sharing from "expo-sharing";
 import { DesignChangePanel } from "@/src/features/album/components/stamp-rally/DesignChangePanel/DesignChangePanel";
+import { useStampDesignChange } from "@/src/features/album/hooks/useStampDesignChange";
 import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/constants/frameStyleOptions";
-import {
-  DEFAULT_STAMP_COLOR,
-  STAMP_INK_COLORS,
-} from "@/src/utils/stamp/constants/constants";
+import { STAMP_INK_COLORS } from "@/src/utils/stamp/constants/constants";
 import { ShareButton } from "@/src/commons/button/components/ShareButton/ShareButton";
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
 import { Trash2 } from "lucide-react-native";
-import {
-  deleteStamp,
-  getStamp,
-  originalPhotoUri,
-  replaceStampImage,
-  stampImageUri,
-  updateStamp,
-  type Stamp,
-} from "@/src/infra/db/stamps";
-import {
-  generateStampFromUri,
-  generateStampPngFromUri,
-} from "@/src/utils/stamp/io";
-import { seedFromStampId } from "@/src/utils/stamp/seed";
+import { deleteStamp, getStamp, type Stamp } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, radii, spacing, typography } from "@/src/style/tokens";
 import { StampDetailMediaPager } from "@/src/features/album/components/detail/StampDetailMediaPager/StampDetailMediaPager";
@@ -53,14 +38,6 @@ export default function StampDetailScreen() {
   const [stampUnavailable, setStampUnavailable] = React.useState(false);
   const stampLatitude = stamp?.location?.latitude ?? null;
   const stampLongitude = stamp?.location?.longitude ?? null;
-  // 作成時の演出値。デザイン変更でも同じ見た目になるよう引き継いで再適用する
-  const stampTiltAngle = stamp?.tiltAngle ?? 0;
-  const stampScratchLevel = stamp?.scratchLevel ?? 0;
-  const [designMode, setDesignMode] = React.useState(false);
-  const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
-    FRAME_STYLE_OPTIONS[0].id,
-  );
-  const [selectedColor, setSelectedColor] = React.useState(DEFAULT_STAMP_COLOR);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
   const editors = useStampFieldEditors({
@@ -71,20 +48,11 @@ export default function StampDetailScreen() {
     logTag: "[stamp-detail]",
   });
 
-  // 表示中のスタンプ画像の uri（file://）。共有もこの値を使う
-  const [currentImageUri, setCurrentImageUri] = React.useState("");
-  // デザイン変更しても画像のパスは変わらないため、同じ uri のままだと
-  // 画像側のキャッシュが効いて古い絵が出る。表示のときだけクエリを足して別物として読ませる
-  const [imageVersion, setImageVersion] = React.useState(0);
-  const displayImageUri = currentImageUri
-    ? `${currentImageUri}${imageVersion ? `?v=${imageVersion}` : ""}`
-    : "";
-  // この端末に残っている元写真の uri(無ければデザイン変更不可)
-  const [originalUri, setOriginalUri] = React.useState<string | null>(null);
-  const [designUpdating, setDesignUpdating] = React.useState(false);
-  // デザイン変更中の、選択中デザインのリアルタイムプレビュー(data-URI)
-  const [previewUri, setPreviewUri] = React.useState<string | null>(null);
-  const [previewLoading, setPreviewLoading] = React.useState(false);
+  const design = useStampDesignChange({
+    stampId: id,
+    stamp,
+    onUpdated: setStamp,
+  });
 
   React.useEffect(() => {
     if (!id) return;
@@ -97,10 +65,6 @@ export default function StampDetailScreen() {
           return;
         }
         setStamp(loaded);
-        setCurrentImageUri(stampImageUri(loaded));
-        setOriginalUri(originalPhotoUri(loaded));
-        setSelectedColor(loaded.color);
-        setSelectedFrameStyleId(loaded.frameId);
       })
       .catch((error) => {
         console.error("[stamp-detail] failed to load stamp", error);
@@ -110,104 +74,6 @@ export default function StampDetailScreen() {
       cancelled = true;
     };
   }, [id]);
-
-  // デザイン変更中は選択中の色/フレームでプレビューを生成する(作成画面と同じ cancelled フラグ方式)
-  React.useEffect(() => {
-    if (!designMode || !originalUri) {
-      // プレビューの生成を止めたときの後始末。描画は外部（Skia）で走らせており、
-      // 捨てる操作をレンダー側に寄せられないためここで消す
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setPreviewUri(null);
-      return;
-    }
-    const color = selectedColor;
-    const frame = selectedFrameStyleId;
-    let cancelled = false;
-    setPreviewLoading(true);
-    // 掠れの seed は id から導くので、色やフレームを変えても模様は変わらない
-    generateStampFromUri(originalUri, {
-      color,
-      frame,
-      scratchLevel: stampScratchLevel,
-      tiltAngle: stampTiltAngle,
-      seed: id ? seedFromStampId(id) : 0,
-    })
-      .then((image) => {
-        if (cancelled) return;
-        const base64 = image.encodeToBase64();
-        if (base64) setPreviewUri(`data:image/png;base64,${base64}`);
-        setPreviewLoading(false);
-      })
-      .catch((error) => {
-        if (!cancelled) setPreviewLoading(false);
-        console.warn("[stamp-detail] preview generation failed", error);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    designMode,
-    id,
-    originalUri,
-    selectedColor,
-    selectedFrameStyleId,
-    stampScratchLevel,
-    stampTiltAngle,
-  ]);
-
-  const handleOpenDesignChange = () => {
-    if (!originalUri) {
-      Alert.alert(
-        t("stampDetail.designUnavailableTitle"),
-        t("stampDetail.designUnavailableMessage"),
-      );
-      return;
-    }
-    setDesignMode(true);
-  };
-
-  const handleCloseDesignChange = () => {
-    setDesignMode(false);
-    setPreviewUri(null);
-    // 適用せずに閉じたので選択を捨て、保存済みのデザインに戻す。
-    // 残したままだと、開き直したときに実際のスタンプと違う選択が出る
-    if (stamp) {
-      setSelectedColor(stamp.color);
-      setSelectedFrameStyleId(stamp.frameId);
-    }
-  };
-
-  const handleConfirmDesign = async () => {
-    if (!id || !originalUri || designUpdating) return;
-    const color = selectedColor;
-    const frame = selectedFrameStyleId;
-    if (!color) return;
-    setDesignUpdating(true);
-    try {
-      const stampPng = await generateStampPngFromUri(originalUri, {
-        color,
-        frame,
-        scratchLevel: stampScratchLevel,
-        tiltAngle: stampTiltAngle,
-        seed: seedFromStampId(id),
-      });
-      await replaceStampImage(id, stampPng);
-      const updated = await updateStamp(id, { color, frameId: frame });
-      setStamp(updated);
-      setCurrentImageUri(stampImageUri(updated));
-      setImageVersion((version) => version + 1);
-      setPreviewUri(null);
-      setDesignMode(false);
-    } catch (error) {
-      console.error("[stamp-detail] failed to update design", error);
-      Alert.alert(
-        t("stampDetail.designUpdateFailedTitle"),
-        t("stampDetail.designUpdateFailedMessage"),
-      );
-    } finally {
-      setDesignUpdating(false);
-    }
-  };
 
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
 
@@ -226,7 +92,7 @@ export default function StampDetailScreen() {
   };
 
   const handleShare = async () => {
-    if (!currentImageUri) return;
+    if (!design.imageUri) return;
     try {
       const isAvailable = await Sharing.isAvailableAsync();
       if (!isAvailable) {
@@ -238,7 +104,7 @@ export default function StampDetailScreen() {
       }
 
       // 画像は端末の documentDirectory にあるので、そのまま渡せる
-      await Sharing.shareAsync(currentImageUri, {
+      await Sharing.shareAsync(design.imageUri, {
         dialogTitle: editors.spotName || undefined,
       });
     } catch (error) {
@@ -287,8 +153,8 @@ export default function StampDetailScreen() {
       </View>
       <StampDetailMediaPager
         spotName={editors.spotName}
-        imageUri={displayImageUri || undefined}
-        onPressDesignChange={handleOpenDesignChange}
+        imageUri={design.displayImageUri || undefined}
+        onPressDesignChange={design.open}
         onPressSpotName={editors.openSpotName}
         latitude={stampLatitude}
         longitude={stampLongitude}
@@ -319,25 +185,23 @@ export default function StampDetailScreen() {
         onCancel={() => setDeleteDialogVisible(false)}
         onConfirm={handleConfirmDelete}
       />
-      {designMode && (
+      {design.designMode && (
         <DesignChangePanel
-          onBack={handleCloseDesignChange}
+          onBack={design.close}
           onShare={handleShare}
-          imageUri={
-            (designMode && previewUri ? previewUri : currentImageUri) ||
-            undefined
-          }
-          loading={previewLoading}
-          confirming={designUpdating}
+          // プレビューが出来るまでは保存済みの絵を出しておく
+          imageUri={design.previewUri || design.imageUri || undefined}
+          loading={design.previewLoading}
+          confirming={design.updating}
           frameStyles={FRAME_STYLE_OPTIONS}
-          selectedFrameStyleId={selectedFrameStyleId}
-          onSelectFrameStyle={setSelectedFrameStyleId}
+          selectedFrameStyleId={design.selectedFrameStyleId}
+          onSelectFrameStyle={design.setSelectedFrameStyleId}
           colorOptions={STAMP_INK_COLORS}
-          selectedColor={selectedColor}
-          onSelectColor={setSelectedColor}
+          selectedColor={design.selectedColor}
+          onSelectColor={design.setSelectedColor}
           showLandmarkName={showLandmarkName}
           onToggleShowLandmarkName={setShowLandmarkName}
-          onConfirm={handleConfirmDesign}
+          onConfirm={design.confirm}
         />
       )}
       <StampFieldSheets editors={editors} />
