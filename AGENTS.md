@@ -153,6 +153,15 @@ git worktree list            # 消えたことを確認
 - セキュリティ上の懸念
 - テストの不足
 
+### 自動レビュー
+
+PR には `chatgpt-codex-connector[bot]` がレビューを付ける。CI では回さず、手元で
+`codex-review-loop` スキル（`.claude/skills/`）を使って巡回する。
+
+- 指摘に対応して push したら、PR に `@codex` で始まる日本語コメントを送って再レビューを依頼する
+- 指摘が的外れ・既に対応済みの場合も、理由を添えて `@codex` から始まるコメントを返す
+- 未 push の修正がある間は `@codex` を送らない
+
 ## フロントエンド
 
 `docs/front-architecture.md`準拠
