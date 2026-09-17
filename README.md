@@ -26,8 +26,7 @@
 | 領域 | 使用技術 |
 | --- | --- |
 | フロントエンド | React Native / Expo / TypeScript（expo-camera, expo-sensors, expo-haptics, react-native-reanimated ほか） |
-| DB・ストレージ | Supabase Postgres / Supabase Storage |
-| デプロイ | Railway |
+| データ保存 | 端末ローカル（expo-sqlite / expo-file-system） |
 
 ドキュメントの一覧と役割は [`docs/README.md`](docs/README.md) にまとめています。詳しい仕様は [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md)、アーキテクチャは [`docs/front-architecture.md`](docs/front-architecture.md)　デザインは [`design/DESIGN.MD`](design/DESIGN.MD) を参照してください。
 
