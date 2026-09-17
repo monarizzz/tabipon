@@ -67,7 +67,6 @@ export const en: Translations = {
     stampCount: "%{count} stamps",
     loadError: "Could not load stamps",
     empty: "Collect stamps and they will show up here!",
-    filterAll: "All",
     stampName: "Stamp",
     unknownSpotName: "No spot set",
   },

@@ -66,7 +66,6 @@ export const zh: Translations = {
     stampCount: "%{count} 枚印章",
     loadError: "无法加载印章",
     empty: "收集印章后会显示在这里！",
-    filterAll: "全部",
     stampName: "印章",
     unknownSpotName: "未设置地点",
   },

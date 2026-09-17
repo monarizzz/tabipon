@@ -66,7 +66,6 @@ export const ko: Translations = {
     stampCount: "스탬프 %{count}개",
     loadError: "스탬프를 불러오지 못했습니다",
     empty: "스탬프를 모으면 여기에 표시됩니다!",
-    filterAll: "전체",
     stampName: "스탬프",
     unknownSpotName: "장소 미설정",
   },

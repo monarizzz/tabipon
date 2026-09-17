@@ -8,15 +8,12 @@ export type Album = {
   stamps: StampGridItem[] | null;
   loadFailed: boolean;
   refreshing: boolean;
-  selectedFilterId: string;
   collectionSheetVisible: boolean;
   collectionName: string;
 
-  selectFilter: (id: string) => void;
   reload: () => void;
   refresh: () => void;
   pressStamp: (item: StampGridItem) => void;
-  openCollectionSheet: () => void;
   closeCollectionSheet: () => void;
   changeCollectionName: (name: string) => void;
   addCollection: () => void;
