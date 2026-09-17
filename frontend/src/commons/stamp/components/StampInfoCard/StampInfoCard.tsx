@@ -13,6 +13,11 @@ type Props = {
   onPressMemo?: () => void;
 };
 
+// 日時 / 場所のセルはラベル 12pt ＋ 値 14pt の 2 行ぶん（約 35pt）しかない。
+// 上下 8pt 広げて実効 44pt 以上にする。infoRow の padding 20pt の内側に収まるため、
+// 上下に隣接する要素の判定とは重ならない。
+const CELL_HIT_SLOP = { top: 8, bottom: 8 } as const;
+
 export function StampInfoCard({
   date,
   location,
@@ -30,6 +35,7 @@ export function StampInfoCard({
           onPress={onPressDate}
           disabled={!onPressDate}
           activeOpacity={0.7}
+          hitSlop={CELL_HIT_SLOP}
         >
           <View style={styles.labelRow}>
             <Text style={styles.label}>{t("stampDetail.labelDate")}</Text>
@@ -47,6 +53,7 @@ export function StampInfoCard({
           onPress={onPressLocation}
           disabled={!onPressLocation}
           activeOpacity={0.7}
+          hitSlop={CELL_HIT_SLOP}
         >
           <View style={styles.labelRow}>
             <Text style={styles.label}>{t("stampDetail.labelPlace")}</Text>
