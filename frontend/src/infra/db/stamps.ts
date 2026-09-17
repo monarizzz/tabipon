@@ -293,6 +293,11 @@ export async function replaceStampImage(
  * **行を先に消し、画像はその後。**逆にすると、ファイルだけ消えて行が残ったとき
  * 一覧に壊れた項目が出る。行が消えた後にファイル削除が失敗しても、残るのは
  * どこからも参照されないファイルだけで、`deleteOrphanFiles()` が拾える。
+ *
+ * **投げるのは行が消せなかったときだけ。**画像の後始末で落ちても、利用者から見た
+ * スタンプはもう消えている。ここで投げると呼び出し側が「削除に失敗した」と扱い、
+ * 消えたはずのスタンプの画面に留めてしまう。取り残したファイルは次の起動で
+ * `deleteOrphanFiles()` が拾うので、ログだけ残して成功として返す。
  */
 export async function deleteStamp(id: string): Promise<void> {
   const stamp = await getStamp(id);
@@ -302,7 +307,11 @@ export async function deleteStamp(id: string): Promise<void> {
 
   await db.runAsync("DELETE FROM stamps WHERE id = ?", id);
 
-  deleteFiles([stamp.stampImagePath, stamp.lineArtPath]);
+  try {
+    deleteFiles([stamp.stampImagePath, stamp.lineArtPath]);
+  } catch (error) {
+    console.warn("[stamps] failed to delete stamp files", error);
+  }
 }
 
 /**
