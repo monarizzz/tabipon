@@ -29,3 +29,22 @@ export const Default: Story = {};
 export const Empty: Story = {
   args: { spotName: "" },
 };
+
+/** 破線が hitSlop 込みの実効タップ領域（44pt）。文字がその内側に収まることを見る。 */
+export const TapArea: Story = {
+  decorators: [
+    (Story) => (
+      <View
+        style={{
+          minHeight: 44,
+          justifyContent: "center",
+          borderWidth: 1,
+          borderStyle: "dashed",
+          borderColor: "#c3d6cf",
+        }}
+      >
+        <Story />
+      </View>
+    ),
+  ],
+};

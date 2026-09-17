@@ -9,6 +9,10 @@ type Props = {
   onPress?: () => void;
 };
 
+// 行の高さは fontSize 18 の行高ぶん（約 22pt）しかない。
+// 上下 12pt 広げて、見た目を変えずに実効 44pt 以上を確保する。
+const HIT_SLOP = { top: 12, bottom: 12 } as const;
+
 export function SpotNameLabel({ spotName, onPress }: Props) {
   const { t } = useTranslation();
   return (
@@ -17,6 +21,7 @@ export function SpotNameLabel({ spotName, onPress }: Props) {
       onPress={onPress}
       disabled={!onPress}
       activeOpacity={0.7}
+      hitSlop={HIT_SLOP}
     >
       {spotName ? (
         <Text style={styles.spotName}>{spotName}</Text>
