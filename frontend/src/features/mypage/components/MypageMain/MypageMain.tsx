@@ -1,0 +1,73 @@
+import { View, ScrollView, StyleSheet } from "react-native";
+import { Bell, Shield, Info, Settings, Languages } from "lucide-react-native";
+
+import { NavBar } from "@/src/commons/layout/components/NavBar/NavBar";
+import { ProfileSection } from "@/src/features/mypage/components/ProfileSection/ProfileSection";
+import { RecentCollectionsSection } from "@/src/features/mypage/components/RecentCollectionsSection/RecentCollectionsSection";
+import { SettingsMenuSection } from "@/src/features/mypage/components/SettingsMenuSection/SettingsMenuSection";
+import type { Mypage, MypageMenuId } from "@/src/features/mypage/types/mypage";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { colors, spacing } from "@/src/style/tokens";
+
+/** 設定メニューの並びとアイコン。文言は翻訳キーから引く */
+const MENU_ITEMS: {
+  id: MypageMenuId;
+  labelKey: `mypage.${MypageMenuId}`;
+  icon: typeof Bell;
+}[] = [
+  { id: "notifications", labelKey: "mypage.notifications", icon: Bell },
+  { id: "privacy", labelKey: "mypage.privacy", icon: Shield },
+  { id: "language", labelKey: "mypage.language", icon: Languages },
+  { id: "help", labelKey: "mypage.help", icon: Info },
+];
+
+type Props = Mypage;
+
+export function MypageMain({
+  recentCollections,
+  pressSeeAllCollections,
+  pressMenu,
+}: Props) {
+  const { t } = useTranslation();
+
+  return (
+    <View style={styles.container}>
+      <NavBar
+        title={t("mypage.title")}
+        rightIcon={<Settings size={16} color={colors.textMuted} />}
+        onRightPress={() => {}}
+      />
+      <ScrollView contentContainerStyle={styles.content}>
+        <ProfileSection name="たびすたんぷ太郎" registeredDate="2025.02.16" />
+        <RecentCollectionsSection
+          items={recentCollections}
+          onPressSeeAll={pressSeeAllCollections}
+        />
+        <View style={styles.recentToSettingsSpacer} />
+        <SettingsMenuSection
+          items={MENU_ITEMS.map((item) => ({
+            id: item.id,
+            label: t(item.labelKey),
+            icon: item.icon,
+            onPress: () => pressMenu(item.id),
+          }))}
+        />
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+  content: {
+    gap: 35,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xxl,
+  },
+  recentToSettingsSpacer: {
+    height: spacing.xl,
+  },
+});
