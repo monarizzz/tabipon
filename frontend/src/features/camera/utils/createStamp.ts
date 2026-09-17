@@ -1,24 +1,7 @@
-import {
-  newStampId,
-  saveStamp,
-  type Stamp,
-  type StampLocation,
-} from "@/src/infra/db/stamps";
+import { newStampId, saveStamp, type Stamp } from "@/src/infra/db/stamps";
 import { generateStampPngFromUri } from "@/src/utils/stamp/io";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
-import type { StampFrame } from "@/src/utils/stamp/types";
-
-export type CreateStampInput = {
-  /** 元写真の uri。この 1 枚からスタンプを描き、再生成用にそのまま保存する */
-  photoUri: string;
-  color: string;
-  frameId: StampFrame;
-  /** 押した勢いから決まる演出値。長押しで押した場合はどちらも 0 */
-  scratchLevel: number;
-  tiltAngle: number;
-  location: StampLocation | null;
-  address: string | null;
-};
+import type { CreateStampInput } from "@/src/features/camera/types/createStampInput";
 
 /**
  * 写真 1 枚からスタンプを作って保存する。
