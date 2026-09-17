@@ -10,7 +10,7 @@
 
 ## frontend/ のディレクトリ構成
 
-```
+```txt
 frontend/
   app/                    # expo-router のルーティング。ファイル = 画面
   src/
@@ -49,7 +49,6 @@ frontend/
 切り出す側では、**ネイティブに触る層と触らない層を分ける。**
 センサーやアニメーションを購読するフックと、そのフックが使う判定ロジックを別ファイルにすると、
 判定ロジックだけは素の Jest で回せる（例: `src/utils/stampPress/`）。
-
 
 ## src/commons/ と src/features/ のディレクトリ構成
 
@@ -139,7 +138,6 @@ Skia のネイティブモジュールが無い環境（Jest のモック）で�
 - ストーリーに `play` があれば併せて実行される。ただし React Native + Jest では`play` に `canvasElement` / `canvas` / `userEvent` が渡らない（`document` が無いため）。web の作法どおり `({ canvas, userEvent })` を分割代入する `play` は動かないので、操作は `@testing-library/react-native` の `screen` / `fireEvent` で書くこと
 - グローバルな Provider は `.rnstorybook/preview.tsx` の `decorators` に置く。テスト側は`jest.setup.storybook.ts` の `setProjectAnnotations` で同じ設定を読み込むため、Storybook と条件が揃う
 - ネイティブモジュールに触れる依存（AsyncStorage・WebView・BottomSheet など）は `jest.setup.ts` でモックしている。そのため、それらの内部描画はテストの対象外
-
 
 ## 文言
 
