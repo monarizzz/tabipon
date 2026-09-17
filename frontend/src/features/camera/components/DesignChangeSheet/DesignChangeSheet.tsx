@@ -5,17 +5,11 @@ import { SelectableTile } from "@/src/commons/other/components/SelectableTile/Se
 import { ColorSwatch } from "@/src/commons/other/components/ColorSwatch/ColorSwatch";
 import { Toggle } from "@/src/commons/other/components/Toggle/Toggle";
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
+import { FrameThumb } from "@/src/commons/stamp/components/FrameThumb/FrameThumb";
+import type { FrameStyleOption } from "@/src/commons/stamp/types/frameStyleOption";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import type { TranslationKey } from "@/src/libs/i18n/types/i18n";
 import { colors, typography, spacing } from "@/src/style/tokens";
 import type { StampFrame } from "@/src/utils/stamp/types";
-
-export type FrameStyleOption = {
-  id: StampFrame;
-  /** design.frameClassic のような翻訳キー。表示時に t() で解決する。 */
-  label: TranslationKey;
-  preview: (selected: boolean) => React.ReactNode;
-};
 
 type Props = {
   visible: boolean;
@@ -64,7 +58,7 @@ export function DesignChangeSheet({
                 selected={selected}
                 onPress={() => onSelectFrameStyle(style.id)}
               >
-                {style.preview(selected)}
+                <FrameThumb variant={style.id} selected={selected} />
               </SelectableTile>
             );
           })}

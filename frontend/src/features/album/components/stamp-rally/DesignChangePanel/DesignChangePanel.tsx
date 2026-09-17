@@ -14,9 +14,10 @@ import { Toggle } from "@/src/commons/other/components/Toggle/Toggle";
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { ShareButton } from "@/src/commons/button/components/ShareButton/ShareButton";
 import { Stamp } from "@/src/commons/stamp/components/Stamp/Stamp";
+import { FrameThumb } from "@/src/commons/stamp/components/FrameThumb/FrameThumb";
+import type { FrameStyleOption } from "@/src/commons/stamp/types/frameStyleOption";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, radii, typography, spacing } from "@/src/style/tokens";
-import type { FrameStyleOption } from "@/src/features/camera/components/DesignChangeSheet/DesignChangeSheet";
 import type { StampFrame } from "@/src/utils/stamp/types";
 
 type Props = {
@@ -93,7 +94,7 @@ export function DesignChangePanel({
                   selected={selected}
                   onPress={() => onSelectFrameStyle(style.id)}
                 >
-                  {style.preview(selected)}
+                  <FrameThumb variant={style.id} selected={selected} />
                 </SelectableTile>
               );
             })}
