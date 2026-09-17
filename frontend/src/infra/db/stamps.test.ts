@@ -7,6 +7,10 @@
 // expo-sqlite / expo-file-system / expo-crypto は jest.mock で差し替える。
 // 置き換え先は node:sqlite と node:fs の薄い実装で、`stamps.ts` 側には
 // テスト用の差し込み口を作っていない。
+//
+// ファイル操作は `src/libs/stampFile/` にあるが、そこも同じ expo-file-system を
+// 使うため、このモックがそのまま効く。ここで確かめるのは
+// 「行とファイルの両方が揃うか」なので、両者をまたぐ `stamps.ts` から呼ぶ。
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
