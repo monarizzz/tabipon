@@ -30,21 +30,30 @@ export const Empty: Story = {
   args: { spotName: "" },
 };
 
-/** 破線が hitSlop 込みの実効タップ領域（44pt）。文字がその内側に収まることを見る。 */
+/** 破線が hitSlop 込みの実効タップ領域（44pt 四方）。文字がその内側に収まることを見る。 */
+const tapAreaDecorator = (Story: () => React.ReactElement) => (
+  <View
+    style={{
+      minWidth: 44,
+      minHeight: 44,
+      alignSelf: "flex-start",
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderStyle: "dashed",
+      borderColor: "#c3d6cf",
+    }}
+  >
+    <Story />
+  </View>
+);
+
 export const TapArea: Story = {
-  decorators: [
-    (Story) => (
-      <View
-        style={{
-          minHeight: 44,
-          justifyContent: "center",
-          borderWidth: 1,
-          borderStyle: "dashed",
-          borderColor: "#c3d6cf",
-        }}
-      >
-        <Story />
-      </View>
-    ),
-  ],
+  decorators: [tapAreaDecorator],
+};
+
+/** 1 文字でも 44pt の帯に収まること（横方向の hitSlop が効く条件）を見る。 */
+export const TapAreaSingleCharacter: Story = {
+  args: { spotName: "山" },
+  decorators: [tapAreaDecorator],
 };
