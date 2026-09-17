@@ -63,14 +63,13 @@ src/
 
 **グループ（`commons/` の下）と領域（`features/` の下）が第 1 階層で、その中を種類ごとに分ける。**
 
+例）
+
 ```txt
 src/commons/layout/
   components/             # UIコンポーネント
-    Header/  NavBar/  TabBar/
   constants/              # 定数
-    tabDefinitions.ts
   hooks/                  # フック
-    useTabBarItems.ts
 ```
 
 種類のフォルダ（`components/` / `constants/` / `hooks/` / `types/`）は**必要になった時点で作る。**
@@ -89,10 +88,8 @@ src/commons/layout/
 
 ## src/utils/stamp/ のディレクトリ構成
 
-写真からスタンプ画像を作る処理（`backend/app/services/stamp_processor.py` の移植）。
-もとは `skiaStamp.ts`（740 行）と `skiaLineArt.ts`（490 行）の 2 ファイルだったものを、
-#134 で工程ごとに分けた。撮影フローから呼ぶヘルパー（位置情報・元写真の保存・押印音）も
-スタンプという同じ関心事なのでここに置く。
+写真からスタンプ画像を作る処理
+撮影フローから呼ぶヘルパー（位置情報・元写真の保存・押印音）もスタンプという同じ関心事なのでここに置く。
 
 ```txt
 src/utils/stamp/
@@ -117,19 +114,14 @@ src/utils/stamp/
 
 ルールは 3 つ。
 
-- **工程ファイルは順序を知らない。**どの工程の次に自分が来るかを書かない。
-  順序を持つのは `pipeline.ts` だけで、工程順の見直し（#138）で触るのはそこ 1 箇所になる
-- **`pipeline.ts` 以下はファイルシステムに触らない。**PNG のバイト列を返すところまでが
-  `io.ts` の責務で、`expo-file-system` で書き出すのは呼び出し側（永続化）の仕事
-- **SkSL 文字列は工程ファイルに同居させる。**`uniform` の宣言と、それを埋める JS 側の
-  平坦な配列は並び順で対応しており、離すと片方だけ直したときに気付けない。
-  共通化したのはコンパイルとキャッシュ（`runtimeEffect.ts`）だけ
+- **工程ファイルは順序を知らない。**どの工程の次に自分が来るかを書かない。順序を持つのは `pipeline.ts` だけで、工程順の見直し（#138）で触るのはそこ 1 箇所になる
+- **`pipeline.ts` 以下はファイルシステムに触らない。**PNG のバイト列を返すところまでが`io.ts` の責務で、`expo-file-system` で書き出すのは呼び出し側（永続化）の仕事
+- **SkSL 文字列は工程ファイルに同居させる。**`uniform` の宣言と、それを埋める JS 側の平坦な配列は並び順で対応しており、離すと片方だけ直したときに気付けない。共通化したのはコンパイルとキャッシュ（`runtimeEffect.ts`）だけ
 
 ### モジュールのトップレベルで `Skia.*` を呼ばない
 
 Skia のネイティブモジュールが無い環境（Jest のモック）では、**import しただけで落ちる**。
-`Skia.Color()` や `Skia.XYWHRect()` を定数にせず、呼ばれた時点で作ること。
-`constants/` に素の数値しか置いていないのもこの理由による。
+`Skia.Color()` や `Skia.XYWHRect()` を定数にせず、呼ばれた時点で作ること。`constants/` に素の数値しか置いていないのもこの理由による。
 
 ### テストの置き場
 
