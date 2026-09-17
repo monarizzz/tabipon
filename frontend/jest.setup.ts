@@ -58,6 +58,6 @@ jest.mock("expo-audio", () => ({
   createAudioPlayer: () => ({
     play: () => {},
     seekTo: () => Promise.resolve(),
-    remove: () => {},
+    release: () => {},
   }),
 }));
