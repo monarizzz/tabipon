@@ -2,8 +2,8 @@ import { StyleSheet } from "react-native";
 import { colors, radii, spacing, typography } from "@/src/style/tokens";
 
 /**
- * `StampLocationMap.tsx`（native）と `StampLocationMap.web.tsx` の両方から
- * 読む。片方だけ直して見た目がずれるのを防ぐため、props とスタイルはここに置く
+ * `StampLocationMap.tsx`（native）と `StampLocationMap.web.tsx` の共有分。
+ * 分ける理由は `docs/front-architecture.md` の「native / web の出し分け」を参照
  */
 export type StampLocationMapProps = {
   spotName: string;
