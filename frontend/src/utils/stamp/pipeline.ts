@@ -2,12 +2,7 @@
  * 工程の順序を決める層。
  *
  * **このファイルは工程を並べるだけで、描画そのものは持たない。**
- * 個々の工程は `lineArt.ts` / `ink.ts` / `frame.ts` / `scratch.ts` / `rotate.ts` にある。
- * 順序を変える検討（#138）で触るのはここ 1 箇所になるよう分けてある。
- *
- * 現在の順序は backend の `process_stamp_image()` と同じで、
- * **線画化 → 着色 → フレーム → 掠れ → 傾き**。
- * 掠れをフレームより後に掛けるので、枠線にも掠れが乗る（backend もそうなっている）。
+ * 工程順とファイル構成は `docs/stamp-pipeline.md`。
  */
 import type { SkImage } from "@shopify/react-native-skia";
 
@@ -19,7 +14,7 @@ import { applyScratch } from "@/src/utils/stamp/scratch";
 import { toRasterImage } from "@/src/utils/stamp/surface";
 import type { StampFrame } from "@/src/utils/stamp/types";
 
-/** スタンプ 1 枚を描くためのパラメータ。backend の `process_stamp_image()` の引数と対応する */
+/** スタンプ 1 枚を描くためのパラメータ */
 export type StampRenderOptions = {
   color: string;
   frame: StampFrame;
@@ -67,10 +62,7 @@ export function composeStampFromLineArt(
   return toRasterImage(applyCircularFrame(inked, color, frame), "スタンプ画像");
 }
 
-/**
- * 写真からスタンプ画像を生成する。線画化から仕上げまでの全工程で、
- * `process_stamp_image()` の全体に相当する。
- */
+/** 写真からスタンプ画像を生成する。線画化から仕上げまでの全工程 */
 export function generateStampFromImage(
   image: SkImage,
   options: StampRenderOptions,

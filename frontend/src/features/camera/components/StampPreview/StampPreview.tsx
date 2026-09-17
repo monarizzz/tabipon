@@ -1,37 +1,10 @@
 /**
  * `src/utils/stamp/` の生成パイプラインを実機で走らせて目視するためのコンポーネント。
+ * Storybook 専用（`docs/stamp-pipeline.md`「出力の確認」）。
  *
- * Refs: #134 / #98
- *
- * ## なぜ要るか
- *
- * **このパイプラインを呼んでいる画面が現時点で存在しない。**#123 で生成関数は
- * 完成しているが結線（#125）が済んでおらず、画面側は削除済みの
- * `src/api/stampSession` を向いたままになっている。さらに #121〜#123 で使っていた
- * 比較用コンポーネントとサンプル画像は #147 で削除済みなので、
- * **コードが動くかどうかを確かめる手段が無い状態**だった。
- *
- * #134 の分割が出力を壊していないことを見るために、Storybook から叩ける経路として
- * 置いている。#125 の結線でも、画面を組む前にここで挙動を確認できる。
- *
- * ## 現行 backend との「比較」はしない
- *
- * #121〜#123 の `LineArtComparison` / `StampVariantComparison` は OpenCV の出力 PNG を
- * 同梱して重ね比べる作りだったが、その 20 枚あまりのサンプルは #147 で削除済みで、
- * backend 自体も #98 で消えている。**再生成できない参照と比べる作りにはしない。**
- * ここで見るのは「破綻せず、意図した見た目のスタンプが出ること」までに留める。
- *
- * ## プロダクトの画面には組み込まない
- *
- * Storybook からのみ確認する。開発者しか見ないので i18n のキーは足さず直書きする
- * （削除済みの検証用コンポーネント 2 つと同じ判断）。
- *
- * ## 表示は PNG 経由にしている
- *
- * 生成した `SkImage` を Skia の `<Canvas>` に直接渡すのではなく、
- * `encodeToBase64()` で PNG にして RN の `<Image>` で表示する。
- * オフスクリーンで作ったテクスチャと `<Canvas>` の Skia コンテキストが別で、
- * 描画が空になるため（`surface.ts` の `toRasterImage()` のコメントを参照）。
+ * 表示は生成した `SkImage` を PNG に符号化して RN の `<Image>` へ渡す。オフスクリーンで
+ * 作ったテクスチャは `<Canvas>` と Skia コンテキストが別で、直接渡すと何も描かれない
+ * （`surface.ts` の `toRasterImage()` を参照）。
  */
 import { useImage, type SkImage } from "@shopify/react-native-skia";
 import { useEffect, useState } from "react";
@@ -58,17 +31,16 @@ const STAMP_COLORS: readonly string[] = STAMP_INK_COLORS;
 
 /**
  * 元写真。平等院（京都府宇治市）。Wikimedia Commons の CC0 1.0、著作者 GiveMeMollusks。
- * #120 が backend のサンプルを書き出したときの主サンプルと同じ 1 枚で、
- * エッジが多く線画化の結果を判断しやすい。
+ * エッジが多く、線画化の結果を判断しやすい。
  */
 const SOURCE_PHOTO = require("@/assets/stamp-preview/byodoin.jpg");
 
 /**
- * 上の写真に対する backend (OpenCV) の線画の黒画素率。
+ * 上の写真に対する線画の黒画素率の基準値。OpenCV 実装で実測したもの。
  * 出力が大きく崩れていないことの唯一の数値的な目安。
  *
- * **完全一致はしない。**#121 のとおり Canny のヒステリシスは 1 段で打ち切っており、
- * リサイズも `INTER_AREA` の近似なので、数 % のずれは想定内。
+ * **完全一致はしない。**Canny のヒステリシスは 1 段で打ち切っており、リサイズも
+ * `INTER_AREA` の近似なので、数 % のずれは想定内（`lineArt.ts`）。
  * 桁が変わる（数 % や 60% になる）ようなら線画化が壊れている。
  */
 const EXPECTED_BLACK_PIXEL_RATIO = 0.31;
@@ -78,9 +50,9 @@ const EXPECTED_BLACK_PIXEL_RATIO = 0.31;
  *
  * ## 掠れは 0.8 あたりまでほとんど効かない
  *
- * 閾値は backend 由来の `1.0 - level * 0.4` を σ 単位に戻したもの
- * （`scratch.ts` の `scratchThreshold()`）。ぼかし後のノイズは平均 0.5 の
- * ほぼ正規分布なので、白抜きされる画素の割合は level に対して極端に非線形になる。
+ * 閾値は `1.0 - level * 0.4` を σ 単位に戻したもの（`scratch.ts` の
+ * `scratchThreshold()`）。ぼかし後のノイズは平均 0.5 のほぼ正規分布なので、
+ * 白抜きされる画素の割合は level に対して極端に非線形になる。
  *
  * | level | 白抜き率（全画素） | インク部分に対して |
  * | --- | --- | --- |
@@ -91,12 +63,11 @@ const EXPECTED_BLACK_PIXEL_RATIO = 0.31;
  * | 0.9 | 5.2022% | 1.457% |
  * | 1.0 | 12.5608% | 3.517% |
  *
- * backend の実測平均（0.2 → 0.004% / 0.6 → 0.364% / 1.0 → 16.06%）とも桁が合うので、
- * **移植のずれではなく元の曲線がこうなっている。**
+ * 閾値の式がそういう曲線になっているためで、実装のずれではない
+ * （`scratch.ts` の実測表と桁が合う）。
  *
  * そのため確認用のサンプルは 0.6 以上に寄せてある。0.6 は「効いていないこと」を
  * 見るために残した比較用で、実際に掠れとして見えるのは 0.9 以上。
- * 撮影フローが渡す値の範囲を含めた見直しは #155。
  */
 const FINISH_SAMPLES = [
   { key: "plain", label: "掠れ・傾きなし", scratchLevel: 0, tiltAngle: 0 },
@@ -335,7 +306,7 @@ export function StampPreview() {
           {result.generated.blackPixelRatio === null
             ? "測定不可"
             : `${(result.generated.blackPixelRatio * 100).toFixed(1)}%`}
-          （backend の実測値 {(EXPECTED_BLACK_PIXEL_RATIO * 100).toFixed(1)}%）
+          （基準値 {(EXPECTED_BLACK_PIXEL_RATIO * 100).toFixed(1)}%）
         </Text>
       ) : null}
 
@@ -347,9 +318,8 @@ export function StampPreview() {
         1.0 / Wikimedia Commons / GiveMeMollusks）。
         {"\n\n"}
         掠れは level 0.8 あたりまでほとんど効かない（0.6 で白抜きされるインクは
-        全画素の 0.03%）。backend
-        由来の閾値がそういう曲線になっているためで、移植のずれではない。詳細と見直しは
-        #155。
+        全画素の
+        0.03%）。閾値の式がそういう曲線になっているためで、実装のずれではない。
       </Text>
     </ScrollView>
   );
