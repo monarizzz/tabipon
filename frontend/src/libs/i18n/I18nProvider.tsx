@@ -10,7 +10,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocales } from "expo-localization";
 import { i18n, resolveDeviceLocale } from "./index";
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "./constants/locales";
+import { SUPPORTED_LOCALES } from "./constants/locales";
 import type {
   I18nContextValue,
   LocalePreference,
@@ -48,18 +48,17 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preference, deviceLocales]);
 
-  i18n.locale = locale ?? DEFAULT_LOCALE;
-
   const setPreference = useCallback((pref: LocalePreference) => {
     setPreferenceState(pref);
     void AsyncStorage.setItem(STORAGE_KEY, pref);
   }, []);
 
+  // i18n はモジュールスコープの共有インスタンスなので locale を代入して使うと
+  // 「どのレンダーの locale が残っているか」に翻訳結果が依存する。
+  // 呼び出しごとに locale を渡して、インスタンスの状態に触れないようにする
   const t = useCallback(
-    (key: TranslationKey, options?: TranslateOptions) => {
-      i18n.locale = locale;
-      return i18n.t(key, options);
-    },
+    (key: TranslationKey, options?: TranslateOptions) =>
+      i18n.t(key, { ...options, locale }),
     [locale],
   );
 
