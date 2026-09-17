@@ -82,9 +82,18 @@ export type StampPatch = {
   memo?: string | null;
   capturedAt?: string;
   address?: string | null;
+  /**
+   * 緯度・経度。2 列にまたがるので、片方だけ書けないように
+   * `StampLocation` ごと差し替える形にしてある（スキーマの
+   * `CHECK ((latitude IS NULL) = (longitude IS NULL))` を破らないため）
+   */
+  location?: StampLocation | null;
   color?: string;
   frameId?: StampFrame;
 };
+
+/** 1 キー = 1 列で書ける項目。`location` だけは 2 列にまたがるので別扱いにする */
+type ScalarStampPatch = Omit<StampPatch, "location">;
 
 type StampRow = {
   id: string;
@@ -224,7 +233,7 @@ export async function updateStamp(
   id: string,
   patch: StampPatch,
 ): Promise<Stamp> {
-  const columns: Record<keyof StampPatch, string> = {
+  const columns: Record<keyof ScalarStampPatch, string> = {
     title: "title",
     memo: "memo",
     capturedAt: "captured_at",
@@ -234,13 +243,22 @@ export async function updateStamp(
   };
 
   const assignments: string[] = [];
-  const values: (string | null)[] = [];
+  const values: (string | number | null)[] = [];
   for (const [key, column] of Object.entries(columns)) {
-    const value = patch[key as keyof StampPatch];
+    const value = patch[key as keyof ScalarStampPatch];
     if (value !== undefined) {
       assignments.push(`${column} = ?`);
       values.push(value);
     }
+  }
+
+  // 緯度と経度は必ず揃えて書く。片方だけ更新するとスキーマの CHECK に弾かれる
+  if (patch.location !== undefined) {
+    assignments.push("latitude = ?", "longitude = ?");
+    values.push(
+      patch.location?.latitude ?? null,
+      patch.location?.longitude ?? null,
+    );
   }
 
   if (assignments.length > 0) {

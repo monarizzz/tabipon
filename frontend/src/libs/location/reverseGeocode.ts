@@ -71,10 +71,6 @@ function dropAdjacentDuplicates(parts: string[]): string[] {
  *
  * 失敗しても投げない。スタンプの作成を住所の有無で止めないため、
  * 呼び出し側は null を「住所が無い」として扱えばよい。
- *
- * 向きは座標 → 住所の一方向だけ。利用者が「場所」を手で直しても座標は動かさない
- * （`geocodeAsync()` で引き直すと、実際に押した地点が番地の代表点に丸められて
- * 失われる）。座標を住所に追従させるかは #87 で決める。
  */
 export async function reverseGeocode(location: {
   latitude: number;

@@ -298,6 +298,65 @@ describe("updateStamp", () => {
     expect(await updateStamp(saved.id, {})).toEqual(saved);
   });
 
+  // 住所を直したときに座標を追従させる（#87）
+  it("住所と座標を一緒に差し替えられる", async () => {
+    const saved = await saveStamp(
+      newStamp({
+        location: { latitude: 35.68, longitude: 139.76 },
+        address: "東京都 千代田区",
+      }),
+    );
+
+    const updated = await updateStamp(saved.id, {
+      address: "京都府 京都市下京区",
+      location: { latitude: 34.9858, longitude: 135.7588 },
+    });
+
+    expect(updated.address).toBe("京都府 京都市下京区");
+    expect(updated.location).toEqual({
+      latitude: 34.9858,
+      longitude: 135.7588,
+    });
+  });
+
+  // 座標が引けなかったときは据え置く。location を省けば触らない
+  it("location を省くと座標は変わらない", async () => {
+    const saved = await saveStamp(
+      newStamp({ location: { latitude: 35.68, longitude: 139.76 } }),
+    );
+
+    const updated = await updateStamp(saved.id, { address: "おばあちゃんち" });
+
+    expect(updated.address).toBe("おばあちゃんち");
+    expect(updated.location).toEqual(saved.location);
+  });
+
+  it("location に null を渡すと座標を消せる", async () => {
+    const saved = await saveStamp(
+      newStamp({ location: { latitude: 35.68, longitude: 139.76 } }),
+    );
+
+    expect(
+      (await updateStamp(saved.id, { location: null })).location,
+    ).toBeNull();
+  });
+
+  // 緯度と経度は両方揃うか両方無いか、というスキーマの CHECK を破らない
+  it("座標の片方だけを書く経路が無い", async () => {
+    const saved = await saveStamp(
+      newStamp({ location: { latitude: 35.68, longitude: 139.76 } }),
+    );
+
+    const updated = await updateStamp(saved.id, {
+      location: { latitude: 34.9858, longitude: 135.7588 },
+    });
+
+    expect(updated.location).toEqual({
+      latitude: 34.9858,
+      longitude: 135.7588,
+    });
+  });
+
   it("無い id は例外", async () => {
     await expect(
       updateStamp("00000000-0000-4000-8000-999999999999", { memo: "x" }),

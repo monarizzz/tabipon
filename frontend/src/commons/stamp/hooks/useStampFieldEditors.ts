@@ -1,8 +1,13 @@
 import React from "react";
 import { Alert } from "react-native";
 
-import { updateStamp, type Stamp } from "@/src/infra/db/stamps";
+import {
+  updateStamp,
+  type Stamp,
+  type StampPatch,
+} from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
+import { geocodeAddress } from "@/src/libs/location/geocode";
 import { parseIso } from "@/src/utils/datetime/format";
 
 /** 空文字は「未設定」として null で保存する。DB 側で "" と null が混ざらないようにする */
@@ -15,7 +20,8 @@ function parseCapturedAt(isoDate: string): Date {
   return parseIso(isoDate) ?? new Date();
 }
 
-type EditingField = "spotName" | "date" | "location" | "memo" | null;
+type EditableField = "spotName" | "date" | "location" | "memo";
+type EditingField = EditableField | null;
 
 export type StampFieldEditors = {
   /** 表示に使う値。`stamp` から導出する */
@@ -86,22 +92,39 @@ export function useStampFieldEditors({
   const [draftLocation, setDraftLocation] = React.useState("");
   const [draftDate, setDraftDate] = React.useState(() => new Date());
   const [draftMemo, setDraftMemo] = React.useState("");
-  const [updating, setUpdating] = React.useState(false);
+
+  /**
+   * 保存中のフィールド。二度押しの guard にだけ使う。
+   *
+   * **フィールドごとに持つ。**場所の保存はジオコーディングの通信を挟むので、
+   * 1 つの真偽値にすると、その待ち時間のあいだメモなど他の項目の保存まで弾かれる。
+   * 早期 return なので押しても何も起きず、失敗したことも分からない。
+   *
+   * 表示には使わないので state ではなく ref で持つ。
+   */
+  const savingFields = React.useRef(new Set<EditableField>());
 
   const closeEditor = React.useCallback(() => setEditingField(null), []);
 
   /**
    * 1 項目を保存する。
    *
-   * 保存中の二度押しを弾き、失敗したらログと Alert を出して編集欄を開いたままにする。
-   * 閉じてしまうと、入力した内容が消えたうえに失敗したことも分からなくなる。
+   * 同じ項目の保存中は二度押しを弾き、失敗したらログと Alert を出して編集欄を
+   * 開いたままにする。閉じてしまうと、入力した内容が消えたうえに失敗したことも
+   * 分からなくなる。
+   *
+   * **patch は関数で受け取る。**場所の保存は書き込む前にジオコーディングを挟むので、
+   * patch を先に組ませると、その通信中だけ二度押しの guard が外れる
    */
   const save = React.useCallback(
-    async (field: string, patch: Parameters<typeof updateStamp>[1]) => {
-      if (!stampId || updating) return;
-      setUpdating(true);
+    async (
+      field: EditableField,
+      buildPatch: () => StampPatch | Promise<StampPatch>,
+    ) => {
+      if (!stampId || savingFields.current.has(field)) return;
+      savingFields.current.add(field);
       try {
-        onUpdated(await updateStamp(stampId, patch));
+        onUpdated(await updateStamp(stampId, await buildPatch()));
         closeEditor();
       } catch (error) {
         console.error(`${logTag} failed to update ${field}`, error);
@@ -110,10 +133,10 @@ export function useStampFieldEditors({
           t("stampDetail.saveFailedMessage"),
         );
       } finally {
-        setUpdating(false);
+        savingFields.current.delete(field);
       }
     },
-    [closeEditor, logTag, onUpdated, stampId, t, updating],
+    [closeEditor, logTag, onUpdated, stampId, t],
   );
 
   return {
@@ -151,20 +174,30 @@ export function useStampFieldEditors({
     setDraftMemo,
     closeEditor,
     saveSpotName: () => {
-      void save("spot name", { title: normalizeOptionalText(draftSpotName) });
+      void save("spotName", () => ({
+        title: normalizeOptionalText(draftSpotName),
+      }));
     },
     saveMemo: () => {
-      void save("memo", { memo: normalizeOptionalText(draftMemo) });
+      void save("memo", () => ({ memo: normalizeOptionalText(draftMemo) }));
     },
     saveDate: () => {
-      void save("date", { capturedAt: draftDate.toISOString() });
+      void save("date", () => ({ capturedAt: draftDate.toISOString() }));
     },
-    // **住所を直しても座標は動かさない。**座標は「実際にスタンプを押した地点」の
-    // 記録で、住所はそこから導いた表示用のラベル。`geocodeAsync()` で住所から
-    // 引き直すと、押した地点が番地の代表点に丸められて復元できなくなる。
-    // 座標を住所に追従させるかは #87 で決める
+    // **住所を直したら座標も引き直す。**そうしないと地図が前の場所を指したまま
+    // 住所だけ変わり、表示が食い違う（#87）。
+    //
+    // 引けなかったときは座標を据え置く。「おばあちゃんち」のような住所として
+    // 引けない文字列は入りうるし、そこで座標を消すと地図ごと出なくなる
     saveLocation: () => {
-      void save("location", { address: normalizeOptionalText(draftLocation) });
+      void save("location", async () => {
+        const address = normalizeOptionalText(draftLocation);
+        if (!address) {
+          return { address };
+        }
+        const geocoded = await geocodeAddress(address);
+        return geocoded ? { address, location: geocoded } : { address };
+      });
     },
   };
 }
