@@ -113,7 +113,7 @@ export const ko: Translations = {
     geocodeNotFoundMessage:
       "“%{address}”의 좌표를 찾지 못했습니다. 이대로 저장하면 주소만 바뀌고 지도는 이전 장소를 그대로 가리킵니다.",
     geocodeUnavailableMessage:
-      "네트워크에 연결할 수 없어 좌표를 가져오지 못했습니다. 이대로 저장하면 주소만 바뀌고 지도는 이전 장소를 그대로 가리킵니다.",
+      "좌표를 가져오지 못했습니다. 네트워크 상태나 위치 정보 설정에 따라 가져오지 못할 수 있습니다. 이대로 저장하면 주소만 바뀌고 지도는 이전 장소를 그대로 가리킵니다.",
     geocodeSaveAnyway: "이대로 저장",
     geocodeBackToEdit: "편집으로 돌아가기",
   },

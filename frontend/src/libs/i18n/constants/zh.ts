@@ -110,7 +110,7 @@ export const zh: Translations = {
     geocodeNotFoundMessage:
       "无法获取“%{address}”的坐标。若仍然保存，将只更改地址，地图仍指向此前的位置。",
     geocodeUnavailableMessage:
-      "因无法联网而未能获取坐标。若仍然保存，将只更改地址，地图仍指向此前的位置。",
+      "未能获取坐标。视网络状况或定位权限设置，有时会无法获取。若仍然保存，将只更改地址，地图仍指向此前的位置。",
     geocodeSaveAnyway: "仍然保存",
     geocodeBackToEdit: "返回编辑",
   },

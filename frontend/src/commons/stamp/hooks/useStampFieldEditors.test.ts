@@ -104,7 +104,7 @@ describe("saveLocation", () => {
     expect(view.result.current.editingField).toBe("location");
   });
 
-  // オフラインなど。入力そのものは正しいかもしれないので文言を分けるための reason
+  // オフラインや権限エラーなど。入力自体は正しいかもしれないので reason を分ける
   test("ジオコーダが失敗したら unavailable の警告を出す", async () => {
     geocodeAddressMock.mockResolvedValue({ status: "unavailable" });
     const view = await setup();

@@ -81,7 +81,7 @@ export const GeocodeNotFound: Story = {
   },
 };
 
-/** オフラインで座標を引けなかったとき。入力そのものは正しいかもしれない */
+/** ジオコーダ自体が失敗して座標を引けなかったとき。入力自体は正しいかもしれない */
 export const GeocodeUnavailable: Story = {
   args: {
     editors: {

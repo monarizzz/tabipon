@@ -114,7 +114,7 @@ export const en: Translations = {
     geocodeNotFoundMessage:
       "Couldn't find coordinates for “%{address}”. If you save anyway, only the address changes and the map keeps pointing at the previous place.",
     geocodeUnavailableMessage:
-      "Couldn't look up coordinates because the device is offline. If you save anyway, only the address changes and the map keeps pointing at the previous place.",
+      "Couldn't look up coordinates. This can happen depending on your connection or your location settings. If you save anyway, only the address changes and the map keeps pointing at the previous place.",
     geocodeSaveAnyway: "Save anyway",
     geocodeBackToEdit: "Back to editing",
   },
