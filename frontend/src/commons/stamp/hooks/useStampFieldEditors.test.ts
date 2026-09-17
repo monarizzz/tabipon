@@ -136,6 +136,59 @@ describe("useStampFieldEditors", () => {
     expect(Alert.alert).toHaveBeenCalledTimes(1);
   });
 
+  it("古い保存の成功では、閉じて開き直したあとの編集欄は閉じない", async () => {
+    const first = deferred<Stamp>();
+    const second = deferred<Stamp>();
+    updateStampMock
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
+
+    const { result } = await setup();
+
+    // 1 回目を保存中のまま、シートを閉じて開き直し、別の内容で 2 回目を保存する
+    await press(result.current.openMemo);
+    await press(() => result.current.setDraftMemo("1 回目"));
+    await press(result.current.saveMemo);
+    await press(result.current.closeEditor);
+    await press(result.current.openMemo);
+    await press(() => result.current.setDraftMemo("2 回目"));
+    await press(result.current.saveMemo);
+    expect(result.current.editingField).toBe("memo");
+
+    // 1 回目の成功で 2 回目用の編集欄を閉じない
+    await act(async () => {
+      first.resolve({ ...STAMP, memo: "1 回目" });
+    });
+    await waitFor(() => expect(updateStampMock).toHaveBeenCalledTimes(2));
+    expect(result.current.editingField).toBe("memo");
+
+    // 2 回目が失敗したら編集欄は開いたまま、入力も残る
+    await act(async () => {
+      second.reject(new Error("書き込みに失敗"));
+    });
+    await waitFor(() => expect(Alert.alert).toHaveBeenCalledTimes(1));
+    expect(result.current.editingField).toBe("memo");
+    expect(result.current.draftMemo).toBe("2 回目");
+  });
+
+  it("待ち行列の最後の保存が成功したら編集欄を閉じる", async () => {
+    updateStampMock
+      .mockResolvedValueOnce({ ...STAMP, memo: "1 回目" })
+      .mockResolvedValueOnce({ ...STAMP, memo: "2 回目" });
+
+    const { result } = await setup();
+
+    await press(result.current.openMemo);
+    await press(() => result.current.setDraftMemo("1 回目"));
+    await press(result.current.saveMemo);
+    await press(result.current.openMemo);
+    await press(() => result.current.setDraftMemo("2 回目"));
+    await press(result.current.saveMemo);
+
+    await waitFor(() => expect(result.current.editingField).toBeNull());
+    expect(updateStampMock).toHaveBeenCalledTimes(2);
+  });
+
   it("別の項目の保存は前の項目の完了を待たない", async () => {
     const memo = deferred<Stamp>();
     updateStampMock
