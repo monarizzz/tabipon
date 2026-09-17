@@ -1,7 +1,5 @@
-import {
-  TAB_DEFINITIONS,
-  type TabKey,
-} from "@/src/commons/layout/constants/tabDefinitions";
+import { TAB_DEFINITIONS } from "@/src/commons/layout/constants/tabDefinitions";
+import type { TabKey } from "@/src/commons/layout/types/tabDefinition";
 
 /** パスが base 自身か、その配下かを判定する */
 function isUnder(pathname: string, base: string): boolean {
