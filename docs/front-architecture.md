@@ -87,31 +87,7 @@ src/commons/layout/
 
 ## src/utils/stamp/ のディレクトリ構成
 
-写真からスタンプ画像を作る処理。
-
-```txt
-src/utils/stamp/
-  types.ts          # StampColor / StampFrame
-  constants/        # サイズ・インク色・フレーム寸法
-  surface.ts        # オフスクリーン描画と CPU コピー
-  runtimeEffect.ts  # SkSL のコンパイルとキャッシュ
-  lineArt.ts        # 工程1: 線画化
-  ink.ts            # 工程2: インク着色
-  applyCircularFrame.ts  # 工程3: 円マスクで切り抜き、フレームを重ねる
-  framePaint.ts     # 工程3: 枠線の Paint（意匠に依らない共通部分）
-  frames/           # 工程3: 枠の意匠ごとに 1 ファイル
-  scratch.ts        # 工程4: 掠れ
-  rotate.ts         # 工程5: 傾き
-  seed.ts           # 掠れのシード（Skia に触れない純粋な関数）
-  pipeline.ts       # 工程の順序を決める層
-  io.ts             # uri のデコードと PNG への符号化
-```
-
-ルールは 3 つ。
-
-- **工程ファイルは順序を知らない。**どの工程の次に自分が来るかを書かない。順序を持つのは `pipeline.ts` だけで、工程順の見直し（#138）で触るのはそこ 1 箇所になる
-- **`pipeline.ts` 以下はファイルシステムに触らない。**PNG のバイト列を返すところまでが`io.ts` の責務で、`expo-file-system` で書き出すのは呼び出し側（永続化）の仕事
-- **SkSL 文字列は工程ファイルに同居させる。**`uniform` の宣言と、それを埋める JS 側の平坦な配列は並び順で対応しており、離すと片方だけ直したときに気付けない。共通化したのはコンパイルとキャッシュ（`runtimeEffect.ts`）だけ
+写真からスタンプ画像を作る処理。構成・工程順・ルールは [stamp-pipeline.md](stamp-pipeline.md) を参照。
 
 ## 端末に置くものの分け方
 
