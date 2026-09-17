@@ -20,20 +20,20 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import { Palette } from "lucide-react-native";
-import { CommonButton } from "@/src/components/common/CommonButton/CommonButton";
-import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
-import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
-import { useTabBarItems } from "@/src/components/common/layout/TabBar/useTabBarItems";
-import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
-import { Stamp } from "@/src/components/common/Stamp/Stamp";
-import { StampHelp } from "@/src/components/features/camera/StampHelp/StampHelp";
-import { DesignChangeSheet } from "@/src/components/features/camera/DesignChangeSheet/DesignChangeSheet";
-import { FRAME_STYLE_OPTIONS } from "@/src/components/features/camera/DesignChangeSheet/frameStyleOptions";
+import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
+import { NavBar } from "@/src/commons/layout/components/NavBar/NavBar";
+import { TabBar } from "@/src/commons/layout/components/TabBar/TabBar";
+import { useTabBarItems } from "@/src/commons/layout/hooks/useTabBarItems";
+import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
+import { Stamp } from "@/src/commons/stamp/components/Stamp/Stamp";
+import { StampHelp } from "@/src/features/camera/components/StampHelp/StampHelp";
+import { DesignChangeSheet } from "@/src/features/camera/components/DesignChangeSheet/DesignChangeSheet";
+import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/constants/frameStyleOptions";
 import {
   DEFAULT_STAMP_COLOR,
   STAMP_INK_COLORS,
 } from "@/src/utils/stamp/constants/constants";
-import { StampOrientationGuide } from "@/src/components/features/camera/StampOrientationGuide/StampOrientationGuide";
+import { StampOrientationGuide } from "@/src/features/camera/components/StampOrientationGuide/StampOrientationGuide";
 import { newStampId, saveStamp } from "@/src/infra/db/stamps";
 import { generateStampPngFromUri } from "@/src/utils/stamp/io";
 import { seedFromStampId } from "@/src/utils/stamp/seed";

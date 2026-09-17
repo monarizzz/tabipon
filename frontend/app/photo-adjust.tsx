@@ -1,15 +1,15 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams, type Href } from "expo-router";
-import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
-import { TabBar } from "@/src/components/common/layout/TabBar/TabBar";
-import { useTabBarItems } from "@/src/components/common/layout/TabBar/useTabBarItems";
-import { CommonDialog } from "@/src/components/common/CommonDialog/CommonDialog";
+import { NavBar } from "@/src/commons/layout/components/NavBar/NavBar";
+import { TabBar } from "@/src/commons/layout/components/TabBar/TabBar";
+import { useTabBarItems } from "@/src/commons/layout/hooks/useTabBarItems";
+import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
 import {
   PhotoCropArea,
   type PhotoCropAreaHandle,
-} from "@/src/components/features/camera/PhotoCropArea/PhotoCropArea";
-import { PhotoAdjustControls } from "@/src/components/features/camera/PhotoAdjustControls/PhotoAdjustControls";
+} from "@/src/features/camera/components/PhotoCropArea/PhotoCropArea";
+import { PhotoAdjustControls } from "@/src/features/camera/components/PhotoAdjustControls/PhotoAdjustControls";
 import { getCurrentStampLocation } from "@/src/libs/location";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors } from "@/src/style/tokens";

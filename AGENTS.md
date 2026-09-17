@@ -215,4 +215,4 @@ web は `--port 6006` で開く。
 | テスト       | `npm test`                                            |
 | Storybook    | `npm run storybook:ios` / `storybook:web`             |
 
-テストは `src/components/**/*.stories.tsx` を Jest で描画するスモークテスト（詳細は `docs/front-architecture.md`）
+テストは `src/commons/` と `src/features/` の `*.stories.tsx` を Jest で描画するスモークテスト（詳細は `docs/front-architecture.md`）

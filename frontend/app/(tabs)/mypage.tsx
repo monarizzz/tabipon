@@ -2,10 +2,10 @@ import React from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { Bell, Shield, Info, Settings, Languages } from "lucide-react-native";
-import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
-import { ProfileSection } from "@/src/components/features/mypage/ProfileSection/ProfileSection";
-import { RecentCollectionsSection } from "@/src/components/features/mypage/RecentCollectionsSection/RecentCollectionsSection";
-import { SettingsMenuSection } from "@/src/components/features/mypage/SettingsMenuSection/SettingsMenuSection";
+import { NavBar } from "@/src/commons/layout/components/NavBar/NavBar";
+import { ProfileSection } from "@/src/features/mypage/components/ProfileSection/ProfileSection";
+import { RecentCollectionsSection } from "@/src/features/mypage/components/RecentCollectionsSection/RecentCollectionsSection";
+import { SettingsMenuSection } from "@/src/features/mypage/components/SettingsMenuSection/SettingsMenuSection";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, spacing } from "@/src/style/tokens";
 

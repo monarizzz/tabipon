@@ -2,9 +2,9 @@ import { Fragment } from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { Check } from "lucide-react-native";
-import { NavBar } from "@/src/components/common/layout/NavBar/NavBar";
-import { Card } from "@/src/components/common/Card/Card";
-import { ListItem } from "@/src/components/common/ListItem/ListItem";
+import { NavBar } from "@/src/commons/layout/components/NavBar/NavBar";
+import { Card } from "@/src/commons/other/components/Card/Card";
+import { ListItem } from "@/src/commons/other/components/ListItem/ListItem";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import {
   LOCALE_LABELS,
