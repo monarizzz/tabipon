@@ -1,3 +1,5 @@
+import type { Stamp } from "@/src/infra/db/stamps";
+
 /** 編集できるフィールド */
 export type EditableField = "spotName" | "date" | "location" | "memo";
 
@@ -32,4 +34,16 @@ export type StampFieldEditors = {
   saveDate: () => void;
   saveLocation: () => void;
   saveMemo: () => void;
+};
+
+/** `useStampFieldEditors()` の引数 */
+export type StampFieldEditorsOptions = {
+  stampId: string | undefined;
+  stamp: Stamp | null;
+  /** 日時の編集欄を出すか。完了画面では出さない */
+  editableDate?: boolean;
+  /** 保存に成功したときに呼ぶ。画面側の `stamp` を差し替える */
+  onUpdated: (stamp: Stamp) => void;
+  /** 失敗ログの接頭辞。どの画面から失敗したか分かるようにする */
+  logTag: string;
 };

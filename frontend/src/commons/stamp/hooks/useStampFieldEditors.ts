@@ -1,31 +1,17 @@
 import React from "react";
 import { Alert } from "react-native";
 
-import {
-  updateStamp,
-  type Stamp,
-  type StampPatch,
-} from "@/src/infra/db/stamps";
+import { updateStamp, type StampPatch } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { geocodeAddress } from "@/src/libs/location/geocode";
 import type {
   EditableField,
   EditingField,
   StampFieldEditors,
+  StampFieldEditorsOptions,
 } from "@/src/commons/stamp/types/stampField";
 import { normalizeOptionalText } from "@/src/commons/stamp/utils/normalizeOptionalText";
 import { parseCapturedAt } from "@/src/commons/stamp/utils/parseCapturedAt";
-
-type Options = {
-  stampId: string | undefined;
-  stamp: Stamp | null;
-  /** 日時の編集欄を出すか。完了画面では出さない */
-  editableDate?: boolean;
-  /** 保存に成功したときに呼ぶ。画面側の `stamp` を差し替える */
-  onUpdated: (stamp: Stamp) => void;
-  /** 失敗ログの接頭辞。どの画面から失敗したか分かるようにする */
-  logTag: string;
-};
 
 /**
  * スタンプ情報（スポット名 / 日時 / 場所 / メモ）の編集状態をまとめて持つ。
@@ -41,7 +27,7 @@ export function useStampFieldEditors({
   editableDate = false,
   onUpdated,
   logTag,
-}: Options): StampFieldEditors {
+}: StampFieldEditorsOptions): StampFieldEditors {
   const { t } = useTranslation();
 
   const spotName = stamp?.title ?? "";
