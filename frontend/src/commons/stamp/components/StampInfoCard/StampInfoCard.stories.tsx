@@ -37,8 +37,3 @@ export const NoMemo: Story = {
 export const NoLocation: Story = {
   args: { location: "" },
 };
-
-// 逆ジオコーディングに失敗したとき。場所欄だけ文言が差し替わる
-export const LocationLookupFailed: Story = {
-  args: { location: "", locationPlaceholder: "場所を取得できませんでした" },
-};

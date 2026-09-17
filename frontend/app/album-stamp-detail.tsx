@@ -41,7 +41,6 @@ import { StampInfoCard } from "@/src/commons/stamp/components/StampInfoCard/Stam
 import { StampFieldSheets } from "@/src/commons/stamp/components/StampFieldSheets/StampFieldSheets";
 import { useStampFieldEditors } from "@/src/commons/stamp/hooks/useStampFieldEditors";
 import { formatIsoDateTime } from "@/src/utils/datetime/format";
-import { useReverseGeocode } from "@/src/libs/location/useReverseGeocode";
 
 export default function StampDetailScreen() {
   const router = useRouter();
@@ -64,11 +63,9 @@ export default function StampDetailScreen() {
   const [selectedColor, setSelectedColor] = React.useState(DEFAULT_STAMP_COLOR);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
 
-  const geocoded = useReverseGeocode(stamp?.location ?? null);
   const editors = useStampFieldEditors({
     stampId: id,
     stamp,
-    geocodedAddress: geocoded.address,
     editableDate: true,
     onUpdated: setStamp,
     logTag: "[stamp-detail]",
@@ -299,9 +296,6 @@ export default function StampDetailScreen() {
       <StampInfoCard
         date={formatIsoDateTime(editors.capturedAt)}
         location={editors.location}
-        locationPlaceholder={
-          geocoded.failed ? t("stampDetail.placeLookupFailed") : undefined
-        }
         memo={editors.memo}
         onPressDate={editors.openDate}
         onPressLocation={editors.openLocation}
