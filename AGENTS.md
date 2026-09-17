@@ -137,7 +137,15 @@ git worktree list            # 消えたことを確認
 - 削除前に `git status` で未コミットの変更が無いことを確認する
 
 > [!IMPORTANT]
-> 作ったらルートで `npm ci` を実行する
+> 作ったらリポジトリルートで依存をセットアップする
+
+```bash
+npm run worktree:setup <worktree のパス>
+```
+
+本体の `node_modules` を APFS の clonefile で複製し、`.husky/_` をコピーする（macOS 前提）。
+`npm ci` は不要。ただし依存を変更するブランチでは lock ファイルの差分で中断するので、
+その場合はルートと `frontend/` の両方で `npm ci` を実行する。
 
 ## コードレビュー
 
@@ -174,6 +182,7 @@ cd frontend && npm ci
 
 リポジトリルートにも `package.json` があり、そちらの `npm ci` は Git フックを有効にするためのもの（「Git フック」節を参照）。
 アプリの依存とは別物なので、clone 後は両方で実行する。
+worktree を足すときは代わりに `npm run worktree:setup`（「WorkTree」節を参照）。
 
 #### パッケージの追加
 
