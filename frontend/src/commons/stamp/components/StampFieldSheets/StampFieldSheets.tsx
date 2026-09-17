@@ -16,8 +16,8 @@ type Props = {
  * 開いている 1 枚だけが `visible` になる。日時の欄は `editableDate` で出し分ける
  * （完了画面には日時の編集が無い）。
  *
- * 座標が引けなかったときの警告もここで出す。場所のシートを使う画面すべてで
- * 必要なので、画面ごとに配線せずシートと同じ場所に置く
+ * 座標が引けなかったときの警告もここで出す（置き場の方針は
+ * docs/front-architecture.md「場所の編集と座標の追従」を参照）。
  */
 export function StampFieldSheets({ editors }: Props) {
   const { t } = useTranslation();
