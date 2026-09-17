@@ -105,11 +105,6 @@ src/infra/
 
 **行とファイルは分ける。**`src/infra/db/` が SQLite の行、`src/libs/stampFile/` が端末上のファイルを扱い、`stampFile/` は DB を知らない（documentDirectory からの相対パスだけを受け取る）。行が入らないのとファイルが書けないのは別々の失敗なので、両方をまたぐ手続き（保存・削除・孤児ファイルの掃除）とその順序は `src/infra/db/stamps.ts` にだけ置く。
 
-### モジュールのトップレベルで `Skia.*` を呼ばない
-
-Skia のネイティブモジュールが無い環境（Jest のモック）では、**import しただけで落ちる**。
-`Skia.Color()` や `Skia.XYWHRect()` を定数にせず、呼ばれた時点で作ること。`constants/` に素の数値しか置いていないのもこの理由による。
-
 ### テストの置き場
 
 `cd frontend && npm test`（`jest.config.js` の `testMatch`）が拾うのは
