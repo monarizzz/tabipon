@@ -15,6 +15,11 @@ export function useStampDetail(id: string | undefined): StampDetail {
   const { t } = useTranslation();
   const [stamp, setStamp] = React.useState<Stamp | null>(null);
   const [unavailable, setUnavailable] = React.useState(false);
+  /**
+   * 読み込みが片付いたかどうか。`stamp` の有無から導くと、失敗して `stamp` が
+   * null のままのときに読み込み中と区別が付かず、スピナーのまま止まる
+   */
+  const [loading, setLoading] = React.useState(true);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
 
@@ -38,15 +43,15 @@ export function useStampDetail(id: string | undefined): StampDetail {
     getStamp(id)
       .then((loaded) => {
         if (cancelled) return;
-        if (!loaded) {
-          setUnavailable(true);
-          return;
-        }
-        setStamp(loaded);
+        if (loaded) setStamp(loaded);
+        else setUnavailable(true);
+        setLoading(false);
       })
       .catch((error) => {
         console.error("[stamp-detail] failed to load stamp", error);
-        if (!cancelled) setUnavailable(true);
+        if (cancelled) return;
+        setUnavailable(true);
+        setLoading(false);
       });
     return () => {
       cancelled = true;
@@ -54,7 +59,8 @@ export function useStampDetail(id: string | undefined): StampDetail {
   }, [id]);
 
   return {
-    loading: !stamp,
+    // id が無ければ読み込むものが無いので、待たせずに `unavailable` の表示へ倒す
+    loading: Boolean(id) && loading,
     unavailable: !id || unavailable,
 
     latitude: stamp?.location?.latitude ?? null,
