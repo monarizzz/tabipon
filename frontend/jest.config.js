@@ -8,6 +8,9 @@
 /** @type {import('jest').Config} */
 module.exports = {
   preset: "jest-expo",
+  // Skia の描画 API を使うコンポーネントのために CanvasKit を読み込む環境を使う
+  // （詳細は jest.environment.js）
+  testEnvironment: "<rootDir>/jest.environment.js",
   setupFilesAfterEnv: [
     "<rootDir>/jest.setup.ts",
     "<rootDir>/jest.setup.storybook.ts",

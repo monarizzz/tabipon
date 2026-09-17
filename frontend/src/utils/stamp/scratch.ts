@@ -1,6 +1,5 @@
 /**
- * 工程4: スタンプに掠れを掛ける。
- *
+ * スタンプに掠れを掛ける。
  *
  * 1. `seed` から 0..1 の一様乱数ノイズを作る
  * 2. σ = 2.5543 でぼかす（`GaussianBlur(15, 15)` 相当）
@@ -24,8 +23,8 @@ import { renderToSquareImage } from "@/src/utils/stamp/surface";
 /**
  * `cv2.GaussianBlur(noise, (15, 15), 0)` 相当の σ。
  *
- * 公称は `0.3 * ((15 - 1) * 0.5 - 1) + 0.8 = 2.6`。#121 と同じく打ち切り後の
- * 実効値（カーネルの 2 次モーメントから算出）を使う。15 タップは ±7 = 2.7σ しか
+ * 公称は `0.3 * ((15 - 1) * 0.5 - 1) + 0.8 = 2.6` だが、打ち切り後の実効値
+ * （カーネルの 2 次モーメントから算出）を使う。15 タップは ±7 = 2.7σ しか
  * 取れていないので、公称より少し小さい 2.5543 になる。
  */
 const SCRATCH_BLUR_SIGMA = 2.5543;
@@ -41,14 +40,14 @@ const SCRATCH_BLUR_SIGMA = 2.5543;
 const SCRATCH_NOISE_SD = 0.031556;
 
 /**
- * `apply_scratch` の min-max 正規化を、固定値に置き換えるための定数。
+ * ぼかしたノイズの min-max 正規化を、実測ではなく固定値で行うための定数。
  *
- * ## backend をそのまま移植しなかった理由
+ * ## 実測の min / max を使わない理由
  *
- * backend は「ぼかしたノイズを実測の min / max で 0..1 に伸ばし、
- * `1.0 - level * 0.4` で切る」。min / max は 26 万画素の**外れ値そのもの**なので、
- * 同じ `scratch_level` でも走らせるたびに白抜き率が変わる。
- * numpy で backend と同じカーネルを組んで 512x512 を 6 回試したときの実測:
+ * 素直に書くと「ぼかしたノイズを実測の min / max で 0..1 に伸ばし、
+ * `1.0 - level * 0.4` で切る」になる。min / max は 26 万画素の**外れ値そのもの**なので、
+ * 同じ `scratchLevel` でもシードが違うと白抜き率が大きく変わる。
+ * numpy で同じカーネルを組んで 512x512 を（シードを変えて）6 回試したときの実測:
  *
  * | scratch_level | 白抜き率の平均 | 最小 | 最大 |
  * | --- | --- | --- | --- |
@@ -57,13 +56,12 @@ const SCRATCH_NOISE_SD = 0.031556;
  * | 0.6 | 0.364% | 0.016% | 1.483% |
  * | 1.0 | 16.06% | 1.45% | 39.77% |
  *
- * **level = 1.0 で 1.5% 〜 39.8% まで振れる。**掠れの「濃さ」が毎回変わるということで、
- * #123 が挙げている「再生成で掠れが変わる」問題の本体はシードよりこちらに近い。
- * 端末側は再レンダリングの頻度が上がるので、そのまま移植すると悪化する。
+ * **level = 1.0 で 1.5% 〜 39.8% まで振れる。**同じ `scratchLevel` を指定していても、
+ * スタンプごとに掠れの「濃さ」がまったく別物になる。
  *
  * そこで **min / max を実測せず、上の試行で得た期待値で固定する**。
  * ぼかし後のノイズの min / max はそれぞれ -6.025σ / +5.929σ（σ はぼかし後の標準偏差）。
- * これで backend の平均的な挙動は保ったまま、同じ入力なら必ず同じ結果になる。
+ * これで平均的な見た目は保ったまま、`scratchLevel` と白抜き率がシードに依らず対応する。
  *
  * 副産物として `readPixels` での min / max 走査が要らなくなる（GPU から CPU への
  * 読み戻しは重いので、プレビュー速度の面でも都合が良い）。
@@ -81,8 +79,8 @@ const SCRATCH_NORMALIZE_RANGE = 11.954;
  * **`seed` は 0 以上 1 未満であること。**`dot()` の中に足すので、大きな値を渡すと
  * 後段の積が 32bit float の精度を超えて `fract()` が潰れる（`seed.ts` を参照）。
  *
- * 出力は 0..1 の一様乱数。backend は正規乱数だが、**このあとガウスぼかしを掛けるので
- * 中心極限定理でどちらも正規分布に近づく**。一様乱数を使うのは 8bit の
+ * 出力は 0..1 の一様乱数。正規乱数でなくてよいのは、**このあとガウスぼかしを掛けるので
+ * 中心極限定理でどちらも正規分布に近づく**ため。一様乱数を使うのは 8bit の
  * オフスクリーンに格納する都合で、σ = 0.289 と階調を目一杯使えるため
  * （正規乱数を 0..1 に押し込めると、そのままでは裾が飽和する）。
  */
@@ -101,10 +99,7 @@ half4 main(float2 p) {
 }
 `;
 
-/**
- * ぼかしたノイズが閾値を超えた画素を白で抜くシェーダ。
- * `result[scratch_mask] = [255, 255, 255]` に相当する。
- */
+/** ぼかしたノイズが閾値を超えた画素を白で抜くシェーダ */
 const SCRATCH_APPLY_SKSL = `
 uniform shader src;
 uniform shader noise;
@@ -124,8 +119,7 @@ const getApplyEffect = createCachedEffect(SCRATCH_APPLY_SKSL, "掠れ");
  *
  * **片方だけ先にコンパイルしない**ために噛ませてある。個別に遅延させると、
  * 適用シェーダのコンパイルが失敗したときに、ノイズ生成とぼかしの 2 パスを
- * 走らせたあとで例外が飛ぶ。分割前の `getScratchEffects()` は両方を先に
- * コンパイルしてから返していたので、その挙動に揃える。
+ * 走らせたあとで例外が飛ぶ。
  */
 function getScratchEffects() {
   return { noise: getNoiseEffect(), apply: getApplyEffect() };
@@ -134,7 +128,7 @@ function getScratchEffects() {
 /**
  * 掠れの閾値を求める。0..1 のピクセル値と直接比較できる形で返す。
  *
- * backend の `threshold = 1.0 - scratch_level * 0.4` は**正規化後**の値なので、
+ * `1.0 - scratchLevel * 0.4` は**正規化後**の値なので、
  * 固定した min / max（`SCRATCH_NORMALIZE_*`）を使って σ 単位に戻し、
  * さらにノイズ画像のスケール（平均 0.5 / σ = `SCRATCH_NOISE_SD`）へ移す。
  */
@@ -147,7 +141,7 @@ function scratchThreshold(scratchLevel: number): number {
 /**
  * スタンプに掠れを掛ける。
  *
- * `scratchLevel <= 0` のときは何もしない（backend の `if scratch_level > 0` と同じ）。
+ * `scratchLevel <= 0` のときは何もしない。
  */
 export function applyScratch(
   stamp: SkImage,
@@ -170,9 +164,7 @@ export function applyScratch(
   // 巻き込んで縁のノイズが偏り、四辺だけ掠れ方が変わる。
   // Clamp も駄目で、端の 1 画素を 7 回繰り返すぶん平均化が効かず、
   // **縁だけノイズの分散が大きくなって四辺が強く白抜きされる**。
-  // 移植元の `cv2.GaussianBlur` は borderType 省略＝`BORDER_REFLECT_101` なので、
-  // 反射に合わせる（Skia の Mirror は `BORDER_REFLECT`。端 1 画素を含むかだけの違いで、
-  // 白色ノイズに対しては分散が保たれる点は同じ）
+  // Skia の Mirror は端の 1 画素を含む反射だが、白色ノイズに対しては分散が保たれる
   const blurPaint = Skia.Paint();
   blurPaint.setImageFilter(
     Skia.ImageFilter.MakeBlur(

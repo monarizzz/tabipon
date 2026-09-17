@@ -8,11 +8,15 @@ import {
 } from "@/src/utils/stamp/constants/constants";
 import { framePaint } from "@/src/utils/stamp/framePaint";
 
-export function drawSimpleCircle(canvas: SkCanvas, color: string): void {
+export function drawSimpleCircle(
+  canvas: SkCanvas,
+  color: string,
+  minThickness: number,
+): void {
   canvas.drawCircle(
     FRAME_CENTER,
     FRAME_CENTER,
     FRAME_RADIUS,
-    framePaint(color, SIMPLE_THICKNESS),
+    framePaint(color, Math.max(SIMPLE_THICKNESS, minThickness)),
   );
 }

@@ -1,5 +1,4 @@
 // 端末ローカル DB（expo-sqlite）のスキーマとマイグレーション。
-// 設計の理由は docs/data-model.md を参照。
 //
 // バージョン管理は Expo 公式の `PRAGMA user_version` 方式で行う。
 // user_version は DB ファイルのヘッダに入る整数で、どこまでマイグレーションを
@@ -34,7 +33,7 @@ const relativePathCheck = (column: string) =>
 const V1_CREATE_STAMPS = `
 CREATE TABLE stamps (
   id TEXT PRIMARY KEY NOT NULL CHECK (length(id) = 36),
-  -- v1 では中間画像を作れないため元写真のパスが入る（docs/data-model.md「v1 のカラムは ER 図と3点ずれる」）
+  -- v1 では中間画像を作れないため元写真のパスが入る
   line_art_path TEXT NOT NULL ${relativePathCheck("line_art_path")},
   stamp_image_path TEXT NOT NULL ${relativePathCheck("stamp_image_path")},
   title TEXT,

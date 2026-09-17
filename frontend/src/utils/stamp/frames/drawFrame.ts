@@ -14,23 +14,30 @@ import { drawSimpleCircle } from "@/src/utils/stamp/frames/simpleCircle";
 import { drawWaveCircle } from "@/src/utils/stamp/frames/waveCircle";
 import type { StampFrame } from "@/src/utils/stamp/types";
 
+/**
+ * @param minThickness 線幅の下限。この 512px 空間での値で、各フレームは
+ *   自分の線幅とこの値の大きい方を使う。縮小して表示する側が、縮尺で割った値を
+ *   渡すことで「画面上の実寸」の下限として効かせる（`FrameCanvas`）。
+ *   本番の画像生成（512px 等倍）は既定の 0 のまま、下限なしで描く。
+ */
 export function drawFrame(
   canvas: SkCanvas,
   color: string,
   frame: StampFrame,
+  minThickness = 0,
 ): void {
   switch (frame) {
     case "simple":
-      drawSimpleCircle(canvas, color);
+      drawSimpleCircle(canvas, color, minThickness);
       break;
     case "classic":
-      drawClassicCircle(canvas, color);
+      drawClassicCircle(canvas, color, minThickness);
       break;
     case "dash":
-      drawDashedCircle(canvas, color);
+      drawDashedCircle(canvas, color, minThickness);
       break;
     case "wave":
-      drawWaveCircle(canvas, color);
+      drawWaveCircle(canvas, color, minThickness);
       break;
     // 枠だけ描かれないスタンプが黙って出来上がるより、止めて気付ける方を採る。
     // DB からの読み出しは `isStampFrame()` で型どおりの値へ寄せているので、

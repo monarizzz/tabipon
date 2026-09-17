@@ -11,7 +11,11 @@ import {
 } from "@/src/utils/stamp/constants/constants";
 import { framePaint } from "@/src/utils/stamp/framePaint";
 
-export function drawWaveCircle(canvas: SkCanvas, color: string): void {
+export function drawWaveCircle(
+  canvas: SkCanvas,
+  color: string,
+  minThickness: number,
+): void {
   const path = Skia.Path.Make();
   for (let i = 0; i < WAVE_POINT_COUNT; i += 1) {
     const angle = (2 * Math.PI * i) / WAVE_POINT_COUNT;
@@ -27,5 +31,8 @@ export function drawWaveCircle(canvas: SkCanvas, color: string): void {
   // cv2.polylines(..., isClosed=True) と同じく最後の点と最初の点を繋ぐ
   path.close();
 
-  canvas.drawPath(path, framePaint(color, WAVE_THICKNESS));
+  canvas.drawPath(
+    path,
+    framePaint(color, Math.max(WAVE_THICKNESS, minThickness)),
+  );
 }

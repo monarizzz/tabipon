@@ -1,15 +1,11 @@
 /**
- * 工程2: 線画の暗い画素をインク色に置き換える。
- * ## 閾値判定は 0..1 スケール
+ * 線画の暗い画素をインク色に置き換える。
  *
- * 暗いピクセルの判定 `< 180` は 0..255 スケール。SkSL 側は 0..1 なので
- * `180 / 255` に正規化して渡す。`<` の向きは変えていない（180 ちょうどは暗くない）。
+ * 閾値 `< 180` は 0..255 スケール。SkSL 側は 0..1 なので `180 / 255` に正規化して
+ * 渡す。`<` の向きは変えない（180 ちょうどは暗くない）。
  *
- * ## 入力は 2 値線画でなくてもよい
- *
- * 「3 チャンネルとも 180 未満なら置換」という元の条件をそのまま実装しているので、
- * 入力がグレースケールでも写真でも動く。実際に渡すのは `lineArt.ts` の
- * `generateLineArtFromImage()` の出力（0 か 255 の 2 値）なので、
+ * 判定は「3 チャンネルとも閾値未満」なので入力は 2 値でなくてもよい。実際に渡すのは
+ * `lineArt.ts` の `generateLineArtFromImage()` の出力（0 か 255 の 2 値）で、
  * 実質は「黒をインク色に、白は白のまま」になる。
  */
 import {
@@ -24,14 +20,14 @@ import { STAMP_SIZE } from "@/src/utils/stamp/constants/constants";
 import { createCachedEffect } from "@/src/utils/stamp/runtimeEffect";
 import { renderToSquareImage } from "@/src/utils/stamp/surface";
 
-/** `dark_pixels` の閾値 180 を 0..1 スケールに直したもの */
+/** 暗い画素と判定する閾値 180（0..255 スケール）を 0..1 に直したもの */
 const DARK_PIXEL_THRESHOLD = 180 / 255;
 
 /**
  * インク置換シェーダ。
  *
- * `src` は線画の画像シェーダ。判定は BGR/RGB の順に依らない（3 チャンネルとも
- * 閾値未満か）ので、元の numpy の条件をそのまま書いている。
+ * `src` は線画の画像シェーダ。判定は「3 チャンネルとも閾値未満か」なので、
+ * チャンネルの並び（BGR / RGB）に依らない。
  */
 const INK_SKSL = `
 uniform shader src;
@@ -40,7 +36,6 @@ uniform half   threshold;  // 0..1 に正規化した 180
 
 half4 main(float2 p) {
   half4 c = src.eval(p);
-  // dark_pixels = (b < 180) & (g < 180) & (r < 180)
   bool dark = c.r < threshold && c.g < threshold && c.b < threshold;
   return dark ? ink : half4(c.rgb, 1.0);
 }
@@ -48,7 +43,7 @@ half4 main(float2 p) {
 
 const getInkEffect = createCachedEffect(INK_SKSL, "インク置換");
 
-/** インク色の `SkColor` を作る（不透明）。`frame.ts` の枠線も同じ色を使う */
+/** インク色の `SkColor` を作る（不透明）。`frames/` の枠線も同じ色を使う */
 export function inkColorOf(color: string) {
   return Skia.Color(color);
 }
