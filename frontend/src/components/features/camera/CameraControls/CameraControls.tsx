@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useState } from "react";
 import { Animated, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Zap, ZapOff, SwitchCamera } from "lucide-react-native";
 import { colors, radii, spacing } from "@/src/style/tokens";
@@ -18,7 +18,10 @@ export function CameraControls({
   onFlipCamera,
   disabled = false,
 }: Props) {
-  const pressAnim = useRef(new Animated.Value(0)).current;
+  // Animated.Value はレンダーをまたいで同じインスタンスを保つ必要があるが、ref に
+  // 置くと interpolate() のためにレンダー中 .current を読むことになる。state の
+  // 遅延初期化なら生成は初回だけで、レンダー中に読んでも純粋性を壊さない
+  const [pressAnim] = useState(() => new Animated.Value(0));
 
   const handlePressIn = () => {
     Animated.timing(pressAnim, {
