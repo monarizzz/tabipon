@@ -125,4 +125,10 @@ export const zh: Translations = {
     title: "语言",
     system: "跟随系统设置",
   },
+  dbError: {
+    title: "无法启动应用",
+    message:
+      "准备读取已保存的印章时失败。如果重试后仍无法解决，请将应用更新到最新版本。",
+    detailLabel: "错误详情",
+  },
 };

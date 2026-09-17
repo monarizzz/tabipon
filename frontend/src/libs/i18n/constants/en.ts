@@ -129,4 +129,10 @@ export const en: Translations = {
     title: "Language",
     system: "Follow system setting",
   },
+  dbError: {
+    title: "Could not start the app",
+    message:
+      "Preparing your saved stamps failed. If retrying does not help, update the app to the latest version.",
+    detailLabel: "Error details",
+  },
 };
