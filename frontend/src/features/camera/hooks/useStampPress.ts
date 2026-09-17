@@ -7,7 +7,7 @@ import type { StampPress } from "@/src/features/camera/types/stampPress";
 import { createStamp } from "@/src/features/camera/utils/createStamp";
 import { DEFAULT_STAMP_COLOR } from "@/src/utils/stamp/constants/constants";
 import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
-import type { PressGestureFinish } from "@/src/utils/stampPress/pressGesture";
+import type { PressGestureFinish } from "@/src/utils/stampPress/types/pressGesture";
 
 type Params = {
   imageUri: string | undefined;

@@ -33,7 +33,7 @@ import type { StampPress } from "@/src/features/camera/types/stampPress";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { playStampSound } from "@/src/libs/sound";
 import { STAMP_INK_COLORS } from "@/src/utils/stamp/constants/constants";
-import type { PressGestureFinish } from "@/src/utils/stampPress/pressGesture";
+import type { PressGestureFinish } from "@/src/utils/stampPress/types/pressGesture";
 import { useStampPressGesture } from "@/src/utils/stampPress/useStampPressGesture";
 import { colors, typography, spacing } from "@/src/style/tokens";
 

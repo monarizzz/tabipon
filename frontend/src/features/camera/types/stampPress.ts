@@ -1,5 +1,5 @@
 import type { TabBarItemData } from "@/src/commons/layout/components/TabBar/TabBar";
-import type { PressGestureFinish } from "@/src/utils/stampPress/pressGesture";
+import type { PressGestureFinish } from "@/src/utils/stampPress/types/pressGesture";
 import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 /** 押印画面の状態と操作。`useStampPress()` が返し、`<StampPressMain />` が受け取る */

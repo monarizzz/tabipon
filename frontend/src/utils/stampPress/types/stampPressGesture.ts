@@ -1,6 +1,6 @@
 import type { SharedValue } from "react-native-reanimated";
 
-import type { PressGestureFinish } from "@/src/utils/stampPress/pressGesture";
+import type { PressGestureFinish } from "@/src/utils/stampPress/types/pressGesture";
 
 export type StampPressGesture = {
   /**
