@@ -14,7 +14,10 @@ import {
 } from "@/src/utils/stamp/io";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
 import { DEFAULT_STAMP_COLOR } from "@/src/utils/stamp/constants/constants";
-import { DEFAULT_STAMP_FRAME, type StampFrame } from "@/src/utils/stamp/types";
+import {
+  DEFAULT_STAMP_FRAME,
+  type StampFrame,
+} from "@/src/utils/stamp/types/stampFrame";
 import type {
   StampDesignChange,
   StampDesignChangeOptions,

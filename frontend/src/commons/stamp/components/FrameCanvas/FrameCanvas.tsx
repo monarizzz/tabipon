@@ -7,7 +7,7 @@ import {
 import { useMemo } from "react";
 import { STAMP_SIZE } from "@/src/utils/stamp/constants/constants";
 import { drawFrame } from "@/src/utils/stamp/frames/drawFrame";
-import type { StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 type Props = {
   frame: StampFrame;

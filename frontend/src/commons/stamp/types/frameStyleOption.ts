@@ -1,5 +1,5 @@
 import type { TranslationKey } from "@/src/libs/i18n/types/i18n";
-import type { StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 /** デザイン変更UIに並べるフレームの選択肢 */
 export type FrameStyleOption = {

@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import { FrameCanvas } from "@/src/commons/stamp/components/FrameCanvas/FrameCanvas";
-import type { StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 type Props = {
   size?: number;

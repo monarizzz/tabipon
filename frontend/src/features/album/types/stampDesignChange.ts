@@ -1,5 +1,5 @@
 import type { Stamp } from "@/src/infra/db/stamps";
-import type { StampFrame } from "@/src/utils/stamp/types";
+import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 export type StampDesignChange = {
   /** 画面に出す uri。デザイン変更のたびに変わる（キャッシュ避け） */

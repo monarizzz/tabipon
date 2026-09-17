@@ -11,7 +11,7 @@
  *
  * Skia には触らない純粋な関数なので、`@shopify/react-native-skia` は読み込ませない。
  */
-import { DEFAULT_STAMP_FRAME, STAMP_FRAMES, isStampFrame } from "./types";
+import { DEFAULT_STAMP_FRAME, STAMP_FRAMES, isStampFrame } from "./stampFrame";
 
 /** 型どおりでない値。廃止・改名・大文字小文字違い・空文字を並べている */
 const UNKNOWN_VALUES = ["", "Simple", "SIMPLE", "double", "dotted", "円"];
