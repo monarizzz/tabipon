@@ -7,6 +7,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { SpotNameLabel } from "@/src/commons/stamp/components/SpotNameLabel/SpotNameLabel";
 import { StampDetailPhoto } from "@/src/features/album/components/detail/StampDetailPhoto/StampDetailPhoto";
 import { StampLocationMap } from "@/src/features/album/components/detail/StampLocationMap/StampLocationMap";
 import { colors, spacing } from "@/src/style/tokens";
@@ -47,10 +48,8 @@ export function StampDetailMediaPager({
       >
         <View style={{ width: PAGE_WIDTH }}>
           <StampDetailPhoto
-            spotName={spotName}
             imageUri={imageUri}
             onPressDesignChange={onPressDesignChange}
-            onPressSpotName={onPressSpotName}
           />
         </View>
         <View style={{ width: PAGE_WIDTH }}>
@@ -61,6 +60,10 @@ export function StampDetailMediaPager({
           />
         </View>
       </ScrollView>
+      {/* スポット名はページ固有の情報ではないので、ページャの外に 1 つだけ置く */}
+      <View style={styles.spotName}>
+        <SpotNameLabel spotName={spotName} onPress={onPressSpotName} />
+      </View>
       <View style={styles.dots}>
         {[0, 1].map((index) => (
           <View
@@ -74,6 +77,11 @@ export function StampDetailMediaPager({
 }
 
 const styles = StyleSheet.create({
+  spotName: {
+    alignItems: "center",
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.l,
+  },
   dots: {
     flexDirection: "row",
     justifyContent: "center",

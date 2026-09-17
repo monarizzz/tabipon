@@ -5,6 +5,10 @@ import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { colors, radii, spacing, typography } from "@/src/style/tokens";
 
 type Props = {
+  /**
+   * ピンをタップしたときの吹き出しに出す名前。画面の見出しとしてのスポット名は
+   * ページャ側（`StampDetailMediaPager`）が 1 つだけ描く
+   */
   spotName: string;
   latitude: number | null;
   longitude: number | null;
@@ -77,11 +81,6 @@ export function StampLocationMap({
           </View>
         )}
       </View>
-      {spotName ? (
-        <Text style={styles.spotName}>{spotName}</Text>
-      ) : (
-        <Text style={styles.placeholder}>{t("stampDetail.addSpotName")}</Text>
-      )}
     </View>
   );
 }
@@ -113,15 +112,5 @@ const styles = StyleSheet.create({
     fontSize: typography.body.fontSize,
     color: colors.textPlaceholder,
     textAlign: "center",
-  },
-  spotName: {
-    fontSize: typography.sectionHeading.fontSize,
-    fontWeight: typography.sectionHeading.fontWeight,
-    color: colors.textPrimary,
-  },
-  placeholder: {
-    fontSize: typography.sectionHeading.fontSize,
-    fontWeight: typography.sectionHeading.fontWeight,
-    color: colors.textPlaceholder,
   },
 });
