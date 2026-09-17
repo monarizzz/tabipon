@@ -52,7 +52,6 @@ export const ja = {
   design: {
     frame: "フレーム",
     color: "カラー",
-    showLandmark: "ランドマーク名を表示",
     apply: "このデザインにする",
     changeDesign: "デザインを変更する",
     frameClassic: "クラシック",

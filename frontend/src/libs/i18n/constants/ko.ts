@@ -53,7 +53,6 @@ export const ko: Translations = {
   design: {
     frame: "프레임",
     color: "색상",
-    showLandmark: "랜드마크 이름 표시",
     apply: "이 디자인으로 설정",
     changeDesign: "디자인 변경",
     frameClassic: "클래식",
