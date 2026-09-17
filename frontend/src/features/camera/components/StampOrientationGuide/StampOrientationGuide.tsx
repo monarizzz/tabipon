@@ -1,5 +1,6 @@
 import React from "react";
 import { View } from "react-native";
+import { FrameCanvas } from "@/src/commons/stamp/components/FrameCanvas/FrameCanvas";
 import type { StampFrame } from "@/src/utils/stamp/types";
 
 type Props = {
@@ -9,26 +10,6 @@ type Props = {
 };
 
 export function StampOrientationGuide({ size = 260, color, frameId }: Props) {
-  const pad = 8;
-  const outerSize = size - pad * 2;
-  const outerRadius = outerSize / 2;
-  const outerBorderWidth = frameId === "simple" ? 2 : 8;
-  const innerInset = 30;
-  const innerSize = outerSize - innerInset * 2;
-  const innerRadius = innerSize / 2;
-  const showInnerRing = frameId === "classic" || frameId === "dash";
-
-  // ウェーブフレームの4方向ドット位置
-  const waveDots =
-    frameId === "wave"
-      ? [
-          { top: pad - 4, left: size / 2 - 4 },
-          { bottom: pad - 4, left: size / 2 - 4 },
-          { top: size / 2 - 4, left: pad - 4 },
-          { top: size / 2 - 4, right: pad - 4 },
-        ]
-      : [];
-
   // 向きを示す矢印（上向き三角 + 縦線）
   const arrowW = 14;
   const arrowH = 20;
@@ -38,51 +19,8 @@ export function StampOrientationGuide({ size = 260, color, frameId }: Props) {
 
   return (
     <View style={{ width: size, height: size }}>
-      {/* 外枠 */}
-      <View
-        style={{
-          position: "absolute",
-          top: pad,
-          left: pad,
-          width: outerSize,
-          height: outerSize,
-          borderRadius: outerRadius,
-          borderWidth: outerBorderWidth,
-          borderColor: color,
-          borderStyle: frameId === "dash" ? "dashed" : "solid",
-        }}
-      />
-
-      {/* 内枠（classic / dash） */}
-      {showInnerRing && (
-        <View
-          style={{
-            position: "absolute",
-            top: pad + innerInset,
-            left: pad + innerInset,
-            width: innerSize,
-            height: innerSize,
-            borderRadius: innerRadius,
-            borderWidth: 2,
-            borderColor: color,
-          }}
-        />
-      )}
-
-      {/* wave ドット */}
-      {waveDots.map((style, i) => (
-        <View
-          key={i}
-          style={{
-            position: "absolute",
-            width: 8,
-            height: 8,
-            borderRadius: 4,
-            backgroundColor: color,
-            ...style,
-          }}
-        />
-      ))}
+      {/* 枠は本番の画像生成と同じ描画を縮小して使う */}
+      <FrameCanvas frame={frameId} color={color} size={size} />
 
       {/* 向きガイド：上向き三角 */}
       <View
