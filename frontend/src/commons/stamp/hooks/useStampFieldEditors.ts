@@ -145,7 +145,9 @@ export function useStampFieldEditors({
           return { address };
         }
         const geocoded = await geocodeAddress(address);
-        return geocoded ? { address, location: geocoded } : { address };
+        return geocoded.status === "found"
+          ? { address, location: geocoded.location }
+          : { address };
       });
     },
   };

@@ -17,8 +17,8 @@ describe("geocodeAddress", () => {
     ]);
 
     await expect(geocodeAddress("京都府京都市下京区")).resolves.toEqual({
-      latitude: 34.9858,
-      longitude: 135.7588,
+      status: "found",
+      location: { latitude: 34.9858, longitude: 135.7588 },
     });
   });
 
@@ -29,8 +29,8 @@ describe("geocodeAddress", () => {
     ]);
 
     await expect(geocodeAddress("京都駅")).resolves.toEqual({
-      latitude: 1,
-      longitude: 2,
+      status: "found",
+      location: { latitude: 1, longitude: 2 },
     });
   });
 
@@ -41,8 +41,8 @@ describe("geocodeAddress", () => {
     ]);
 
     await expect(geocodeAddress("京都駅")).resolves.toEqual({
-      latitude: 1,
-      longitude: 2,
+      status: "found",
+      location: { latitude: 1, longitude: 2 },
     });
   });
 
@@ -55,23 +55,29 @@ describe("geocodeAddress", () => {
   });
 
   // 「おばあちゃんち」のような、住所として引けない文字列
-  test("引けなければ null（呼び出し側が座標を据え置く）", async () => {
+  test("引けなければ notFound", async () => {
     geocodeAsync.mockResolvedValue([]);
 
-    await expect(geocodeAddress("おばあちゃんち")).resolves.toBeNull();
+    await expect(geocodeAddress("おばあちゃんち")).resolves.toEqual({
+      status: "notFound",
+    });
   });
 
-  test("空文字なら引かずに null", async () => {
-    await expect(geocodeAddress("   ")).resolves.toBeNull();
+  test("空文字なら引かずに notFound", async () => {
+    await expect(geocodeAddress("   ")).resolves.toEqual({
+      status: "notFound",
+    });
     expect(geocodeAsync).not.toHaveBeenCalled();
   });
 
-  // 住所の保存自体は座標が引けたかどうかと無関係に通す
-  test("例外が出ても投げずに null を返す", async () => {
+  // オフラインなど。呼び出し側が「引けない文字列」と区別できるようにする
+  test("例外が出ても投げずに unavailable を返す", async () => {
     const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
     geocodeAsync.mockRejectedValue(new Error("offline"));
 
-    await expect(geocodeAddress("京都駅")).resolves.toBeNull();
+    await expect(geocodeAddress("京都駅")).resolves.toEqual({
+      status: "unavailable",
+    });
     expect(warn).toHaveBeenCalled();
 
     warn.mockRestore();
