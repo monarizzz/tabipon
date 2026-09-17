@@ -6,7 +6,6 @@
 | --- | --- |
 | [REQUIREMENTS.md](REQUIREMENTS.md) | ユーザー体験フロー・画面定義・画面遷移・主要機能・技術スタック |
 | [data-model.md](data-model.md) | DB構造 |
-| [stamp-samples/README.md](stamp-samples/README.md) | 旧システムでのスタンプ画像生成（4色×4フレーム他）の出力サンプルと再生成手順 |
 | [../design/DESIGN.MD](../design/DESIGN.MD) | ビジュアルデザインシステム（配色・タイポグラフィ・コンポーネントのスタイル定義） |
 
 デザインファイルの実体は `design/` 配下にある。

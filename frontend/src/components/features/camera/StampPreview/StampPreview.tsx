@@ -21,11 +21,6 @@
  * backend 自体も #98 で消えている。**再生成できない参照と比べる作りにはしない。**
  * ここで見るのは「破綻せず、意図した見た目のスタンプが出ること」までに留める。
  *
- * 唯一の数値的な手掛かりが線画の黒画素率で、backend 側の実測値（平等院 31.0%）を
- * `EXPECTED_BLACK_PIXEL_RATIO` に残してある。これは #147 で消えた
- * `docs/stamp-samples/manifest.json` の
- * `sources.byodoin.line_art.black_pixel_ratio` の値。
- *
  * ## プロダクトの画面には組み込まない
  *
  * Storybook からのみ確認する。開発者しか見ないので i18n のキーは足さず直書きする
