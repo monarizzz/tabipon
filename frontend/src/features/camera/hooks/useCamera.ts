@@ -31,10 +31,15 @@ export function useCamera(): Camera {
     setCapturing(false);
   }, []);
 
+  // 画面を離れるたびに進む。撮影開始時の値と違っていれば、その撮影は
+  // 利用者がカメラ画面を見ていない間に終わったもの
+  const captureGenerationRef = React.useRef(0);
+
   const failCapture = React.useCallback(
-    (reason: unknown) => {
+    (reason: unknown, notify: boolean) => {
       console.error("[camera] failed to capture", reason);
       stopCapturing();
+      if (!notify) return;
       Alert.alert(
         t("camera.captureFailedTitle"),
         t("camera.captureFailedMessage"),
@@ -43,8 +48,19 @@ export function useCamera(): Camera {
     [stopCapturing, t],
   );
 
-  // 撮影後に戻ってきたときは、また撮れる状態にしておく
-  useFocusEffect(stopCapturing);
+  useFocusEffect(
+    React.useCallback(() => {
+      // 撮影後に戻ってきたときは、また撮れる状態にしておく
+      stopCapturing();
+      // タブを離れても useCamera はマウントされたまま残る。進行中の撮影を
+      // ここで無効にしないと、あとから解決した結果がアルバムなど別の画面に
+      // Alert や遷移として出てしまう
+      return () => {
+        captureGenerationRef.current += 1;
+        stopCapturing();
+      };
+    }, [stopCapturing]),
+  );
 
   return {
     permissionGranted: permission?.granted ?? false,
@@ -63,20 +79,26 @@ export function useCamera(): Camera {
       if (capturingRef.current) return;
       capturingRef.current = true;
       setCapturing(true);
+      const generation = captureGenerationRef.current;
+      const onCameraScreen = () => generation === captureGenerationRef.current;
       try {
         const photo = await cameraRef.current?.takePictureAsync();
         if (!photo) {
           // takePictureAsync() は失敗を例外ではなく undefined で返すことがある。
           // 利用者から見ると例外時と同じ「何も起きない」なので同じ扱いにする
-          failCapture(new Error("takePictureAsync returned no photo"));
+          failCapture(
+            new Error("takePictureAsync returned no photo"),
+            onCameraScreen(),
+          );
           return;
         }
         // 撮影時のズームは写真自体に反映済みのため、調整画面には引き継がない
         // (引き継いで再度 scale をかけるとガイド円の中身がズレる)
         const uri = await cropToPreview(photo, containerSizeRef.current);
+        if (!onCameraScreen()) return;
         router.push({ pathname: "/photo-adjust", params: { uri } });
       } catch (error) {
-        failCapture(error);
+        failCapture(error, onCameraScreen());
       }
     },
     toggleFlash: () => setFlash((prev) => (prev === "on" ? "off" : "on")),
