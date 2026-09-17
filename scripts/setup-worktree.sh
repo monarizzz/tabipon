@@ -70,6 +70,28 @@ for lock in package-lock.json frontend/package-lock.json; do
 done
 echo "✓ lock ファイルは本体と一致"
 
+# 1-2. 複製元の node_modules 自体が lock に追いついているかを確認する。
+#      lock ファイル同士の比較だけでは、本体が lock の更新を pull しただけの状態や
+#      npm ci が途中で止まった状態を通してしまい、古い依存をそのまま配ることになる。
+#      npm は install を終えた時点の実体を node_modules/.package-lock.json に書くので、
+#      これが lock より古ければ、本体のインストールが追いついていない。
+for dir in "" frontend/; do
+  installed="$source_root/${dir}node_modules/.package-lock.json"
+  lock_file="$source_root/${dir}package-lock.json"
+
+  if [ ! -f "$installed" ]; then
+    echo "✗ 本体の ${dir}node_modules が npm でインストールされていない" >&2
+    echo "  本体で npm ci を実行してから複製すること" >&2
+    exit 1
+  fi
+  if [ "$lock_file" -nt "$installed" ]; then
+    echo "✗ 本体の ${dir}node_modules が ${dir}package-lock.json より古い" >&2
+    echo "  lock の更新が未反映か npm ci が中断している。本体で npm ci を実行すること" >&2
+    exit 1
+  fi
+done
+echo "✓ 本体の node_modules は lock に追いついている"
+
 # 中断・失敗で中途半端な複製が残ると、次回は存在確認だけで skip され、
 # 依存が欠けたまま「完了」と報告してしまう。
 # そのため一時ディレクトリへ複製し、成功したときだけ本来の名前へ rename する。
