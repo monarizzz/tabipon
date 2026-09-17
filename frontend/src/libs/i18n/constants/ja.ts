@@ -68,11 +68,6 @@ export const ja = {
     stampName: "スタンプ",
     unknownSpotName: "スポット未設定",
   },
-  collection: {
-    add: "コレクションを追加",
-    name: "コレクション名",
-    namePlaceholder: "コレクション名を入力",
-  },
   stampDetail: {
     notFound: "スタンプが見つかりません",
     backToAlbum: "アルバムへ戻る",

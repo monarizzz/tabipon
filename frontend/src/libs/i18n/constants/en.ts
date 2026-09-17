@@ -70,11 +70,6 @@ export const en: Translations = {
     stampName: "Stamp",
     unknownSpotName: "No spot set",
   },
-  collection: {
-    add: "Add collection",
-    name: "Collection name",
-    namePlaceholder: "Enter a collection name",
-  },
   stampDetail: {
     notFound: "Stamp not found",
     backToAlbum: "Back to album",

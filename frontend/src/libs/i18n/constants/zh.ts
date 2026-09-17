@@ -69,11 +69,6 @@ export const zh: Translations = {
     stampName: "印章",
     unknownSpotName: "未设置地点",
   },
-  collection: {
-    add: "添加合集",
-    name: "合集名称",
-    namePlaceholder: "请输入合集名称",
-  },
   stampDetail: {
     notFound: "找不到该印章",
     backToAlbum: "返回相册",

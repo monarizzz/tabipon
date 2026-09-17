@@ -2,7 +2,6 @@ import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { Header } from "@/src/commons/layout/components/Header/Header";
-import { CollectionSheet } from "@/src/features/album/components/CollectionSheet/CollectionSheet";
 import { StampGrid } from "@/src/features/album/components/StampGrid/StampGrid";
 import type { Album } from "@/src/features/album/types/album";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
@@ -14,14 +13,9 @@ export function AlbumMain({
   stamps,
   loadFailed,
   refreshing,
-  collectionSheetVisible,
-  collectionName,
   reload,
   refresh,
   pressStamp,
-  closeCollectionSheet,
-  changeCollectionName,
-  addCollection,
 }: Props) {
   const { t } = useTranslation();
 
@@ -52,13 +46,6 @@ export function AlbumMain({
           onPressStamp={pressStamp}
         />
       )}
-      <CollectionSheet
-        visible={collectionSheetVisible}
-        onClose={closeCollectionSheet}
-        name={collectionName}
-        onChangeName={changeCollectionName}
-        onAdd={addCollection}
-      />
     </View>
   );
 }

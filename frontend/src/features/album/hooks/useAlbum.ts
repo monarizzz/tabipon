@@ -12,9 +12,6 @@ export function useAlbum(): Album {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const [collectionSheetVisible, setCollectionSheetVisible] =
-    React.useState(false);
-  const [collectionName, setCollectionName] = React.useState("");
   const [stamps, setStamps] = React.useState<StampGridItem[] | null>(null);
   const [loadFailed, setLoadFailed] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
@@ -46,8 +43,6 @@ export function useAlbum(): Album {
     stamps,
     loadFailed,
     refreshing,
-    collectionSheetVisible,
-    collectionName,
 
     reload: loadStamps,
     // 一覧を下に引っ張ったときの再読み込み
@@ -58,11 +53,5 @@ export function useAlbum(): Album {
     // 詳細画面は id から DB を引くので、渡すのは id だけでよい
     pressStamp: (item) =>
       router.push({ pathname: "/album-stamp-detail", params: { id: item.id } }),
-    closeCollectionSheet: () => setCollectionSheetVisible(false),
-    changeCollectionName: setCollectionName,
-    addCollection: () => {
-      setCollectionName("");
-      setCollectionSheetVisible(false);
-    },
   };
 }

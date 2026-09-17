@@ -69,11 +69,6 @@ export const ko: Translations = {
     stampName: "스탬프",
     unknownSpotName: "장소 미설정",
   },
-  collection: {
-    add: "컬렉션 추가",
-    name: "컬렉션 이름",
-    namePlaceholder: "컬렉션 이름 입력",
-  },
   stampDetail: {
     notFound: "스탬프를 찾을 수 없습니다",
     backToAlbum: "앨범으로 돌아가기",

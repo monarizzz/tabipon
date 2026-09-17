@@ -25,14 +25,9 @@ const meta = {
     stamps: STAMPS,
     loadFailed: false,
     refreshing: false,
-    collectionSheetVisible: false,
-    collectionName: "",
     reload: () => {},
     refresh: () => {},
     pressStamp: () => {},
-    closeCollectionSheet: () => {},
-    changeCollectionName: () => {},
-    addCollection: () => {},
   },
 } satisfies Meta<typeof AlbumMain>;
 
