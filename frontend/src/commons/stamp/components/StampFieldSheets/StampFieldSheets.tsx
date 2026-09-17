@@ -1,5 +1,6 @@
 import React from "react";
 
+import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
 import { EditFieldSheet } from "@/src/commons/sheet/components/EditFieldSheet/EditFieldSheet";
 import type { StampFieldEditors } from "@/src/commons/stamp/types/stampField";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
@@ -14,6 +15,9 @@ type Props = {
  *
  * 開いている 1 枚だけが `visible` になる。日時の欄は `editableDate` で出し分ける
  * （完了画面には日時の編集が無い）。
+ *
+ * 座標が引けなかったときの警告もここで出す。場所のシートを使う画面すべてで
+ * 必要なので、画面ごとに配線せずシートと同じ場所に置く
  */
 export function StampFieldSheets({ editors }: Props) {
   const { t } = useTranslation();
@@ -60,6 +64,21 @@ export function StampFieldSheets({ editors }: Props) {
         placeholder={t("stampDetail.editMemoPlaceholder")}
         multiline
         onSave={editors.saveMemo}
+      />
+      <CommonDialog
+        visible={editors.geocodeWarning !== null}
+        title={t("stampDetail.geocodeFailedTitle")}
+        message={
+          editors.geocodeWarning?.reason === "unavailable"
+            ? t("stampDetail.geocodeUnavailableMessage")
+            : t("stampDetail.geocodeNotFoundMessage", {
+                address: editors.geocodeWarning?.address ?? "",
+              })
+        }
+        cancelLabel={t("stampDetail.geocodeBackToEdit")}
+        confirmLabel={t("stampDetail.geocodeSaveAnyway")}
+        onCancel={editors.cancelGeocodeWarning}
+        onConfirm={editors.saveLocationAnyway}
       />
     </>
   );

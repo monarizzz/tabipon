@@ -31,6 +31,10 @@ const EDITORS: StampFieldEditors = {
   saveDate: () => {},
   saveLocation: () => {},
   saveMemo: () => {},
+
+  geocodeWarning: null,
+  cancelGeocodeWarning: () => {},
+  saveLocationAnyway: () => {},
 };
 
 const DESIGN: StampDesignChange = {

@@ -7,6 +7,7 @@ import { geocodeAddress } from "@/src/libs/location/geocode";
 import type {
   EditableField,
   EditingField,
+  GeocodeWarning,
   StampFieldEditors,
   StampFieldEditorsOptions,
 } from "@/src/commons/stamp/types/stampField";
@@ -53,6 +54,9 @@ export function useStampFieldEditors({
    */
   const savingFields = React.useRef(new Set<EditableField>());
 
+  const [geocodeWarning, setGeocodeWarning] =
+    React.useState<GeocodeWarning | null>(null);
+
   const closeEditor = React.useCallback(() => setEditingField(null), []);
 
   /**
@@ -64,16 +68,21 @@ export function useStampFieldEditors({
    *
    * **patch は関数で受け取る。**場所の保存は書き込む前にジオコーディングを挟むので、
    * patch を先に組ませると、その通信中だけ二度押しの guard が外れる
+   *
+   * **patch が null なら書き込まない。**場所の保存は、座標が引けなかったときに
+   * 利用者へ確認してから書き込むため、ここでいったん降りる（`saveLocation`）
    */
   const save = React.useCallback(
     async (
       field: EditableField,
-      buildPatch: () => StampPatch | Promise<StampPatch>,
+      buildPatch: () => StampPatch | null | Promise<StampPatch | null>,
     ) => {
       if (!stampId || savingFields.current.has(field)) return;
       savingFields.current.add(field);
       try {
-        onUpdated(await updateStamp(stampId, await buildPatch()));
+        const patch = await buildPatch();
+        if (!patch) return;
+        onUpdated(await updateStamp(stampId, patch));
         closeEditor();
       } catch (error) {
         console.error(`${logTag} failed to update ${field}`, error);
@@ -136,8 +145,10 @@ export function useStampFieldEditors({
     // **住所を直したら座標も引き直す。**そうしないと地図が前の場所を指したまま
     // 住所だけ変わり、表示が食い違う（#87）。
     //
-    // 引けなかったときは座標を据え置く。「おばあちゃんち」のような住所として
-    // 引けない文字列は入りうるし、そこで座標を消すと地図ごと出なくなる
+    // 引けなかったときは座標を据え置いたうえで、警告を出して保存を保留する。
+    // 「おばあちゃんち」のような住所として引けない文字列は入りうるし、そこで
+    // 座標を消すと地図ごと出なくなる。ただし据え置けば住所と地図が食い違うので、
+    // そのまま保存するかどうかは利用者に選ばせる（#241）
     saveLocation: () => {
       void save("location", async () => {
         const address = normalizeOptionalText(draftLocation);
@@ -145,10 +156,24 @@ export function useStampFieldEditors({
           return { address };
         }
         const geocoded = await geocodeAddress(address);
-        return geocoded.status === "found"
-          ? { address, location: geocoded.location }
-          : { address };
+        if (geocoded.status === "found") {
+          return { address, location: geocoded.location };
+        }
+        setGeocodeWarning({ address, reason: geocoded.status });
+        return null;
       });
+    },
+
+    geocodeWarning,
+    // 住所も保存しない。食い違いが困るから選んだのに住所だけ残ると同じ状態になる。
+    // 編集欄は開いたままにして、引ける表記に直して出し直せるようにする
+    cancelGeocodeWarning: () => setGeocodeWarning(null),
+    saveLocationAnyway: () => {
+      const pending = geocodeWarning;
+      setGeocodeWarning(null);
+      if (!pending) return;
+      // 引き直しはしない。警告を出す前に引いた結果をそのまま採用する
+      void save("location", () => ({ address: pending.address }));
     },
   };
 }
