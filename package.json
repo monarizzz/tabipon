@@ -3,7 +3,8 @@
   "private": true,
   "description": "Git フックを管理するためのリポジトリルートの package.json。アプリのコードは frontend/ にある",
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "worktree:setup": "scripts/setup-worktree.sh"
   },
   "devDependencies": {
     "husky": "^9.1.7",
