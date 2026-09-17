@@ -70,28 +70,48 @@ for lock in package-lock.json frontend/package-lock.json; do
 done
 echo "✓ lock ファイルは本体と一致"
 
-# 2. node_modules を clonefile で複製する（copy-on-write。実ディスク消費はほぼ 0）。
-for dir in node_modules frontend/node_modules; do
-  if [ -e "$target/$dir" ]; then
-    echo "- $dir は既にある (skip)"
-    continue
+# 中断・失敗で中途半端な複製が残ると、次回は存在確認だけで skip され、
+# 依存が欠けたまま「完了」と報告してしまう。
+# そのため一時ディレクトリへ複製し、成功したときだけ本来の名前へ rename する。
+# rename は同一ボリュームなので不可分。中断時は trap で一時ディレクトリを消す。
+staging=""
+cleanup() {
+  if [ -n "$staging" ]; then
+    rm -rf "$staging"
   fi
-  echo "▶ $dir を複製中..."
-  if ! cp -Rc "$source_root/$dir" "$target/$dir"; then
-    echo "✗ $dir の複製に失敗した" >&2
+}
+trap cleanup EXIT INT TERM
+
+# 複製する。複製先が既にあれば skip する。
+clone_into() {
+  local src=$1 dest=$2 label=$3 clone_opt=$4
+
+  if [ -e "$dest" ]; then
+    echo "- $label は既にある (skip)"
+    return
+  fi
+
+  echo "▶ $label を複製中..."
+  # 一時ディレクトリは複製先と同じ階層に置く。別ボリュームだと rename できないため。
+  staging="${dest}.setup-worktree-tmp.$$"
+  rm -rf "$staging"
+  if ! cp -R $clone_opt "$src" "$staging"; then
+    echo "✗ $label の複製に失敗した" >&2
     echo "  npm ci をルートと frontend/ の両方で実行すること" >&2
     exit 1
   fi
-  echo "✓ $dir"
+  mv "$staging" "$dest"
+  staging=""
+  echo "✓ $label"
+}
+
+# 2. node_modules を clonefile で複製する（copy-on-write。実ディスク消費はほぼ 0）。
+for dir in node_modules frontend/node_modules; do
+  clone_into "$source_root/$dir" "$target/$dir" "$dir" -c
 done
 
 # 3. .husky/_ を用意する。core.hooksPath は .git/config にあり worktree 間で共有されるが、
 #    実体の .husky/_ は gitignore されているため worktree ごとに要る。
-if [ -e "$target/.husky/_" ]; then
-  echo "- .husky/_ は既にある (skip)"
-else
-  cp -R "$source_root/.husky/_" "$target/.husky/_"
-  echo "✓ .husky/_"
-fi
+clone_into "$source_root/.husky/_" "$target/.husky/_" ".husky/_" ""
 
 echo "完了。"
