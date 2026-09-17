@@ -1,7 +1,7 @@
-import { FlatList, View, Text, StyleSheet, RefreshControl } from "react-native";
+import { FlatList, StyleSheet, RefreshControl } from "react-native";
 import { StampCard } from "@/src/features/album/components/StampCard/StampCard";
-import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/style/tokens";
+import { StampGridEmpty } from "@/src/features/album/components/StampGridEmpty/StampGridEmpty";
+import { colors, spacing } from "@/src/style/tokens";
 
 export type StampGridItem = {
   id: string;
@@ -15,6 +15,7 @@ export type StampGridItem = {
 type Props = {
   stamps: StampGridItem[];
   onPressStamp?: (item: StampGridItem) => void;
+  onPressStartStamp?: () => void;
   refreshing?: boolean;
   onRefresh?: () => void;
 };
@@ -22,25 +23,21 @@ type Props = {
 export function StampGrid({
   stamps,
   onPressStamp,
+  onPressStartStamp,
   refreshing,
   onRefresh,
 }: Props) {
-  const { t } = useTranslation();
-  if (stamps.length === 0) {
-    return (
-      <View style={styles.empty}>
-        <Text style={styles.emptyText}>{t("album.empty")}</Text>
-      </View>
-    );
-  }
-
+  const isEmpty = stamps.length === 0;
   return (
     <FlatList
       data={stamps}
       keyExtractor={(item) => item.id}
       numColumns={2}
-      contentContainerStyle={styles.list}
+      // 空のときは flexGrow で中身を画面いっぱいに伸ばす。伸ばさないと
+      // スクロールできる領域が生まれず、RefreshControl を引けない
+      contentContainerStyle={[styles.list, isEmpty && styles.listEmpty]}
       columnWrapperStyle={styles.row}
+      ListEmptyComponent={<StampGridEmpty onPressStart={onPressStartStamp} />}
       refreshControl={
         onRefresh ? (
           <RefreshControl
@@ -70,17 +67,10 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     gap: spacing.m,
   },
+  listEmpty: {
+    flexGrow: 1,
+  },
   row: {
     justifyContent: "space-between",
-  },
-  empty: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: spacing.xxxl,
-  },
-  emptyText: {
-    fontSize: typography.body.fontSize,
-    color: colors.textPlaceholder,
   },
 });
