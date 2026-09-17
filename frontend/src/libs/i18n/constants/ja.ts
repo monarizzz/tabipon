@@ -18,7 +18,13 @@ export const ja = {
   },
   camera: {
     accessRequiredTitle: "カメラへのアクセスが必要です",
+    accessRequiredDescription:
+      "スタンプを押すには写真の撮影が必要です。カメラへのアクセスを許可してください。",
     accessAllow: "カメラへのアクセスを許可",
+    accessDeniedTitle: "カメラへのアクセスが許可されていません",
+    accessDeniedDescription:
+      "アプリからはもう一度許可を求められません。設定アプリでカメラをオンにしてから、この画面に戻ってください。",
+    accessOpenSettings: "設定アプリを開く",
     hint: "円に入るように撮影してください",
     capturedPhoto: "[ 撮影した写真 ]",
   },

@@ -19,7 +19,12 @@ export const zh: Translations = {
   },
   camera: {
     accessRequiredTitle: "需要相机访问权限",
+    accessRequiredDescription: "盖章需要拍摄照片。请允许访问相机。",
     accessAllow: "允许访问相机",
+    accessDeniedTitle: "相机访问权限已关闭",
+    accessDeniedDescription:
+      "应用无法再次请求权限。请在「设置」应用中打开相机权限，然后返回此页面。",
+    accessOpenSettings: "打开「设置」应用",
     hint: "请将拍摄对象置于圆圈内",
     capturedPhoto: "[ 已拍摄的照片 ]",
   },
