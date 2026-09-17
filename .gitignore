@@ -21,6 +21,10 @@ log/
 # ルートの node_modules は Git フック（husky / lint-staged）専用
 /node_modules
 frontend/node_modules
+
+# husky が生成するフックの実体。symlink にすると中の .gitignore が効かないため明示する
+/.husky/_
+
 frontend/.expo/
 frontend/dist/
 frontend/build/

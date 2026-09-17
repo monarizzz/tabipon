@@ -143,9 +143,11 @@ git worktree list            # 消えたことを確認
 npm run worktree:setup <worktree のパス>
 ```
 
-本体の `node_modules` を APFS の clonefile で複製し、`.husky/_` をコピーする（macOS 前提）。
-`npm ci` は不要。ただし依存を変更するブランチでは lock ファイルの差分で中断するので、
-その場合はルートと `frontend/` の両方で `npm ci` を実行する。
+`node_modules` と `.husky/_` を本体への symlink にする。`npm ci` は不要。
+
+> [!IMPORTANT]
+> `node_modules` は本体と共有される。**どこか 1 つの worktree で `npm ci` / `npm install` を実行すると、全ての worktree の依存が入れ替わる。**
+> 依存を変更するブランチではセットアップ時に警告が出るので、他の worktree を畳んでから実行する。
 
 ## コードレビュー
 
