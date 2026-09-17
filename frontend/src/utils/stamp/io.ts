@@ -42,7 +42,8 @@ export async function generateStampFromUri(
 /**
  * 写真の uri からスタンプの PNG バイト列を生成する。
  *
- * 保存する側（`src/infra/db/stamps.ts` の `saveStamp()`）が呼ぶのはこの関数。
+ * 呼ぶのは画面側（`app/stamp-press.tsx` の押印時、`app/album-stamp-detail.tsx` の
+ * デザイン変更時）。戻り値のバイト列を `src/infra/db/stamps.ts` へ渡して保存させる。
  */
 export async function generateStampPngFromUri(
   uri: string,
