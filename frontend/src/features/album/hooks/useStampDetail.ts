@@ -13,15 +13,32 @@ import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 export function useStampDetail(id: string | undefined): StampDetail {
   const router = useRouter();
   const { t } = useTranslation();
-  const [stamp, setStamp] = React.useState<Stamp | null>(null);
-  const [unavailable, setUnavailable] = React.useState(false);
   /**
-   * 読み込みが片付いたかどうか。`stamp` の有無から導くと、失敗して `stamp` が
-   * null のままのときに読み込み中と区別が付かず、スピナーのまま止まる
+   * 取得の結果。どの `id` の何回目の取得に対する結果かを一緒に持つ。
+   *
+   * **`stamp` だけを持たない。**`stamp` の有無からは「失敗して null」と
+   * 「まだ読み込み中」が区別できず、スピナーのまま止まる。`id` と `attempt` を
+   * 付けておくと、取得を始めるときに state を書き戻さなくても、別の `id` や
+   * 前回の試行に対する結果を読み捨てられる
    */
-  const [loading, setLoading] = React.useState(true);
+  const [loaded, setLoaded] = React.useState<{
+    id: string;
+    attempt: number;
+    stamp: Stamp | null;
+  } | null>(null);
   /** 増やすと読み込みの effect をもう一度走らせる。再試行の起点 */
   const [loadAttempt, setLoadAttempt] = React.useState(0);
+  const current =
+    loaded && loaded.id === id && loaded.attempt === loadAttempt
+      ? loaded
+      : null;
+  const stamp = current?.stamp ?? null;
+  const loading = current === null;
+  const unavailable = current !== null && current.stamp === null;
+
+  const applyUpdated = React.useCallback((updated: Stamp) => {
+    setLoaded((prev) => (prev ? { ...prev, stamp: updated } : prev));
+  }, []);
   const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
 
@@ -29,31 +46,29 @@ export function useStampDetail(id: string | undefined): StampDetail {
     stampId: id,
     stamp,
     editableDate: true,
-    onUpdated: setStamp,
+    onUpdated: applyUpdated,
     logTag: "[stamp-detail]",
   });
 
   const design = useStampDesignChange({
     stampId: id,
     stamp,
-    onUpdated: setStamp,
+    onUpdated: applyUpdated,
   });
 
   React.useEffect(() => {
     if (!id) return;
+    const attempt = loadAttempt;
     let cancelled = false;
     getStamp(id)
-      .then((loaded) => {
+      .then((stamp) => {
         if (cancelled) return;
-        if (loaded) setStamp(loaded);
-        else setUnavailable(true);
-        setLoading(false);
+        setLoaded({ id, attempt, stamp });
       })
       .catch((error) => {
         console.error("[stamp-detail] failed to load stamp", error);
         if (cancelled) return;
-        setUnavailable(true);
-        setLoading(false);
+        setLoaded({ id, attempt, stamp: null });
       });
     return () => {
       cancelled = true;
@@ -69,8 +84,6 @@ export function useStampDetail(id: string | undefined): StampDetail {
     longitude: stamp?.location?.longitude ?? null,
 
     reload: React.useCallback(() => {
-      setUnavailable(false);
-      setLoading(true);
       setLoadAttempt((attempt) => attempt + 1);
     }, []),
 
