@@ -109,6 +109,13 @@ export const ko: Translations = {
       "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     saveFailedTitle: "저장할 수 없습니다",
     saveFailedMessage: "잠시 후 다시 시도해 주세요.",
+    geocodeFailedTitle: "위치 정보는 업데이트되지 않습니다",
+    geocodeNotFoundMessage:
+      "“%{address}”의 좌표를 찾지 못했습니다. 이대로 저장하면 주소만 바뀌고 지도는 이전 장소를 그대로 가리킵니다.",
+    geocodeUnavailableMessage:
+      "네트워크에 연결할 수 없어 좌표를 가져오지 못했습니다. 이대로 저장하면 주소만 바뀌고 지도는 이전 장소를 그대로 가리킵니다.",
+    geocodeSaveAnyway: "이대로 저장",
+    geocodeBackToEdit: "편집으로 돌아가기",
   },
   discardDialog: {
     title: "편집 내용을 취소하시겠습니까?",

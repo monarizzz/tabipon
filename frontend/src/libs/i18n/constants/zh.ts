@@ -106,6 +106,13 @@ export const zh: Translations = {
     shareFailedMessage: "图片共享失败。请稍后再试。",
     saveFailedTitle: "无法保存",
     saveFailedMessage: "请稍后再试。",
+    geocodeFailedTitle: "位置信息不会更新",
+    geocodeNotFoundMessage:
+      "无法获取“%{address}”的坐标。若仍然保存，将只更改地址，地图仍指向此前的位置。",
+    geocodeUnavailableMessage:
+      "因无法联网而未能获取坐标。若仍然保存，将只更改地址，地图仍指向此前的位置。",
+    geocodeSaveAnyway: "仍然保存",
+    geocodeBackToEdit: "返回编辑",
   },
   discardDialog: {
     title: "要放弃编辑内容吗？",

@@ -108,6 +108,13 @@ export const ja = {
       "画像の共有に失敗しました。時間をおいて再度お試しください。",
     saveFailedTitle: "保存できませんでした",
     saveFailedMessage: "時間をおいて再度お試しください。",
+    geocodeFailedTitle: "位置情報は更新されません",
+    geocodeNotFoundMessage:
+      "「%{address}」から座標を取得できませんでした。このまま保存すると住所だけが変わり、地図は前の場所を指したままになります。",
+    geocodeUnavailableMessage:
+      "通信できないため座標を取得できませんでした。このまま保存すると住所だけが変わり、地図は前の場所を指したままになります。",
+    geocodeSaveAnyway: "このまま保存",
+    geocodeBackToEdit: "編集に戻る",
   },
   discardDialog: {
     title: "編集内容を破棄しますか？",

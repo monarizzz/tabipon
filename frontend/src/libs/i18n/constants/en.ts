@@ -110,6 +110,13 @@ export const en: Translations = {
       "Failed to share the image. Please wait a moment and try again.",
     saveFailedTitle: "Could not save",
     saveFailedMessage: "Please wait a moment and try again.",
+    geocodeFailedTitle: "The location won't be updated",
+    geocodeNotFoundMessage:
+      "Couldn't find coordinates for “%{address}”. If you save anyway, only the address changes and the map keeps pointing at the previous place.",
+    geocodeUnavailableMessage:
+      "Couldn't look up coordinates because the device is offline. If you save anyway, only the address changes and the map keeps pointing at the previous place.",
+    geocodeSaveAnyway: "Save anyway",
+    geocodeBackToEdit: "Back to editing",
   },
   discardDialog: {
     title: "Discard your edits?",
