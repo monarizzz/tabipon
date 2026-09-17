@@ -1,4 +1,4 @@
-/** 工程3: 円マスクで切り抜き、フレームを重ねる。 */
+/** 円マスクで切り抜き、フレームを重ねる。 */
 import { ClipOp, Skia, type SkImage } from "@shopify/react-native-skia";
 
 import {
