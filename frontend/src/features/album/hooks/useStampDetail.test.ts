@@ -111,6 +111,83 @@ describe("useStampDetail", () => {
     expect(result.current.editors.spotName).toBe("東京タワー");
   });
 
+  it("id が変わったら読み込み中へ戻し、前のスタンプを出したままにしない", async () => {
+    getStampMock.mockResolvedValueOnce(STAMP);
+    const { result, rerender } = await renderHook(
+      ({ id }: { id: string }) => useStampDetail(id),
+      { initialProps: { id: "stamp-1" } },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    let resolveSecond: (stamp: Stamp | null) => void = () => {};
+    getStampMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveSecond = resolve;
+      }),
+    );
+    await act(async () => {
+      rerender({ id: "stamp-2" });
+    });
+
+    // 出したままにすると、編集・削除は stamp-2 に効くのに画面は stamp-1 になる
+    expect(result.current.loading).toBe(true);
+    expect(result.current.editors.spotName).toBe("");
+
+    await act(async () => {
+      resolveSecond({ ...STAMP, id: "stamp-2", title: "通天閣" });
+    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.editors.spotName).toBe("通天閣");
+  });
+
+  it("直前の取得が失敗していても、id が変わって読み込めたら表示に戻る", async () => {
+    getStampMock.mockRejectedValueOnce(new Error("boom"));
+    const { result, rerender } = await renderHook(
+      ({ id }: { id: string }) => useStampDetail(id),
+      { initialProps: { id: "stamp-1" } },
+    );
+    await waitFor(() => expect(result.current.unavailable).toBe(true));
+
+    getStampMock.mockResolvedValueOnce({ ...STAMP, id: "stamp-2" });
+    await act(async () => {
+      rerender({ id: "stamp-2" });
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.unavailable).toBe(false);
+  });
+
+  it("古い取得が後から返ってきても新しい id の結果を上書きしない", async () => {
+    let resolveFirst: (stamp: Stamp | null) => void = () => {};
+    getStampMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveFirst = resolve;
+      }),
+    );
+    const { result, rerender } = await renderHook(
+      ({ id }: { id: string }) => useStampDetail(id),
+      { initialProps: { id: "stamp-1" } },
+    );
+
+    getStampMock.mockResolvedValueOnce({
+      ...STAMP,
+      id: "stamp-2",
+      title: "通天閣",
+    });
+    await act(async () => {
+      rerender({ id: "stamp-2" });
+    });
+    await waitFor(() => expect(result.current.editors.spotName).toBe("通天閣"));
+
+    await act(async () => {
+      resolveFirst(STAMP);
+    });
+
+    expect(result.current.editors.spotName).toBe("通天閣");
+    expect(result.current.loading).toBe(false);
+    expect(result.current.unavailable).toBe(false);
+  });
+
   it("再読み込みがまた失敗しても、もう一度やり直せる状態に戻る", async () => {
     getStampMock.mockRejectedValue(new Error("boom"));
     const { result } = await renderHook(() => useStampDetail("stamp-1"));
