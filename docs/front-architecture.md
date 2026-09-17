@@ -14,11 +14,12 @@
 frontend/
   app/                    # expo-router のルーティング。ファイル = 画面
   src/
-    components/           # UIコンポーネント
+    commons/              # 複数箇所で共通して使うもの
+    features/             # 特定の領域でのみ使うもの
     infra/                # データアクセス層
     libs/                 # ライブラリ類
     style/                # スタイルに関するもの
-    utils/                # 画面に依存しない関数類
+    utils/                # 画面にも領域にも依存しない関数類
   .rnstorybook/           # Storybook の設定。story ファイル自体はここに置かない
   assets/                 # 画像・音声
   android/ , ios/         # prebuild で生成されるネイティブプロジェクト
@@ -27,7 +28,7 @@ frontend/
 ### `app/` と `src/` の役割分担
 
 - `app/` — ルーティングの役割
-- `src/components/` — 画面から呼ばれるコンポーネント類。`src/` から `app/` はimportされない
+- `src/` — 画面から呼ばれるコンポーネント・フック・関数類。`src/` から `app/` はimportされない
 
 ### `app/` が持ってよいもの
 
@@ -50,19 +51,39 @@ frontend/
 判定ロジックだけは素の Jest で回せる（例: `src/utils/stampPress/`）。
 
 
-## src/components/ のディレクトリ構成
+## src/commons/ と src/features/ のディレクトリ構成
 
 ```txt
-src/components/
-  common/                 # 複数箇所で共通して使用されるUIコンポーネント
-  features/               # 特定の箇所のみで使用されるUIコンポーネント
+src/
+  commons/                # 複数箇所で共通して使うもの
+    button/  sheet/  layout/  stamp/  other/
+  features/               # 特定の領域でのみ使うもの
+    album/  camera/  mypage/
 ```
+
+**グループ（`commons/` の下）と領域（`features/` の下）が第 1 階層で、その中を種類ごとに分ける。**
+
+```txt
+src/commons/layout/
+  components/             # UIコンポーネント
+    Header/  NavBar/  TabBar/
+  constants/              # 定数
+    tabDefinitions.ts
+  hooks/                  # フック
+    useTabBarItems.ts
+```
+
+種類のフォルダ（`components/` / `constants/` / `hooks/` / `types/`）は**必要になった時点で作る。**
+先に空で用意しない。
+
+`components/` の下は原則コンポーネント名のフォルダを直に並べるが、画面単位のまとまりが
+はっきりしている場合は入れ子にしてよい（例: `features/album/components/detail/`）。
 
 ### コンポーネントとStorybookファイルの配置
 
 - コンポーネントごとに `コンポーネント名/` フォルダを作る。フォルダ名はコンポーネント名と同じPascalCaseにする。
 - 本体ファイルと `*.stories.tsx` を同じフォルダに同居させる
-- Storybook 側は `.rnstorybook/main.ts` の `stories` に `../src/components/**/*.stories.?(ts|tsx|js|jsx)` を指定し、この配置を自動検出する
+- Storybook 側は `.rnstorybook/main.ts` の `stories` に `../src/commons/**` と `../src/features/**` の 2 つを指定し、この配置を自動検出する
 
 ---
 
@@ -115,12 +136,12 @@ Skia のネイティブモジュールが無い環境（Jest のモック）で�
 `cd frontend && npm test`（`jest.config.js` の `testMatch`）が拾うのは
 `frontend/src/**/*.test.ts(x)`。現在は次の 2 種類が入っている。
 
-- **ストーリーのスモークテスト**: `src/components/stories.test.tsx` の 1 本（下記）
+- **ストーリーのスモークテスト**: `src/stories.test.tsx` の 1 本（下記）
 - **ユーティリティの単体テスト**: 対象ファイルと同じフォルダに `<対象>.test.ts`
 
 ### ストーリーのテスト
 
-`cd frontend && npm test` で、`src/components/**/*.stories.tsx` を Storybook のportable stories（`composeStories`）として Jest から描画する。CI（`.github/workflows/ci.yml` の`Storybook stories` ジョブ）でも同じコマンドを実行する。
+`cd frontend && npm test` で、`src/commons/` と `src/features/` の `*.stories.tsx` を Storybook のportable stories（`composeStories`）として Jest から描画する。CI（`.github/workflows/ci.yml` の`Storybook stories` ジョブ）でも同じコマンドを実行する。
 
 - 検証するのは「例外を投げずに描画できること」だけ。見た目の崩れは検出できない（見た目は実機の Storybook で確認する）
 - ストーリーに `play` があれば併せて実行される。ただし React Native + Jest では`play` に `canvasElement` / `canvas` / `userEvent` が渡らない（`document` が無いため）。web の作法どおり `({ canvas, userEvent })` を分割代入する `play` は動かないので、操作は `@testing-library/react-native` の `screen` / `fireEvent` で書くこと
