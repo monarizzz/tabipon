@@ -146,6 +146,14 @@ export function useStampFieldEditors({
     // 据え置いたまま保存を保留して警告を出す
     // （方針は docs/front-architecture.md「場所の編集と座標の追従」）
     saveLocation: () => {
+      // 住所が変わっていなければ引き直さない。引けなかったときに「住所だけが
+      // 変わる」という確認が出るが、実際には住所も変わらず選ばせる意味が無い
+      if (
+        normalizeOptionalText(draftLocation) === normalizeOptionalText(location)
+      ) {
+        closeEditor();
+        return;
+      }
       void save("location", async () => {
         const address = normalizeOptionalText(draftLocation);
         if (!address) {

@@ -130,6 +130,32 @@ describe("saveLocation", () => {
     expect(geocodeAddressMock).not.toHaveBeenCalled();
     expect(view.result.current.geocodeWarning).toBeNull();
   });
+
+  // 開いたまま保存を押しただけの場合。住所が変わらないので確認する対象が無い
+  test("住所を変えずに保存したら座標を引かず、警告も出さずに閉じる", async () => {
+    geocodeAddressMock.mockResolvedValue({ status: "unavailable" });
+    const view = await setup();
+
+    await act(async () => view.result.current.openLocation());
+    await act(async () => view.result.current.saveLocation());
+
+    expect(geocodeAddressMock).not.toHaveBeenCalled();
+    expect(updateStampMock).not.toHaveBeenCalled();
+    expect(view.result.current.geocodeWarning).toBeNull();
+    expect(view.result.current.editingField).toBeNull();
+  });
+
+  // 前後の空白だけの違いは「変えた」に数えない
+  test("空白を足しただけなら座標を引かない", async () => {
+    geocodeAddressMock.mockResolvedValue({ status: "unavailable" });
+    const view = await setup();
+
+    await editLocation(view, `  ${STAMP.address}  `);
+
+    expect(geocodeAddressMock).not.toHaveBeenCalled();
+    expect(updateStampMock).not.toHaveBeenCalled();
+    expect(view.result.current.editingField).toBeNull();
+  });
 });
 
 describe("警告のあとの分岐", () => {
