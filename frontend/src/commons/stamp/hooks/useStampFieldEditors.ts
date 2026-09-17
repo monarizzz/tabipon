@@ -169,7 +169,13 @@ export function useStampFieldEditors({
     },
 
     geocodeWarning,
-    cancelGeocodeWarning: () => setGeocodeWarning(null),
+    // **閉じるのではなく開き直す。**ジオコーディングを待っているあいだも場所の
+    // シートはスワイプで閉じられるので、警告が出た時点で開いているとは限らない。
+    // ドラフトは閉じても残るため、開き直せば入力内容がそのまま戻る
+    cancelGeocodeWarning: () => {
+      setGeocodeWarning(null);
+      setEditingField("location");
+    },
     saveLocationAnyway: () => {
       const pending = geocodeWarning;
       setGeocodeWarning(null);

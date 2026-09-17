@@ -6,7 +6,10 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 
 import { useStampFieldEditors } from "@/src/commons/stamp/hooks/useStampFieldEditors";
 import { updateStamp, type Stamp } from "@/src/infra/db/stamps";
-import { geocodeAddress } from "@/src/libs/location/geocode";
+import {
+  geocodeAddress,
+  type GeocodeResult,
+} from "@/src/libs/location/geocode";
 
 jest.mock("@/src/infra/db/stamps", () => ({ updateStamp: jest.fn() }));
 jest.mock("@/src/libs/location/geocode", () => ({ geocodeAddress: jest.fn() }));
@@ -191,5 +194,37 @@ describe("警告のあとの分岐", () => {
     expect(updateStampMock).not.toHaveBeenCalled();
     expect(view.result.current.geocodeWarning).toBeNull();
     expect(view.result.current.editingField).toBe("location");
+  });
+
+  // 待っているあいだもシートはスワイプで閉じられる
+  test("ジオコード中にシートを閉じても、編集に戻ると入力内容ごと開き直す", async () => {
+    let settle!: (result: GeocodeResult) => void;
+    geocodeAddressMock.mockReturnValue(
+      new Promise<GeocodeResult>((resolve) => {
+        settle = resolve;
+      }),
+    );
+    const view = await setup();
+
+    await act(async () => view.result.current.openLocation());
+    await act(async () =>
+      view.result.current.setDraftLocation("おばあちゃんち"),
+    );
+    await act(async () => view.result.current.saveLocation());
+    await act(async () => view.result.current.closeEditor());
+    expect(view.result.current.editingField).toBeNull();
+
+    await act(async () => {
+      settle({ status: "notFound" });
+    });
+    await waitFor(() =>
+      expect(view.result.current.geocodeWarning).not.toBeNull(),
+    );
+
+    await act(async () => view.result.current.cancelGeocodeWarning());
+
+    expect(view.result.current.editingField).toBe("location");
+    expect(view.result.current.draftLocation).toBe("おばあちゃんち");
+    expect(updateStampMock).not.toHaveBeenCalled();
   });
 });
