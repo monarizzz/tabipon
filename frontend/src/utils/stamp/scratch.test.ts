@@ -19,7 +19,7 @@ import { Skia } from "@shopify/react-native-skia";
 
 import { STAMP_SIZE } from "@/src/utils/stamp/constants/constants";
 import { applyScratch, scratchThreshold } from "@/src/utils/stamp/scratch";
-import { renderToSquareImage, toRasterImage } from "@/src/utils/stamp/surface";
+import { renderToSquareImage, toRasterImage } from "@/src/utils/skia/surface";
 
 /** `scratch.ts` の `SCRATCH_MAX_WHITEOUT` と同じ値 */
 const MAX_WHITEOUT = 0.35;

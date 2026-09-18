@@ -1,10 +1,10 @@
 import React from "react";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
-import * as Sharing from "expo-sharing";
 
 import { useTabBarItems } from "@/src/commons/layout/hooks/useTabBarItems";
 import { useStampFieldEditors } from "@/src/commons/stamp/hooks/useStampFieldEditors";
+import { useStampShare } from "@/src/commons/stamp/hooks/useStampShare";
 import type { StampDone } from "@/src/features/camera/types/stampDone";
 import { headerAnchorHeight } from "@/src/features/camera/utils/headerAnchorHeight";
 import {
@@ -34,6 +34,8 @@ export function useStampDone({ stampId, stampTop }: Params): StampDone {
     onUpdated: setStamp,
     logTag: "[stamp-done]",
   });
+
+  const { share } = useStampShare({ stamp, logTag: "[stamp-done]" });
 
   // 撮影フローはここで終わりなので確認は挟まない。
   // カメラへ戻るときだけ履歴を積まないよう replace する
@@ -67,31 +69,7 @@ export function useStampDone({ stampId, stampTop }: Params): StampDone {
     headerAnchorHeight: headerAnchorHeight(stampTop),
     retakeDialogVisible,
 
-    share: () => {
-      void (async () => {
-        if (!imageUri) return;
-        try {
-          if (!(await Sharing.isAvailableAsync())) {
-            Alert.alert(
-              t("stampDone.shareUnavailableTitle"),
-              t("stampDone.shareUnavailableMessage"),
-            );
-            return;
-          }
-          // 画像は端末の documentDirectory にあるので、そのまま渡せる。
-          // shareAsync は本文テキストを渡せないため、文言は dialogTitle に入れる
-          await Sharing.shareAsync(imageUri, {
-            dialogTitle: editors.spotName || t("stampDone.shareMessage"),
-          });
-        } catch (error) {
-          console.error("[stamp-done] failed to share image", error);
-          Alert.alert(
-            t("stampDone.shareFailedTitle"),
-            t("stampDone.shareFailedMessage"),
-          );
-        }
-      })();
-    },
+    share,
     openRetakeDialog: () => setRetakeDialogVisible(true),
     cancelRetake: () => setRetakeDialogVisible(false),
     confirmRetake: () => {

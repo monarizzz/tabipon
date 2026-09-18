@@ -11,12 +11,13 @@
  */
 import { Skia, type SkCanvas, type SkImage } from "@shopify/react-native-skia";
 
-/** 正方形のオフスクリーンサーフェスに描いてスナップショットを返す */
-export function renderToSquareImage(
-  size: number,
+/** オフスクリーンサーフェスに描いてスナップショットを返す */
+export function renderToImage(
+  width: number,
+  height: number,
   draw: (canvas: SkCanvas) => void,
 ): SkImage {
-  const surface = Skia.Surface.MakeOffscreen(size, size);
+  const surface = Skia.Surface.MakeOffscreen(width, height);
   if (!surface) {
     throw new Error("Skia.Surface.MakeOffscreen に失敗した");
   }
@@ -25,10 +26,18 @@ export function renderToSquareImage(
   return surface.makeImageSnapshot();
 }
 
+/** 正方形のオフスクリーンサーフェスに描いてスナップショットを返す */
+export function renderToSquareImage(
+  size: number,
+  draw: (canvas: SkCanvas) => void,
+): SkImage {
+  return renderToImage(size, size, draw);
+}
+
 /**
  * GPU テクスチャを CPU メモリ上のラスタ画像へ落とす。
  *
- * `renderToSquareImage()` が返す `SkImage` は、生成したスレッドの Skia
+ * `renderToImage()` が返す `SkImage` は、生成したスレッドの Skia
  * コンテキストに属する GPU テクスチャ。この関数群は JS スレッドから呼ばれるが、
  * `<Canvas>` の描画は UI スレッドの Skia コンテキストで行われる。
  * 公式ドキュメント（Canvas overview）は `makeImageSnapshotAsync` を「UI スレッドで

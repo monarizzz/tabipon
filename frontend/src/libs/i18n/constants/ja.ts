@@ -46,9 +46,18 @@ export const ja = {
     step2: "振り下げる",
     step3: "ぐっと押し込む",
   },
+  share: {
+    dialogTitle: "スタンプを共有",
+    postText: "たびぽんでスタンプを押しました！ #たびぽん",
+    postTextWithSpot: "%{spot}でスタンプを押しました！ #たびぽん",
+    unavailableTitle: "共有できません",
+    unavailableMessage: "この端末では共有機能を利用できません。",
+    failedTitle: "エラー",
+    failedMessage:
+      "共有カードを作れませんでした。時間をおいて再度お試しください。",
+  },
   stampDone: {
     badge: "✦ スタンプ獲得！ ✦",
-    shareMessage: "スタンプを獲得しました！",
     addSpotName: "スポット名を追加",
     addMemo: "メモを追加...",
     keepShooting: "続けて撮影",
@@ -56,11 +65,6 @@ export const ja = {
     retake: "撮り直す",
     retakeConfirmTitle: "スタンプを撮り直しますか?",
     retakeConfirmMessage: "このスタンプは削除され、もう一度撮影し直せます。",
-    shareUnavailableTitle: "共有できません",
-    shareUnavailableMessage: "この端末では共有機能を利用できません。",
-    shareFailedTitle: "エラー",
-    shareFailedMessage:
-      "画像の共有に失敗しました。時間をおいて再度お試しください。",
     retakeFailedTitle: "撮り直せませんでした",
     retakeFailedMessage:
       "スタンプの削除に失敗しました。時間をおいて再度お試しください。",
@@ -112,11 +116,6 @@ export const ja = {
     designUpdateFailedTitle: "エラー",
     designUpdateFailedMessage:
       "デザインの変更に失敗しました。時間をおいて再度お試しください。",
-    shareUnavailableTitle: "共有できません",
-    shareUnavailableMessage: "この端末では共有機能を利用できません。",
-    shareFailedTitle: "エラー",
-    shareFailedMessage:
-      "画像の共有に失敗しました。時間をおいて再度お試しください。",
     saveFailedTitle: "保存できませんでした",
     saveFailedMessage: "時間をおいて再度お試しください。",
     geocodeFailedTitle: "位置情報は更新されません",

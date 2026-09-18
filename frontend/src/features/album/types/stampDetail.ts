@@ -23,6 +23,7 @@ export type StampDetail = {
   design: StampDesignChange;
 
   deleteDialogVisible: boolean;
+
   openDeleteDialog: () => void;
   cancelDelete: () => void;
   confirmDelete: () => void;

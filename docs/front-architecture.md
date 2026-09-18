@@ -175,6 +175,13 @@ commons/stamp/components/DesignChangeForm/   枠 / 色 / 適用ボタン
 
 写真からスタンプ画像を作る処理。構成・工程順・ルールは [stamp-pipeline.md](stamp-pipeline.md) を参照。
 
+## src/utils/shareCard/ のディレクトリ構成
+
+共有ボタンから作る 1 枚の画像（スタンプ帳のページに見立てたカード）。構成・体裁・ルールは [share-card.md](share-card.md) を参照。
+
+Skia のオフスクリーン描画と uri のデコードは、スタンプ生成と共有カードの両方が使うので
+`src/utils/skia/` に置く。
+
 ## 端末に置くものの分け方
 
 撮影フローから呼ぶヘルパー（位置情報・押印音・画像の置き場）は、画像を作る処理ではなく端末の機能を使う処理なので `src/libs/` に置く。
@@ -184,6 +191,7 @@ src/libs/
   location/         # 撮影地の取得・逆ジオコーディング
   sound/            # 押印音の再生
   stampFile/        # スタンプ画像と元写真の置き場（読み書き・削除）
+  shareCardFile/    # 共有カードの置き場（キャッシュへの書き出し）
   i18n/             # 文言
 src/infra/
   db/               # SQLite（マイグレーションと行の読み書き）
