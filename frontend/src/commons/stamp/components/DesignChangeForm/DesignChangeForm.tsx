@@ -31,8 +31,7 @@ type Props = {
 
 /**
  * デザイン変更の入力部（枠・色・適用ボタン）。
- * 押印中はボトムシート、スタンプ詳細は全画面パネルと外枠が違うので、
- * 中身だけをここに置いてそれぞれが包む。
+ * 外枠と中身の分け方は docs/front-architecture.md「外枠は features、中身は commons」を参照。
  */
 export function DesignChangeForm({
   frameStyles,
