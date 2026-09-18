@@ -49,6 +49,11 @@ export const ko: Translations = {
     retake: "다시 찍기",
     retakeConfirmTitle: "스탬프를 다시 찍으시겠어요?",
     retakeConfirmMessage: "이 스탬프는 삭제되며 다시 촬영할 수 있습니다.",
+    shareUnavailableTitle: "공유할 수 없습니다",
+    shareUnavailableMessage: "이 기기에서는 공유 기능을 사용할 수 없습니다.",
+    shareFailedTitle: "오류",
+    shareFailedMessage:
+      "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     retakeFailedTitle: "다시 찍을 수 없습니다",
     retakeFailedMessage:
       "스탬프 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
