@@ -132,4 +132,10 @@ export const ko: Translations = {
     title: "언어",
     system: "시스템 설정 따르기",
   },
+  dbError: {
+    title: "앱을 시작할 수 없습니다",
+    message:
+      "저장된 스탬프를 불러올 준비에 실패했습니다. 다시 시도해도 해결되지 않으면 앱을 최신 버전으로 업데이트해 주세요.",
+    detailLabel: "오류 내용",
+  },
 };
