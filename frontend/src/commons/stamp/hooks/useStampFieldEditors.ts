@@ -57,11 +57,8 @@ export function useStampFieldEditors({
     React.useState<GeocodeWarning | null>(null);
 
   /**
-   * 最新の `draftLocation`。ジオコーディングを待っているあいだに住所が打ち直され
-   * たかどうかを見るために持つ（`saveLocation`）。
-   *
-   * 待ち時間のあいだも場所のシートは開いたままで入力できるので、保存を押した
-   * 時点の値しか見ないと、警告が指す住所と画面の住所がずれる。
+   * 最新の `draftLocation`。座標を引いているあいだに住所が打ち直されたかどうかを
+   * 見るために持つ（`saveLocation`）
    */
   const draftLocationRef = React.useRef(draftLocation);
   React.useEffect(() => {
@@ -168,12 +165,10 @@ export function useStampFieldEditors({
     saveDate: () => {
       void save("date", () => ({ capturedAt: draftDate.toISOString() }));
     },
-    // 住所を直したら `geocodeAddress()` で座標も引き直し、引けなければ座標を
-    // 据え置いたまま保存を保留して警告を出す
-    // （方針は docs/front-architecture.md「場所の編集と座標の追従」）
+    // 住所の保存と座標の追従、引けなかったときの分岐は
+    // docs/front-architecture.md「場所の編集と座標の追従」に従う
     saveLocation: () => {
-      // 住所が変わっていなければ引き直さない。引けなかったときに「住所だけが
-      // 変わる」という確認が出るが、実際には住所も変わらず選ばせる意味が無い
+      // 住所が変わっていなければ引き直さない
       if (
         normalizeOptionalText(draftLocation) === normalizeOptionalText(location)
       ) {
@@ -181,9 +176,7 @@ export function useStampFieldEditors({
         return;
       }
       void save("location", async () => {
-        // 待っているあいだに住所が打ち直されていたら、引いた結果は捨てて画面に
-        // ある住所で引き直す。古い結果のまま警告を出すと、「このまま保存」が
-        // 打ち直す前の住所を書き込む
+        // 引いているあいだに打ち直されていたら、結果を捨てて引き直す
         let address = normalizeOptionalText(draftLocation);
         for (;;) {
           if (!address) {
@@ -207,9 +200,7 @@ export function useStampFieldEditors({
     geocodeWarning,
     cancelGeocodeWarning: () => {
       setGeocodeWarning(null);
-      // 開き直すのは、どの編集欄も開いていないときだけ。待っているあいだに
-      // 別の項目を開いていたら、そのシートを閉じることになり、開き直したときに
-      // `openMemo()` などがドラフトを保存済みの値へ巻き戻して入力が消える
+      // 開き直すのは、どの編集欄も開いていないときだけ
       setEditingField((current) => current ?? "location");
     },
     saveLocationAnyway: () => {

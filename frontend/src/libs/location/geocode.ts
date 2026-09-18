@@ -5,9 +5,8 @@ import type { StampLocation } from "@/src/infra/db/stamps";
 /**
  * 住所から座標を引いた結果。
  *
- * **引けなかった理由を 2 つに分ける。**利用者にとって「住所として引けない文字列
- * だった」と「引く処理そのものが失敗した」は意味が違い、取るべき行動も違う（表記を直す /
- * 環境を整えてやり直す）。同じ値で返すと呼び出し側が文言を出し分けられない
+ * 引けなかった理由を分けている狙いと、呼び出し側での文言の出し分けは
+ * docs/front-architecture.md「場所の編集と座標の追従」を参照。
  */
 export type GeocodeResult =
   | { status: "found"; location: StampLocation }
@@ -15,7 +14,7 @@ export type GeocodeResult =
   | { status: "notFound" }
   /**
    * ジオコーダ自体が失敗した。通信できないときのほか、Android では位置情報の
-   * 権限が無いときにも起きる。原因は切り分けられないので断定しない
+   * 権限が無いときにも起きる（原因は切り分けられない）
    */
   | { status: "unavailable" };
 
