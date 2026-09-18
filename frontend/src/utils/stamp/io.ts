@@ -51,14 +51,24 @@ export async function generateStampWithLineArtFromUri(
  *
  * **1 枚だけにする。**保持するのは 512x512 のラスタ画像で、増やすとそのぶん常駐する。
  * デザイン変更は 1 つのスタンプを開いている間しか走らないので、1 枚で足りる。
+ *
+ * **読み終わった画像ではなく Promise を持つ。**プレビューは最初のデコードの完了を
+ * 待たずに次の色・フレームを受け付けるので、画像を持つ形だと、まだ誰も読み終えていない
+ * 間に来た呼び出しがそれぞれデコードを始めてしまう。
  */
-let lastLineArt: { uri: string; image: SkImage } | null = null;
+let lastLineArt: { uri: string; image: Promise<SkImage> } | null = null;
 
-async function loadLineArt(uri: string): Promise<SkImage> {
+function loadLineArt(uri: string): Promise<SkImage> {
   if (lastLineArt?.uri === uri) {
     return lastLineArt.image;
   }
-  const image = await decodeImageFromUri(uri);
+  // 失敗を持ち続けると、次に同じ線画を開いたときも読み直さずに同じ失敗を返してしまう
+  const image = decodeImageFromUri(uri).catch((error: unknown) => {
+    if (lastLineArt?.image === image) {
+      lastLineArt = null;
+    }
+    throw error;
+  });
   lastLineArt = { uri, image };
   return image;
 }

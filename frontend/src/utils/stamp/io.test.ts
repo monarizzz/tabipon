@@ -75,6 +75,47 @@ describe("renderStampFromLineArtUri", () => {
     );
   });
 
+  // プレビューは最初のデコードの完了を待たずに次の色・フレームを受け付ける。
+  // 読み終わった画像だけを持つ形だと、ここで 2 本目のデコードが走る
+  it("デコードの完了前に同じ uri で呼ばれても読み直さない", async () => {
+    let finishDecode = () => {};
+    const decoding = new Promise<void>((resolve) => {
+      finishDecode = resolve;
+    });
+    decodeImageFromUriMock.mockImplementation(async (uri) => {
+      await decoding;
+      return imageNamed(`line-art:${uri}`);
+    });
+
+    const first = renderStampFromLineArtUri(
+      "file:///line-arts/in-flight.png",
+      OPTIONS,
+    );
+    const second = renderStampFromLineArtUri(
+      "file:///line-arts/in-flight.png",
+      {
+        ...OPTIONS,
+        color: "#FF0000",
+      },
+    );
+    finishDecode();
+    await Promise.all([first, second]);
+
+    expect(decodeImageFromUriMock).toHaveBeenCalledTimes(1);
+    expect(renderStampFromLineArtMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("デコードに失敗したら覚えず、次は読み直す", async () => {
+    decodeImageFromUriMock.mockRejectedValueOnce(new Error("boom"));
+
+    await expect(
+      renderStampFromLineArtUri("file:///line-arts/failed.png", OPTIONS),
+    ).rejects.toThrow("boom");
+    await renderStampFromLineArtUri("file:///line-arts/failed.png", OPTIONS);
+
+    expect(decodeImageFromUriMock).toHaveBeenCalledTimes(2);
+  });
+
   it("uri が変われば読み直す", async () => {
     // 別のスタンプを開いたとき、前のスタンプの線画で描いてはいけない
     await renderStampFromLineArtUri("file:///line-arts/switch-1.png", OPTIONS);
