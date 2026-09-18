@@ -82,6 +82,10 @@ export function useCamera(): Camera {
       const generation = captureGenerationRef.current;
       const onCameraScreen = () => generation === captureGenerationRef.current;
       try {
+        // シャッターを切った瞬間の時刻。これがスタンプの撮影日時になる。
+        // 調整・押印を挟むあいだに日付をまたぐことがあるので、保存側で
+        // 測り直さず、ここで測った値を押印画面まで運ぶ
+        const capturedAt = new Date().toISOString();
         const photo = await cameraRef.current?.takePictureAsync();
         if (!photo) {
           // takePictureAsync() は失敗を例外ではなく undefined で返すことがある。
@@ -96,7 +100,10 @@ export function useCamera(): Camera {
         // (引き継いで再度 scale をかけるとガイド円の中身がズレる)
         const uri = await cropToPreview(photo, containerSizeRef.current);
         if (!onCameraScreen()) return;
-        router.push({ pathname: "/photo-adjust", params: { uri } });
+        router.push({
+          pathname: "/photo-adjust",
+          params: { uri, capturedAt },
+        });
       } catch (error) {
         failCapture(error, onCameraScreen());
       }

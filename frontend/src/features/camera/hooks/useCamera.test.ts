@@ -1,5 +1,7 @@
 // 撮影が失敗したときに、利用者へ知らせが出て開発側にもログが残ることを固定する。
 // 以前はどちらも無く、シャッターが効かないようにしか見えなかった（Issue #258）。
+// あわせて、調整画面へ渡す撮影時刻がシャッターを切った瞬間のものであることも見る。
+// 写真の切り出しそのものは `cropToPreview.test.ts` で見ているのでモックする。
 import { act, renderHook } from "@testing-library/react-native";
 import { Alert } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -27,6 +29,10 @@ const useFocusEffectMock = jest.mocked(useFocusEffect);
 
 const push = jest.fn();
 const takePictureAsync = jest.fn();
+
+const SHUTTER = new Date("2026-09-18T14:58:00.000Z");
+/** 切り出しに時間がかかり、その間に日付をまたいだ状況 */
+const AFTER_CROP = new Date("2026-09-19T00:01:00.000Z");
 
 let alertSpy: jest.SpyInstance;
 let errorSpy: jest.SpyInstance;
@@ -98,9 +104,36 @@ describe("useCamera", () => {
 
     expect(push).toHaveBeenCalledWith({
       pathname: "/photo-adjust",
-      params: { uri: "file:///photos/cropped.jpg" },
+      params: {
+        uri: "file:///photos/cropped.jpg",
+        capturedAt: expect.any(String),
+      },
     });
     expect(alertSpy).not.toHaveBeenCalled();
+  });
+
+  it("シャッターを切った瞬間の時刻を、切り出し後の写真と一緒に調整画面へ渡す", async () => {
+    jest.useFakeTimers().setSystemTime(SHUTTER);
+    // 切り出しのあいだに日付をまたいでも、渡す時刻はシャッターの瞬間のまま
+    cropToPreviewMock.mockImplementation(async () => {
+      jest.setSystemTime(AFTER_CROP);
+      return "file:///photos/cropped.jpg";
+    });
+    try {
+      const { result } = await setup();
+
+      await shutter(result.current.capture);
+    } finally {
+      jest.useRealTimers();
+    }
+
+    expect(push).toHaveBeenCalledWith({
+      pathname: "/photo-adjust",
+      params: {
+        uri: "file:///photos/cropped.jpg",
+        capturedAt: SHUTTER.toISOString(),
+      },
+    });
   });
 
   it("撮影が例外で失敗したら、知らせを出して理由をログに残す", async () => {
@@ -227,7 +260,10 @@ describe("useCamera", () => {
 
     expect(push).toHaveBeenCalledWith({
       pathname: "/photo-adjust",
-      params: { uri: "file:///photos/cropped.jpg" },
+      params: {
+        uri: "file:///photos/cropped.jpg",
+        capturedAt: expect.any(String),
+      },
     });
   });
 });

@@ -51,11 +51,18 @@ export const ko: Translations = {
     retake: "다시 찍기",
     retakeConfirmTitle: "스탬프를 다시 찍으시겠어요?",
     retakeConfirmMessage: "이 스탬프는 삭제되며 다시 촬영할 수 있습니다.",
+    shareUnavailableTitle: "공유할 수 없습니다",
+    shareUnavailableMessage: "이 기기에서는 공유 기능을 사용할 수 없습니다.",
+    shareFailedTitle: "오류",
+    shareFailedMessage:
+      "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    retakeFailedTitle: "다시 찍을 수 없습니다",
+    retakeFailedMessage:
+      "스탬프 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
   },
   design: {
     frame: "프레임",
     color: "색상",
-    showLandmark: "랜드마크 이름 표시",
     apply: "이 디자인으로 설정",
     changeDesign: "디자인 변경",
     frameClassic: "클래식",
@@ -68,14 +75,8 @@ export const ko: Translations = {
     stampCount: "스탬프 %{count}개",
     loadError: "스탬프를 불러오지 못했습니다",
     empty: "스탬프를 모으면 여기에 표시됩니다!",
-    filterAll: "전체",
     stampName: "스탬프",
     unknownSpotName: "장소 미설정",
-  },
-  collection: {
-    add: "컬렉션 추가",
-    name: "컬렉션 이름",
-    namePlaceholder: "컬렉션 이름 입력",
   },
   stampDetail: {
     notFound: "스탬프를 찾을 수 없습니다",
@@ -111,6 +112,9 @@ export const ko: Translations = {
       "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     saveFailedTitle: "저장할 수 없습니다",
     saveFailedMessage: "잠시 후 다시 시도해 주세요.",
+    deleteFailedTitle: "삭제할 수 없습니다",
+    deleteFailedMessage:
+      "스탬프 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
   },
   discardDialog: {
     title: "편집 내용을 취소하시겠습니까?",
@@ -129,5 +133,11 @@ export const ko: Translations = {
   language: {
     title: "언어",
     system: "시스템 설정 따르기",
+  },
+  dbError: {
+    title: "앱을 시작할 수 없습니다",
+    message:
+      "저장된 스탬프를 불러올 준비에 실패했습니다. 다시 시도해도 해결되지 않으면 앱을 최신 버전으로 업데이트해 주세요.",
+    detailLabel: "오류 내용",
   },
 };

@@ -52,11 +52,18 @@ export const en: Translations = {
     retakeConfirmTitle: "Retake this stamp?",
     retakeConfirmMessage:
       "This stamp will be deleted so you can shoot it again.",
+    shareUnavailableTitle: "Sharing unavailable",
+    shareUnavailableMessage: "Sharing isn't available on this device.",
+    shareFailedTitle: "Error",
+    shareFailedMessage:
+      "Failed to share the image. Please wait a moment and try again.",
+    retakeFailedTitle: "Could not retake",
+    retakeFailedMessage:
+      "Failed to delete the stamp. Please wait a moment and try again.",
   },
   design: {
     frame: "Frame",
     color: "Color",
-    showLandmark: "Show landmark name",
     apply: "Use this design",
     changeDesign: "Change design",
     frameClassic: "Classic",
@@ -69,14 +76,8 @@ export const en: Translations = {
     stampCount: "%{count} stamps",
     loadError: "Could not load stamps",
     empty: "Collect stamps and they will show up here!",
-    filterAll: "All",
     stampName: "Stamp",
     unknownSpotName: "No spot set",
-  },
-  collection: {
-    add: "Add collection",
-    name: "Collection name",
-    namePlaceholder: "Enter a collection name",
   },
   stampDetail: {
     notFound: "Stamp not found",
@@ -112,6 +113,9 @@ export const en: Translations = {
       "Failed to share the image. Please wait a moment and try again.",
     saveFailedTitle: "Could not save",
     saveFailedMessage: "Please wait a moment and try again.",
+    deleteFailedTitle: "Could not delete",
+    deleteFailedMessage:
+      "Failed to delete the stamp. Please wait a moment and try again.",
   },
   discardDialog: {
     title: "Discard your edits?",
@@ -130,5 +134,11 @@ export const en: Translations = {
   language: {
     title: "Language",
     system: "Follow system setting",
+  },
+  dbError: {
+    title: "Could not start the app",
+    message:
+      "Preparing your saved stamps failed. If retrying does not help, update the app to the latest version.",
+    detailLabel: "Error details",
   },
 };

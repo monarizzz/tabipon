@@ -34,7 +34,6 @@ const EDITORS: StampFieldEditors = {
 };
 
 const DESIGN: StampDesignChange = {
-  displayImageUri: "",
   imageUri: "",
   designMode: false,
   previewUri: null,
@@ -59,8 +58,6 @@ const meta = {
     longitude: 139.7454,
     editors: EDITORS,
     design: DESIGN,
-    showLandmarkName: true,
-    toggleShowLandmarkName: () => {},
     deleteDialogVisible: false,
     openDeleteDialog: () => {},
     cancelDelete: () => {},

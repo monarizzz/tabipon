@@ -23,6 +23,7 @@ const PNG = new Uint8Array([1, 2, 3]);
 
 const INPUT = {
   photoUri: "file:///photos/1.jpg",
+  capturedAt: "2026-09-18T01:23:45.000Z",
   color: "#112233",
   frameId: "wave",
   scratchLevel: 0.4,
@@ -102,8 +103,8 @@ describe("createStamp", () => {
     );
   });
 
-  it("撮影日時は保存した時刻を ISO 文字列で入れる", async () => {
-    jest.useFakeTimers().setSystemTime(new Date("2026-09-18T01:23:45.000Z"));
+  it("撮影日時は渡された撮影時刻をそのまま入れる（保存した時刻では上書きしない）", async () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-09-19T00:01:00.000Z"));
     try {
       await createStamp({ ...INPUT });
     } finally {

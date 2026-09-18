@@ -7,10 +7,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocales } from "expo-localization";
 import { i18n, resolveDeviceLocale } from "./index";
-import { SUPPORTED_LOCALES } from "./constants/locales";
+import { loadLocalePreference, saveLocalePreference } from "./localePreference";
 import type {
   I18nContextValue,
   LocalePreference,
@@ -19,30 +18,23 @@ import type {
   TranslationKey,
 } from "./types/i18n";
 
-const STORAGE_KEY = "app.localePreference";
-
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-function isPreference(value: string | null): value is LocalePreference {
-  return (
-    value === "system" ||
-    (SUPPORTED_LOCALES as readonly string[]).includes(value ?? "")
-  );
-}
-
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreferenceState] = useState<LocalePreference>("system");
+  // null は「保存済みの設定をまだ読めていない」。初期値を "system" に
+  // しないのは、読み終わる前に端末の言語で 1 フレーム描いてしまわないため
+  const [preference, setPreferenceState] = useState<LocalePreference | null>(
+    null,
+  );
   // preference が "system" のとき端末設定の変更に追従するための依存値。
   const deviceLocales = useLocales();
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
-      if (isPreference(stored)) setPreferenceState(stored);
-    });
+    void loadLocalePreference().then(setPreferenceState);
   }, []);
 
   const locale = useMemo<SupportedLocale>(() => {
-    if (preference !== "system") return preference;
+    if (preference !== null && preference !== "system") return preference;
     return resolveDeviceLocale();
     // deviceLocales は端末設定の変更検知用（値は resolveDeviceLocale 内で参照）。
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -50,7 +42,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const setPreference = useCallback((pref: LocalePreference) => {
     setPreferenceState(pref);
-    void AsyncStorage.setItem(STORAGE_KEY, pref);
+    void saveLocalePreference(pref);
   }, []);
 
   // i18n はモジュールスコープの共有インスタンスなので locale を代入して使うと
@@ -63,9 +55,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<I18nContextValue>(
-    () => ({ locale, preference, setPreference, t }),
+    () => ({ locale, preference: preference ?? "system", setPreference, t }),
     [locale, preference, setPreference, t],
   );
+
+  // 読み終わるまで子を描かない。SQLiteProvider がマイグレーション中に
+  // 子を描かないのと同じ扱いで、待つのは AsyncStorage の 1 キー分
+  if (preference === null) return null;
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

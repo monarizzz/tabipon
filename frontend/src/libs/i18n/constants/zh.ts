@@ -51,11 +51,16 @@ export const zh: Translations = {
     retake: "重新拍摄",
     retakeConfirmTitle: "要重新拍摄这枚印章吗？",
     retakeConfirmMessage: "该印章将被删除，你可以重新拍摄。",
+    shareUnavailableTitle: "无法共享",
+    shareUnavailableMessage: "此设备不支持共享功能。",
+    shareFailedTitle: "错误",
+    shareFailedMessage: "图片共享失败。请稍后再试。",
+    retakeFailedTitle: "无法重新拍摄",
+    retakeFailedMessage: "删除印章失败。请稍后再试。",
   },
   design: {
     frame: "边框",
     color: "颜色",
-    showLandmark: "显示地标名称",
     apply: "使用此设计",
     changeDesign: "更改设计",
     frameClassic: "经典",
@@ -68,14 +73,8 @@ export const zh: Translations = {
     stampCount: "%{count} 枚印章",
     loadError: "无法加载印章",
     empty: "收集印章后会显示在这里！",
-    filterAll: "全部",
     stampName: "印章",
     unknownSpotName: "未设置地点",
-  },
-  collection: {
-    add: "添加合集",
-    name: "合集名称",
-    namePlaceholder: "请输入合集名称",
   },
   stampDetail: {
     notFound: "找不到该印章",
@@ -108,6 +107,8 @@ export const zh: Translations = {
     shareFailedMessage: "图片共享失败。请稍后再试。",
     saveFailedTitle: "无法保存",
     saveFailedMessage: "请稍后再试。",
+    deleteFailedTitle: "无法删除",
+    deleteFailedMessage: "删除印章失败。请稍后再试。",
   },
   discardDialog: {
     title: "要放弃编辑内容吗？",
@@ -126,5 +127,11 @@ export const zh: Translations = {
   language: {
     title: "语言",
     system: "跟随系统设置",
+  },
+  dbError: {
+    title: "无法启动应用",
+    message:
+      "准备读取已保存的印章时失败。如果重试后仍无法解决，请将应用更新到最新版本。",
+    detailLabel: "错误详情",
   },
 };
