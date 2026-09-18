@@ -1,5 +1,10 @@
 /** 共有カードの台紙（スタンプ帳の 1 ページ）。紙・綴じ穴・罫線だけを描く。 */
-import { PaintStyle, Skia, type SkCanvas } from "@shopify/react-native-skia";
+import {
+  BlendMode,
+  PaintStyle,
+  Skia,
+  type SkCanvas,
+} from "@shopify/react-native-skia";
 
 import { colors } from "@/src/style/tokens";
 import {
@@ -10,6 +15,11 @@ import {
   HOLE_COUNT,
   HOLE_RADIUS,
   PAGE_PADDING_H,
+  PAPER_COLOR,
+  PAPER_GRAIN_ALPHA,
+  PAPER_GRAIN_FREQUENCY,
+  PAPER_GRAIN_OCTAVES,
+  PAPER_GRAIN_SEED,
   RULE_COUNT,
   RULE_GAP,
   RULE_TOP,
@@ -19,6 +29,38 @@ import {
 /** 上から `index` 本目（0 始まり）の罫線の y */
 export function ruleY(index: number): number {
   return RULE_TOP + RULE_GAP * index;
+}
+
+/**
+ * 紙の繊維に見立てた粒状感を重ねる。
+ *
+ * `MakeFractalNoise` は RGB がばらばらの色付きノイズを返すので、彩度を落とす
+ * カラーマトリクスを通してから薄く掛ける。`Multiply` で重ねると、明るいところだけが
+ * わずかに沈んで紙の凹凸に見える。**シードは固定。**同じスタンプを共有し直したときに
+ * 紙目が変わると、別の画像に見えてしまう
+ */
+function drawPaperGrain(canvas: SkCanvas): void {
+  const paint = Skia.Paint();
+  paint.setShader(
+    Skia.Shader.MakeFractalNoise(
+      PAPER_GRAIN_FREQUENCY,
+      PAPER_GRAIN_FREQUENCY,
+      PAPER_GRAIN_OCTAVES,
+      PAPER_GRAIN_SEED,
+      CARD_WIDTH,
+      CARD_HEIGHT,
+    ),
+  );
+  // 彩度 0 のカラーマトリクス。色を持ったノイズだと紙が色付いて見える
+  paint.setColorFilter(
+    Skia.ColorFilter.MakeMatrix([
+      0.213, 0.715, 0.072, 0, 0, 0.213, 0.715, 0.072, 0, 0, 0.213, 0.715, 0.072,
+      0, 0, 0, 0, 0, 1, 0,
+    ]),
+  );
+  paint.setAlphaf(PAPER_GRAIN_ALPHA);
+  paint.setBlendMode(BlendMode.Multiply);
+  canvas.drawRect(Skia.XYWHRect(0, 0, CARD_WIDTH, CARD_HEIGHT), paint);
 }
 
 /** 綴じ穴。紙の上端に等間隔で並べる */
@@ -50,7 +92,8 @@ function drawBindingHoles(canvas: SkCanvas): void {
  * 決まっていて繰り上がらない（`renderShareCard()`）
  */
 export function drawNotebookPage(canvas: SkCanvas): void {
-  canvas.drawColor(Skia.Color(colors.bg));
+  canvas.drawColor(Skia.Color(PAPER_COLOR));
+  drawPaperGrain(canvas);
   drawBindingHoles(canvas);
 
   const rule = Skia.Paint();
