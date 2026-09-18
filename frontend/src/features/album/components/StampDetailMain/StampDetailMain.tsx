@@ -77,7 +77,7 @@ export function StampDetailMain({
       </View>
       <StampDetailMediaPager
         spotName={editors.spotName}
-        imageUri={design.displayImageUri || undefined}
+        imageUri={design.imageUri || undefined}
         onPressDesignChange={design.open}
         onPressSpotName={editors.openSpotName}
         latitude={latitude}

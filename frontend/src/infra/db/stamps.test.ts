@@ -24,6 +24,7 @@ import {
   newStampId,
   replaceStampImage,
   saveStamp,
+  stampImageUri,
   updateStamp,
   type NewStamp,
 } from "@/src/infra/db/stamps";
@@ -365,17 +366,74 @@ describe("updateStamp", () => {
 });
 
 describe("replaceStampImage", () => {
-  it("パスを変えずに中身だけ差し替える", async () => {
+  // `<Image source={{ uri }}>` は uri をキーに画像をキャッシュする。上書きすると
+  // デザインを変えても uri が変わらず、一覧も詳細も古い絵を出し続ける
+  it("上書きせず、次の版のパスへ書いてそのパスを返す", async () => {
+    const fs = jest.requireActual<typeof import("node:fs")>("node:fs");
     const saved = await saveStamp(newStamp());
-    await replaceStampImage(saved.id, new Uint8Array([1, 2, 3]));
 
-    const loaded = await getStamp(saved.id);
-    expect(loaded?.stampImagePath).toBe(saved.stampImagePath);
-    expect(
-      jest
-        .requireActual<typeof import("node:fs")>("node:fs")
-        .readFileSync(join(mockDocumentRoot, saved.stampImagePath)),
-    ).toEqual(Buffer.from([1, 2, 3]));
+    const replaced = await replaceStampImage(saved.id, new Uint8Array([1, 2]));
+
+    expect(replaced).not.toBe(saved.stampImagePath);
+    expect(replaced).toBe(`stamps/${saved.id}-2.png`);
+    expect(fs.readFileSync(join(mockDocumentRoot, replaced))).toEqual(
+      Buffer.from([1, 2]),
+    );
+  });
+
+  it("繰り返すたびに版番号が上がる", async () => {
+    const saved = await saveStamp(newStamp());
+    expect(saved.stampImagePath).toBe(`stamps/${saved.id}-1.png`);
+
+    const paths: string[] = [];
+    for (let revision = 0; revision < 3; revision++) {
+      const replaced = await replaceStampImage(
+        saved.id,
+        new Uint8Array([revision]),
+      );
+      paths.push(replaced);
+      await updateStamp(saved.id, { stampImagePath: replaced });
+    }
+
+    expect(paths).toEqual([
+      `stamps/${saved.id}-2.png`,
+      `stamps/${saved.id}-3.png`,
+      `stamps/${saved.id}-4.png`,
+    ]);
+  });
+
+  // 版番号を入れる前に保存したスタンプ。行のパスはそのまま読めるので移行は要らず、
+  // 次にデザインを変えた時点で版番号の付いたパスへ移る
+  it("版番号の付かないパスで保存済みの行も差し替えられる", async () => {
+    const saved = await saveStamp(newStamp());
+    const legacyPath = `stamps/${saved.id}.png`;
+    mockSqlite
+      .prepare("UPDATE stamps SET stamp_image_path = ? WHERE id = ?")
+      .run(legacyPath, saved.id);
+
+    expect(await replaceStampImage(saved.id, new Uint8Array([1]))).toBe(
+      `stamps/${saved.id}-1.png`,
+    );
+  });
+
+  it("更新した行を読むと uri のもとになるパスが変わっている", async () => {
+    const saved = await saveStamp(newStamp());
+
+    const replaced = await replaceStampImage(saved.id, new Uint8Array([1, 2]));
+    const updated = await updateStamp(saved.id, {
+      color: "#1E3CDC",
+      stampImagePath: replaced,
+    });
+
+    expect(updated.stampImagePath).toBe(replaced);
+    expect(stampImageUri(updated)).not.toBe(stampImageUri(saved));
+    expect((await getStamp(saved.id))?.stampImagePath).toBe(replaced);
+  });
+
+  it("無い id は例外", async () => {
+    await expect(
+      replaceStampImage("00000000-0000-4000-8000-999999999999", PNG),
+    ).rejects.toThrow();
   });
 });
 
@@ -497,6 +555,22 @@ describe("deleteOrphanFiles", () => {
     expect(fs.existsSync(join(mockDocumentRoot, saved.lineArtPath))).toBe(
       false,
     );
+  });
+
+  // デザイン変更は前の版を消さずに次の版へ書く。掃除をここに任せているので、
+  // 任せた先が本当に拾えることを固定する
+  it("デザイン変更で参照されなくなった前の版を拾う", async () => {
+    const fs = jest.requireActual<typeof import("node:fs")>("node:fs");
+    const saved = await saveStamp(newStamp());
+    const replaced = await replaceStampImage(saved.id, new Uint8Array([1, 2]));
+    await updateStamp(saved.id, { stampImagePath: replaced });
+
+    expect(await deleteOrphanFiles()).toBe(1);
+    expect(fs.existsSync(join(mockDocumentRoot, saved.stampImagePath))).toBe(
+      false,
+    );
+    expect(fs.existsSync(join(mockDocumentRoot, replaced))).toBe(true);
+    expect(fs.existsSync(join(mockDocumentRoot, saved.lineArtPath))).toBe(true);
   });
 
   it("画像の置き場がまだ無くても落ちない", async () => {

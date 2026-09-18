@@ -34,7 +34,6 @@ const EDITORS: StampFieldEditors = {
 };
 
 const DESIGN: StampDesignChange = {
-  displayImageUri: "",
   imageUri: "",
   designMode: false,
   previewUri: null,
