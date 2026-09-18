@@ -22,6 +22,7 @@ export function StampLocationMap({
   zoom = 15,
 }: StampLocationMapProps) {
   const { t } = useTranslation();
+  const mapRef = React.useRef<MapView | null>(null);
 
   // 0,0 は大西洋上の点で、座標が入っていない行の既定値として紛れ込みやすい。
   // その 1 点だけは「座標なし」として扱う
@@ -32,24 +33,34 @@ export function StampLocationMap({
 
   const delta = deltaFromZoom(zoom);
 
+  // 住所を直して座標を引き直したとき（`saveLocation` in
+  // `src/commons/stamp/hooks/useStampFieldEditors.ts`）にカメラを寄せ直す。
+  //
+  // **`region` を毎レンダー渡してはいけない。**`region` は制御プロップで、
+  // 値が変わるたびにネイティブ側のカメラを上書きするため、利用者がズームや
+  // パンで動かしたカメラまで再レンダーのたびに押し戻してしまう。初回は
+  // `initialRegion` に任せ、以降は座標が変わったときだけここで動かす
+  React.useEffect(() => {
+    if (latitude === null || longitude === null) return;
+
+    mapRef.current?.animateToRegion({
+      latitude,
+      longitude,
+      latitudeDelta: delta,
+      longitudeDelta: delta,
+    });
+  }, [latitude, longitude, delta]);
+
   return (
     <View style={styles.wrap}>
       <View style={styles.mapCard}>
         {hasLocation ? (
           <MapView
+            ref={mapRef}
             style={styles.map}
             // 端末の地図（iOS は Apple Maps）を使う。API キーが要らず、
             // 圏外でも OS のキャッシュが効く範囲では出る
-            //
-            // **`initialRegion` ではなく `region` を渡す。**`initialRegion` は
-            // ネイティブ側で「まだ適用していないとき」だけカメラを動かす作りで
-            // （`AIRMap.mm` の `setInitialRegion:` / Android の
-            // `MapView.java` の `setInitialRegion()`）、住所を直して座標を
-            // 引き直したとき（`saveLocation` in
-            // `src/commons/stamp/hooks/useStampFieldEditors.ts`）にピンだけが
-            // 動いて地図は前の場所のままになる。`region` は値が変わるたびに
-            // カメラへ反映され、初回表示にもそのまま効く
-            region={{
+            initialRegion={{
               latitude,
               longitude,
               latitudeDelta: delta,
