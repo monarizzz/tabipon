@@ -28,3 +28,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const NoSpotName: Story = {
+  args: { spotName: "" },
+};
+
+export const LongSpotName: Story = {
+  args: { spotName: "東京スカイツリータウン ソラマチ 展望デッキ フロア 350" },
+};

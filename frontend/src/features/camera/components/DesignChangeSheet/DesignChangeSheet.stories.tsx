@@ -27,7 +27,6 @@ const meta = {
     colorOptions: STAMP_INK_COLORS,
     onSelectFrameStyle: fn(),
     onSelectColor: fn(),
-    onToggleShowLandmarkName: fn(),
     onConfirm: fn(),
     onClose: fn(),
   },
@@ -42,7 +41,6 @@ export const Interactive: Story = {
     visible: false,
     selectedFrameStyleId: "classic",
     selectedColor: DEFAULT_STAMP_COLOR,
-    showLandmarkName: true,
   },
   render: function Render(args) {
     const [visible, setVisible] = React.useState(false);
@@ -51,9 +49,6 @@ export const Interactive: Story = {
     );
     const [selectedColor, setSelectedColor] = React.useState(
       args.selectedColor,
-    );
-    const [showLandmarkName, setShowLandmarkName] = React.useState(
-      args.showLandmarkName,
     );
 
     return (
@@ -84,11 +79,6 @@ export const Interactive: Story = {
           onSelectColor={(color) => {
             args.onSelectColor(color);
             setSelectedColor(color);
-          }}
-          showLandmarkName={showLandmarkName}
-          onToggleShowLandmarkName={(value) => {
-            args.onToggleShowLandmarkName(value);
-            setShowLandmarkName(value);
           }}
         />
       </View>

@@ -22,9 +22,35 @@ function fileOf(relativePath: string): File {
   return new File(Paths.document, relativePath);
 }
 
-/** スタンプ id から、仕上げ済み PNG の置き場所（相対パス）を決める */
-export function stampImagePathOf(id: string): string {
-  return `${STAMP_IMAGES_DIR}/${id}.png`;
+/**
+ * スタンプ id と版番号から、仕上げ済み PNG の置き場所（相対パス）を決める。
+ *
+ * **版番号をファイル名に入れる。**`<Image source={{ uri }}>` は uri をキーに
+ * 画像をキャッシュするため、同じパスへ上書きすると中身を差し替えても古い絵が出る。
+ * 内容が変わったらパスも変える形にして、キャッシュを意識せずに済ませる
+ */
+export function stampImagePathOf(id: string, revision: number): string {
+  return `${STAMP_IMAGES_DIR}/${id}-${revision}.png`;
+}
+
+/**
+ * 今の画像パスから版番号を読む。版番号の付かないパス（`<id>.png`）は 0 版とする。
+ *
+ * id を渡して先頭を切り落としてから読む。uuid の末尾は数字だけのこともあり、
+ * 末尾の `-数字` を探すだけだと `<id>.png` の id 側を版番号と読み違える
+ */
+function stampImageRevisionOf(id: string, relativePath: string): number {
+  const prefix = `${STAMP_IMAGES_DIR}/${id}`;
+  if (!relativePath.startsWith(prefix)) {
+    return 0;
+  }
+  const revision = /^-(\d+)\.png$/.exec(relativePath.slice(prefix.length));
+  return revision ? Number(revision[1]) : 0;
+}
+
+/** 今の画像パスから、次の版の置き場所（相対パス）を決める */
+export function nextStampImagePathOf(id: string, currentPath: string): string {
+  return stampImagePathOf(id, stampImageRevisionOf(id, currentPath) + 1);
 }
 
 /** スタンプ id から、元写真の置き場所（相対パス）を決める */
