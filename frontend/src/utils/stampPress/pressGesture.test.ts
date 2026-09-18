@@ -267,4 +267,31 @@ describe("scratchLevelFromPeak", () => {
 
     expect(scratchLevelFromPeak((weakPeak + strongPeak) / 2)).toBeCloseTo(0.5);
   });
+
+  /**
+   * 実際に振り下ろしたときのピーク(m/s²)に対する掠れ量を、**定数から導かずに**固定する。
+   *
+   * 上の検査は期待値を `SCRATCH_LEVEL_RANGE` 自身から作っているので、両端をどれだけ
+   * 広げても全件通る。両端が実際の振り幅より深いと実用域が 1.0 付近へ潰れて
+   * **どう振っても掠れが最大で出る**が、それを検出できるのは固定値の側だけ。
+   *
+   * 期待値は `strongPeak` を動かせば当然ずれる。**ずれたらこの表も押し方の感触に
+   * 合わせて更新する**。更新が要ること自体が、写像を変えた事実を残すための検査。
+   */
+  it.each([
+    [-5, 0.89],
+    [-10, 0.71],
+    [-15, 0.54],
+    [-20, 0.36],
+    [-30, 0],
+  ])("ピーク %p の掠れ量は %p", (peak, expected) => {
+    expect(scratchLevelFromPeak(peak)).toBeCloseTo(expected, 2);
+  });
+
+  it("普通に振り下ろした範囲が最大付近へ潰れない", () => {
+    // 弱い振り(-5)と強い振り(-25)で 0.5 以上離れていれば、振り方の差が掠れに出る
+    expect(
+      scratchLevelFromPeak(-5) - scratchLevelFromPeak(-25),
+    ).toBeGreaterThan(0.5);
+  });
 });
