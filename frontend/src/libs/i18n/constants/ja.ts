@@ -47,8 +47,6 @@ export const ja = {
     step3: "ぐっと押し込む",
   },
   share: {
-    brand: "たびぽん",
-    hashtag: "#たびぽん",
     dialogTitle: "スタンプを共有",
     postText: "たびぽんでスタンプを押しました！ #たびぽん",
     postTextWithSpot: "%{spot}でスタンプを押しました！ #たびぽん",

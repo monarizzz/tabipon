@@ -47,8 +47,6 @@ export const zh: Translations = {
     step3: "用力按下",
   },
   share: {
-    brand: "tabipon",
-    hashtag: "#たびぽん",
     dialogTitle: "共享印章",
     postText: "我用 tabipon 盖了一枚印章！ #たびぽん",
     postTextWithSpot: "我在%{spot}盖了一枚印章！ #たびぽん",

@@ -48,8 +48,6 @@ export const en: Translations = {
     step3: "Press it firmly",
   },
   share: {
-    brand: "tabipon",
-    hashtag: "#たびぽん",
     dialogTitle: "Share stamp",
     postText: "I stamped my trip with tabipon! #たびぽん",
     postTextWithSpot: "I stamped %{spot} with tabipon! #たびぽん",

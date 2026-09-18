@@ -73,8 +73,6 @@ export function useStampShare({
         spotName,
         date: formatIsoDate(stamp.capturedAt),
         address: stamp.address ?? "",
-        brand: t("share.brand"),
-        hashtag: t("share.hashtag"),
       });
       const cardUri = writeShareCard(stamp.id, png);
 

@@ -82,7 +82,7 @@ it("スタンプ画像ではなく、合成した共有カードの URI を共�
   );
 });
 
-it("カードにはスポット名・日付・場所を載せる", async () => {
+it("カードにはスポット名・日付・場所を載せる（ハッシュタグは載せない）", async () => {
   const { result } = await setup();
 
   await press(result.current.share);
@@ -93,7 +93,6 @@ it("カードにはスポット名・日付・場所を載せる", async () => {
       spotName: "東京タワー",
       date: "2026/09/18",
       address: "東京都港区芝公園",
-      hashtag: "share.hashtag",
     }),
   );
 });

@@ -2,8 +2,7 @@
  * 共有カード 1 枚を組み立てる。
  *
  * 置き方は上から順ではなく、本券（切り取り線より上）と半券（下）で別々に決める。
- * 本券はスタンプとスポット名をひとまとまりにして縦中央へ、半券は上から日付・場所、
- * 下端にアプリ名とハッシュタグを置く。
+ * 本券はスタンプとスポット名をひとまとまりにして縦中央へ、半券は日付と場所を置く。
  */
 import {
   FontWeight,
@@ -16,7 +15,6 @@ import {
 import { colors } from "@/src/style/tokens";
 import {
   ADDRESS_FONT_SIZE,
-  BRAND_FONT_SIZE,
   CARD_HEIGHT,
   CARD_WIDTH,
   DATE_FONT_SIZE,
@@ -25,7 +23,6 @@ import {
   STAMP_SIZE,
   STAMP_TO_SPOT_NAME_GAP,
   STUB_LINE_GAP,
-  STUB_PADDING_BOTTOM,
   STUB_PADDING_TOP,
 } from "@/src/utils/shareCard/constants/constants";
 import {
@@ -88,12 +85,11 @@ function drawTicketBody(
   }
 }
 
-/** 半券。日付・場所を上から積み、アプリ名とハッシュタグは下端に置く */
+/** 半券。日付と場所を上から積む */
 function drawTicketStub(
   canvas: SkCanvas,
   content: ShareCardContent,
   tearY: number,
-  bottom: number,
   contentLeft: number,
   contentWidth: number,
 ): void {
@@ -106,6 +102,7 @@ function drawTicketStub(
           text: content.date,
           fontSize: DATE_FONT_SIZE,
           color: colors.textPrimary,
+          align: TextAlign.Center,
         }
       : null,
     content.address
@@ -113,6 +110,7 @@ function drawTicketStub(
           text: content.address,
           fontSize: ADDRESS_FONT_SIZE,
           color: colors.textMuted,
+          align: TextAlign.Center,
         }
       : null,
   ]) {
@@ -120,24 +118,6 @@ function drawTicketStub(
     y += drawTextBlock(canvas, block, contentLeft, y, contentWidth);
     y += STUB_LINE_GAP;
   }
-
-  const brand: TextBlock = {
-    text: content.brand,
-    fontSize: BRAND_FONT_SIZE,
-    color: colors.textMuted,
-  };
-  const hashtag: TextBlock = {
-    text: content.hashtag,
-    fontSize: BRAND_FONT_SIZE,
-    color: colors.textMuted,
-    weight: FontWeight.SemiBold,
-    align: TextAlign.Right,
-  };
-  // 同じ行の左端と右端に置く。高さは揃うので測るのは片方だけでよい
-  const brandY =
-    bottom - STUB_PADDING_BOTTOM - measureTextHeight(brand, contentWidth);
-  drawTextBlock(canvas, brand, contentLeft, brandY, contentWidth);
-  drawTextBlock(canvas, hashtag, contentLeft, brandY, contentWidth);
 }
 
 /** 共有カードを描く */
@@ -159,7 +139,6 @@ export function renderShareCard(content: ShareCardContent): SkImage {
       canvas,
       content,
       geometry.tearY,
-      geometry.bottom,
       geometry.contentLeft,
       geometry.contentWidth,
     );

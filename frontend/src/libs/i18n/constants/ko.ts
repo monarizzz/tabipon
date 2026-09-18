@@ -48,8 +48,6 @@ export const ko: Translations = {
     step3: "힘껏 눌러 찍기",
   },
   share: {
-    brand: "tabipon",
-    hashtag: "#たびぽん",
     dialogTitle: "스탬프 공유",
     postText: "tabipon으로 스탬프를 찍었습니다! #たびぽん",
     postTextWithSpot: "%{spot}에서 스탬프를 찍었습니다! #たびぽん",
