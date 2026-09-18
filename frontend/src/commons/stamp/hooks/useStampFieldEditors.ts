@@ -57,6 +57,16 @@ export function useStampFieldEditors({
     React.useState<GeocodeWarning | null>(null);
 
   /**
+   * 場所の保存の世代。保存を押すたび、警告に答えるたびに繰り上げる。
+   *
+   * 座標を引き終える前に保存を押し直せるので、順番待ちには同じ住所の保存が
+   * 複数並びうる。警告に答えたあとに古い保存が流れると、答えたはずの警告が
+   * 出し直され、その「このまま保存」が新しい保存の座標を消す。
+   * 繰り上げた時点より古い保存は、書き込みも警告もせずに降りる。
+   */
+  const locationSaveGeneration = React.useRef(0);
+
+  /**
    * 最新の `draftLocation`。座標を引いているあいだに住所が打ち直されたかどうかを
    * 見るために持つ（`saveLocation`）
    */
@@ -175,7 +185,11 @@ export function useStampFieldEditors({
         closeEditor();
         return;
       }
+      const generation = ++locationSaveGeneration.current;
+      // 押し直したので、前の保存が出した警告は答える対象ではなくなる
+      setGeocodeWarning(null);
       void save("location", async () => {
+        if (locationSaveGeneration.current !== generation) return null;
         // 引いているあいだに打ち直されていたら、結果を捨てて引き直す
         let address = normalizeOptionalText(draftLocation);
         for (;;) {
@@ -183,6 +197,7 @@ export function useStampFieldEditors({
             return { address };
           }
           const geocoded = await geocodeAddress(address);
+          if (locationSaveGeneration.current !== generation) return null;
           const latest = normalizeOptionalText(draftLocationRef.current);
           if (latest !== address) {
             address = latest;
@@ -199,12 +214,15 @@ export function useStampFieldEditors({
 
     geocodeWarning,
     cancelGeocodeWarning: () => {
+      // 保存をやめたので、順番待ちに残っている同じ住所の保存も流さない
+      locationSaveGeneration.current += 1;
       setGeocodeWarning(null);
       // 開き直すのは、どの編集欄も開いていないときだけ
       setEditingField((current) => current ?? "location");
     },
     saveLocationAnyway: () => {
       const pending = geocodeWarning;
+      locationSaveGeneration.current += 1;
       setGeocodeWarning(null);
       if (!pending) return;
       // 引き直しはしない。警告を出す前に引いた結果をそのまま採用する

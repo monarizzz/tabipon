@@ -480,4 +480,34 @@ describe("警告のあとの分岐", () => {
     expect(view.result.current.draftMemo).toBe("書きかけのメモ");
     expect(updateStampMock).not.toHaveBeenCalled();
   });
+
+  // 待ち時間のあいだも保存は押し直せるので、同じ住所の保存が順番待ちに並ぶ。
+  // 古い保存をそのまま流すと、答えたはずの警告があとから出し直され、その
+  // 「このまま保存」が新しい保存で引いた座標を残したまま古い住所を書き込む
+  test("警告に答えたあとは、順番待ちの古い保存は警告も書き込みもしない", async () => {
+    const first = deferred<GeocodeResult>();
+    const second = deferred<GeocodeResult>();
+    geocodeAddressMock
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
+    const view = await setup(LOCATED_STAMP);
+
+    await press(view.result.current.openLocation);
+    await press(() => view.result.current.setDraftLocation("おばあちゃんち"));
+    await press(view.result.current.saveLocation);
+    // 引き終わる前に保存を押し直し、同じ住所の保存を順番待ちに積む
+    await press(view.result.current.saveLocation);
+
+    await act(async () => {
+      first.resolve({ status: "notFound" });
+    });
+    await press(view.result.current.cancelGeocodeWarning);
+
+    // 積まれていた保存が引き終わっても、答えた警告は出し直さない
+    await act(async () => {
+      second.resolve({ status: "notFound" });
+    });
+    expect(view.result.current.geocodeWarning).toBeNull();
+    expect(updateStampMock).not.toHaveBeenCalled();
+  });
 });
