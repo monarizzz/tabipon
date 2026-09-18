@@ -20,6 +20,8 @@ export function StampLocationMap({
   latitude,
   longitude,
   zoom = 15,
+  onTouchStart,
+  onTouchEnd,
 }: StampLocationMapProps) {
   const { t } = useTranslation();
   const mapRef = React.useRef<MapView | null>(null);
@@ -35,11 +37,8 @@ export function StampLocationMap({
 
   // 住所を直して座標を引き直したとき（`saveLocation` in
   // `src/commons/stamp/hooks/useStampFieldEditors.ts`）にカメラを寄せ直す。
-  //
-  // **`region` を毎レンダー渡してはいけない。**`region` は制御プロップで、
-  // 値が変わるたびにネイティブ側のカメラを上書きするため、利用者がズームや
-  // パンで動かしたカメラまで再レンダーのたびに押し戻してしまう。初回は
-  // `initialRegion` に任せ、以降は座標が変わったときだけここで動かす
+  // **`region` を毎レンダー渡してはいけない**（docs/front-architecture.md
+  // 「地図の操作とページャの競合」）
   React.useEffect(() => {
     if (latitude === null || longitude === null) return;
 
@@ -53,7 +52,17 @@ export function StampLocationMap({
 
   return (
     <View style={styles.wrap}>
-      <View style={styles.mapCard}>
+      {/*
+        触り始め / 終わりを置く側へ流す。カードの中だけに付けるので、カードの
+        外側の余白をなぞったときは置く側のスワイプがそのまま効く。
+        指が画面外へ出るなどして touch が取り消されたときも「終わり」にする
+      */}
+      <View
+        style={styles.mapCard}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
+      >
         {hasLocation ? (
           <MapView
             ref={mapRef}
@@ -66,9 +75,8 @@ export function StampLocationMap({
               latitudeDelta: delta,
               longitudeDelta: delta,
             }}
-            // 地図は自由に動かせる。動かした状態を戻す導線は置かず、
-            // 詳細を開き直せば `initialRegion` の位置から始まる
-            //
+            // ズーム・パン・回転・傾きは既定どおり有効
+            // （docs/front-architecture.md「地図の操作とページャの競合」）。
             // ツールバー（Android の経路案内ボタン）だけは外す。押すと
             // 別アプリへ飛び、詳細画面から出てしまう
             toolbarEnabled={false}

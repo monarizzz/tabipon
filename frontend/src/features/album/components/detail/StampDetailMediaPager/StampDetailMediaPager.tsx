@@ -32,6 +32,11 @@ export function StampDetailMediaPager({
   longitude,
 }: Props) {
   const [activeIndex, setActiveIndex] = React.useState(0);
+  // 地図のパンとページ送りは同じ横方向のジェスチャで、放っておくとページャが
+  // 先に取ってしまう。地図カードに指が乗っている間だけページ送りを止めて
+  // 地図へ譲る。カードの外側の余白では止めないので、地図ページからでも
+  // 写真ページへ戻れる
+  const [mapTouched, setMapTouched] = React.useState(false);
 
   const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const page = Math.round(event.nativeEvent.contentOffset.x / PAGE_WIDTH);
@@ -45,6 +50,7 @@ export function StampDetailMediaPager({
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScrollEnd}
+        scrollEnabled={!mapTouched}
       >
         <View style={{ width: PAGE_WIDTH }}>
           <StampDetailPhoto
@@ -57,6 +63,8 @@ export function StampDetailMediaPager({
             spotName={spotName}
             latitude={latitude}
             longitude={longitude}
+            onTouchStart={() => setMapTouched(true)}
+            onTouchEnd={() => setMapTouched(false)}
           />
         </View>
       </ScrollView>

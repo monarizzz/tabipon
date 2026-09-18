@@ -11,6 +11,12 @@ export type StampLocationMapProps = {
   latitude: number | null;
   longitude: number | null;
   zoom?: number;
+  /**
+   * 地図カードに指が触れた / 離れたときに呼ぶ。置く側が横スワイプを止めるのに使う
+   * （docs/front-architecture.md「地図の操作とページャの競合」）
+   */
+  onTouchStart?: () => void;
+  onTouchEnd?: () => void;
 };
 
 export const styles = StyleSheet.create({
