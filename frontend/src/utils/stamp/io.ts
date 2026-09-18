@@ -43,6 +43,27 @@ export async function generateStampWithLineArtFromUri(
 }
 
 /**
+ * 直前に読んだ線画を 1 枚だけ持つ。
+ *
+ * デザイン変更は色・フレームを選ぶたびに同じ uri を読み直す。線画は版番号を持たず
+ * 書き換わらないので（`src/libs/stampFile/index.ts` の `lineArtPathOf()`）、
+ * uri が同じなら中身も同じと見なしてよい。
+ *
+ * **1 枚だけにする。**保持するのは 512x512 のラスタ画像で、増やすとそのぶん常駐する。
+ * デザイン変更は 1 つのスタンプを開いている間しか走らないので、1 枚で足りる。
+ */
+let lastLineArt: { uri: string; image: SkImage } | null = null;
+
+async function loadLineArt(uri: string): Promise<SkImage> {
+  if (lastLineArt?.uri === uri) {
+    return lastLineArt.image;
+  }
+  const image = await decodeImageFromUri(uri);
+  lastLineArt = { uri, image };
+  return image;
+}
+
+/**
  * 保存済み線画の uri からスタンプ画像を生成する。デザイン変更のプレビューに使う
  * （`src/features/album/hooks/useStampDesignChange.ts`）。
  *
@@ -52,7 +73,7 @@ export async function renderStampFromLineArtUri(
   uri: string,
   options: StampRenderOptions,
 ): Promise<SkImage> {
-  return renderStampFromLineArt(await decodeImageFromUri(uri), options);
+  return renderStampFromLineArt(await loadLineArt(uri), options);
 }
 
 /** 保存済み線画の uri からスタンプの PNG バイト列を生成する。デザイン変更の確定時に呼ぶ */
