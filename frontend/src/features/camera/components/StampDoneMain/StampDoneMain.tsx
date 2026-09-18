@@ -9,6 +9,7 @@ import { RotateCcw } from "lucide-react-native";
 
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { TabBar } from "@/src/commons/layout/components/TabBar/TabBar";
+import { Toast } from "@/src/commons/other/components/Toast/Toast";
 import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
 import { StampFieldSheets } from "@/src/commons/stamp/components/StampFieldSheets/StampFieldSheets";
 import { StampInfoCard } from "@/src/commons/stamp/components/StampInfoCard/StampInfoCard";
@@ -28,6 +29,7 @@ export function StampDoneMain({
   tabItems,
   headerAnchorHeight,
   retakeDialogVisible,
+  toastMessage,
   share,
   openRetakeDialog,
   cancelRetake,
@@ -90,6 +92,8 @@ export function StampDoneMain({
             </View>
           </View>
         </ScrollView>
+        {/* タブバーに被せないよう、タブバーの外側ではなくこの中に置く */}
+        <Toast message={toastMessage} />
       </KeyboardAvoidingView>
       <CommonDialog
         visible={retakeDialogVisible}

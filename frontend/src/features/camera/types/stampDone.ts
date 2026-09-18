@@ -14,6 +14,8 @@ export type StampDone = {
   headerAnchorHeight: number | undefined;
   /** 撮り直しの確認を出しているか */
   retakeDialogVisible: boolean;
+  /** 下部に出す知らせ。`<Toast message={...} />` へ渡す。出していない間は null */
+  toastMessage: string | null;
 
   share: () => void;
   openRetakeDialog: () => void;

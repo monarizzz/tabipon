@@ -1,9 +1,9 @@
 import React from "react";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
-import * as Sharing from "expo-sharing";
 
 import { useStampFieldEditors } from "@/src/commons/stamp/hooks/useStampFieldEditors";
+import { useStampShare } from "@/src/commons/stamp/hooks/useStampShare";
 import { useStampDesignChange } from "@/src/features/album/hooks/useStampDesignChange";
 import type { StampDetail } from "@/src/features/album/types/stampDetail";
 import { deleteStamp, getStamp, type Stamp } from "@/src/infra/db/stamps";
@@ -52,6 +52,11 @@ export function useStampDetail(id: string | undefined): StampDetail {
     stampId: id,
     stamp,
     onUpdated: applyUpdated,
+  });
+
+  const { share, toastMessage } = useStampShare({
+    stamp,
+    logTag: "[stamp-detail]",
   });
 
   React.useEffect(() => {
@@ -117,29 +122,7 @@ export function useStampDetail(id: string | undefined): StampDetail {
     // replace だと履歴に残っているアルバムの上へ積むだけで同じ画面が 2 枚になる。
     // dismissTo は履歴のアルバムまで戻り、履歴に無ければ現在の画面を置き換える
     backToAlbum: () => router.dismissTo("/(tabs)/album"),
-    share: () => {
-      void (async () => {
-        if (!design.imageUri) return;
-        try {
-          if (!(await Sharing.isAvailableAsync())) {
-            Alert.alert(
-              t("stampDetail.shareUnavailableTitle"),
-              t("stampDetail.shareUnavailableMessage"),
-            );
-            return;
-          }
-          // 画像は端末の documentDirectory にあるので、そのまま渡せる
-          await Sharing.shareAsync(design.imageUri, {
-            dialogTitle: editors.spotName || undefined,
-          });
-        } catch (error) {
-          console.error("[stamp-detail] failed to share image", error);
-          Alert.alert(
-            t("stampDetail.shareFailedTitle"),
-            t("stampDetail.shareFailedMessage"),
-          );
-        }
-      })();
-    },
+    share,
+    toastMessage,
   };
 }

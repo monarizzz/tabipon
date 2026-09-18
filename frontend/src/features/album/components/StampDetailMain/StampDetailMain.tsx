@@ -10,6 +10,7 @@ import { Trash2 } from "lucide-react-native";
 
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { ShareButton } from "@/src/commons/button/components/ShareButton/ShareButton";
+import { Toast } from "@/src/commons/other/components/Toast/Toast";
 import { CommonDialog } from "@/src/commons/sheet/components/CommonDialog/CommonDialog";
 import { StampFieldSheets } from "@/src/commons/stamp/components/StampFieldSheets/StampFieldSheets";
 import { StampInfoCard } from "@/src/commons/stamp/components/StampInfoCard/StampInfoCard";
@@ -33,6 +34,7 @@ export function StampDetailMain({
   editors,
   design,
   deleteDialogVisible,
+  toastMessage,
   openDeleteDialog,
   cancelDelete,
   confirmDelete,
@@ -133,6 +135,8 @@ export function StampDetailMain({
         />
       )}
       <StampFieldSheets editors={editors} />
+      {/* デザイン変更パネルからも共有できるので、パネルより後ろに置いて前面に出す */}
+      <Toast message={toastMessage} />
     </View>
   );
 }

@@ -60,6 +60,7 @@ const meta = {
     editors: EDITORS,
     design: DESIGN,
     deleteDialogVisible: false,
+    toastMessage: null,
     openDeleteDialog: () => {},
     cancelDelete: () => {},
     confirmDelete: () => {},
@@ -74,6 +75,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+/** 共有して投稿用の文章をコピーした直後 */
+export const Copied: Story = {
+  args: { toastMessage: "投稿用の文章をコピーしました" },
+};
 
 export const Loading: Story = {
   args: { loading: true },
