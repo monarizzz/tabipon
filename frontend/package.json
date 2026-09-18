@@ -30,7 +30,6 @@
     "expo-location": "~57.0.17",
     "expo-router": "~57.0.21",
     "expo-sensors": "~57.0.3",
-    "expo-sharing": "~57.0.19",
     "expo-sqlite": "~57.0.3",
     "expo-status-bar": "~57.0.1",
     "i18n-js": "^4.5.3",

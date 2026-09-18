@@ -21,10 +21,6 @@ jest.mock("@/src/infra/db/stamps", () => ({
   replaceStampImage: jest.fn(),
 }));
 jest.mock("expo-router", () => ({ useRouter: jest.fn() }));
-jest.mock("expo-sharing", () => ({
-  isAvailableAsync: jest.fn(),
-  shareAsync: jest.fn(),
-}));
 jest.mock("@/src/libs/i18n/I18nProvider", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
