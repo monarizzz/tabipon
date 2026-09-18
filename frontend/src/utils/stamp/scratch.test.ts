@@ -1,73 +1,104 @@
 /**
- * `scratchThreshold()` の応答曲線を固定する回帰テスト。
+ * 掠れの効き方を固定する回帰テスト。
  *
- * この関数は「`scratchLevel` をそのまま白抜き率として扱う」ための逆算で、
- * #155 で式を入れ替えた本体。壊れると掠れの効き方が直接おかしくなる。
+ * `scratchLevel` は白抜き率そのものとして扱う（`docs/stamp-pipeline.md`
+ * 「掠れの強さは『白抜き率』で決める」）。これが壊れると掠れの効き方が
+ * 直接おかしくなるので、次の 2 つを見る。
  *
- * - **白抜き率が level に比例する**こと。旧実装（閾値を σ 単位で線形に動かす）は
- *   level 0.8 まで実質何も起きず、つまみとして機能していなかった
- * - **level が増えれば必ず閾値が下がる**こと。逆転すると強くするほど掠れなくなる
+ * - **白抜き率が level に比例する**こと
+ * - **level を上げれば閾値が必ず下がる**こと。逆転すると強くするほど掠れなくなる
  *
- * 描画には触れないので、実機やストーリーでは検出できない。
+ * 比例の検査は `scratchThreshold()` の返り値ではなく、**`applyScratch()` が実際に
+ * 白へ抜いた画素を数えて**行う。閾値を実装と同じ正規分布へ当て直すだけの検査では、
+ * `MakeBlur` の実カーネル・8bit サーフェス・`half` 精度・SkSL のハッシュが
+ * 想定と違っても常に通ってしまい、ユーザーが見る掠れが比例しなくなっても気付けない。
+ *
+ * 描画には触れるが、Storybook のスモークテストでは検出できない（絵は出てしまう）。
  */
-import { scratchThreshold } from "./scratch";
+import { Skia } from "@shopify/react-native-skia";
 
-/** ぼかし後のノイズの標準偏差。`scratch.ts` の `SCRATCH_NOISE_SD` と同じ値 */
-const NOISE_SD = 0.031556;
+import { STAMP_SIZE } from "@/src/utils/stamp/constants/constants";
+import { applyScratch, scratchThreshold } from "@/src/utils/stamp/scratch";
+import { renderToSquareImage, toRasterImage } from "@/src/utils/stamp/surface";
 
-/** 標準正規分布の上側確率。`erfc` が無いので級数を使わず数値積分で出す */
-function fractionAbove(threshold: number): number {
-  const z = (threshold - 0.5) / NOISE_SD;
-  // 台形則。区間は ±12σ あれば裾は十分に無視できる
-  const steps = 200000;
-  const from = z;
-  const to = 12;
-  if (from >= to) {
-    return 0;
-  }
-  const h = (to - from) / steps;
-  const pdf = (t: number) => Math.exp((-t * t) / 2) / Math.sqrt(2 * Math.PI);
-  let sum = (pdf(from) + pdf(to)) / 2;
-  for (let i = 1; i < steps; i += 1) {
-    sum += pdf(from + i * h);
-  }
-  return sum * h;
+/** `scratch.ts` の `SCRATCH_MAX_WHITEOUT` と同じ値 */
+const MAX_WHITEOUT = 0.35;
+
+/**
+ * 実測の白抜き率と狙い値とのずれの許容幅（ポイント）。
+ *
+ * ノイズは 8bit のオフスクリーンに入るので、σ = `SCRATCH_NOISE_SD` = 0.0316 は
+ * 8 階調しかない。閾値は階調の間に落ちるため、狙った割合をそのまま取れず
+ * シードによっても数ポイント振れる（実測で最大 3.3 ポイント）。
+ * 見た目には効かないが、ここを 1 ポイント台まで絞ると偽陽性で落ちる。
+ */
+const WHITEOUT_TOLERANCE = 0.04;
+
+/** 掠れを掛ける前の下地。全面黒なので、白い画素 = 抜かれた画素になる */
+function blackSquare() {
+  const paint = Skia.Paint();
+  paint.setColor(Skia.Color("black"));
+  return renderToSquareImage(STAMP_SIZE, (canvas) => {
+    canvas.drawRect(Skia.XYWHRect(0, 0, STAMP_SIZE, STAMP_SIZE), paint);
+  });
 }
 
-describe("scratchThreshold", () => {
+/** `applyScratch()` が実際に白へ抜いた画素の割合 */
+function measureWhiteoutRatio(scratchLevel: number, seed: number): number {
+  const scratched = applyScratch(blackSquare(), scratchLevel, seed);
+  const pixels = toRasterImage(scratched, "掠れの結果").readPixels();
+  if (!pixels) {
+    throw new Error("readPixels に失敗した");
+  }
+  let white = 0;
+  for (let i = 0; i < pixels.length; i += 4) {
+    // 下地は黒・抜いた先は白なので、中間の値は出ない
+    if ((pixels[i] as number) > 127) {
+      white += 1;
+    }
+  }
+  return white / (pixels.length / 4);
+}
+
+/** 掠れ模様がシードに依らないことを見るための、無関係な 3 つのシード */
+const SEEDS = [0.1, 0.42, 0.77];
+
+const LEVELS = [0.2, 0.4, 0.6, 0.8, 1.0];
+
+describe("applyScratch の白抜き率", () => {
   test("level 0 では 1 画素も白抜きされない", () => {
-    // ノイズの最大値は 1.0 なので、閾値がそれを超えていれば誰も通らない
-    expect(scratchThreshold(0)).toBeGreaterThan(1);
+    expect(measureWhiteoutRatio(0, SEEDS[0] as number)).toBe(0);
   });
 
-  // level 1.0 で SCRATCH_MAX_WHITEOUT の 35% に届く
-  test.each([
-    [0.2, 0.07],
-    [0.4, 0.14],
-    [0.6, 0.21],
-    [0.8, 0.28],
-    [1.0, 0.35],
-  ])("level %p の白抜き率が %p になる", (level, expected) => {
-    // 近似式（Winitzki）の誤差を見込んで 0.001 まで許容する
-    expect(fractionAbove(scratchThreshold(level))).toBeCloseTo(expected, 3);
-  });
-
-  test("白抜き率が level に比例する", () => {
-    const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
-    const ratios = levels.map(
-      (level) => fractionAbove(scratchThreshold(level)) / level,
-    );
-    // 比例していれば level で割った値はすべて等しくなる。
-    // 旧実装ではここが 0.00002 〜 0.126 と 4 桁違っていた
-    for (const ratio of ratios) {
-      expect(ratio).toBeCloseTo(ratios[0], 3);
+  test.each(LEVELS)("level %p の白抜き率が level に比例する", (level) => {
+    const expected = level * MAX_WHITEOUT;
+    for (const seed of SEEDS) {
+      // toBeCloseTo の桁指定では `WHITEOUT_TOLERANCE` の幅を表せないので差を直接見る
+      expect(
+        Math.abs(measureWhiteoutRatio(level, seed) - expected),
+      ).toBeLessThanOrEqual(WHITEOUT_TOLERANCE);
     }
   });
 
+  test("level を上げると白抜き率が必ず増える", () => {
+    for (const seed of SEEDS) {
+      const ratios = LEVELS.map((level) => measureWhiteoutRatio(level, seed));
+      for (let i = 1; i < ratios.length; i += 1) {
+        expect(ratios[i] as number).toBeGreaterThan(ratios[i - 1] as number);
+      }
+    }
+  });
+});
+
+describe("scratchThreshold", () => {
+  test("level 0 の閾値はノイズの最大値 1.0 を超える", () => {
+    expect(scratchThreshold(0)).toBeGreaterThan(1);
+  });
+
   test("level を上げると閾値が必ず下がる", () => {
-    const thresholds = [0.1, 0.2, 0.4, 0.6, 0.8, 1.0].map(scratchThreshold);
+    const thresholds = [0.1, ...LEVELS].map(scratchThreshold);
     for (let i = 1; i < thresholds.length; i += 1) {
-      expect(thresholds[i]).toBeLessThan(thresholds[i - 1]);
+      expect(thresholds[i] as number).toBeLessThan(thresholds[i - 1] as number);
     }
   });
 
