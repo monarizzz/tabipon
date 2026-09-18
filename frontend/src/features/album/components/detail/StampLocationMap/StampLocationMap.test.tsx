@@ -95,7 +95,11 @@ describe("StampLocationMap", () => {
   // 地図を触っている間は置く側がページ送りを止める
   // （docs/front-architecture.md「地図の操作とページャの競合」）
   describe("触り始め / 終わりの通知", () => {
-    const touch = (touches: unknown[]) => ({ nativeEvent: { touches } });
+    // `touches` は画面上の全タッチ。カードの上で始まった指かどうかは
+    // `identifier` でしか分からない
+    const touch = (identifier: string, touches: unknown[] = []) => ({
+      nativeEvent: { identifier, touches },
+    });
 
     it("最後の指が離れたときに終わりを知らせる", async () => {
       const onTouchStart = jest.fn();
@@ -110,8 +114,8 @@ describe("StampLocationMap", () => {
       );
       const card = view.getByTestId("map-card");
 
-      await fireEvent(card, "touchStart", touch([{}]));
-      await fireEvent(card, "touchEnd", touch([]));
+      await fireEvent(card, "touchStart", touch("1"));
+      await fireEvent(card, "touchEnd", touch("1"));
 
       expect(onTouchStart).toHaveBeenCalled();
       expect(onTouchEnd).toHaveBeenCalled();
@@ -119,7 +123,7 @@ describe("StampLocationMap", () => {
 
     // ピンチ中に片方だけ離した時点で終わりにすると、残った指で動かしたぶんを
     // 置く側に取られる
-    it("指が残っているうちは終わりを知らせない", async () => {
+    it("カードの上に指が残っているうちは終わりを知らせない", async () => {
       const onTouchEnd = jest.fn();
       const view = await render(
         <StampLocationMap
@@ -130,10 +134,35 @@ describe("StampLocationMap", () => {
       );
       const card = view.getByTestId("map-card");
 
-      await fireEvent(card, "touchStart", touch([{}, {}]));
-      await fireEvent(card, "touchEnd", touch([{}]));
+      await fireEvent(card, "touchStart", touch("1"));
+      await fireEvent(card, "touchStart", touch("2"));
+      await fireEvent(card, "touchEnd", touch("1"));
 
       expect(onTouchEnd).not.toHaveBeenCalled();
+
+      await fireEvent(card, "touchEnd", touch("2"));
+
+      expect(onTouchEnd).toHaveBeenCalled();
+    });
+
+    // カードの外に置いた指まで数えると、その指が離れたことはこのカードへ
+    // 届かないため、置く側が止まったままになる
+    it("カードの外に残っている指は数えない", async () => {
+      const onTouchEnd = jest.fn();
+      const view = await render(
+        <StampLocationMap
+          spotName="東京タワー"
+          {...TOKYO_TOWER}
+          onTouchEnd={onTouchEnd}
+        />,
+      );
+      const card = view.getByTestId("map-card");
+
+      await fireEvent(card, "touchStart", touch("1"));
+      // カード外の指（識別子 "2"）が画面に残ったまま、地図側の指だけを離す
+      await fireEvent(card, "touchEnd", touch("1", [{ identifier: "2" }]));
+
+      expect(onTouchEnd).toHaveBeenCalled();
     });
 
     // 地図が無いカードには競合する相手がおらず、止める理由が無い。

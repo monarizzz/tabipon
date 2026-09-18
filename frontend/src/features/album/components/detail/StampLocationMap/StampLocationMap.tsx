@@ -50,11 +50,21 @@ export function StampLocationMap({
     });
   }, [latitude, longitude, delta]);
 
+  // このカードの上で始まった指だけを識別子で数える。`nativeEvent.touches` は
+  // 画面上の全タッチなので、カードの外に置いた指まで数えてしまい、地図側の指を
+  // 離しても「終わり」にならない。カード外の指が離れたことはここへ届かないため、
+  // 置く側が止まったままになる
+  const touchIds = React.useRef(new Set<string>());
+
+  const handleTouchStart = (event: GestureResponderEvent) => {
+    touchIds.current.add(event.nativeEvent.identifier);
+    onTouchStart?.();
+  };
+
+  // 指 1 本ごとに来るので、ピンチ中に片方だけ離した時点では知らせない
   const handleTouchEnd = (event: GestureResponderEvent) => {
-    // `onTouchEnd` は指 1 本ごとに来る。ピンチ中に片方だけ離した時点で
-    // 「終わり」にすると、残った指で動かしたぶんを置く側に取られる。
-    // まだ触れている指があるうちは知らせない
-    if (event.nativeEvent.touches.length > 0) return;
+    touchIds.current.delete(event.nativeEvent.identifier);
+    if (touchIds.current.size > 0) return;
 
     onTouchEnd?.();
   };
@@ -63,7 +73,7 @@ export function StampLocationMap({
   // 競合する相手がおらず、置く側のスワイプを止める理由が無い
   const touchHandlers = hasLocation
     ? {
-        onTouchStart,
+        onTouchStart: handleTouchStart,
         onTouchEnd: handleTouchEnd,
         // 指が画面外へ出るなどして touch が取り消されたときも「終わり」にする
         onTouchCancel: handleTouchEnd,
