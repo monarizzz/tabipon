@@ -119,7 +119,6 @@ export const ja = {
   },
   mypage: {
     title: "マイページ",
-    registered: "%{date} 登録",
     recentCollections: "最近のコレクション",
     seeAll: "すべて見る",
     notifications: "通知設定",

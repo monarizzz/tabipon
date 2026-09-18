@@ -120,7 +120,6 @@ export const ko: Translations = {
   },
   mypage: {
     title: "마이페이지",
-    registered: "%{date} 가입",
     recentCollections: "최근 컬렉션",
     seeAll: "모두 보기",
     notifications: "알림 설정",

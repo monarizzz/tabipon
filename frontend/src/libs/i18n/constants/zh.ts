@@ -114,7 +114,6 @@ export const zh: Translations = {
   },
   mypage: {
     title: "我的",
-    registered: "注册于 %{date}",
     recentCollections: "最近的合集",
     seeAll: "查看全部",
     notifications: "通知设置",
