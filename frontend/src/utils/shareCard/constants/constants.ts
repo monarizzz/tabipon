@@ -9,20 +9,6 @@
 export const CARD_WIDTH = 1080;
 export const CARD_HEIGHT = 1920;
 
-/**
- * 紙の色と質感。
- *
- * **`src/style/tokens.ts` には置かない。**カードの中だけで使う値で、アプリの画面には
- * 出てこない。画面の背景は白のまま（`design/DESIGN.md`）
- */
-export const PAPER_COLOR = "#fbf8f2";
-
-/** 紙の繊維に見立てたノイズ。数値が大きいほど細かく、濃くなる */
-export const PAPER_GRAIN_FREQUENCY = 0.9;
-export const PAPER_GRAIN_OCTAVES = 2;
-export const PAPER_GRAIN_SEED = 7;
-export const PAPER_GRAIN_ALPHA = 0.16;
-
 /** 紙の左右余白 */
 export const PAGE_PADDING_H = 72;
 
