@@ -136,8 +136,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  // 適用ボタンを下端に寄せるため、プレビューの下の余白をフォームが受け取る
+  // 適用ボタンを下端に寄せるため、プレビューの下の余白をフォームが受け取る。
+  // flex: 1 だと flexBasis: 0 + flexShrink: 1 で中身の実高より縮み、
+  // 画面が狭いときに下端のボタンまでスクロールできなくなるので flexGrow だけにする
   form: {
-    flex: 1,
+    flexGrow: 1,
   },
 });
