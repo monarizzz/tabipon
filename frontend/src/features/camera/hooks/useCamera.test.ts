@@ -16,8 +16,21 @@ jest.mock("expo-router", () => ({
   useRouter: jest.fn(),
   useFocusEffect: jest.fn(),
 }));
+// useCameraPermissions() は [現在値, 要求, 読み直し] の 3 要素を返す。
+// 第 3 要素を省くと useCamera 側の読み直しが undefined になって落ちる。
+// 返す関数は毎レンダー作り直さない。作り直すと useCamera 内の
+// useCallback の同一性が毎回変わり、latestFocusEffects() が
+// 古い分まで拾ってしまう
+const mockPermission: { current: { granted: boolean; canAskAgain: boolean } } =
+  { current: { granted: true, canAskAgain: false } };
+const mockRequestPermission = jest.fn();
+const mockGetPermission = jest.fn();
 jest.mock("expo-camera", () => ({
-  useCameraPermissions: () => [{ granted: true }, jest.fn()],
+  useCameraPermissions: () => [
+    mockPermission.current,
+    mockRequestPermission,
+    mockGetPermission,
+  ],
 }));
 jest.mock("@/src/libs/i18n/I18nProvider", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -55,14 +68,28 @@ async function setup() {
 }
 
 /**
+ * これまでに useFocusEffect へ渡された処理を、同じものを除いて集める。
+ * useCamera は useFocusEffect を複数登録し、再レンダーのたびに同じ処理が
+ * 積まれるため、呼び出し履歴をそのまま使うと同じ処理を何度も呼んでしまう
+ */
+function latestFocusEffects() {
+  const effects = useFocusEffectMock.mock.calls.map(([effect]) => effect);
+  return [...new Set(effects)];
+}
+
+/**
  * カメラ画面から別のタブへ移る。
- * 実機では useFocusEffect に渡した後始末が blur で走るので、それを直に呼ぶ
+ * 実機では useFocusEffect に渡した後始末が blur で走るので、それを直に呼ぶ。
+ * useCamera は useFocusEffect を複数登録するため、1 つだけを選ばず
+ * 最後のレンダーで登録されたぶんをまとめて呼ぶ（実機の focus / blur と同じ）
  */
 async function leaveCameraScreen() {
-  const effect = useFocusEffectMock.mock.calls.at(-1)?.[0];
+  const effects = latestFocusEffects();
   await act(async () => {
-    const cleanup = effect?.();
-    if (typeof cleanup === "function") cleanup();
+    const cleanups = effects.map((effect) => effect());
+    for (const cleanup of cleanups) {
+      if (typeof cleanup === "function") cleanup();
+    }
   });
 }
 
@@ -84,6 +111,7 @@ function pendingShot() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockPermission.current = { granted: true, canAskAgain: false };
   useRouterMock.mockReturnValue({ push } as never);
   takePictureAsync.mockResolvedValue({ uri: "file:///photos/raw.jpg" });
   cropToPreviewMock.mockResolvedValue("file:///photos/cropped.jpg");
