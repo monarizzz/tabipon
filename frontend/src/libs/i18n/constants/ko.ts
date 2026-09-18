@@ -47,9 +47,20 @@ export const ko: Translations = {
     step2: "아래로 내리치기",
     step3: "힘껏 눌러 찍기",
   },
+  share: {
+    brand: "tabipon",
+    hashtag: "#たびぽん",
+    dialogTitle: "스탬프 공유",
+    postText: "tabipon으로 스탬프를 찍었습니다! #たびぽん",
+    postTextWithSpot: "%{spot}에서 스탬프를 찍었습니다! #たびぽん",
+    copied: "게시용 문구를 복사했습니다",
+    unavailableTitle: "공유할 수 없습니다",
+    unavailableMessage: "이 기기에서는 공유 기능을 사용할 수 없습니다.",
+    failedTitle: "오류",
+    failedMessage: "공유 카드를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.",
+  },
   stampDone: {
     badge: "✦ 스탬프 획득! ✦",
-    shareMessage: "스탬프를 획득했습니다!",
     addSpotName: "장소 이름 추가",
     addMemo: "메모 추가...",
     keepShooting: "계속 촬영",
@@ -57,11 +68,6 @@ export const ko: Translations = {
     retake: "다시 찍기",
     retakeConfirmTitle: "스탬프를 다시 찍으시겠어요?",
     retakeConfirmMessage: "이 스탬프는 삭제되며 다시 촬영할 수 있습니다.",
-    shareUnavailableTitle: "공유할 수 없습니다",
-    shareUnavailableMessage: "이 기기에서는 공유 기능을 사용할 수 없습니다.",
-    shareFailedTitle: "오류",
-    shareFailedMessage:
-      "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     retakeFailedTitle: "다시 찍을 수 없습니다",
     retakeFailedMessage:
       "스탬프 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
@@ -113,11 +119,6 @@ export const ko: Translations = {
     designUpdateFailedTitle: "오류",
     designUpdateFailedMessage:
       "디자인 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.",
-    shareUnavailableTitle: "공유할 수 없습니다",
-    shareUnavailableMessage: "이 기기에서는 공유 기능을 사용할 수 없습니다.",
-    shareFailedTitle: "오류",
-    shareFailedMessage:
-      "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     saveFailedTitle: "저장할 수 없습니다",
     saveFailedMessage: "잠시 후 다시 시도해 주세요.",
     deleteFailedTitle: "삭제할 수 없습니다",
