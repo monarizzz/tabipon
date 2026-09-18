@@ -3,7 +3,6 @@ import { View, Text, StyleSheet } from "react-native";
 import { BottomSheet } from "@/src/commons/sheet/components/BottomSheet/BottomSheet";
 import { SelectableTile } from "@/src/commons/other/components/SelectableTile/SelectableTile";
 import { ColorSwatch } from "@/src/commons/other/components/ColorSwatch/ColorSwatch";
-import { Toggle } from "@/src/commons/other/components/Toggle/Toggle";
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { FrameThumb } from "@/src/commons/stamp/components/FrameThumb/FrameThumb";
 import type { FrameStyleOption } from "@/src/commons/stamp/types/frameStyleOption";
@@ -20,8 +19,6 @@ type Props = {
   colorOptions: readonly string[];
   selectedColor: string;
   onSelectColor: (color: string) => void;
-  showLandmarkName: boolean;
-  onToggleShowLandmarkName: (value: boolean) => void;
   onConfirm: () => void;
 };
 
@@ -34,8 +31,6 @@ export function DesignChangeSheet({
   colorOptions,
   selectedColor,
   onSelectColor,
-  showLandmarkName,
-  onToggleShowLandmarkName,
   onConfirm,
 }: Props) {
   const { t } = useTranslation();
@@ -79,14 +74,6 @@ export function DesignChangeSheet({
         </View>
       </View>
 
-      <View style={styles.toggleRow}>
-        <Text style={styles.toggleLabel}>{t("design.showLandmark")}</Text>
-        <Toggle
-          value={showLandmarkName}
-          onValueChange={onToggleShowLandmarkName}
-        />
-      </View>
-
       <CommonButton
         label={t("design.apply")}
         onPress={onConfirm}
@@ -115,19 +102,6 @@ const styles = StyleSheet.create({
   colorRow: {
     flexDirection: "row",
     gap: 12,
-  },
-  toggleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 14,
-    paddingHorizontal: spacing.l,
-    marginBottom: spacing.xl,
-  },
-  toggleLabel: {
-    fontSize: 13,
-    fontWeight: typography.labelBold.fontWeight,
-    color: colors.textPrimary,
   },
   confirmButton: {
     height: 52,

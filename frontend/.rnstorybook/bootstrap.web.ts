@@ -7,9 +7,8 @@ import { registerStorybook } from "./registerStorybook";
 // API を呼ぶたびに `Cannot read properties of undefined` で落ちる。
 // wasm は `public/canvaskit.wasm` に置く（`npm run storybook:web` が配置する）
 //
-// このファイルを `.web.ts` に分けているのは、`canvaskit-wasm` が node の
-// `fs` を require しており、native のバンドルに混ざると解決できずに
-// バンドルが失敗するため。実行時の `Platform.OS` 分岐では防げない
+// `.web.ts` に分けている理由は `docs/front-architecture.md` の
+// 「native / web の出し分け」を参照
 LoadSkiaWeb()
   .then(registerStorybook)
   .catch((error: unknown) => {

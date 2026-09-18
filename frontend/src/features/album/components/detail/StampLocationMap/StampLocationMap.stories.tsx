@@ -31,7 +31,3 @@ export const Default: Story = {};
 export const NoLocation: Story = {
   args: { latitude: null, longitude: null },
 };
-
-export const NoSpotName: Story = {
-  args: { spotName: "" },
-};

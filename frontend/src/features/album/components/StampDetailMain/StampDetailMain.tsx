@@ -27,12 +27,11 @@ type Props = StampDetail;
 export function StampDetailMain({
   loading,
   unavailable,
+  reload,
   latitude,
   longitude,
   editors,
   design,
-  showLandmarkName,
-  toggleShowLandmarkName,
   deleteDialogVisible,
   openDeleteDialog,
   cancelDelete,
@@ -48,6 +47,11 @@ export function StampDetailMain({
     return (
       <View style={[styles.container, styles.status]}>
         <Text style={styles.statusText}>{t("stampDetail.notFound")}</Text>
+        <CommonButton
+          label={t("common.reload")}
+          onPress={reload}
+          variant="secondary"
+        />
         <CommonButton
           label={t("stampDetail.backToAlbum")}
           onPress={backToAlbum}
@@ -79,7 +83,7 @@ export function StampDetailMain({
       </View>
       <StampDetailMediaPager
         spotName={editors.spotName}
-        imageUri={design.displayImageUri || undefined}
+        imageUri={design.imageUri || undefined}
         onPressDesignChange={design.open}
         onPressSpotName={editors.openSpotName}
         latitude={latitude}
@@ -125,8 +129,6 @@ export function StampDetailMain({
           colorOptions={STAMP_INK_COLORS}
           selectedColor={design.selectedColor}
           onSelectColor={design.setSelectedColor}
-          showLandmarkName={showLandmarkName}
-          onToggleShowLandmarkName={toggleShowLandmarkName}
           onConfirm={design.confirm}
         />
       )}
