@@ -16,6 +16,7 @@ export function AlbumMain({
   reload,
   refresh,
   pressStamp,
+  startStamp,
 }: Props) {
   const { t } = useTranslation();
 
@@ -44,6 +45,7 @@ export function AlbumMain({
           refreshing={refreshing}
           onRefresh={refresh}
           onPressStamp={pressStamp}
+          onPressStartStamp={startStamp}
         />
       )}
     </View>
