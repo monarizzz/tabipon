@@ -1,15 +1,8 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { colors, radii, spacing, typography } from "@/src/style/tokens";
-
-type Props = {
-  spotName: string;
-  latitude: number | null;
-  longitude: number | null;
-  zoom?: number;
-};
+import { styles, type StampLocationMapProps } from "./StampLocationMap.shared";
 
 /**
  * ズーム段数を `MapView` の表示範囲（緯度経度の幅）に直す。
@@ -27,7 +20,7 @@ export function StampLocationMap({
   latitude,
   longitude,
   zoom = 15,
-}: Props) {
+}: StampLocationMapProps) {
   const { t } = useTranslation();
 
   // 0,0 は大西洋上の点で、座標が入っていない行の既定値として紛れ込みやすい。
@@ -88,43 +81,3 @@ export function StampLocationMap({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: {
-    alignItems: "center",
-    gap: spacing.l,
-    paddingVertical: spacing.l,
-  },
-  mapCard: {
-    width: 350,
-    height: 260,
-    borderRadius: radii.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: "hidden",
-  },
-  map: {
-    flex: 1,
-  },
-  unavailable: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: spacing.l,
-  },
-  unavailableText: {
-    fontSize: typography.body.fontSize,
-    color: colors.textPlaceholder,
-    textAlign: "center",
-  },
-  spotName: {
-    fontSize: typography.sectionHeading.fontSize,
-    fontWeight: typography.sectionHeading.fontWeight,
-    color: colors.textPrimary,
-  },
-  placeholder: {
-    fontSize: typography.sectionHeading.fontSize,
-    fontWeight: typography.sectionHeading.fontWeight,
-    color: colors.textPlaceholder,
-  },
-});
