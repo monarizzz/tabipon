@@ -25,11 +25,6 @@ export type TextBlock = {
   align?: TextAlign;
   /** 省略記号に畳むまでの行数。省略すると 1 行 */
   maxLines?: number;
-  /**
-   * 1 行の高さ。折り返した行を罫線に合わせるために使う。
-   * 省略するとフォント既定の行送りになる
-   */
-  lineHeight?: number;
 };
 
 function buildParagraph(block: TextBlock, width: number): SkParagraph {
@@ -42,10 +37,6 @@ function buildParagraph(block: TextBlock, width: number): SkParagraph {
     color: Skia.Color(block.color),
     fontSize: block.fontSize,
     fontStyle: { weight: block.weight ?? FontWeight.Normal },
-    // heightMultiplier は fontSize に対する倍率なので、欲しい行高を fontSize で割る
-    ...(block.lineHeight
-      ? { heightMultiplier: block.lineHeight / block.fontSize }
-      : {}),
   });
   builder.addText(block.text);
   const paragraph = builder.build();

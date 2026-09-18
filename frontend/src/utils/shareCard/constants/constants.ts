@@ -10,19 +10,33 @@ export const CARD_WIDTH = 1080;
 export const CARD_HEIGHT = 1920;
 
 /** 紙の左右余白 */
-export const PAGE_PADDING_H = 80;
+export const PAGE_PADDING_H = 72;
 
 /** 記入欄の幅 */
 export const CONTENT_WIDTH = CARD_WIDTH - PAGE_PADDING_H * 2;
 
-/** スタンプを押す位置と大きさ */
-export const STAMP_TOP = 140;
-export const STAMP_SIZE = 820;
+/** 上端の綴じ穴。リングノートの見え方に寄せる */
+export const HOLE_COUNT = 7;
+export const HOLE_RADIUS = 26;
+export const HOLE_CENTER_Y = 96;
 
-/** 罫線の本数・間隔・太さ。1 本目はスタンプの下に置く */
-export const RULE_COUNT = 5;
-export const RULE_TOP = STAMP_TOP + STAMP_SIZE + 150;
-export const RULE_GAP = 140;
+/**
+ * スタンプを押す位置と大きさ。記入欄と同じ幅にして左右を揃える。
+ *
+ * 記入欄は 1 項目 1 行に抑えてあり、余った高さはすべてスタンプに回している
+ */
+export const STAMP_TOP = 220;
+export const STAMP_SIZE = CONTENT_WIDTH;
+
+/**
+ * 罫線の本数・間隔・太さ。
+ *
+ * 本数はスポット名 + 日付 + 場所 + メモ の 4 行ぶん。どの項目も 1 行に収め、
+ * 入り切らない分は省略記号に畳む
+ */
+export const RULE_COUNT = 4;
+export const RULE_TOP = 1400;
+export const RULE_GAP = 130;
 export const RULE_WIDTH = 3;
 
 /** 罫線と、その上に乗る文字の間隔 */
@@ -35,9 +49,6 @@ export const LABEL_WIDTH = 150;
 export const SPOT_NAME_FONT_SIZE = 56;
 export const LABEL_FONT_SIZE = 30;
 export const VALUE_FONT_SIZE = 40;
-
-/** メモが折り返せる行数。1 行につき罫線 1 本を使う */
-export const MEMO_MAX_LINES = 2;
 
 /** 省略記号 */
 export const ELLIPSIS = "…";

@@ -2,8 +2,7 @@
  * 共有カード 1 枚を組み立てる。
  *
  * スタンプ帳の 1 ページに見立て、上にスタンプを押し、その下の罫線へ手書きの記入欄の
- * ように項目を書き込む。書き込む順は「スポット名 → 渡された項目」で、値の無い項目は
- * 呼び出し側が除いてあるので後ろの項目が繰り上がる。
+ * ように項目を書き込む。
  */
 import {
   FontWeight,
@@ -20,7 +19,6 @@ import {
   LABEL_FONT_SIZE,
   LABEL_WIDTH,
   PAGE_PADDING_H,
-  RULE_GAP,
   RULE_TO_TEXT_GAP,
   SPOT_NAME_FONT_SIZE,
   STAMP_SIZE,
@@ -46,22 +44,22 @@ import { renderToImage, toRasterImage } from "@/src/utils/skia/surface";
 /**
  * 罫線の上に文字を乗せる。
  *
- * Paragraph は左上を指定して描くので、罫線の y から文字の高さを引いて上端を出す。
- * 折り返した行も罫線に乗るよう、行高は罫線の間隔に合わせてある
+ * Paragraph は左上を指定して描くので、罫線の y から文字の高さを引いて上端を出す
  */
 function drawOnRule(
   canvas: SkCanvas,
   block: TextBlock,
   left: number,
   width: number,
-  bottom: number,
+  ruleIndex: number,
 ): void {
+  const bottom = ruleY(ruleIndex) - RULE_TO_TEXT_GAP;
   const height = measureTextHeight(block, width);
   drawTextBlock(canvas, block, left, bottom - height, width);
 }
 
 /** スポット名。1 本目の罫線にラベル無しで大きく書く */
-function drawSpotName(canvas: SkCanvas, spotName: string, index: number): void {
+function drawSpotName(canvas: SkCanvas, spotName: string): void {
   drawOnRule(
     canvas,
     {
@@ -72,7 +70,7 @@ function drawSpotName(canvas: SkCanvas, spotName: string, index: number): void {
     },
     PAGE_PADDING_H,
     CONTENT_WIDTH,
-    ruleY(index) - RULE_TO_TEXT_GAP,
+    0,
   );
 }
 
@@ -80,10 +78,8 @@ function drawSpotName(canvas: SkCanvas, spotName: string, index: number): void {
 function drawField(
   canvas: SkCanvas,
   field: ShareCardField,
-  index: number,
+  ruleIndex: number,
 ): void {
-  const bottom = ruleY(index) - RULE_TO_TEXT_GAP;
-
   drawOnRule(
     canvas,
     {
@@ -93,24 +89,19 @@ function drawField(
     },
     PAGE_PADDING_H,
     LABEL_WIDTH,
-    bottom,
+    ruleIndex,
   );
 
-  const maxLines = field.maxLines ?? 1;
   drawOnRule(
     canvas,
     {
       text: field.value,
       fontSize: VALUE_FONT_SIZE,
       color: colors.textPrimary,
-      maxLines,
-      // 折り返した行を次の罫線に乗せる
-      lineHeight: maxLines > 1 ? RULE_GAP : undefined,
     },
     PAGE_PADDING_H + LABEL_WIDTH,
     CONTENT_WIDTH - LABEL_WIDTH,
-    // 複数行は下の罫線まで使うので、最後の行の位置へ下げる
-    bottom + RULE_GAP * (maxLines - 1),
+    ruleIndex,
   );
 }
 
@@ -126,16 +117,16 @@ export function renderShareCard(content: ShareCardContent): SkImage {
       Skia.Paint(),
     );
 
-    // 使った罫線の本数を数えながら上から書き込む。複数行の項目はその分だけ進める
-    let index = 0;
+    // **値が無くても行は詰めない。**項目ごとに使う罫線を決め打ちにする。
+    // 繰り上げると、スポット名の無いスタンプだけ下の項目が 1 行上にずれて、
+    // 同じ項目が別の高さに出てしまう
     if (content.spotName) {
-      drawSpotName(canvas, content.spotName, index);
-      index += 1;
+      drawSpotName(canvas, content.spotName);
     }
-    for (const field of content.fields) {
-      drawField(canvas, field, index);
-      index += field.maxLines ?? 1;
-    }
+    content.fields.forEach((field, index) => {
+      if (!field.value) return;
+      drawField(canvas, field, index + 1);
+    });
   });
 
   return toRasterImage(card, "共有カード");

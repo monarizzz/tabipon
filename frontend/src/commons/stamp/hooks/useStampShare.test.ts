@@ -100,23 +100,24 @@ it("カードにはスポット名と、日付・場所・メモを載せる", a
     fields: [
       { label: "stampDetail.labelDate", value: "2026/09/18" },
       { label: "stampDetail.labelPlace", value: "東京都港区芝公園" },
-      {
-        label: "stampDetail.labelMemo",
-        value: "展望台からの眺めが良かった",
-        maxLines: 2,
-      },
+      { label: "stampDetail.labelMemo", value: "展望台からの眺めが良かった" },
     ],
   });
 });
 
-it("値の無い項目は罫線ごと詰めるため、カードへ渡さない", async () => {
+it("値の無い項目も空のまま渡す。行の位置を項目ごとに決め打ちにするため", async () => {
   const { result } = await setup({ ...STAMP, address: null, memo: null });
 
   await press(result.current.share);
 
+  // 外してしまうと、場所の無いスタンプだけメモが 1 行上に出てしまう
   expect(generateShareCardPngMock).toHaveBeenCalledWith(
     expect.objectContaining({
-      fields: [{ label: "stampDetail.labelDate", value: "2026/09/18" }],
+      fields: [
+        { label: "stampDetail.labelDate", value: "2026/09/18" },
+        { label: "stampDetail.labelPlace", value: "" },
+        { label: "stampDetail.labelMemo", value: "" },
+      ],
     }),
   );
 });

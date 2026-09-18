@@ -10,7 +10,6 @@ import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import type { I18nContextValue } from "@/src/libs/i18n/types/i18n";
 import { writeShareCard } from "@/src/libs/shareCardFile";
 import { generateShareCardPng } from "@/src/utils/shareCard/io";
-import { MEMO_MAX_LINES } from "@/src/utils/shareCard/constants/constants";
 import type { ShareCardField } from "@/src/utils/shareCard/types/shareCardContent";
 import { formatIsoDate } from "@/src/utils/datetime/format";
 
@@ -25,7 +24,12 @@ function postTextOf(t: I18nContextValue["t"], spotName: string): string {
     : t("share.postText");
 }
 
-/** カードの罫線に書き込む項目。値の無いものは行ごと詰めるのでここで除く */
+/**
+ * カードの罫線に書き込む項目。
+ *
+ * 並び順がそのまま行の位置になるので、値が空でも要素は外さない
+ * （`ShareCardContent`）
+ */
 function fieldsOf(t: I18nContextValue["t"], stamp: Stamp): ShareCardField[] {
   return [
     {
@@ -33,12 +37,8 @@ function fieldsOf(t: I18nContextValue["t"], stamp: Stamp): ShareCardField[] {
       value: formatIsoDate(stamp.capturedAt),
     },
     { label: t("stampDetail.labelPlace"), value: stamp.address ?? "" },
-    {
-      label: t("stampDetail.labelMemo"),
-      value: stamp.memo ?? "",
-      maxLines: MEMO_MAX_LINES,
-    },
-  ].filter((field) => field.value !== "");
+    { label: t("stampDetail.labelMemo"), value: stamp.memo ?? "" },
+  ];
 }
 
 /**

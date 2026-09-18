@@ -4,10 +4,8 @@ import type { SkImage } from "@shopify/react-native-skia";
 export type ShareCardField = {
   /** 行の左に小さく出す項目名（「日付」など） */
   label: string;
-  /** 書き込む値。空文字の項目は呼び出し側で除く */
+  /** 書き込む値。空文字ならその行は空のまま残す */
   value: string;
-  /** 折り返せる行数。2 以上なら罫線もその本数を使う。省略すると 1 */
-  maxLines?: number;
 };
 
 /**
@@ -24,6 +22,11 @@ export type ShareCardContent = {
   stamp: SkImage;
   /** スポット名。1 本目の罫線にラベル無しで大きく書く。未入力なら空文字 */
   spotName: string;
-  /** スポット名の下に上から順に書き込む項目。値の無いものは含めない */
+  /**
+   * スポット名の下の罫線へ、渡した順に 1 行ずつ書き込む項目。
+   *
+   * **値が空でも要素を外さない。**並び順がそのまま行の位置になるので、外すと
+   * 下の項目が繰り上がって同じ項目が別の高さに出てしまう
+   */
   fields: ShareCardField[];
 };
