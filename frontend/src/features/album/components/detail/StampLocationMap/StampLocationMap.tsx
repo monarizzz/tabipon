@@ -66,10 +66,11 @@ export function StampLocationMap({
               latitudeDelta: delta,
               longitudeDelta: delta,
             }}
-            scrollEnabled={false}
-            zoomEnabled={false}
-            rotateEnabled={false}
-            pitchEnabled={false}
+            // 地図は自由に動かせる。動かした状態を戻す導線は置かず、
+            // 詳細を開き直せば `initialRegion` の位置から始まる
+            //
+            // ツールバー（Android の経路案内ボタン）だけは外す。押すと
+            // 別アプリへ飛び、詳細画面から出てしまう
             toolbarEnabled={false}
           >
             <Marker coordinate={{ latitude, longitude }} title={spotName} />
