@@ -119,8 +119,6 @@ export const ja = {
   },
   mypage: {
     title: "マイページ",
-    recentCollections: "最近のコレクション",
-    seeAll: "すべて見る",
     notifications: "通知設定",
     privacy: "プライバシー",
     help: "ヘルプ",

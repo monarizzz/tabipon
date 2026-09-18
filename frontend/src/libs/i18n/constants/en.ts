@@ -121,8 +121,6 @@ export const en: Translations = {
   },
   mypage: {
     title: "My Page",
-    recentCollections: "Recent collections",
-    seeAll: "See all",
     notifications: "Notifications",
     privacy: "Privacy",
     help: "Help",
