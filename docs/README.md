@@ -4,6 +4,7 @@
 
 | ドキュメント                                   | 概要                                                                             |
 | ---------------------------------------------- | -------------------------------------------------------------------------------- |
+| [ai-review-loop.md](ai-review-loop.md)         | Codex / Claude 共通の PR レビュー・修正・再レビュー手順                          |
 | [REQUIREMENTS.md](REQUIREMENTS.md)             | ユーザー体験フロー・画面定義・画面遷移・主要機能・技術スタック                   |
 | [front-architecture.md](front-architecture.md) | フロントエンドの構成とコンポーネント設計ルール                                   |
 | [stamp-pipeline.md](stamp-pipeline.md)         | スタンプ生成パイプラインの構成・工程順・ルール                                   |
