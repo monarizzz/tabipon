@@ -28,7 +28,8 @@ export const typography = {
 export const radii = {
   card: 12,
   button: 20,
-  circle: 36,
+  circle: 36, // カメラシャッター（72px）
+  iconCircle: 40, // アイコンを囲む円（80px）
   tab: 16,
   hint: 14,
 };

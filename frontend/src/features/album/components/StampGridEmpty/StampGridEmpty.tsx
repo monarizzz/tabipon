@@ -2,7 +2,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Camera } from "lucide-react-native";
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/style/tokens";
+import { colors, typography, spacing, radii } from "@/src/style/tokens";
 
 type Props = {
   /** 撮影画面へ向かう導線。渡さなければ見出しと説明だけを出す */
@@ -40,9 +40,10 @@ const styles = StyleSheet.create({
     gap: spacing.m,
   },
   iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    // 正円にするため、辺は radii.iconCircle の 2 倍で揃える
+    width: radii.iconCircle * 2,
+    height: radii.iconCircle * 2,
+    borderRadius: radii.iconCircle,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.surface,
