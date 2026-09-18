@@ -75,6 +75,12 @@ export function useStampDetail(id: string | undefined): StampDetail {
             await deleteStamp(id);
           } catch (error) {
             console.error("[stamp-detail] failed to delete stamp", error);
+            // 戻すとスタンプが残ったまま消えたように見えるので、この画面に留めて知らせる
+            Alert.alert(
+              t("stampDetail.deleteFailedTitle"),
+              t("stampDetail.deleteFailedMessage"),
+            );
+            return;
           }
         }
         router.back();

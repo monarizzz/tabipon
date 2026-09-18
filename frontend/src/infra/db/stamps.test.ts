@@ -413,6 +413,49 @@ describe("deleteStamp", () => {
       deleteStamp("00000000-0000-4000-8000-999999999999"),
     ).resolves.toBeUndefined();
   });
+
+  // 行が消えた後にファイルの後始末で落ちても、利用者から見たスタンプはもう消えている。
+  // ここで投げると呼び出し側が削除の失敗として扱ってしまう（`stamps.ts` の
+  // `deleteStamp()` のコメント）
+  it("画像の削除が失敗しても投げず、行は消えたままにする", async () => {
+    const fs = jest.requireActual<typeof import("node:fs")>("node:fs");
+    const saved = await saveStamp(newStamp());
+    const rmSyncSpy = jest.spyOn(fs, "rmSync").mockImplementation(() => {
+      throw new Error("boom");
+    });
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+    try {
+      await expect(deleteStamp(saved.id)).resolves.toBeUndefined();
+
+      expect(await getStamp(saved.id)).toBeNull();
+      expect(warnSpy).toHaveBeenCalled();
+    } finally {
+      // 後片付け（afterEach の rmSync）も同じ実体を使うので、必ず戻す
+      rmSyncSpy.mockRestore();
+      warnSpy.mockRestore();
+    }
+  });
+
+  it("行の削除が失敗したら投げる", async () => {
+    const saved = await saveStamp(newStamp());
+    const prepare = mockSqlite.prepare.bind(mockSqlite);
+    mockSqlite.prepare = (sql: string) =>
+      sql.trimStart().startsWith("DELETE")
+        ? {
+            all: () => [],
+            get: () => undefined,
+            run: () => {
+              throw new Error("boom");
+            },
+          }
+        : prepare(sql);
+
+    await expect(deleteStamp(saved.id)).rejects.toThrow("boom");
+
+    mockSqlite.prepare = prepare;
+    expect(await getStamp(saved.id)).not.toBeNull();
+  });
 });
 
 describe("deleteOrphanFiles", () => {

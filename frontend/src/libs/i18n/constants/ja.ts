@@ -48,6 +48,9 @@ export const ja = {
     retake: "撮り直す",
     retakeConfirmTitle: "スタンプを撮り直しますか?",
     retakeConfirmMessage: "このスタンプは削除され、もう一度撮影し直せます。",
+    retakeFailedTitle: "撮り直せませんでした",
+    retakeFailedMessage:
+      "スタンプの削除に失敗しました。時間をおいて再度お試しください。",
   },
   design: {
     frame: "フレーム",
@@ -101,6 +104,9 @@ export const ja = {
       "画像の共有に失敗しました。時間をおいて再度お試しください。",
     saveFailedTitle: "保存できませんでした",
     saveFailedMessage: "時間をおいて再度お試しください。",
+    deleteFailedTitle: "削除できませんでした",
+    deleteFailedMessage:
+      "スタンプの削除に失敗しました。時間をおいて再度お試しください。",
   },
   discardDialog: {
     title: "編集内容を破棄しますか？",

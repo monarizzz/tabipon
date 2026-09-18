@@ -50,6 +50,9 @@ export const en: Translations = {
     retakeConfirmTitle: "Retake this stamp?",
     retakeConfirmMessage:
       "This stamp will be deleted so you can shoot it again.",
+    retakeFailedTitle: "Could not retake",
+    retakeFailedMessage:
+      "Failed to delete the stamp. Please wait a moment and try again.",
   },
   design: {
     frame: "Frame",
@@ -103,6 +106,9 @@ export const en: Translations = {
       "Failed to share the image. Please wait a moment and try again.",
     saveFailedTitle: "Could not save",
     saveFailedMessage: "Please wait a moment and try again.",
+    deleteFailedTitle: "Could not delete",
+    deleteFailedMessage:
+      "Failed to delete the stamp. Please wait a moment and try again.",
   },
   discardDialog: {
     title: "Discard your edits?",
