@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { GestureResponderEvent, Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { styles, type StampLocationMapProps } from "./StampLocationMap.shared";
@@ -20,8 +20,11 @@ export function StampLocationMap({
   latitude,
   longitude,
   zoom = 15,
+  onTouchStart,
+  onTouchEnd,
 }: StampLocationMapProps) {
   const { t } = useTranslation();
+  const mapRef = React.useRef<MapView | null>(null);
 
   // 0,0 は大西洋上の点で、座標が入っていない行の既定値として紛れ込みやすい。
   // その 1 点だけは「座標なし」として扱う
@@ -32,33 +35,71 @@ export function StampLocationMap({
 
   const delta = deltaFromZoom(zoom);
 
+  // 住所を直して座標を引き直したとき（`saveLocation` in
+  // `src/commons/stamp/hooks/useStampFieldEditors.ts`）にカメラを寄せ直す。
+  // **`region` を毎レンダー渡してはいけない**（docs/front-architecture.md
+  // 「地図の操作とページャの競合」）
+  React.useEffect(() => {
+    if (latitude === null || longitude === null) return;
+
+    mapRef.current?.animateToRegion({
+      latitude,
+      longitude,
+      latitudeDelta: delta,
+      longitudeDelta: delta,
+    });
+  }, [latitude, longitude, delta]);
+
+  // このカードの上で始まった指だけを識別子で数える。`nativeEvent.touches` は
+  // 画面上の全タッチなので、カードの外に置いた指まで数えてしまい、地図側の指を
+  // 離しても「終わり」にならない。カード外の指が離れたことはここへ届かないため、
+  // 置く側が止まったままになる
+  const touchIds = React.useRef(new Set<string>());
+
+  const handleTouchStart = (event: GestureResponderEvent) => {
+    touchIds.current.add(event.nativeEvent.identifier);
+    onTouchStart?.();
+  };
+
+  // 指 1 本ごとに来るので、ピンチ中に片方だけ離した時点では知らせない
+  const handleTouchEnd = (event: GestureResponderEvent) => {
+    touchIds.current.delete(event.nativeEvent.identifier);
+    if (touchIds.current.size > 0) return;
+
+    onTouchEnd?.();
+  };
+
+  // 触り始め / 終わりを流すのは地図があるときだけ。地図が無いカードには
+  // 競合する相手がおらず、置く側のスワイプを止める理由が無い
+  const touchHandlers = hasLocation
+    ? {
+        onTouchStart: handleTouchStart,
+        onTouchEnd: handleTouchEnd,
+        // 指が画面外へ出るなどして touch が取り消されたときも「終わり」にする
+        onTouchCancel: handleTouchEnd,
+      }
+    : null;
+
   return (
     <View style={styles.wrap}>
-      <View style={styles.mapCard}>
+      {/* 方針は docs/front-architecture.md「地図の操作とページャの競合」 */}
+      <View testID="map-card" style={styles.mapCard} {...touchHandlers}>
         {hasLocation ? (
           <MapView
+            ref={mapRef}
             style={styles.map}
             // 端末の地図（iOS は Apple Maps）を使う。API キーが要らず、
             // 圏外でも OS のキャッシュが効く範囲では出る
-            //
-            // **`initialRegion` ではなく `region` を渡す。**`initialRegion` は
-            // ネイティブ側で「まだ適用していないとき」だけカメラを動かす作りで
-            // （`AIRMap.mm` の `setInitialRegion:` / Android の
-            // `MapView.java` の `setInitialRegion()`）、住所を直して座標を
-            // 引き直したとき（`saveLocation` in
-            // `src/commons/stamp/hooks/useStampFieldEditors.ts`）にピンだけが
-            // 動いて地図は前の場所のままになる。`region` は値が変わるたびに
-            // カメラへ反映され、初回表示にもそのまま効く
-            region={{
+            initialRegion={{
               latitude,
               longitude,
               latitudeDelta: delta,
               longitudeDelta: delta,
             }}
-            scrollEnabled={false}
-            zoomEnabled={false}
-            rotateEnabled={false}
-            pitchEnabled={false}
+            // ズーム・パン・回転・傾きは既定どおり有効
+            // （docs/front-architecture.md「地図の操作とページャの競合」）。
+            // ツールバー（Android の経路案内ボタン）だけは外す。押すと
+            // 別アプリへ飛び、詳細画面から出てしまう
             toolbarEnabled={false}
           >
             <Marker coordinate={{ latitude, longitude }} title={spotName} />

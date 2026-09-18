@@ -30,12 +30,26 @@ jest.spyOn(Image, "getSize").mockImplementation((_uri, success) => {
 // react-native-maps はネイティブ実装 (RNMapsAirModule) を要求するため、
 // 読み込んだ時点で落ちる。公式のモックが無いので、中身を描画しない View に
 // 置き換える。このテストで確認できるのは「地図を含む画面が組み立てられること」まで
+//
+// `MapView` だけは素の `View` に置き換えられない。`StampLocationMap.tsx` が
+// ref 経由で `animateToRegion()` を呼ぶが、`View` のインスタンスは
+// 持っていないため。何もしない実装を生やしたスタブを返す
 jest.mock("react-native-maps", () => {
   const { View } = require("react-native");
+  const { createElement, forwardRef, useImperativeHandle } = require("react");
+
+  const MapView = forwardRef(
+    (props: Record<string, unknown>, ref: React.Ref<unknown>) => {
+      useImperativeHandle(ref, () => ({ animateToRegion: () => {} }));
+      return createElement(View, props);
+    },
+  );
+  MapView.displayName = "MapView";
+
   return {
     __esModule: true,
-    default: View,
-    MapView: View,
+    default: MapView,
+    MapView,
     Marker: View,
     Callout: View,
     Polyline: View,
