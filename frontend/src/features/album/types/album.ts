@@ -12,4 +12,6 @@ export type Album = {
   reload: () => void;
   refresh: () => void;
   pressStamp: (item: StampGridItem) => void;
+  /** 0 件のときの導線。撮影タブへ切り替える */
+  startStamp: () => void;
 };

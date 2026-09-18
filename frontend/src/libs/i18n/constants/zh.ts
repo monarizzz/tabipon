@@ -15,13 +15,20 @@ export const zh: Translations = {
   tabs: {
     camera: "相机",
     album: "相册",
-    mypage: "我的",
+    mypage: "设置",
   },
   camera: {
     accessRequiredTitle: "需要相机访问权限",
+    accessRequiredDescription: "盖章需要拍摄照片。请允许访问相机。",
     accessAllow: "允许访问相机",
+    accessDeniedTitle: "相机访问权限已关闭",
+    accessDeniedDescription:
+      "应用无法再次请求权限。请在「设置」应用中打开相机权限，然后返回此页面。",
+    accessOpenSettings: "打开「设置」应用",
     hint: "请将拍摄对象置于圆圈内",
     capturedPhoto: "[ 已拍摄的照片 ]",
+    captureFailedTitle: "拍摄失败",
+    captureFailedMessage: "请再次按下快门。",
   },
   photoAdjust: {
     title: "调整照片",
@@ -49,6 +56,10 @@ export const zh: Translations = {
     retake: "重新拍摄",
     retakeConfirmTitle: "要重新拍摄这枚印章吗？",
     retakeConfirmMessage: "该印章将被删除，你可以重新拍摄。",
+    shareUnavailableTitle: "无法共享",
+    shareUnavailableMessage: "此设备不支持共享功能。",
+    shareFailedTitle: "错误",
+    shareFailedMessage: "图片共享失败。请稍后再试。",
     retakeFailedTitle: "无法重新拍摄",
     retakeFailedMessage: "删除印章失败。请稍后再试。",
   },
@@ -66,7 +77,9 @@ export const zh: Translations = {
     title: "相册",
     stampCount: "%{count} 枚印章",
     loadError: "无法加载印章",
+    emptyTitle: "还没有印章",
     empty: "收集印章后会显示在这里！",
+    emptyAction: "去盖印章",
     stampName: "印章",
     unknownSpotName: "未设置地点",
   },
@@ -109,10 +122,7 @@ export const zh: Translations = {
     message: "切换标签页会丢失当前的编辑内容。",
   },
   mypage: {
-    title: "我的",
-    registered: "注册于 %{date}",
-    recentCollections: "最近的合集",
-    seeAll: "查看全部",
+    title: "设置",
     notifications: "通知设置",
     privacy: "隐私",
     help: "帮助",
@@ -121,5 +131,11 @@ export const zh: Translations = {
   language: {
     title: "语言",
     system: "跟随系统设置",
+  },
+  dbError: {
+    title: "无法启动应用",
+    message:
+      "准备读取已保存的印章时失败。如果重试后仍无法解决，请将应用更新到最新版本。",
+    detailLabel: "错误详情",
   },
 };

@@ -54,6 +54,7 @@ const meta = {
   args: {
     loading: false,
     unavailable: false,
+    reload: () => {},
     latitude: 35.6586,
     longitude: 139.7454,
     editors: EDITORS,
@@ -78,7 +79,10 @@ export const Loading: Story = {
   args: { loading: true },
 };
 
-/** id が無い／DB に行が無い／読み込みに失敗した、のいずれか */
+/**
+ * id が無い／DB に行が無い／読み込みに失敗した、のいずれか。
+ * どれかを問わず、再読み込みとアルバムへ戻る導線を出す
+ */
 export const Unavailable: Story = {
   args: { unavailable: true },
 };

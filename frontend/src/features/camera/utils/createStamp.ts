@@ -15,6 +15,7 @@ import type { CreateStampInput } from "@/src/features/camera/types/createStampIn
  */
 export async function createStamp({
   photoUri,
+  capturedAt,
   color,
   frameId,
   scratchLevel,
@@ -34,7 +35,7 @@ export async function createStamp({
     id,
     stampPng,
     photoUri,
-    capturedAt: new Date().toISOString(),
+    capturedAt,
     location,
     address,
     color,

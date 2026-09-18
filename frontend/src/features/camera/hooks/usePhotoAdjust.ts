@@ -6,8 +6,14 @@ import type { PhotoAdjust } from "@/src/features/camera/types/photoAdjust";
 import { stampPressParams } from "@/src/features/camera/utils/stampPressParams";
 import { getCurrentStampPlace } from "@/src/libs/location";
 
+type Params = {
+  imageUri: string | undefined;
+  /** 撮影した時刻。ルートパラメータなので ISO 文字列で来る */
+  capturedAt: string | undefined;
+};
+
 /** 写真調整画面の状態と操作をまとめて持つ */
-export function usePhotoAdjust(imageUri: string | undefined): PhotoAdjust {
+export function usePhotoAdjust({ imageUri, capturedAt }: Params): PhotoAdjust {
   const router = useRouter();
   const [zoom, setZoom] = React.useState(0);
   const [pendingTab, setPendingTab] = React.useState<Href | null>(null);
@@ -34,7 +40,7 @@ export function usePhotoAdjust(imageUri: string | undefined): PhotoAdjust {
         : { location: null, address: null };
       router.push({
         pathname: "/stamp-press",
-        params: stampPressParams(photoUri, place),
+        params: stampPressParams(photoUri, capturedAt, place),
       });
     },
     cancelDiscard: () => setPendingTab(null),

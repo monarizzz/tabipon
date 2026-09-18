@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-native";
 import { View } from "react-native";
 import { fn } from "storybook/test";
-import { Camera, Image, User } from "lucide-react-native";
+import { Camera, Image, Settings } from "lucide-react-native";
 
 import { TabBar, type TabBarItemData } from "./TabBar";
 
@@ -22,8 +22,8 @@ const baseItems: (activeKey: string) => TabBarItemData[] = (activeKey) => [
   },
   {
     key: "mypage",
-    label: "マイページ",
-    icon: User,
+    label: "設定",
+    icon: Settings,
     active: activeKey === "mypage",
     onPress: fn(),
   },

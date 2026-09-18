@@ -5,7 +5,15 @@ import type { CameraType, CameraView, FlashMode } from "expo-camera";
 export type Camera = {
   /** 権限がまだ無い間は許可を求める表示にする */
   permissionGranted: boolean;
+  /**
+   * アプリから権限ダイアログをもう一度出せるか。
+   * 一度拒否されると OS はダイアログを出さなくなり、
+   * `requestPermission()` は何も表示せずに拒否のまま返る
+   */
+  permissionCanAskAgain: boolean;
   requestPermission: () => void;
+  /** 権限を戻せるのが OS の設定アプリだけになったときの逃げ道 */
+  openSettings: () => void;
 
   facing: CameraType;
   flash: FlashMode;

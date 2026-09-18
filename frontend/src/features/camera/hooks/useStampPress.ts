@@ -5,12 +5,15 @@ import { useTabBarItems } from "@/src/commons/layout/hooks/useTabBarItems";
 import { FRAME_STYLE_OPTIONS } from "@/src/features/camera/constants/frameStyleOptions";
 import type { StampPress } from "@/src/features/camera/types/stampPress";
 import { createStamp } from "@/src/features/camera/utils/createStamp";
+import { resolveCapturedAt } from "@/src/features/camera/utils/resolveCapturedAt";
 import { DEFAULT_STAMP_COLOR } from "@/src/utils/stamp/constants/constants";
 import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 import type { PressGestureFinish } from "@/src/utils/stampPress/types/pressGesture";
 
 type Params = {
   imageUri: string | undefined;
+  /** 撮影した時刻。ルートパラメータなので ISO 文字列で来る */
+  capturedAt: string | undefined;
   /** 撮影地。ルートパラメータなので文字列で来る */
   latitude: string | undefined;
   longitude: string | undefined;
@@ -20,6 +23,7 @@ type Params = {
 /** 押印画面の状態と操作をまとめて持つ */
 export function useStampPress({
   imageUri,
+  capturedAt,
   latitude,
   longitude,
   address,
@@ -69,6 +73,8 @@ export function useStampPress({
       try {
         const { id } = await createStamp({
           photoUri: imageUri,
+          // 押した時刻ではなく、撮影画面から運ばれてきた撮影時刻を入れる
+          capturedAt: resolveCapturedAt(capturedAt),
           color,
           frameId: frameStyleId,
           scratchLevel: finish.scratchLevel,
@@ -93,7 +99,16 @@ export function useStampPress({
         setWaiting(false);
       }
     },
-    [address, color, frameStyleId, imageUri, latitude, longitude, router],
+    [
+      address,
+      capturedAt,
+      color,
+      frameStyleId,
+      imageUri,
+      latitude,
+      longitude,
+      router,
+    ],
   );
 
   return {

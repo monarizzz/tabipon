@@ -14,13 +14,21 @@ export const ja = {
   tabs: {
     camera: "カメラ",
     album: "アルバム",
-    mypage: "マイページ",
+    mypage: "設定",
   },
   camera: {
     accessRequiredTitle: "カメラへのアクセスが必要です",
+    accessRequiredDescription:
+      "スタンプを押すには写真の撮影が必要です。カメラへのアクセスを許可してください。",
     accessAllow: "カメラへのアクセスを許可",
+    accessDeniedTitle: "カメラへのアクセスが許可されていません",
+    accessDeniedDescription:
+      "アプリからはもう一度許可を求められません。設定アプリでカメラをオンにしてから、この画面に戻ってください。",
+    accessOpenSettings: "設定アプリを開く",
     hint: "円に入るように撮影してください",
     capturedPhoto: "[ 撮影した写真 ]",
+    captureFailedTitle: "撮影できませんでした",
+    captureFailedMessage: "もう一度シャッターを押してください。",
   },
   photoAdjust: {
     title: "写真を調整",
@@ -48,6 +56,11 @@ export const ja = {
     retake: "撮り直す",
     retakeConfirmTitle: "スタンプを撮り直しますか?",
     retakeConfirmMessage: "このスタンプは削除され、もう一度撮影し直せます。",
+    shareUnavailableTitle: "共有できません",
+    shareUnavailableMessage: "この端末では共有機能を利用できません。",
+    shareFailedTitle: "エラー",
+    shareFailedMessage:
+      "画像の共有に失敗しました。時間をおいて再度お試しください。",
     retakeFailedTitle: "撮り直せませんでした",
     retakeFailedMessage:
       "スタンプの削除に失敗しました。時間をおいて再度お試しください。",
@@ -66,7 +79,9 @@ export const ja = {
     title: "アルバム",
     stampCount: "スタンプ %{count}枚",
     loadError: "スタンプを読み込めませんでした",
+    emptyTitle: "まだスタンプがありません",
     empty: "スタンプを集めるとここに表示されます!",
+    emptyAction: "スタンプを押しに行く",
     stampName: "スタンプ",
     unknownSpotName: "スポット未設定",
   },
@@ -113,10 +128,7 @@ export const ja = {
     message: "タブを切り替えると、現在の編集内容が失われます。",
   },
   mypage: {
-    title: "マイページ",
-    registered: "%{date} 登録",
-    recentCollections: "最近のコレクション",
-    seeAll: "すべて見る",
+    title: "設定",
     notifications: "通知設定",
     privacy: "プライバシー",
     help: "ヘルプ",
@@ -125,6 +137,12 @@ export const ja = {
   language: {
     title: "言語",
     system: "端末の設定に従う",
+  },
+  dbError: {
+    title: "アプリを起動できませんでした",
+    message:
+      "保存したスタンプを読み込む準備に失敗しました。再試行しても直らない場合は、アプリを最新版に更新してください。",
+    detailLabel: "エラー内容",
   },
 };
 

@@ -1,5 +1,7 @@
 import React from "react";
+import { Alert, AppState } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
+import { openSettings } from "expo-linking";
 import {
   useCameraPermissions,
   type CameraType,
@@ -9,11 +11,13 @@ import {
 
 import type { Camera } from "@/src/features/camera/types/camera";
 import { cropToPreview } from "@/src/features/camera/utils/cropToPreview";
+import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 
 /** カメラ画面の状態と操作をまとめて持つ */
 export function useCamera(): Camera {
   const router = useRouter();
-  const [permission, requestPermission] = useCameraPermissions();
+  const { t } = useTranslation();
+  const [permission, requestPermission, getPermission] = useCameraPermissions();
   const [facing, setFacing] = React.useState<CameraType>("back");
   const [flash, setFlash] = React.useState<FlashMode>("off");
   const cameraRef = React.useRef<CameraView>(null);
@@ -28,12 +32,70 @@ export function useCamera(): Camera {
     setCapturing(false);
   }, []);
 
-  // 撮影後に戻ってきたときは、また撮れる状態にしておく
-  useFocusEffect(stopCapturing);
+  // 画面を離れるたびに進む。撮影開始時の値と違っていれば、その撮影は
+  // 利用者がカメラ画面を見ていない間に終わったもの
+  const captureGenerationRef = React.useRef(0);
+
+  const failCapture = React.useCallback(
+    (reason: unknown, notify: boolean) => {
+      console.error("[camera] failed to capture", reason);
+      stopCapturing();
+      if (!notify) return;
+      Alert.alert(
+        t("camera.captureFailedTitle"),
+        t("camera.captureFailedMessage"),
+      );
+    },
+    [stopCapturing, t],
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // 撮影後に戻ってきたときは、また撮れる状態にしておく
+      stopCapturing();
+      // タブを離れても useCamera はマウントされたまま残る。進行中の撮影を
+      // ここで無効にしないと、あとから解決した結果がアルバムなど別の画面に
+      // Alert や遷移として出てしまう
+      return () => {
+        captureGenerationRef.current += 1;
+        stopCapturing();
+      };
+    }, [stopCapturing]),
+  );
+
+  const permissionGranted = permission?.granted ?? false;
+
+  // useCameraPermissions() が自動で読むのはマウント時の 1 度だけで、
+  // 画面が残ったままだと古い拒否状態を表示し続ける。
+  // 許可済みなら読み直す必要は無いので OS への問い合わせを省く
+  const refreshPermission = React.useCallback(() => {
+    if (permissionGranted) return;
+    void getPermission();
+  }, [permissionGranted, getPermission]);
+
+  // 別のタブから戻ってきたとき
+  useFocusEffect(refreshPermission);
+
+  // 設定アプリで権限を変えてから戻ってきたとき。画面遷移は起きないので
+  // useFocusEffect は発火せず、拒否のままの表示が残る
+  // (とくに Android。iOS は権限変更でアプリ側が作り直されることが多い)
+  React.useEffect(() => {
+    const subscription = AppState.addEventListener("change", (next) => {
+      if (next !== "active") return;
+      refreshPermission();
+    });
+    return () => subscription.remove();
+  }, [refreshPermission]);
 
   return {
-    permissionGranted: permission?.granted ?? false,
+    permissionGranted,
+    // 読み込み中 (permission === null) は拒否済みと決めつけず、
+    // アプリ内で許可を求められる側に倒す
+    permissionCanAskAgain: permission?.canAskAgain ?? true,
     requestPermission,
+    openSettings: () => {
+      void openSettings();
+    },
 
     facing,
     flash,
@@ -48,18 +110,33 @@ export function useCamera(): Camera {
       if (capturingRef.current) return;
       capturingRef.current = true;
       setCapturing(true);
+      const generation = captureGenerationRef.current;
+      const onCameraScreen = () => generation === captureGenerationRef.current;
       try {
+        // シャッターを切った瞬間の時刻。これがスタンプの撮影日時になる。
+        // 調整・押印を挟むあいだに日付をまたぐことがあるので、保存側で
+        // 測り直さず、ここで測った値を押印画面まで運ぶ
+        const capturedAt = new Date().toISOString();
         const photo = await cameraRef.current?.takePictureAsync();
         if (!photo) {
-          stopCapturing();
+          // takePictureAsync() は失敗を例外ではなく undefined で返すことがある。
+          // 利用者から見ると例外時と同じ「何も起きない」なので同じ扱いにする
+          failCapture(
+            new Error("takePictureAsync returned no photo"),
+            onCameraScreen(),
+          );
           return;
         }
         // 撮影時のズームは写真自体に反映済みのため、調整画面には引き継がない
         // (引き継いで再度 scale をかけるとガイド円の中身がズレる)
         const uri = await cropToPreview(photo, containerSizeRef.current);
-        router.push({ pathname: "/photo-adjust", params: { uri } });
-      } catch {
-        stopCapturing();
+        if (!onCameraScreen()) return;
+        router.push({
+          pathname: "/photo-adjust",
+          params: { uri, capturedAt },
+        });
+      } catch (error) {
+        failCapture(error, onCameraScreen());
       }
     },
     toggleFlash: () => setFlash((prev) => (prev === "on" ? "off" : "on")),
