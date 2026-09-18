@@ -193,6 +193,25 @@ describe("saveStamp", () => {
     expect(loaded?.tiltAngle).toBe(10);
   });
 
+  // スタンプ画像・線画・元写真の 3 つを別々の置き場へ書く。どれとどれを取り違えても
+  // ファイルは 3 つとも揃うので、存在の確認だけでは気付けない。中身まで見る
+  it("スタンプ画像・線画・元写真をそれぞれの置き場へ書き分ける", async () => {
+    const fs = jest.requireActual<typeof import("node:fs")>("node:fs");
+    const saved = await saveStamp(newStamp());
+
+    const bytesAt = (relativePath: string) =>
+      new Uint8Array(fs.readFileSync(join(mockDocumentRoot, relativePath)));
+
+    expect(saved.stampImagePath).toBe(`stamps/${saved.id}-1.png`);
+    expect(saved.lineArtPath).toBe(`stamp-line-arts/${saved.id}.png`);
+    expect(saved.originalPhotoPath).toBe(`stamp-originals/${saved.id}.jpg`);
+    expect(bytesAt(saved.stampImagePath)).toEqual(PNG);
+    expect(bytesAt(saved.lineArtPath)).toEqual(LINE_ART_PNG);
+    expect(
+      fs.readFileSync(join(mockDocumentRoot, saved.originalPhotoPath), "utf8"),
+    ).toBe("photo");
+  });
+
   it("撮影日時は編集用と原本の両方に同じ値が入る", async () => {
     const saved = await saveStamp(
       newStamp({ capturedAt: "2026-09-15T02:00:00.000Z" }),

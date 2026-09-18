@@ -161,11 +161,6 @@ export function lineArtUri(stamp: Stamp): string | null {
   return existingFileUriOf(stamp.lineArtPath);
 }
 
-/** 元写真の uri。失われていれば null */
-export function originalPhotoUri(stamp: Stamp): string | null {
-  return existingFileUriOf(stamp.originalPhotoPath);
-}
-
 /**
  * スタンプ id を払い出す。
  *
