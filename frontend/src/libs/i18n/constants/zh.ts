@@ -15,7 +15,7 @@ export const zh: Translations = {
   tabs: {
     camera: "相机",
     album: "相册",
-    mypage: "我的",
+    mypage: "设置",
   },
   camera: {
     accessRequiredTitle: "需要相机访问权限",
@@ -115,10 +115,7 @@ export const zh: Translations = {
     message: "切换标签页会丢失当前的编辑内容。",
   },
   mypage: {
-    title: "我的",
-    registered: "注册于 %{date}",
-    recentCollections: "最近的合集",
-    seeAll: "查看全部",
+    title: "设置",
     notifications: "通知设置",
     privacy: "隐私",
     help: "帮助",

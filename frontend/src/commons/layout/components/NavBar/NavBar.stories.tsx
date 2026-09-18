@@ -25,12 +25,12 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const NoBack: Story = {
-  args: { onBack: undefined, title: "マイページ" },
+  args: { onBack: undefined, title: "設定" },
 };
 
 export const WithRightAction: Story = {
   args: {
-    title: "マイページ",
+    title: "設定",
     onBack: undefined,
     onRightPress: fn(),
     rightIcon: <Text style={{ color: colors.textMuted, fontSize: 14 }}>⚙︎</Text>,
