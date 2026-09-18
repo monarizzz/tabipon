@@ -73,11 +73,6 @@ export function StampLocationMap({
           </View>
         )}
       </View>
-      {spotName ? (
-        <Text style={styles.spotName}>{spotName}</Text>
-      ) : (
-        <Text style={styles.placeholder}>{t("stampDetail.addSpotName")}</Text>
-      )}
     </View>
   );
 }

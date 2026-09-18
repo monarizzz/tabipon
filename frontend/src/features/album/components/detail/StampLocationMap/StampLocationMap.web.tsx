@@ -7,7 +7,7 @@ import { styles, type StampLocationMapProps } from "./StampLocationMap.shared";
  * `StampLocationMap.tsx` の web 版。`react-native-maps` を import しない。
  * 分ける理由は `docs/front-architecture.md` の「native / web の出し分け」を参照
  */
-export function StampLocationMap({ spotName }: StampLocationMapProps) {
+export function StampLocationMap(_props: StampLocationMapProps) {
   const { t } = useTranslation();
 
   return (
@@ -19,11 +19,6 @@ export function StampLocationMap({ spotName }: StampLocationMapProps) {
           </Text>
         </View>
       </View>
-      {spotName ? (
-        <Text style={styles.spotName}>{spotName}</Text>
-      ) : (
-        <Text style={styles.placeholder}>{t("stampDetail.addSpotName")}</Text>
-      )}
     </View>
   );
 }

@@ -6,6 +6,7 @@ import { colors, radii, spacing, typography } from "@/src/style/tokens";
  * 分ける理由は `docs/front-architecture.md` の「native / web の出し分け」を参照
  */
 export type StampLocationMapProps = {
+  /** ピンをタップしたときの吹き出しに出す名前（docs/front-architecture.md「スポット名の描画」） */
   spotName: string;
   latitude: number | null;
   longitude: number | null;
@@ -39,15 +40,5 @@ export const styles = StyleSheet.create({
     fontSize: typography.body.fontSize,
     color: colors.textPlaceholder,
     textAlign: "center",
-  },
-  spotName: {
-    fontSize: typography.sectionHeading.fontSize,
-    fontWeight: typography.sectionHeading.fontWeight,
-    color: colors.textPrimary,
-  },
-  placeholder: {
-    fontSize: typography.sectionHeading.fontSize,
-    fontWeight: typography.sectionHeading.fontWeight,
-    color: colors.textPlaceholder,
   },
 });

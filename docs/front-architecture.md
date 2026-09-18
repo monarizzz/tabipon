@@ -103,6 +103,21 @@ src/commons/layout/
 - 本体ファイルと `*.stories.tsx` を同じフォルダに同居させる
 - Storybook 側は `.rnstorybook/main.ts` の `stories` に `../src/commons/**` と `../src/features/**` の 2 つを指定し、この配置を自動検出する
 
+### スポット名の描画
+
+画面の見出しとしてのスポット名を描くのは `src/commons/stamp/components/SpotNameLabel/` だけとする。
+同じ値を複数のコンポーネントがそれぞれ描くと、スタイルと編集導線の有無が揃わなくなる。
+
+スタンプ詳細（`src/features/album/components/detail/`）では、`StampDetailMediaPager` が
+横スクロールの `ScrollView` の外に `SpotNameLabel` を 1 つ置く。スポット名はページ固有の情報ではなく
+スタンプの属性なので、ページ側（`StampDetailPhoto` / `StampLocationMap`）は描かない。
+ページャの外に置けば横スワイプしても位置と内容が変わらず、編集導線もページに関係なく 1 つで済む。
+
+`StampLocationMap` の `spotName` は地図のピンの吹き出し（`Marker` の `title`）専用で、見出しとは別物。
+
+横幅の制約は `SpotNameLabel` 自身が持つ（名前が長いときは名前側だけを縮めて省略し、鉛筆アイコンを
+押し出さない）。置く側は中央寄せと余白だけを決めればよい。
+
 ---
 
 ## src/utils/stamp/ のディレクトリ構成
