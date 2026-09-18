@@ -32,8 +32,6 @@ export function StampDetailMain({
   longitude,
   editors,
   design,
-  showLandmarkName,
-  toggleShowLandmarkName,
   deleteDialogVisible,
   openDeleteDialog,
   cancelDelete,
@@ -85,7 +83,7 @@ export function StampDetailMain({
       </View>
       <StampDetailMediaPager
         spotName={editors.spotName}
-        imageUri={design.displayImageUri || undefined}
+        imageUri={design.imageUri || undefined}
         onPressDesignChange={design.open}
         onPressSpotName={editors.openSpotName}
         latitude={latitude}
@@ -131,8 +129,6 @@ export function StampDetailMain({
           colorOptions={STAMP_INK_COLORS}
           selectedColor={design.selectedColor}
           onSelectColor={design.setSelectedColor}
-          showLandmarkName={showLandmarkName}
-          onToggleShowLandmarkName={toggleShowLandmarkName}
           onConfirm={design.confirm}
         />
       )}

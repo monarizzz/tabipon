@@ -42,18 +42,16 @@ type Props = StampPress;
 export function StampPressMain({
   imageUri,
   tabItems,
-  color,
-  frameStyleId,
   draftColor,
   draftFrameStyleId,
   selectDraftColor,
   selectDraftFrameStyle,
+  guideColor,
+  guideFrameStyleId,
   designSheetVisible,
   openDesignSheet,
   closeDesignSheet,
   confirmDesign,
-  showLandmarkName,
-  toggleShowLandmarkName,
   helpVisible,
   toggleHelp,
   closeHelp,
@@ -181,7 +179,10 @@ export function StampPressMain({
             {stampPressed ? (
               <Stamp imageUri={imageUri} />
             ) : (
-              <StampOrientationGuide color={color} frameId={frameStyleId} />
+              <StampOrientationGuide
+                color={guideColor}
+                frameId={guideFrameStyleId}
+              />
             )}
           </Animated.View>
         </Pressable>
@@ -205,8 +206,6 @@ export function StampPressMain({
         colorOptions={STAMP_INK_COLORS}
         selectedColor={draftColor}
         onSelectColor={selectDraftColor}
-        showLandmarkName={showLandmarkName}
-        onToggleShowLandmarkName={toggleShowLandmarkName}
         onConfirm={confirmDesign}
       />
       <CommonDialog

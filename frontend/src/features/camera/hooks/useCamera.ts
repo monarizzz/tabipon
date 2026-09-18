@@ -49,6 +49,10 @@ export function useCamera(): Camera {
       capturingRef.current = true;
       setCapturing(true);
       try {
+        // シャッターを切った瞬間の時刻。これがスタンプの撮影日時になる。
+        // 調整・押印を挟むあいだに日付をまたぐことがあるので、保存側で
+        // 測り直さず、ここで測った値を押印画面まで運ぶ
+        const capturedAt = new Date().toISOString();
         const photo = await cameraRef.current?.takePictureAsync();
         if (!photo) {
           stopCapturing();
@@ -57,7 +61,10 @@ export function useCamera(): Camera {
         // 撮影時のズームは写真自体に反映済みのため、調整画面には引き継がない
         // (引き継いで再度 scale をかけるとガイド円の中身がズレる)
         const uri = await cropToPreview(photo, containerSizeRef.current);
-        router.push({ pathname: "/photo-adjust", params: { uri } });
+        router.push({
+          pathname: "/photo-adjust",
+          params: { uri, capturedAt },
+        });
       } catch {
         stopCapturing();
       }

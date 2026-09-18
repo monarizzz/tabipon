@@ -24,15 +24,29 @@ export const stampSoundPlayerRef: { current: AudioPlayer | null } = {
  * 再生に失敗してもスタンプ確定処理は止めないため、例外は握りつぶす。
  */
 export function playStampSound(): void {
+  let player: AudioPlayer;
   try {
-    const player = (stampSoundPlayerRef.current ??= createAudioPlayer(
+    player = stampSoundPlayerRef.current ??= createAudioPlayer(
       require("@/assets/sounds/stamp.mp3"),
-    ));
-    // 末尾まで再生済みのプレイヤーをそのまま play() しても鳴らないため、
-    // 毎回先頭へ戻してから鳴らす(play() を遅らせないので完了は待たない)
-    void player.seekTo(0).catch(() => {});
-    player.play();
+    );
   } catch (error) {
-    console.warn("[stampSound] failed to play", error);
+    console.warn("[stampSound] failed to create player", error);
+    return;
   }
+
+  // 末尾まで再生済みのプレイヤーをそのまま play() しても鳴らないので、毎回先頭へ戻す。
+  //
+  // expo-audio では seekTo だけがネイティブ側で非同期に処理され、play は同期で届く
+  // (expo-audio/ios/AudioModule.swift の AsyncFunction("seekTo") と Function("play"))。
+  // 続けて呼ぶと play の方が先に効いてしまい、位置が末尾のままなので鳴らない。
+  // 先頭へ戻り切ってから鳴らす。
+  player
+    .seekTo(0)
+    .then(() => {
+      player.play();
+    })
+    // 音が鳴らなくてもスタンプ確定処理は止めない
+    .catch((error: unknown) => {
+      console.warn("[stampSound] failed to play", error);
+    });
 }

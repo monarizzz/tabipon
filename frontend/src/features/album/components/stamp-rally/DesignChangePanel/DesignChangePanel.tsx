@@ -10,7 +10,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SelectableTile } from "@/src/commons/other/components/SelectableTile/SelectableTile";
 import { ColorSwatch } from "@/src/commons/other/components/ColorSwatch/ColorSwatch";
-import { Toggle } from "@/src/commons/other/components/Toggle/Toggle";
 import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { ShareButton } from "@/src/commons/button/components/ShareButton/ShareButton";
 import { Stamp } from "@/src/commons/stamp/components/Stamp/Stamp";
@@ -31,8 +30,6 @@ type Props = {
   colorOptions: readonly string[];
   selectedColor: string;
   onSelectColor: (color: string) => void;
-  showLandmarkName: boolean;
-  onToggleShowLandmarkName: (value: boolean) => void;
   onConfirm: () => void;
   confirming?: boolean;
 };
@@ -48,8 +45,6 @@ export function DesignChangePanel({
   colorOptions,
   selectedColor,
   onSelectColor,
-  showLandmarkName,
-  onToggleShowLandmarkName,
   onConfirm,
   confirming,
 }: Props) {
@@ -113,14 +108,6 @@ export function DesignChangePanel({
               />
             ))}
           </View>
-        </View>
-
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>{t("design.showLandmark")}</Text>
-          <Toggle
-            value={showLandmarkName}
-            onValueChange={onToggleShowLandmarkName}
-          />
         </View>
 
         <CommonButton
@@ -203,19 +190,6 @@ const styles = StyleSheet.create({
   colorRow: {
     flexDirection: "row",
     gap: 12,
-  },
-  toggleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 14,
-    paddingHorizontal: spacing.l,
-    marginBottom: spacing.xl,
-  },
-  toggleLabel: {
-    fontSize: 13,
-    fontWeight: typography.labelBold.fontWeight,
-    color: colors.textPrimary,
   },
   confirmButton: {
     height: 52,

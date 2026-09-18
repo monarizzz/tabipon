@@ -22,10 +22,6 @@ export type StampDetail = {
   editors: StampFieldEditors;
   design: StampDesignChange;
 
-  /** ランドマーク名を出すかのトグル。生成には渡していない見た目だけの設定 */
-  showLandmarkName: boolean;
-  toggleShowLandmarkName: (value: boolean) => void;
-
   deleteDialogVisible: boolean;
   openDeleteDialog: () => void;
   cancelDelete: () => void;

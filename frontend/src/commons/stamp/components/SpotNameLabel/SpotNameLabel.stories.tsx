@@ -29,3 +29,16 @@ export const Default: Story = {};
 export const Empty: Story = {
   args: { spotName: "" },
 };
+
+// 幅が足りないとき、鉛筆アイコンを押し出さずに名前側だけが省略されることを見る。
+// 画面幅に左右されないよう、置き場より狭い幅で囲む
+export const LongSpotName: Story = {
+  args: { spotName: "東京スカイツリータウン ソラマチ 展望デッキ フロア 350" },
+  decorators: [
+    (Story) => (
+      <View style={{ width: 240, alignItems: "center" }}>
+        <Story />
+      </View>
+    ),
+  ],
+};
