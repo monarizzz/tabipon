@@ -48,11 +48,18 @@ export const ja = {
     retake: "撮り直す",
     retakeConfirmTitle: "スタンプを撮り直しますか?",
     retakeConfirmMessage: "このスタンプは削除され、もう一度撮影し直せます。",
+    shareUnavailableTitle: "共有できません",
+    shareUnavailableMessage: "この端末では共有機能を利用できません。",
+    shareFailedTitle: "エラー",
+    shareFailedMessage:
+      "画像の共有に失敗しました。時間をおいて再度お試しください。",
+    retakeFailedTitle: "撮り直せませんでした",
+    retakeFailedMessage:
+      "スタンプの削除に失敗しました。時間をおいて再度お試しください。",
   },
   design: {
     frame: "フレーム",
     color: "カラー",
-    showLandmark: "ランドマーク名を表示",
     apply: "このデザインにする",
     changeDesign: "デザインを変更する",
     frameClassic: "クラシック",
@@ -65,14 +72,8 @@ export const ja = {
     stampCount: "スタンプ %{count}枚",
     loadError: "スタンプを読み込めませんでした",
     empty: "スタンプを集めるとここに表示されます!",
-    filterAll: "すべて",
     stampName: "スタンプ",
     unknownSpotName: "スポット未設定",
-  },
-  collection: {
-    add: "コレクションを追加",
-    name: "コレクション名",
-    namePlaceholder: "コレクション名を入力",
   },
   stampDetail: {
     notFound: "スタンプが見つかりません",
@@ -108,6 +109,9 @@ export const ja = {
       "画像の共有に失敗しました。時間をおいて再度お試しください。",
     saveFailedTitle: "保存できませんでした",
     saveFailedMessage: "時間をおいて再度お試しください。",
+    deleteFailedTitle: "削除できませんでした",
+    deleteFailedMessage:
+      "スタンプの削除に失敗しました。時間をおいて再度お試しください。",
   },
   discardDialog: {
     title: "編集内容を破棄しますか？",

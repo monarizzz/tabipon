@@ -27,7 +27,6 @@ const meta = {
     onShare: fn(),
     onSelectFrameStyle: fn(),
     onSelectColor: fn(),
-    onToggleShowLandmarkName: fn(),
     onConfirm: fn(),
   },
 } satisfies Meta<typeof DesignChangePanel>;
@@ -40,7 +39,6 @@ export const Interactive: Story = {
   args: {
     selectedFrameStyleId: "classic",
     selectedColor: DEFAULT_STAMP_COLOR,
-    showLandmarkName: true,
   },
   render: function Render(args) {
     const [selectedFrameStyleId, setSelectedFrameStyleId] = React.useState(
@@ -48,9 +46,6 @@ export const Interactive: Story = {
     );
     const [selectedColor, setSelectedColor] = React.useState(
       args.selectedColor,
-    );
-    const [showLandmarkName, setShowLandmarkName] = React.useState(
-      args.showLandmarkName,
     );
 
     return (
@@ -65,11 +60,6 @@ export const Interactive: Story = {
         onSelectColor={(color) => {
           args.onSelectColor(color);
           setSelectedColor(color);
-        }}
-        showLandmarkName={showLandmarkName}
-        onToggleShowLandmarkName={(value) => {
-          args.onToggleShowLandmarkName(value);
-          setShowLandmarkName(value);
         }}
       />
     );

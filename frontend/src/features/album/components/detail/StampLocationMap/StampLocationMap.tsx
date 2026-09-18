@@ -1,16 +1,8 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { colors, radii, spacing, typography } from "@/src/style/tokens";
-
-type Props = {
-  /** ピンをタップしたときの吹き出しに出す名前（docs/front-architecture.md「スポット名の描画」） */
-  spotName: string;
-  latitude: number | null;
-  longitude: number | null;
-  zoom?: number;
-};
+import { styles, type StampLocationMapProps } from "./StampLocationMap.shared";
 
 /**
  * ズーム段数を `MapView` の表示範囲（緯度経度の幅）に直す。
@@ -28,7 +20,7 @@ export function StampLocationMap({
   latitude,
   longitude,
   zoom = 15,
-}: Props) {
+}: StampLocationMapProps) {
   const { t } = useTranslation();
 
   // 0,0 は大西洋上の点で、座標が入っていない行の既定値として紛れ込みやすい。
@@ -45,16 +37,19 @@ export function StampLocationMap({
       <View style={styles.mapCard}>
         {hasLocation ? (
           <MapView
-            // 座標が変わったら地図ごと貼り替える。`initialRegion` はマウント時に
-            // しか効かないので、住所を直して座標を引き直したとき（`saveLocation`
-            // in `src/commons/stamp/hooks/useStampFieldEditors.ts`）にピンだけが
-            // 動いて地図は前の場所のままになる。操作は全て無効にしてあるため、
-            // 追従しないと新しいピンを画面に出す手段が無い
-            key={`${latitude},${longitude}`}
             style={styles.map}
             // 端末の地図（iOS は Apple Maps）を使う。API キーが要らず、
             // 圏外でも OS のキャッシュが効く範囲では出る
-            initialRegion={{
+            //
+            // **`initialRegion` ではなく `region` を渡す。**`initialRegion` は
+            // ネイティブ側で「まだ適用していないとき」だけカメラを動かす作りで
+            // （`AIRMap.mm` の `setInitialRegion:` / Android の
+            // `MapView.java` の `setInitialRegion()`）、住所を直して座標を
+            // 引き直したとき（`saveLocation` in
+            // `src/commons/stamp/hooks/useStampFieldEditors.ts`）にピンだけが
+            // 動いて地図は前の場所のままになる。`region` は値が変わるたびに
+            // カメラへ反映され、初回表示にもそのまま効く
+            region={{
               latitude,
               longitude,
               latitudeDelta: delta,
@@ -81,33 +76,3 @@ export function StampLocationMap({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: {
-    alignItems: "center",
-    gap: spacing.l,
-    paddingVertical: spacing.l,
-  },
-  mapCard: {
-    width: 350,
-    height: 260,
-    borderRadius: radii.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: "hidden",
-  },
-  map: {
-    flex: 1,
-  },
-  unavailable: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: spacing.l,
-  },
-  unavailableText: {
-    fontSize: typography.body.fontSize,
-    color: colors.textPlaceholder,
-    textAlign: "center",
-  },
-});

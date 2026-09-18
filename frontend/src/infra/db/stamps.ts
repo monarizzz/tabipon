@@ -9,6 +9,7 @@ import {
   ensureImageDirs,
   existingFileUriOf,
   fileUriOf,
+  nextStampImagePathOf,
   originalPhotoPathOf,
   stampImagePathOf,
   writeStampImage,
@@ -90,6 +91,11 @@ export type StampPatch = {
   location?: StampLocation | null;
   color?: string;
   frameId?: StampFrame;
+  /**
+   * 画像の相対パス。デザインを変えて画像を書き直したときだけ渡す。
+   * 値は `replaceStampImage()` の戻り値をそのまま使う
+   */
+  stampImagePath?: string;
 };
 
 /** 1 キー = 1 列で書ける項目。`location` だけは 2 列にまたがるので別扱いにする */
@@ -170,7 +176,7 @@ export async function saveStamp(input: NewStamp): Promise<Stamp> {
   const { id } = input;
   const now = new Date().toISOString();
 
-  const stampImagePath = stampImagePathOf(id);
+  const stampImagePath = stampImagePathOf(id, 1);
   const lineArtPath = originalPhotoPathOf(id);
 
   ensureImageDirs();
@@ -227,7 +233,7 @@ export async function getStamp(id: string): Promise<Stamp | null> {
  * 編集できる項目だけを更新する。
  *
  * 色とフレームを変えても画像は差し替えない。呼び出し側が再生成した PNG で
- * `replaceStampImage()` を呼ぶ。
+ * `replaceStampImage()` を呼び、戻り値のパスを `stampImagePath` に渡す。
  */
 export async function updateStamp(
   id: string,
@@ -240,6 +246,7 @@ export async function updateStamp(
     address: "address",
     color: "color",
     frameId: "frame_id",
+    stampImagePath: "stamp_image_path",
   };
 
   const assignments: string[] = [];
@@ -275,16 +282,31 @@ export async function updateStamp(
   return updated;
 }
 
-/** デザイン変更で作り直した画像で差し替える。パスは変えないので行の更新は要らない */
+/**
+ * デザイン変更で作り直した画像を、次の版のパスへ書いてそのパスを返す。
+ *
+ * **上書きせずに別のパスへ書く。**`<Image source={{ uri }}>` は uri をキーに
+ * 画像をキャッシュするので、同じパスに書くと一覧も詳細も古い絵を出し続ける
+ * （`stampImagePathOf()`）。
+ *
+ * **返したパスを `updateStamp()` の `stampImagePath` に渡すこと。**渡さないと
+ * 行が前の版を指したままになり、書いた画像はどこからも参照されない。
+ * 差し替え後に参照されなくなった前の版は `deleteOrphanFiles()` が拾う。
+ */
 export async function replaceStampImage(
   id: string,
   stampPng: Uint8Array,
-): Promise<void> {
+): Promise<string> {
   const stamp = await getStamp(id);
   if (!stamp) {
     throw new Error(`スタンプが見つからない: ${id}`);
   }
-  writeStampImage(stamp.stampImagePath, stampPng);
+  const stampImagePath = nextStampImagePathOf(id, stamp.stampImagePath);
+
+  ensureImageDirs();
+  writeStampImage(stampImagePath, stampPng);
+
+  return stampImagePath;
 }
 
 /**
@@ -293,6 +315,11 @@ export async function replaceStampImage(
  * **行を先に消し、画像はその後。**逆にすると、ファイルだけ消えて行が残ったとき
  * 一覧に壊れた項目が出る。行が消えた後にファイル削除が失敗しても、残るのは
  * どこからも参照されないファイルだけで、`deleteOrphanFiles()` が拾える。
+ *
+ * **投げるのは行が消せなかったときだけ。**画像の後始末で落ちても、利用者から見た
+ * スタンプはもう消えている。ここで投げると呼び出し側が「削除に失敗した」と扱い、
+ * 消えたはずのスタンプの画面に留めてしまう。取り残したファイルは次の起動で
+ * `deleteOrphanFiles()` が拾うので、ログだけ残して成功として返す。
  */
 export async function deleteStamp(id: string): Promise<void> {
   const stamp = await getStamp(id);
@@ -302,7 +329,11 @@ export async function deleteStamp(id: string): Promise<void> {
 
   await db.runAsync("DELETE FROM stamps WHERE id = ?", id);
 
-  deleteFiles([stamp.stampImagePath, stamp.lineArtPath]);
+  try {
+    deleteFiles([stamp.stampImagePath, stamp.lineArtPath]);
+  } catch (error) {
+    console.warn("[stamps] failed to delete stamp files", error);
+  }
 }
 
 /**
