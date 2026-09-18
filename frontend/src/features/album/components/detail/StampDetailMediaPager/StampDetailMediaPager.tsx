@@ -32,10 +32,8 @@ export function StampDetailMediaPager({
   longitude,
 }: Props) {
   const [activeIndex, setActiveIndex] = React.useState(0);
-  // 地図のパンとページ送りは同じ横方向のジェスチャで、放っておくとページャが
-  // 先に取ってしまう。地図カードに指が乗っている間だけページ送りを止めて
-  // 地図へ譲る。カードの外側の余白では止めないので、地図ページからでも
-  // 写真ページへ戻れる
+  // 地図カードに指が乗っている間はページ送りを止めて地図へ譲る
+  // （docs/front-architecture.md「地図の操作とページャの競合」）
   const [mapTouched, setMapTouched] = React.useState(false);
 
   const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {

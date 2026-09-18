@@ -2,7 +2,7 @@
 // 「座標が変わったら地図のカメラも動く」こと。`initialRegion` はネイティブ側で
 // 一度しか効かないので、座標を直したときは `animateToRegion()` で寄せ直す
 // （`StampLocationMap.tsx` のコメント）。
-import { render } from "@testing-library/react-native";
+import { fireEvent, render } from "@testing-library/react-native";
 
 import { StampLocationMap } from "@/src/features/album/components/detail/StampLocationMap/StampLocationMap";
 
@@ -90,6 +90,73 @@ describe("StampLocationMap", () => {
     );
 
     expect(mockAnimateToRegion).not.toHaveBeenCalled();
+  });
+
+  // 地図を触っている間は置く側がページ送りを止める
+  // （docs/front-architecture.md「地図の操作とページャの競合」）
+  describe("触り始め / 終わりの通知", () => {
+    const touch = (touches: unknown[]) => ({ nativeEvent: { touches } });
+
+    it("最後の指が離れたときに終わりを知らせる", async () => {
+      const onTouchStart = jest.fn();
+      const onTouchEnd = jest.fn();
+      const view = await render(
+        <StampLocationMap
+          spotName="東京タワー"
+          {...TOKYO_TOWER}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        />,
+      );
+      const card = view.getByTestId("map-card");
+
+      await fireEvent(card, "touchStart", touch([{}]));
+      await fireEvent(card, "touchEnd", touch([]));
+
+      expect(onTouchStart).toHaveBeenCalled();
+      expect(onTouchEnd).toHaveBeenCalled();
+    });
+
+    // ピンチ中に片方だけ離した時点で終わりにすると、残った指で動かしたぶんを
+    // 置く側に取られる
+    it("指が残っているうちは終わりを知らせない", async () => {
+      const onTouchEnd = jest.fn();
+      const view = await render(
+        <StampLocationMap
+          spotName="東京タワー"
+          {...TOKYO_TOWER}
+          onTouchEnd={onTouchEnd}
+        />,
+      );
+      const card = view.getByTestId("map-card");
+
+      await fireEvent(card, "touchStart", touch([{}, {}]));
+      await fireEvent(card, "touchEnd", touch([{}]));
+
+      expect(onTouchEnd).not.toHaveBeenCalled();
+    });
+
+    // 地図が無いカードには競合する相手がおらず、止める理由が無い。
+    //
+    // ここだけ `fireEvent` ではなく prop を直接見る。`fireEvent` は要素に
+    // ハンドラが無いと祖先を辿り、`<StampLocationMap onTouchStart={…} />` の
+    // props まで届いて呼んでしまうため、付いていないことを確かめられない
+    it("座標が無いときはカードにハンドラを付けない", async () => {
+      const view = await render(
+        <StampLocationMap
+          spotName="おばあちゃんち"
+          latitude={null}
+          longitude={null}
+          onTouchStart={jest.fn()}
+          onTouchEnd={jest.fn()}
+        />,
+      );
+
+      const card = view.getByTestId("map-card");
+
+      expect(card.props.onTouchStart).toBeUndefined();
+      expect(card.props.onTouchEnd).toBeUndefined();
+    });
   });
 
   it("座標が無いときは地図を出さない", async () => {

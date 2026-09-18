@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { GestureResponderEvent, Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import { styles, type StampLocationMapProps } from "./StampLocationMap.shared";
@@ -50,19 +50,30 @@ export function StampLocationMap({
     });
   }, [latitude, longitude, delta]);
 
+  const handleTouchEnd = (event: GestureResponderEvent) => {
+    // `onTouchEnd` は指 1 本ごとに来る。ピンチ中に片方だけ離した時点で
+    // 「終わり」にすると、残った指で動かしたぶんを置く側に取られる。
+    // まだ触れている指があるうちは知らせない
+    if (event.nativeEvent.touches.length > 0) return;
+
+    onTouchEnd?.();
+  };
+
+  // 触り始め / 終わりを流すのは地図があるときだけ。地図が無いカードには
+  // 競合する相手がおらず、置く側のスワイプを止める理由が無い
+  const touchHandlers = hasLocation
+    ? {
+        onTouchStart,
+        onTouchEnd: handleTouchEnd,
+        // 指が画面外へ出るなどして touch が取り消されたときも「終わり」にする
+        onTouchCancel: handleTouchEnd,
+      }
+    : null;
+
   return (
     <View style={styles.wrap}>
-      {/*
-        触り始め / 終わりを置く側へ流す。カードの中だけに付けるので、カードの
-        外側の余白をなぞったときは置く側のスワイプがそのまま効く。
-        指が画面外へ出るなどして touch が取り消されたときも「終わり」にする
-      */}
-      <View
-        style={styles.mapCard}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-        onTouchCancel={onTouchEnd}
-      >
+      {/* 方針は docs/front-architecture.md「地図の操作とページャの競合」 */}
+      <View testID="map-card" style={styles.mapCard} {...touchHandlers}>
         {hasLocation ? (
           <MapView
             ref={mapRef}
