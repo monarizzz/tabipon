@@ -36,7 +36,6 @@ export function useStampPress({
   const [draftColor, setDraftColor] = React.useState(color);
   const [draftFrameStyleId, setDraftFrameStyleId] =
     React.useState(frameStyleId);
-  const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const [waiting, setWaiting] = React.useState(false);
   const [saveFailed, setSaveFailed] = React.useState(false);
   const [saveErrorMessage, setSaveErrorMessage] = React.useState("");
@@ -107,6 +106,10 @@ export function useStampPress({
     draftFrameStyleId,
     selectDraftColor: setDraftColor,
     selectDraftFrameStyle: setDraftFrameStyleId,
+    // ガイドは選択中の見た目を確かめるためのものなので、シートを開いている間だけ選択中を映す。
+    // 閉じている間に選択中を映すと、「適用」せずに閉じたときガイドと押されるスタンプが食い違う
+    guideColor: designSheetVisible ? draftColor : color,
+    guideFrameStyleId: designSheetVisible ? draftFrameStyleId : frameStyleId,
 
     designSheetVisible,
     openDesignSheet: () => {
@@ -122,9 +125,6 @@ export function useStampPress({
       setFrameStyleId(draftFrameStyleId);
       setDesignSheetVisible(false);
     },
-
-    showLandmarkName,
-    toggleShowLandmarkName: setShowLandmarkName,
 
     helpVisible,
     toggleHelp: () => setHelpVisible((visible) => !visible),

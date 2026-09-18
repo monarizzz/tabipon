@@ -181,6 +181,60 @@ describe("useStampPress", () => {
     expect(result.current.designSheetVisible).toBe(false);
   });
 
+  it("シートを開いている間は、選択中の色とフレームをガイドへ渡す", async () => {
+    const { result } = await setup();
+    const confirmedColor = result.current.color;
+    const confirmedFrame = result.current.frameStyleId;
+
+    await press(result.current.openDesignSheet);
+    await press(() => result.current.selectDraftColor("#ff0000"));
+    await press(() => result.current.selectDraftFrameStyle("wave"));
+
+    expect(result.current.guideColor).toBe("#ff0000");
+    expect(result.current.guideFrameStyleId).toBe("wave");
+    // 確定側は動かさない。押したときに生成へ渡すのはこちら
+    expect(result.current.color).toBe(confirmedColor);
+    expect(result.current.frameStyleId).toBe(confirmedFrame);
+  });
+
+  it("「適用」せずに閉じたらガイドは確定済みのデザインへ戻る", async () => {
+    // 閉じたあとも選択中を映していると、ガイドと実際に押されるスタンプが食い違う
+    const { result } = await setup();
+    const confirmedColor = result.current.color;
+    await press(result.current.openDesignSheet);
+    await press(() => result.current.selectDraftColor("#ff0000"));
+
+    await press(result.current.closeDesignSheet);
+
+    expect(result.current.guideColor).toBe(confirmedColor);
+    expect(result.current.guideFrameStyleId).toBe(result.current.frameStyleId);
+  });
+
+  it("「適用」したらガイドも選んだデザインのまま残る", async () => {
+    const { result } = await setup();
+    await press(result.current.openDesignSheet);
+    await press(() => result.current.selectDraftColor("#ff0000"));
+
+    await press(result.current.confirmDesign);
+
+    expect(result.current.guideColor).toBe("#ff0000");
+    expect(result.current.color).toBe("#ff0000");
+  });
+
+  it("「適用」せずに閉じた選択は生成に使わない", async () => {
+    const { result } = await setup();
+    const confirmedColor = result.current.color;
+    await press(result.current.openDesignSheet);
+    await press(() => result.current.selectDraftColor("#ff0000"));
+    await press(result.current.closeDesignSheet);
+
+    await press(() => result.current.createStamp(FINISH, 100));
+
+    expect(createStampMock).toHaveBeenCalledWith(
+      expect.objectContaining({ color: confirmedColor }),
+    );
+  });
+
   it("「適用」した色とフレームで生成する", async () => {
     const { result } = await setup();
     await press(result.current.openDesignSheet);

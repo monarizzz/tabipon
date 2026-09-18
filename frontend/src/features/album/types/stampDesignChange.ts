@@ -2,9 +2,7 @@ import type { Stamp } from "@/src/infra/db/stamps";
 import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 export type StampDesignChange = {
-  /** 画面に出す uri。デザイン変更のたびに変わる（キャッシュ避け） */
-  displayImageUri: string;
-  /** ファイルそのものを渡すときの uri。共有はこちらを使う */
+  /** 画像の uri。表示にも共有にも使う。デザインを変えるとパスごと変わる */
   imageUri: string;
 
   designMode: boolean;

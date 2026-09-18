@@ -15,7 +15,6 @@ export function useStampDetail(id: string | undefined): StampDetail {
   const { t } = useTranslation();
   const [stamp, setStamp] = React.useState<Stamp | null>(null);
   const [unavailable, setUnavailable] = React.useState(false);
-  const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
 
   const editors = useStampFieldEditors({
@@ -63,9 +62,6 @@ export function useStampDetail(id: string | undefined): StampDetail {
     editors,
     design,
 
-    showLandmarkName,
-    toggleShowLandmarkName: setShowLandmarkName,
-
     deleteDialogVisible,
     openDeleteDialog: () => setDeleteDialogVisible(true),
     cancelDelete: () => setDeleteDialogVisible(false),
@@ -79,6 +75,12 @@ export function useStampDetail(id: string | undefined): StampDetail {
             await deleteStamp(id);
           } catch (error) {
             console.error("[stamp-detail] failed to delete stamp", error);
+            // 戻すとスタンプが残ったまま消えたように見えるので、この画面に留めて知らせる
+            Alert.alert(
+              t("stampDetail.deleteFailedTitle"),
+              t("stampDetail.deleteFailedMessage"),
+            );
+            return;
           }
         }
         router.back();

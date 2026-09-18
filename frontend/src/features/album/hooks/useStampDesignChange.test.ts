@@ -43,7 +43,7 @@ const PNG = new Uint8Array([1, 2, 3]);
 
 const STAMP = {
   id: "stamp-1",
-  stampImagePath: "stamps/stamp-1.png",
+  stampImagePath: "stamps/stamp-1-1.png",
   lineArtPath: "originals/stamp-1.jpg",
   title: "東京タワー",
   memo: null,
@@ -191,10 +191,11 @@ describe("useStampDesignChange", () => {
     expect(result.current.previewUri).toBeNull();
   });
 
-  it("確定したら画像を差し替えてから行を書き、更新後のスタンプを返す", async () => {
+  it("確定したら画像を書いてから行を書き、更新後のスタンプを返す", async () => {
     const calls: string[] = [];
     replaceStampImageMock.mockImplementation(async () => {
       calls.push("replaceStampImage");
+      return "stamps/stamp-1-2.png";
     });
     updateStampMock.mockImplementation(async (_id, patch) => {
       calls.push("updateStamp");
@@ -213,34 +214,43 @@ describe("useStampDesignChange", () => {
     // 逆順だと、行だけ新しいデザインになって実際の絵と食い違う
     expect(calls).toEqual(["replaceStampImage", "updateStamp"]);
     expect(replaceStampImageMock).toHaveBeenCalledWith("stamp-1", PNG);
+    // 画像を書いた先のパスも一緒に書く。渡さないと行が前の版を指したままになる
     expect(updateStampMock).toHaveBeenCalledWith("stamp-1", {
       color: "#ff0000",
       frameId: "simple",
+      stampImagePath: "stamps/stamp-1-2.png",
     });
     expect(onUpdated).toHaveBeenCalledWith(
       expect.objectContaining({ color: "#ff0000" }),
     );
   });
 
-  it("確定したらパネルを閉じ、表示用の uri を別物に変える", async () => {
+  it("確定したらパネルを閉じ、差し替え後の行の uri を出す", async () => {
+    replaceStampImageMock.mockResolvedValue("stamps/stamp-1-2.png");
     const { result, rerender } = await setup();
-    const before = result.current.displayImageUri;
+    const before = result.current.imageUri;
     await press(result.current.open);
     await press(() => result.current.setSelectedColor("#ff0000"));
 
     await press(result.current.confirm);
     // 画面側は onUpdated で受け取った行に差し替える
     await act(async () => {
-      rerender({ stamp: { ...STAMP, color: "#ff0000" } });
+      rerender({
+        stamp: {
+          ...STAMP,
+          color: "#ff0000",
+          stampImagePath: "stamps/stamp-1-2.png",
+        },
+      });
     });
 
     expect(result.current.designMode).toBe(false);
     expect(result.current.previewUri).toBeNull();
-    // ファイルのパスは変わらないので、クエリを足さないと古い絵がキャッシュから出る
+    // パスごと変わるので、キャッシュ避けのクエリを足さなくても新しい絵が出る
     expect(result.current.imageUri).toBe(
-      "file:///documents/stamps/stamp-1.png",
+      "file:///documents/stamps/stamp-1-2.png",
     );
-    expect(result.current.displayImageUri).not.toBe(before);
+    expect(result.current.imageUri).not.toBe(before);
   });
 
   it("確定が失敗したらパネルを開いたままにして知らせる", async () => {
@@ -264,8 +274,10 @@ describe("useStampDesignChange", () => {
     let release = () => {};
     replaceStampImageMock.mockImplementation(
       () =>
-        new Promise<void>((resolve) => {
-          release = resolve;
+        new Promise<string>((resolve) => {
+          release = () => {
+            resolve("stamps/stamp-1-2.png");
+          };
         }),
     );
     const { result } = await setup();

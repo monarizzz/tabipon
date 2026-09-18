@@ -44,16 +44,19 @@ export function StampLocationMap({
       <View style={styles.mapCard}>
         {hasLocation ? (
           <MapView
-            // 座標が変わったら地図ごと貼り替える。`initialRegion` はマウント時に
-            // しか効かないので、住所を直して座標を引き直したとき（`saveLocation`
-            // in `src/commons/stamp/hooks/useStampFieldEditors.ts`）にピンだけが
-            // 動いて地図は前の場所のままになる。操作は全て無効にしてあるため、
-            // 追従しないと新しいピンを画面に出す手段が無い
-            key={`${latitude},${longitude}`}
             style={styles.map}
             // 端末の地図（iOS は Apple Maps）を使う。API キーが要らず、
             // 圏外でも OS のキャッシュが効く範囲では出る
-            initialRegion={{
+            //
+            // **`initialRegion` ではなく `region` を渡す。**`initialRegion` は
+            // ネイティブ側で「まだ適用していないとき」だけカメラを動かす作りで
+            // （`AIRMap.mm` の `setInitialRegion:` / Android の
+            // `MapView.java` の `setInitialRegion()`）、住所を直して座標を
+            // 引き直したとき（`saveLocation` in
+            // `src/commons/stamp/hooks/useStampFieldEditors.ts`）にピンだけが
+            // 動いて地図は前の場所のままになる。`region` は値が変わるたびに
+            // カメラへ反映され、初回表示にもそのまま効く
+            region={{
               latitude,
               longitude,
               latitudeDelta: delta,

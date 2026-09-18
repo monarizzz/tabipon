@@ -104,6 +104,13 @@ export function useStampDone({ stampId, stampTop }: Params): StampDone {
             await deleteStamp(stampId);
           } catch (error) {
             console.error("[stamp-done] failed to delete stamp", error);
+            // カメラへ戻すとスタンプが残ったまま撮り直せたように見えるので、
+            // この画面に留めて知らせる
+            Alert.alert(
+              t("stampDone.retakeFailedTitle"),
+              t("stampDone.retakeFailedMessage"),
+            );
+            return;
           }
         }
         router.replace("/(tabs)");
