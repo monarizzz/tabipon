@@ -27,6 +27,7 @@ type Props = StampDetail;
 export function StampDetailMain({
   loading,
   unavailable,
+  reload,
   latitude,
   longitude,
   editors,
@@ -46,6 +47,11 @@ export function StampDetailMain({
     return (
       <View style={[styles.container, styles.status]}>
         <Text style={styles.statusText}>{t("stampDetail.notFound")}</Text>
+        <CommonButton
+          label={t("common.reload")}
+          onPress={reload}
+          variant="secondary"
+        />
         <CommonButton
           label={t("stampDetail.backToAlbum")}
           onPress={backToAlbum}
