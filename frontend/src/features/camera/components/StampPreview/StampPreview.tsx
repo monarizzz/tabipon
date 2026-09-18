@@ -299,7 +299,7 @@ export function StampPreview() {
         ずれるのが正常で、桁が変わるようなら線画化が壊れている。元写真は平等院（CC0
         1.0 / Wikimedia Commons / GiveMeMollusks）。
         {"\n\n"}
-        掠れは白抜き率が level に比例する。level 1.0 で上限の 35%
+        掠れは白抜き率が level に比例する。level 1.0 で上限の 25%
         （上限の決め方は `docs/stamp-pipeline.md`）。
       </Text>
     </ScrollView>

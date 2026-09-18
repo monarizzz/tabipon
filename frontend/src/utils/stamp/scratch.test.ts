@@ -22,7 +22,7 @@ import { applyScratch, scratchThreshold } from "@/src/utils/stamp/scratch";
 import { renderToSquareImage, toRasterImage } from "@/src/utils/skia/surface";
 
 /** `scratch.ts` の `SCRATCH_MAX_WHITEOUT` と同じ値 */
-const MAX_WHITEOUT = 0.35;
+const MAX_WHITEOUT = 0.25;
 
 /**
  * 実測の白抜き率と狙い値とのずれの許容幅（ポイント）。
