@@ -98,7 +98,11 @@ it("カードにはスポット名と、日付・場所・メモを載せる", a
     stampUri: "file:///documents/stamps/stamp-1.png",
     spotName: "東京タワー",
     fields: [
-      { label: "stampDetail.labelDate", value: "2026/09/18" },
+      // 時刻は端末のタイムゾーンで出るので、桁だけを見る
+      {
+        label: "stampDetail.labelDate",
+        value: expect.stringMatching(/^2026\/09\/18 \d{2}:\d{2}$/),
+      },
       { label: "stampDetail.labelPlace", value: "東京都港区芝公園" },
       { label: "stampDetail.labelMemo", value: "展望台からの眺めが良かった" },
     ],
@@ -114,7 +118,10 @@ it("値の無い項目も空のまま渡す。行の位置を項目ごとに決�
   expect(generateShareCardPngMock).toHaveBeenCalledWith(
     expect.objectContaining({
       fields: [
-        { label: "stampDetail.labelDate", value: "2026/09/18" },
+        {
+          label: "stampDetail.labelDate",
+          value: expect.stringMatching(/^2026\/09\/18 \d{2}:\d{2}$/),
+        },
         { label: "stampDetail.labelPlace", value: "" },
         { label: "stampDetail.labelMemo", value: "" },
       ],

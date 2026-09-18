@@ -11,7 +11,7 @@ import type { I18nContextValue } from "@/src/libs/i18n/types/i18n";
 import { writeShareCard } from "@/src/libs/shareCardFile";
 import { generateShareCardPng } from "@/src/utils/shareCard/io";
 import type { ShareCardField } from "@/src/utils/shareCard/types/shareCardContent";
-import { formatIsoDate } from "@/src/utils/datetime/format";
+import { formatIsoDateTime } from "@/src/utils/datetime/format";
 
 /**
  * 共有シートの本文。スポット名があれば入れる。
@@ -34,7 +34,8 @@ function fieldsOf(t: I18nContextValue["t"], stamp: Stamp): ShareCardField[] {
   return [
     {
       label: t("stampDetail.labelDate"),
-      value: formatIsoDate(stamp.capturedAt),
+      // 画面（`StampInfoCard`）と同じく時刻まで出す
+      value: formatIsoDateTime(stamp.capturedAt),
     },
     { label: t("stampDetail.labelPlace"), value: stamp.address ?? "" },
     { label: t("stampDetail.labelMemo"), value: stamp.memo ?? "" },
