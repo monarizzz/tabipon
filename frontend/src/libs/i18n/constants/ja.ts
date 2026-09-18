@@ -14,7 +14,7 @@ export const ja = {
   tabs: {
     camera: "カメラ",
     album: "アルバム",
-    mypage: "マイページ",
+    mypage: "設定",
   },
   camera: {
     accessRequiredTitle: "カメラへのアクセスが必要です",
@@ -118,7 +118,7 @@ export const ja = {
     message: "タブを切り替えると、現在の編集内容が失われます。",
   },
   mypage: {
-    title: "マイページ",
+    title: "設定",
     notifications: "通知設定",
     privacy: "プライバシー",
     help: "ヘルプ",

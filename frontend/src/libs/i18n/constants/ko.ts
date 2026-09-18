@@ -15,7 +15,7 @@ export const ko: Translations = {
   tabs: {
     camera: "카메라",
     album: "앨범",
-    mypage: "마이페이지",
+    mypage: "설정",
   },
   camera: {
     accessRequiredTitle: "카메라 접근 권한이 필요합니다",
@@ -119,7 +119,7 @@ export const ko: Translations = {
     message: "탭을 전환하면 현재 편집 내용이 사라집니다.",
   },
   mypage: {
-    title: "마이페이지",
+    title: "설정",
     notifications: "알림 설정",
     privacy: "개인정보",
     help: "도움말",

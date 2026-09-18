@@ -15,7 +15,7 @@ export const en: Translations = {
   tabs: {
     camera: "Camera",
     album: "Album",
-    mypage: "My Page",
+    mypage: "Settings",
   },
   camera: {
     accessRequiredTitle: "Camera access is required",
@@ -120,7 +120,7 @@ export const en: Translations = {
     message: "Switching tabs will discard your current edits.",
   },
   mypage: {
-    title: "My Page",
+    title: "Settings",
     notifications: "Notifications",
     privacy: "Privacy",
     help: "Help",

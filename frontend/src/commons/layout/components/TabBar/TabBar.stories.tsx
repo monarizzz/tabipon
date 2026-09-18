@@ -22,7 +22,7 @@ const baseItems: (activeKey: string) => TabBarItemData[] = (activeKey) => [
   },
   {
     key: "mypage",
-    label: "マイページ",
+    label: "設定",
     icon: User,
     active: activeKey === "mypage",
     onPress: fn(),
