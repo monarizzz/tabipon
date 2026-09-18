@@ -103,6 +103,22 @@ src/commons/layout/
 - 本体ファイルと `*.stories.tsx` を同じフォルダに同居させる
 - Storybook 側は `.rnstorybook/main.ts` の `stories` に `../src/commons/**` と `../src/features/**` の 2 つを指定し、この配置を自動検出する
 
+### 外枠は features、中身は commons
+
+同じ入力 UI を複数の画面が持つ場合、**共通化するのは中身だけで、外枠は画面ごとに置いたままにする。**
+外枠（ボトムシート / 全画面パネル）は開き方・閉じ方・付随する表示がそれぞれ違い、
+1 つにまとめると分岐だけが増える。
+
+例）デザイン変更（枠・色・適用ボタン）
+
+```txt
+commons/stamp/components/DesignChangeForm/   枠 / 色 / 適用ボタン
+ ├ features/camera/…/DesignChangeSheet       ボトムシートで包む
+ └ features/album/…/DesignChangePanel        上部バー + プレビュー + スクロールで包む
+```
+
+中身のコンポーネントは外枠でのレイアウトを決め打ちせず、`style` を受け取って外枠側から渡す。
+
 ### スポット名の描画
 
 画面の見出しとしてのスポット名を描くのは `src/commons/stamp/components/SpotNameLabel/` だけとする。

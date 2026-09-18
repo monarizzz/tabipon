@@ -1,13 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
 import { BottomSheet } from "@/src/commons/sheet/components/BottomSheet/BottomSheet";
-import { SelectableTile } from "@/src/commons/other/components/SelectableTile/SelectableTile";
-import { ColorSwatch } from "@/src/commons/other/components/ColorSwatch/ColorSwatch";
-import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
-import { FrameThumb } from "@/src/commons/stamp/components/FrameThumb/FrameThumb";
+import { DesignChangeForm } from "@/src/commons/stamp/components/DesignChangeForm/DesignChangeForm";
 import type { FrameStyleOption } from "@/src/commons/stamp/types/frameStyleOption";
-import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { colors, typography, spacing } from "@/src/style/tokens";
+import { spacing } from "@/src/style/tokens";
 import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 type Props = {
@@ -33,7 +28,6 @@ export function DesignChangeSheet({
   onSelectColor,
   onConfirm,
 }: Props) {
-  const { t } = useTranslation();
   return (
     <BottomSheet
       visible={visible}
@@ -41,74 +35,15 @@ export function DesignChangeSheet({
       snapPoints={["50%"]}
       contentPaddingBottom={spacing.xxxl}
     >
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>{t("design.frame")}</Text>
-        <View style={styles.row}>
-          {frameStyles.map((style) => {
-            const selected = style.id === selectedFrameStyleId;
-            return (
-              <SelectableTile
-                key={style.id}
-                label={t(style.label)}
-                selected={selected}
-                onPress={() => onSelectFrameStyle(style.id)}
-              >
-                <FrameThumb variant={style.id} selected={selected} />
-              </SelectableTile>
-            );
-          })}
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>{t("design.color")}</Text>
-        <View style={styles.colorRow}>
-          {colorOptions.map((color) => (
-            <ColorSwatch
-              key={color}
-              color={color}
-              selected={color === selectedColor}
-              onPress={() => onSelectColor(color)}
-            />
-          ))}
-        </View>
-      </View>
-
-      <CommonButton
-        label={t("design.apply")}
-        onPress={onConfirm}
-        variant="primary"
-        style={styles.confirmButton}
-        textStyle={styles.confirmLabel}
+      <DesignChangeForm
+        frameStyles={frameStyles}
+        selectedFrameStyleId={selectedFrameStyleId}
+        onSelectFrameStyle={onSelectFrameStyle}
+        colorOptions={colorOptions}
+        selectedColor={selectedColor}
+        onSelectColor={onSelectColor}
+        onConfirm={onConfirm}
       />
     </BottomSheet>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    gap: 12,
-    marginBottom: spacing.xl,
-  },
-  sectionLabel: {
-    fontSize: 13,
-    fontWeight: typography.labelBold.fontWeight,
-    color: colors.textPrimary,
-  },
-  row: {
-    flexDirection: "row",
-    gap: spacing.m,
-  },
-  colorRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  confirmButton: {
-    height: 52,
-    borderRadius: 26,
-  },
-  confirmLabel: {
-    fontSize: 15,
-    fontWeight: "700",
-  },
-});
