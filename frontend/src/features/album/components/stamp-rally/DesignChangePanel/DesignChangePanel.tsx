@@ -8,15 +8,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SelectableTile } from "@/src/commons/other/components/SelectableTile/SelectableTile";
-import { ColorSwatch } from "@/src/commons/other/components/ColorSwatch/ColorSwatch";
-import { CommonButton } from "@/src/commons/button/components/CommonButton/CommonButton";
 import { ShareButton } from "@/src/commons/button/components/ShareButton/ShareButton";
 import { Stamp } from "@/src/commons/stamp/components/Stamp/Stamp";
-import { FrameThumb } from "@/src/commons/stamp/components/FrameThumb/FrameThumb";
+import { DesignChangeForm } from "@/src/commons/stamp/components/DesignChangeForm/DesignChangeForm";
 import type { FrameStyleOption } from "@/src/commons/stamp/types/frameStyleOption";
-import { useTranslation } from "@/src/libs/i18n/I18nProvider";
-import { colors, radii, typography, spacing } from "@/src/style/tokens";
+import { colors, radii, spacing } from "@/src/style/tokens";
 import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 type Props = {
@@ -49,7 +45,6 @@ export function DesignChangePanel({
   confirming,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
@@ -77,49 +72,16 @@ export function DesignChangePanel({
           ) : null}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{t("design.frame")}</Text>
-          <View style={styles.row}>
-            {frameStyles.map((style) => {
-              const selected = style.id === selectedFrameStyleId;
-              return (
-                <SelectableTile
-                  key={style.id}
-                  label={t(style.label)}
-                  selected={selected}
-                  onPress={() => onSelectFrameStyle(style.id)}
-                >
-                  <FrameThumb variant={style.id} selected={selected} />
-                </SelectableTile>
-              );
-            })}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>{t("design.color")}</Text>
-          <View style={styles.colorRow}>
-            {colorOptions.map((color) => (
-              <ColorSwatch
-                key={color}
-                color={color}
-                selected={color === selectedColor}
-                onPress={() => onSelectColor(color)}
-              />
-            ))}
-          </View>
-        </View>
-
-        <CommonButton
-          label={t("design.apply")}
-          onPress={onConfirm}
-          variant="primary"
-          disabled={confirming}
-          icon={
-            confirming ? <ActivityIndicator color={colors.white} /> : undefined
-          }
-          style={styles.confirmButton}
-          textStyle={styles.confirmLabel}
+        <DesignChangeForm
+          style={styles.form}
+          frameStyles={frameStyles}
+          selectedFrameStyleId={selectedFrameStyleId}
+          onSelectFrameStyle={onSelectFrameStyle}
+          colorOptions={colorOptions}
+          selectedColor={selectedColor}
+          onSelectColor={onSelectColor}
+          onConfirm={onConfirm}
+          confirming={confirming}
         />
       </ScrollView>
     </View>
@@ -174,30 +136,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  section: {
-    gap: 12,
-    marginBottom: spacing.xl,
-  },
-  sectionLabel: {
-    fontSize: 13,
-    fontWeight: typography.labelBold.fontWeight,
-    color: colors.textPrimary,
-  },
-  row: {
-    flexDirection: "row",
-    gap: spacing.m,
-  },
-  colorRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  confirmButton: {
-    height: 52,
-    borderRadius: 26,
-    marginTop: "auto",
-  },
-  confirmLabel: {
-    fontSize: 15,
-    fontWeight: "700",
+  // 適用ボタンを下端に寄せるため、プレビューの下の余白をフォームが受け取る
+  form: {
+    flex: 1,
   },
 });
