@@ -167,6 +167,17 @@ git worktree list            # 消えたことを確認
 - セキュリティ上の懸念
 - テストの不足
 
+### 自動レビュー
+
+PR の作成・更新後は `docs/ai-review-loop.md` に従い、Codex または Claude でレビューする。
+ローカル AI は各自の認証を使い、GitHub AI はリポジトリに設定済みの provider を使う。
+
+- Codex は `.agents/skills/ai-review-loop/SKILL.md`、Claude は `.claude/skills/ai-review-loop/SKILL.md` を使う
+- 最新の PR head commit を対象にしたレビューで、未対応の妥当な指摘が無い場合だけ完了とする
+- 指摘があれば妥当性を検証して修正し、push 後の最新 HEAD に対して再レビューする
+- provider の応答が無い状態、古い HEAD のレビュー、指摘後に commit があるだけの状態を完了とみなさない
+- push、PR コメント、レビュー依頼は外部変更なので、現在の依頼で許可されている場合だけ実行する
+
 ## フロントエンド
 
 `docs/front-architecture.md`準拠
