@@ -25,17 +25,10 @@ const meta = {
     stamps: STAMPS,
     loadFailed: false,
     refreshing: false,
-    selectedFilterId: "all",
-    collectionSheetVisible: false,
-    collectionName: "",
-    selectFilter: () => {},
     reload: () => {},
     refresh: () => {},
     pressStamp: () => {},
-    openCollectionSheet: () => {},
-    closeCollectionSheet: () => {},
-    changeCollectionName: () => {},
-    addCollection: () => {},
+    startStamp: () => {},
   },
 } satisfies Meta<typeof AlbumMain>;
 
@@ -50,6 +43,7 @@ export const Loading: Story = {
   args: { stamps: null },
 };
 
+/** 0 件。撮影画面への導線を出し、下に引いて再読み込みできる */
 export const Empty: Story = {
   args: { stamps: [] },
 };

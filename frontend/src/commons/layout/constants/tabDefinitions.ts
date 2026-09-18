@@ -1,4 +1,4 @@
-import { Camera, Image, User } from "lucide-react-native";
+import { Camera, Image, Settings } from "lucide-react-native";
 import { colors } from "@/src/style/tokens";
 import type { TabDefinition } from "@/src/commons/layout/types/tabDefinition";
 
@@ -24,7 +24,7 @@ export const TAB_DEFINITIONS: readonly TabDefinition[] = [
   {
     key: "mypage",
     labelKey: "tabs.mypage",
-    icon: User,
+    icon: Settings,
     href: "/(tabs)/mypage",
     pathname: "/mypage",
     activeColor: colors.textPrimary,

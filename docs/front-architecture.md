@@ -53,10 +53,10 @@ export default function StampDetailScreen() {
 
 ### 画面を 3 つに分ける
 
-| 置き場 | 持つもの |
-| --- | --- |
-| `app/<画面>.tsx` | ルートパラメータの読み出しと Main の呼び出し |
-| `src/features/<領域>/hooks/use<画面名>.ts` | 状態・DB・遷移。戻り値の型は `types/` に置く |
+| 置き場                                         | 持つもの                                       |
+| ---------------------------------------------- | ---------------------------------------------- |
+| `app/<画面>.tsx`                               | ルートパラメータの読み出しと Main の呼び出し   |
+| `src/features/<領域>/hooks/use<画面名>.ts`     | 状態・DB・遷移。戻り値の型は `types/` に置く   |
 | `src/features/<領域>/components/<画面名>Main/` | 描画。props で受け取り、自分では状態を持たない |
 
 **Main は props だけで描けるようにする。**そうすれば `*.stories.tsx` が
@@ -102,6 +102,21 @@ src/commons/layout/
 - コンポーネントごとに `コンポーネント名/` フォルダを作る。フォルダ名はコンポーネント名と同じPascalCaseにする。
 - 本体ファイルと `*.stories.tsx` を同じフォルダに同居させる
 - Storybook 側は `.rnstorybook/main.ts` の `stories` に `../src/commons/**` と `../src/features/**` の 2 つを指定し、この配置を自動検出する
+
+### スポット名の描画
+
+画面の見出しとしてのスポット名を描くのは `src/commons/stamp/components/SpotNameLabel/` だけとする。
+同じ値を複数のコンポーネントがそれぞれ描くと、スタイルと編集導線の有無が揃わなくなる。
+
+スタンプ詳細（`src/features/album/components/detail/`）では、`StampDetailMediaPager` が
+横スクロールの `ScrollView` の外に `SpotNameLabel` を 1 つ置く。スポット名はページ固有の情報ではなく
+スタンプの属性なので、ページ側（`StampDetailPhoto` / `StampLocationMap`）は描かない。
+ページャの外に置けば横スワイプしても位置と内容が変わらず、編集導線もページに関係なく 1 つで済む。
+
+`StampLocationMap` の `spotName` は地図のピンの吹き出し（`Marker` の `title`）専用で、見出しとは別物。
+
+横幅の制約は `SpotNameLabel` 自身が持つ（名前が長いときは名前側だけを縮めて省略し、鉛筆アイコンを
+押し出さない）。置く側は中央寄せと余白だけを決めればよい。
 
 ### 場所の編集と座標の追従
 
@@ -173,3 +188,29 @@ src/infra/
 ## スタイルトークン
 
 色・spacing・角丸・フォントサイズは `src/style/tokens.ts`（`colors` / `typography` / `spacing` / `radii`）を参照し、コンポーネント内に直接値を書かない
+
+## native / web の出し分け
+
+アプリの動作対象は iOS / Android で、web は Storybook（`npm run storybook:web`）を出すためだけに動かす。そのため「native では使うが web では読み込めない依存」が出てくる。
+
+**native のバンドルにしか載らない依存は、`Platform.OS` の実行時分岐ではなく `.web.tsx` / `.web.ts` のファイル分割で出し分ける。**
+import は分岐より先に評価されるので、分岐では import そのものを止められない。Metro は同じディレクトリに `<名前>.web.tsx` があれば web のバンドルでそちらを選ぶため、呼ぶ側の import 文（`./StampLocationMap`）は native / web で変えなくてよい。
+
+該当するもの:
+
+| 依存                                 | 分けているファイル                                                               | web で読めない理由                                                                                                                      |
+| ------------------------------------ | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `react-native-maps`                  | `src/features/album/components/detail/StampLocationMap/StampLocationMap.web.tsx` | `Marker` などが読む `src/decorateMapComponent.ts` が `codegenNativeComponent` を import するが、`react-native-web` は export していない |
+| `canvaskit-wasm`（Skia の web 実装） | `.rnstorybook/bootstrap.web.ts`                                                  | node の `fs` を require しており、native のバンドルに混ざると解決できない                                                               |
+
+### `<名前>.shared.ts` に置くもの
+
+**native と web の両方から読む props 型とスタイルは `<名前>.shared.ts` に置く。**
+分割した 2 ファイルは同じ props で呼ばれ、枠やテキストの見た目も揃っている必要がある。それぞれに持たせると、片方だけ直したときにずれる。
+
+置くのは描画に依存しないものだけ（型・`StyleSheet`・定数）。JSX と、プラットフォーム固有の依存を使う処理は `.tsx` / `.web.tsx` 側に残す。
+
+### web 版の振る舞い
+
+**web 版は native の機能を代替実装で再現せず、その機能が使えないときの表示に合わせる。**
+web は Storybook のための実行環境であり、代替実装を足すとそれ自体が保守対象になる。`StampLocationMap.web.tsx` は地図を出さず、座標が無いときと同じ「地図を表示できませんでした」を出す。

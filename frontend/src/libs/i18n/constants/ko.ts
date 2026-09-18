@@ -15,13 +15,15 @@ export const ko: Translations = {
   tabs: {
     camera: "카메라",
     album: "앨범",
-    mypage: "마이페이지",
+    mypage: "설정",
   },
   camera: {
     accessRequiredTitle: "카메라 접근 권한이 필요합니다",
     accessAllow: "카메라 접근 허용",
     hint: "원 안에 들어오도록 촬영하세요",
     capturedPhoto: "[ 촬영한 사진 ]",
+    captureFailedTitle: "촬영하지 못했습니다",
+    captureFailedMessage: "셔터를 다시 눌러 주세요.",
   },
   photoAdjust: {
     title: "사진 조정",
@@ -49,11 +51,18 @@ export const ko: Translations = {
     retake: "다시 찍기",
     retakeConfirmTitle: "스탬프를 다시 찍으시겠어요?",
     retakeConfirmMessage: "이 스탬프는 삭제되며 다시 촬영할 수 있습니다.",
+    shareUnavailableTitle: "공유할 수 없습니다",
+    shareUnavailableMessage: "이 기기에서는 공유 기능을 사용할 수 없습니다.",
+    shareFailedTitle: "오류",
+    shareFailedMessage:
+      "이미지 공유에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    retakeFailedTitle: "다시 찍을 수 없습니다",
+    retakeFailedMessage:
+      "스탬프 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
   },
   design: {
     frame: "프레임",
     color: "색상",
-    showLandmark: "랜드마크 이름 표시",
     apply: "이 디자인으로 설정",
     changeDesign: "디자인 변경",
     frameClassic: "클래식",
@@ -65,15 +74,11 @@ export const ko: Translations = {
     title: "앨범",
     stampCount: "스탬프 %{count}개",
     loadError: "스탬프를 불러오지 못했습니다",
+    emptyTitle: "아직 스탬프가 없습니다",
     empty: "스탬프를 모으면 여기에 표시됩니다!",
-    filterAll: "전체",
+    emptyAction: "스탬프 찍으러 가기",
     stampName: "스탬프",
     unknownSpotName: "장소 미설정",
-  },
-  collection: {
-    add: "컬렉션 추가",
-    name: "컬렉션 이름",
-    namePlaceholder: "컬렉션 이름 입력",
   },
   stampDetail: {
     notFound: "스탬프를 찾을 수 없습니다",
@@ -116,16 +121,16 @@ export const ko: Translations = {
       "좌표를 가져오지 못했습니다. 네트워크 상태나 위치 정보 설정에 따라 가져오지 못할 수 있습니다. 이대로 저장하면 주소만 바뀌고 지도는 이전 장소를 그대로 가리킵니다.",
     geocodeSaveAnyway: "이대로 저장",
     geocodeBackToEdit: "편집으로 돌아가기",
+    deleteFailedTitle: "삭제할 수 없습니다",
+    deleteFailedMessage:
+      "스탬프 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
   },
   discardDialog: {
     title: "편집 내용을 취소하시겠습니까?",
     message: "탭을 전환하면 현재 편집 내용이 사라집니다.",
   },
   mypage: {
-    title: "마이페이지",
-    registered: "%{date} 가입",
-    recentCollections: "최근 컬렉션",
-    seeAll: "모두 보기",
+    title: "설정",
     notifications: "알림 설정",
     privacy: "개인정보",
     help: "도움말",
@@ -134,5 +139,11 @@ export const ko: Translations = {
   language: {
     title: "언어",
     system: "시스템 설정 따르기",
+  },
+  dbError: {
+    title: "앱을 시작할 수 없습니다",
+    message:
+      "저장된 스탬프를 불러올 준비에 실패했습니다. 다시 시도해도 해결되지 않으면 앱을 최신 버전으로 업데이트해 주세요.",
+    detailLabel: "오류 내용",
   },
 };

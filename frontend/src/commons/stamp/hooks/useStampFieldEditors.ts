@@ -44,15 +44,14 @@ export function useStampFieldEditors({
   const [draftMemo, setDraftMemo] = React.useState("");
 
   /**
-   * 保存中のフィールド。二度押しの guard にだけ使う。
+   * フィールドごとの保存の順番待ち。最後に流した保存の Promise を持つ。
    *
    * **フィールドごとに持つ。**場所の保存はジオコーディングの通信を挟むので、
-   * 1 つの真偽値にすると、その待ち時間のあいだメモなど他の項目の保存まで弾かれる。
-   * 早期 return なので押しても何も起きず、失敗したことも分からない。
+   * 1 本の待ち行列にすると、その待ち時間のあいだメモなど他の項目の保存まで待たされる。
    *
    * 表示には使わないので state ではなく ref で持つ。
    */
-  const savingFields = React.useRef(new Set<EditableField>());
+  const saveQueues = React.useRef(new Map<EditableField, Promise<void>>());
 
   const [geocodeWarning, setGeocodeWarning] =
     React.useState<GeocodeWarning | null>(null);
@@ -62,37 +61,52 @@ export function useStampFieldEditors({
   /**
    * 1 項目を保存する。
    *
-   * 同じ項目の保存中は二度押しを弾き、失敗したらログと Alert を出して編集欄を
-   * 開いたままにする。閉じてしまうと、入力した内容が消えたうえに失敗したことも
-   * 分からなくなる。
+   * 同じ項目の保存中に来た保存は捨てずに順番待ちにし、前の保存が終わってから流す。
+   * 弾くと、押した保存が黙って無かったことになるうえ、先に走っていた保存の完了で
+   * 編集欄が閉じるので、保存されたように見えてしまう。
+   *
+   * 失敗したらログと Alert を出して編集欄を開いたままにする。閉じてしまうと、
+   * 入力した内容が消えたうえに失敗したことも分からなくなる。
+   *
+   * **編集欄を閉じるのは、その項目の待ち行列の最後の保存が成功したときだけ。**
+   * 古い保存の成功で閉じると、閉じて開き直したあとに積んだ保存用の編集欄まで
+   * 閉じてしまう。その保存が失敗しても編集欄は閉じたままなので、開き直したときに
+   * `openMemo()` などが古い保存済みの値でドラフトを初期化し、入力が消える。
    *
    * **patch は関数で受け取る。**場所の保存は書き込む前にジオコーディングを挟むので、
-   * patch を先に組ませると、その通信中だけ二度押しの guard が外れる
+   * patch を先に組ませると、順番待ちに入る前の古い入力値で書き込むことになる
    *
-   * **patch が null なら書き込まない。**場所の保存は、座標が引けなかったときに
-   * 利用者へ確認してから書き込むため、ここでいったん降りる（`saveLocation`）
+   * **patch が null なら書き込まず、編集欄も閉じない。**場所の保存は、座標が
+   * 引けなかったときに利用者へ確認してから書き込むため、ここでいったん降りる
+   * （`saveLocation`）
    */
   const save = React.useCallback(
     async (
       field: EditableField,
       buildPatch: () => StampPatch | null | Promise<StampPatch | null>,
     ) => {
-      if (!stampId || savingFields.current.has(field)) return;
-      savingFields.current.add(field);
-      try {
-        const patch = await buildPatch();
-        if (!patch) return;
-        onUpdated(await updateStamp(stampId, patch));
-        closeEditor();
-      } catch (error) {
-        console.error(`${logTag} failed to update ${field}`, error);
-        Alert.alert(
-          t("stampDetail.saveFailedTitle"),
-          t("stampDetail.saveFailedMessage"),
-        );
-      } finally {
-        savingFields.current.delete(field);
-      }
+      if (!stampId) return;
+      const run = async () => {
+        try {
+          const patch = await buildPatch();
+          if (!patch) return;
+          onUpdated(await updateStamp(stampId, patch));
+          // 自分がこの項目の待ち行列の最後なら閉じる。後ろに保存が積まれていれば、
+          // その編集欄は後続の保存が自分で閉じる
+          if (saveQueues.current.get(field) === next) closeEditor();
+        } catch (error) {
+          console.error(`${logTag} failed to update ${field}`, error);
+          Alert.alert(
+            t("stampDetail.saveFailedTitle"),
+            t("stampDetail.saveFailedMessage"),
+          );
+        }
+      };
+      // 前の保存が失敗しても後続は流す（`run` は自分で握るので reject しないが、念のため両方に渡す）
+      const previous = saveQueues.current.get(field) ?? Promise.resolve();
+      const next = previous.then(run, run);
+      saveQueues.current.set(field, next);
+      await next;
     },
     [closeEditor, logTag, onUpdated, stampId, t],
   );

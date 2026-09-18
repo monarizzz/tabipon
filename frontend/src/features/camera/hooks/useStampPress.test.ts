@@ -28,6 +28,7 @@ const back = jest.fn();
 
 const PARAMS = {
   imageUri: "file:///photos/1.jpg",
+  capturedAt: "2026-09-18T14:58:00.000Z",
   latitude: "35.6586",
   longitude: "139.7454",
   address: "東京都港区芝公園",
@@ -61,6 +62,7 @@ describe("useStampPress", () => {
 
     expect(createStampMock).toHaveBeenCalledWith({
       photoUri: "file:///photos/1.jpg",
+      capturedAt: "2026-09-18T14:58:00.000Z",
       color: result.current.color,
       frameId: result.current.frameStyleId,
       scratchLevel: 0.42,
@@ -69,6 +71,38 @@ describe("useStampPress", () => {
       location: { latitude: 35.6586, longitude: 139.7454 },
       address: "東京都港区芝公園",
     });
+  });
+
+  it("撮影時刻は押した時刻で上書きせず、運ばれてきた値のまま渡す", async () => {
+    // 撮影から押印までのあいだに日付をまたぐと、押した時刻では日付がずれる
+    jest.useFakeTimers().setSystemTime(new Date("2026-09-19T00:01:00.000Z"));
+    try {
+      const { result } = await setup();
+
+      await press(() => result.current.createStamp(FINISH, 412.6));
+    } finally {
+      jest.useRealTimers();
+    }
+
+    expect(createStampMock).toHaveBeenCalledWith(
+      expect.objectContaining({ capturedAt: "2026-09-18T14:58:00.000Z" }),
+    );
+  });
+
+  it("撮影時刻が運ばれてこなければ、その場の時刻で埋める", async () => {
+    // 撮影画面を通らずに入る経路。ここで止めると押印そのものが保存できない
+    jest.useFakeTimers().setSystemTime(new Date("2026-09-19T00:01:00.000Z"));
+    try {
+      const { result } = await setup({ capturedAt: undefined });
+
+      await press(() => result.current.createStamp(FINISH, 412.6));
+    } finally {
+      jest.useRealTimers();
+    }
+
+    expect(createStampMock).toHaveBeenCalledWith(
+      expect.objectContaining({ capturedAt: "2026-09-19T00:01:00.000Z" }),
+    );
   });
 
   it("作れたら id と押した位置を持って完成画面へ進む", async () => {
@@ -179,6 +213,60 @@ describe("useStampPress", () => {
 
     expect(result.current.color).toBe("#ff0000");
     expect(result.current.designSheetVisible).toBe(false);
+  });
+
+  it("シートを開いている間は、選択中の色とフレームをガイドへ渡す", async () => {
+    const { result } = await setup();
+    const confirmedColor = result.current.color;
+    const confirmedFrame = result.current.frameStyleId;
+
+    await press(result.current.openDesignSheet);
+    await press(() => result.current.selectDraftColor("#ff0000"));
+    await press(() => result.current.selectDraftFrameStyle("wave"));
+
+    expect(result.current.guideColor).toBe("#ff0000");
+    expect(result.current.guideFrameStyleId).toBe("wave");
+    // 確定側は動かさない。押したときに生成へ渡すのはこちら
+    expect(result.current.color).toBe(confirmedColor);
+    expect(result.current.frameStyleId).toBe(confirmedFrame);
+  });
+
+  it("「適用」せずに閉じたらガイドは確定済みのデザインへ戻る", async () => {
+    // 閉じたあとも選択中を映していると、ガイドと実際に押されるスタンプが食い違う
+    const { result } = await setup();
+    const confirmedColor = result.current.color;
+    await press(result.current.openDesignSheet);
+    await press(() => result.current.selectDraftColor("#ff0000"));
+
+    await press(result.current.closeDesignSheet);
+
+    expect(result.current.guideColor).toBe(confirmedColor);
+    expect(result.current.guideFrameStyleId).toBe(result.current.frameStyleId);
+  });
+
+  it("「適用」したらガイドも選んだデザインのまま残る", async () => {
+    const { result } = await setup();
+    await press(result.current.openDesignSheet);
+    await press(() => result.current.selectDraftColor("#ff0000"));
+
+    await press(result.current.confirmDesign);
+
+    expect(result.current.guideColor).toBe("#ff0000");
+    expect(result.current.color).toBe("#ff0000");
+  });
+
+  it("「適用」せずに閉じた選択は生成に使わない", async () => {
+    const { result } = await setup();
+    const confirmedColor = result.current.color;
+    await press(result.current.openDesignSheet);
+    await press(() => result.current.selectDraftColor("#ff0000"));
+    await press(result.current.closeDesignSheet);
+
+    await press(() => result.current.createStamp(FINISH, 100));
+
+    expect(createStampMock).toHaveBeenCalledWith(
+      expect.objectContaining({ color: confirmedColor }),
+    );
   });
 
   it("「適用」した色とフレームで生成する", async () => {

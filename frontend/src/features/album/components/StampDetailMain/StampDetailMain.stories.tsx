@@ -38,7 +38,6 @@ const EDITORS: StampFieldEditors = {
 };
 
 const DESIGN: StampDesignChange = {
-  displayImageUri: "",
   imageUri: "",
   designMode: false,
   previewUri: null,
@@ -59,12 +58,11 @@ const meta = {
   args: {
     loading: false,
     unavailable: false,
+    reload: () => {},
     latitude: 35.6586,
     longitude: 139.7454,
     editors: EDITORS,
     design: DESIGN,
-    showLandmarkName: true,
-    toggleShowLandmarkName: () => {},
     deleteDialogVisible: false,
     openDeleteDialog: () => {},
     cancelDelete: () => {},
@@ -85,7 +83,10 @@ export const Loading: Story = {
   args: { loading: true },
 };
 
-/** id が無い／DB に行が無い／読み込みに失敗した、のいずれか */
+/**
+ * id が無い／DB に行が無い／読み込みに失敗した、のいずれか。
+ * どれかを問わず、再読み込みとアルバムへ戻る導線を出す
+ */
 export const Unavailable: Story = {
   args: { unavailable: true },
 };

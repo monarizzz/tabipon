@@ -2,8 +2,6 @@ import { View, ScrollView, StyleSheet } from "react-native";
 import { Bell, Shield, Info, Settings, Languages } from "lucide-react-native";
 
 import { NavBar } from "@/src/commons/layout/components/NavBar/NavBar";
-import { ProfileSection } from "@/src/features/mypage/components/ProfileSection/ProfileSection";
-import { RecentCollectionsSection } from "@/src/features/mypage/components/RecentCollectionsSection/RecentCollectionsSection";
 import { SettingsMenuSection } from "@/src/features/mypage/components/SettingsMenuSection/SettingsMenuSection";
 import type { Mypage, MypageMenuId } from "@/src/features/mypage/types/mypage";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
@@ -23,11 +21,7 @@ const MENU_ITEMS: {
 
 type Props = Mypage;
 
-export function MypageMain({
-  recentCollections,
-  pressSeeAllCollections,
-  pressMenu,
-}: Props) {
+export function MypageMain({ pressMenu }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -38,12 +32,6 @@ export function MypageMain({
         onRightPress={() => {}}
       />
       <ScrollView contentContainerStyle={styles.content}>
-        <ProfileSection name="たびすたんぷ太郎" registeredDate="2025.02.16" />
-        <RecentCollectionsSection
-          items={recentCollections}
-          onPressSeeAll={pressSeeAllCollections}
-        />
-        <View style={styles.recentToSettingsSpacer} />
         <SettingsMenuSection
           items={MENU_ITEMS.map((item) => ({
             id: item.id,
@@ -63,11 +51,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   content: {
-    gap: 35,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.xxl,
-  },
-  recentToSettingsSpacer: {
-    height: spacing.xl,
   },
 });

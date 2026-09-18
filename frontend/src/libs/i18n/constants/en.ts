@@ -15,13 +15,15 @@ export const en: Translations = {
   tabs: {
     camera: "Camera",
     album: "Album",
-    mypage: "My Page",
+    mypage: "Settings",
   },
   camera: {
     accessRequiredTitle: "Camera access is required",
     accessAllow: "Allow camera access",
     hint: "Frame your subject inside the circle",
     capturedPhoto: "[ Captured photo ]",
+    captureFailedTitle: "Could not take the photo",
+    captureFailedMessage: "Please press the shutter again.",
   },
   photoAdjust: {
     title: "Adjust photo",
@@ -50,11 +52,18 @@ export const en: Translations = {
     retakeConfirmTitle: "Retake this stamp?",
     retakeConfirmMessage:
       "This stamp will be deleted so you can shoot it again.",
+    shareUnavailableTitle: "Sharing unavailable",
+    shareUnavailableMessage: "Sharing isn't available on this device.",
+    shareFailedTitle: "Error",
+    shareFailedMessage:
+      "Failed to share the image. Please wait a moment and try again.",
+    retakeFailedTitle: "Could not retake",
+    retakeFailedMessage:
+      "Failed to delete the stamp. Please wait a moment and try again.",
   },
   design: {
     frame: "Frame",
     color: "Color",
-    showLandmark: "Show landmark name",
     apply: "Use this design",
     changeDesign: "Change design",
     frameClassic: "Classic",
@@ -66,15 +75,11 @@ export const en: Translations = {
     title: "Album",
     stampCount: "%{count} stamps",
     loadError: "Could not load stamps",
+    emptyTitle: "No stamps yet",
     empty: "Collect stamps and they will show up here!",
-    filterAll: "All",
+    emptyAction: "Go collect a stamp",
     stampName: "Stamp",
     unknownSpotName: "No spot set",
-  },
-  collection: {
-    add: "Add collection",
-    name: "Collection name",
-    namePlaceholder: "Enter a collection name",
   },
   stampDetail: {
     notFound: "Stamp not found",
@@ -117,16 +122,16 @@ export const en: Translations = {
       "Couldn't look up coordinates. This can happen depending on your connection or your location settings. If you save anyway, only the address changes and the map keeps pointing at the previous place.",
     geocodeSaveAnyway: "Save anyway",
     geocodeBackToEdit: "Back to editing",
+    deleteFailedTitle: "Could not delete",
+    deleteFailedMessage:
+      "Failed to delete the stamp. Please wait a moment and try again.",
   },
   discardDialog: {
     title: "Discard your edits?",
     message: "Switching tabs will discard your current edits.",
   },
   mypage: {
-    title: "My Page",
-    registered: "Registered on %{date}",
-    recentCollections: "Recent collections",
-    seeAll: "See all",
+    title: "Settings",
     notifications: "Notifications",
     privacy: "Privacy",
     help: "Help",
@@ -135,5 +140,11 @@ export const en: Translations = {
   language: {
     title: "Language",
     system: "Follow system setting",
+  },
+  dbError: {
+    title: "Could not start the app",
+    message:
+      "Preparing your saved stamps failed. If retrying does not help, update the app to the latest version.",
+    detailLabel: "Error details",
   },
 };

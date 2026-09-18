@@ -23,6 +23,8 @@ const meta = {
   tags: ["autodocs"],
   args: {
     onPressStamp: fn(),
+    onPressStartStamp: fn(),
+    onRefresh: fn(),
   },
 } satisfies Meta<typeof StampGrid>;
 
@@ -36,4 +38,9 @@ export const Default: Story = {
 
 export const Empty: Story = {
   args: { stamps: [] },
+};
+
+/** 導線を渡さない場合。空表示からボタンが消える */
+export const EmptyWithoutAction: Story = {
+  args: { stamps: [], onPressStartStamp: undefined },
 };
