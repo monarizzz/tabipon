@@ -11,10 +11,14 @@ export const PRESS_GESTURE_THRESHOLDS = {
 } as const;
 
 /**
- * 押し付けの強さを掠れ量へ写す両端。
+ * 押し付けの強さを掠れ量へ写す両端。単位は `DeviceMotion` の `acceleration.z`（m/s²）。
  * 弱い押し付け(`weakPeak`)ほど掠れ、強い押し付け(`strongPeak`)ほど掠れない。
+ *
+ * `strongPeak` には**実際に振り下ろして届く深さ**を置く。1G = 9.8 m/s² を目安に、
+ * 届かない深さを置くと実用域が 1.0 付近へ寄り、どう振っても掠れが最大で出る。
+ * 写像の役割は `docs/stamp-pipeline.md`「掠れの強さは押し方で決まる」。
  */
 export const SCRATCH_LEVEL_RANGE = {
   weakPeak: PRESS_GESTURE_THRESHOLDS.press,
-  strongPeak: -75,
+  strongPeak: -30,
 } as const;
