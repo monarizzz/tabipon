@@ -1,5 +1,11 @@
 import React, { useRef, useState } from "react";
-import { View, Text, StyleSheet, type LayoutChangeEvent } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  type LayoutChangeEvent,
+} from "react-native";
 import { CameraView, type CameraType, type FlashMode } from "expo-camera";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { colors, typography } from "@/src/style/tokens";
@@ -37,6 +43,7 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
     };
 
     const pinchGesture = Gesture.Pinch()
+      .withTestId("pinch")
       .runOnJS(true)
       .onStart(() => {
         baseZoom.current = zoom;
@@ -50,6 +57,11 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
         onZoomChange?.(next);
       });
 
+    const handleZoomReset = () => {
+      setZoom(DEFAULT_ZOOM);
+      onZoomChange?.(DEFAULT_ZOOM);
+    };
+
     const effectiveGuideSize = Math.min(
       guideSize,
       containerSize.width - 24,
@@ -61,7 +73,7 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
     ).toFixed(1);
 
     return (
-      <View style={styles.wrap} onLayout={handleLayout}>
+      <View testID="camera-preview" style={styles.wrap} onLayout={handleLayout}>
         {containerSize.width > 0 && (
           <GestureDetector gesture={pinchGesture}>
             <View style={styles.frame}>
@@ -83,12 +95,19 @@ export const CameraPreview = React.forwardRef<CameraView, Props>(
                   },
                 ]}
               />
-              <View
-                pointerEvents="none"
-                style={[styles.zoomBadge, { marginTop: 12 }]}
+              <Pressable
+                testID="zoom-badge"
+                onPress={handleZoomReset}
+                hitSlop={8}
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.zoomBadge,
+                  { marginTop: 12 },
+                  pressed && styles.zoomBadgePressed,
+                ]}
               >
                 <Text style={styles.zoomBadgeText}>{displayZoom}x</Text>
-              </View>
+              </Pressable>
             </View>
           </GestureDetector>
         )}
@@ -131,6 +150,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 4,
+  },
+  zoomBadgePressed: {
+    opacity: 0.6,
   },
   zoomBadgeText: {
     fontSize: typography.caption.fontSize,
