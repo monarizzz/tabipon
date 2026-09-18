@@ -2,15 +2,15 @@ import React from "react";
 import { Alert } from "react-native";
 
 import {
-  originalPhotoUri,
+  lineArtUri,
   replaceStampImage,
   stampImageUri,
   updateStamp,
 } from "@/src/infra/db/stamps";
 import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 import {
-  generateStampFromUri,
-  generateStampPngFromUri,
+  renderStampFromLineArtUri,
+  renderStampPngFromLineArtUri,
 } from "@/src/utils/stamp/io";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
 import { DEFAULT_STAMP_COLOR } from "@/src/utils/stamp/constants/constants";
@@ -52,10 +52,10 @@ export function useStampDesignChange({
 
   const imageUri = stamp ? stampImageUri(stamp) : "";
 
-  // この端末に残っている元写真の uri（無ければデザイン変更できない）。
+  // この端末に残っている線画の uri（無ければデザイン変更できない）。
   // 実ファイルの有無を見にいくので、行が入れ替わったときだけ引き直す
-  const originalUri = React.useMemo(
-    () => (stamp ? originalPhotoUri(stamp) : null),
+  const sourceUri = React.useMemo(
+    () => (stamp ? lineArtUri(stamp) : null),
     [stamp],
   );
 
@@ -69,7 +69,7 @@ export function useStampDesignChange({
 
   // デザイン変更中は選択中の色/フレームでプレビューを生成する(作成画面と同じ cancelled フラグ方式)
   React.useEffect(() => {
-    if (!designMode || !originalUri) {
+    if (!designMode || !sourceUri) {
       // プレビューの生成を止めたときの後始末。描画は外部（Skia）で走らせており、
       // 捨てる操作をレンダー側に寄せられないためここで消す
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -79,7 +79,7 @@ export function useStampDesignChange({
     let cancelled = false;
     setPreviewLoading(true);
     // 掠れの seed は id から導くので、色やフレームを変えても模様は変わらない
-    generateStampFromUri(originalUri, {
+    renderStampFromLineArtUri(sourceUri, {
       color: selectedColor,
       frame: selectedFrameStyleId,
       scratchLevel,
@@ -101,8 +101,8 @@ export function useStampDesignChange({
     };
   }, [
     designMode,
-    originalUri,
     scratchLevel,
+    sourceUri,
     selectedColor,
     selectedFrameStyleId,
     stampId,
@@ -110,12 +110,12 @@ export function useStampDesignChange({
   ]);
 
   const confirm = React.useCallback(async () => {
-    if (!stampId || !originalUri || updating) return;
+    if (!stampId || !sourceUri || updating) return;
     const color = selectedColor;
     const frameId = selectedFrameStyleId;
     setUpdating(true);
     try {
-      const stampPng = await generateStampPngFromUri(originalUri, {
+      const stampPng = await renderStampPngFromLineArtUri(sourceUri, {
         color,
         frame: frameId,
         scratchLevel,
@@ -141,10 +141,10 @@ export function useStampDesignChange({
     }
   }, [
     onUpdated,
-    originalUri,
     scratchLevel,
     selectedColor,
     selectedFrameStyleId,
+    sourceUri,
     stampId,
     t,
     tiltAngle,
@@ -165,8 +165,8 @@ export function useStampDesignChange({
     setSelectedFrameStyleId: setDraftFrameId,
 
     open: () => {
-      // 元写真が消えていると再生成できない。開いてから気付かせない
-      if (!originalUri) {
+      // 線画が消えていると描き直せない。開いてから気付かせない
+      if (!sourceUri) {
         Alert.alert(
           t("stampDetail.designUnavailableTitle"),
           t("stampDetail.designUnavailableMessage"),

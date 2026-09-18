@@ -6,45 +6,48 @@ import { Alert } from "react-native";
 
 import { useStampDesignChange } from "@/src/features/album/hooks/useStampDesignChange";
 import {
-  originalPhotoUri,
+  lineArtUri,
   replaceStampImage,
   stampImageUri,
   updateStamp,
   type Stamp,
 } from "@/src/infra/db/stamps";
 import {
-  generateStampFromUri,
-  generateStampPngFromUri,
+  renderStampFromLineArtUri,
+  renderStampPngFromLineArtUri,
 } from "@/src/utils/stamp/io";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
 
 jest.mock("@/src/infra/db/stamps", () => ({
-  originalPhotoUri: jest.fn(),
+  lineArtUri: jest.fn(),
   replaceStampImage: jest.fn(),
   stampImageUri: jest.fn(),
   updateStamp: jest.fn(),
 }));
 jest.mock("@/src/utils/stamp/io", () => ({
-  generateStampFromUri: jest.fn(),
-  generateStampPngFromUri: jest.fn(),
+  renderStampFromLineArtUri: jest.fn(),
+  renderStampPngFromLineArtUri: jest.fn(),
 }));
 jest.mock("@/src/libs/i18n/I18nProvider", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
-const originalPhotoUriMock = jest.mocked(originalPhotoUri);
+const lineArtUriMock = jest.mocked(lineArtUri);
 const replaceStampImageMock = jest.mocked(replaceStampImage);
 const stampImageUriMock = jest.mocked(stampImageUri);
 const updateStampMock = jest.mocked(updateStamp);
-const generateStampFromUriMock = jest.mocked(generateStampFromUri);
-const generateStampPngFromUriMock = jest.mocked(generateStampPngFromUri);
+const renderStampFromLineArtUriMock = jest.mocked(renderStampFromLineArtUri);
+const renderStampPngFromLineArtUriMock = jest.mocked(
+  renderStampPngFromLineArtUri,
+);
 
 const PNG = new Uint8Array([1, 2, 3]);
 
 const STAMP = {
   id: "stamp-1",
   stampImagePath: "stamps/stamp-1-1.png",
-  lineArtPath: "originals/stamp-1.jpg",
+  lineArtPath: "stamp-line-arts/stamp-1.png",
+  originalPhotoPath: "stamp-originals/stamp-1.jpg",
   title: "東京タワー",
   memo: null,
   capturedAt: "2026-09-18T01:23:00.000Z",
@@ -58,10 +61,10 @@ const STAMP = {
   tiltAngle: 2,
 } as const satisfies Stamp;
 
-/** `generateStampFromUri()` が返す SkImage のうち、フックが触るのは base64 化だけ */
+/** `renderStampFromLineArtUri()` が返す SkImage のうち、フックが触るのは base64 化だけ */
 function skImageWith(base64: string | null) {
   return { encodeToBase64: () => base64 } as unknown as Awaited<
-    ReturnType<typeof generateStampFromUri>
+    ReturnType<typeof renderStampFromLineArtUri>
   >;
 }
 
@@ -89,12 +92,12 @@ async function press(handler: () => void) {
 describe("useStampDesignChange", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    originalPhotoUriMock.mockReturnValue("file:///photos/stamp-1.jpg");
+    lineArtUriMock.mockReturnValue("file:///line-arts/stamp-1.png");
     stampImageUriMock.mockImplementation(
       (stamp) => `file:///documents/${stamp.stampImagePath}`,
     );
-    generateStampFromUriMock.mockResolvedValue(skImageWith("BASE64"));
-    generateStampPngFromUriMock.mockResolvedValue(PNG);
+    renderStampFromLineArtUriMock.mockResolvedValue(skImageWith("BASE64"));
+    renderStampPngFromLineArtUriMock.mockResolvedValue(PNG);
     updateStampMock.mockImplementation(async (_id, patch) => ({
       ...STAMP,
       ...patch,
@@ -112,12 +115,12 @@ describe("useStampDesignChange", () => {
   it("デザイン変更を開くまではプレビューを作らない", async () => {
     await setup();
 
-    expect(generateStampFromUriMock).not.toHaveBeenCalled();
+    expect(renderStampFromLineArtUriMock).not.toHaveBeenCalled();
   });
 
-  it("元写真が残っていなければ開かず、知らせて終わる", async () => {
+  it("線画が残っていなければ開かず、知らせて終わる", async () => {
     const alert = jest.spyOn(Alert, "alert").mockImplementation(() => {});
-    originalPhotoUriMock.mockReturnValue(null);
+    lineArtUriMock.mockReturnValue(null);
     const { result } = await setup();
 
     await press(result.current.open);
@@ -135,8 +138,8 @@ describe("useStampDesignChange", () => {
     await waitFor(() =>
       expect(result.current.previewUri).toBe("data:image/png;base64,BASE64"),
     );
-    expect(generateStampFromUriMock).toHaveBeenCalledWith(
-      "file:///photos/stamp-1.jpg",
+    expect(renderStampFromLineArtUriMock).toHaveBeenCalledWith(
+      "file:///line-arts/stamp-1.png",
       {
         color: "#111111",
         frame: "simple",
@@ -157,8 +160,8 @@ describe("useStampDesignChange", () => {
     await press(() => result.current.setSelectedColor("#ff0000"));
 
     await waitFor(() =>
-      expect(generateStampFromUriMock).toHaveBeenLastCalledWith(
-        "file:///photos/stamp-1.jpg",
+      expect(renderStampFromLineArtUriMock).toHaveBeenLastCalledWith(
+        "file:///line-arts/stamp-1.png",
         expect.objectContaining({ color: "#ff0000" }),
       ),
     );
@@ -167,7 +170,7 @@ describe("useStampDesignChange", () => {
 
   it("プレビューの生成が失敗しても落ちず、読み込み中のままにしない", async () => {
     const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
-    generateStampFromUriMock.mockRejectedValue(new Error("boom"));
+    renderStampFromLineArtUriMock.mockRejectedValue(new Error("boom"));
     const { result } = await setup();
 
     await press(result.current.open);
@@ -207,8 +210,8 @@ describe("useStampDesignChange", () => {
 
     await press(result.current.confirm);
 
-    expect(generateStampPngFromUriMock).toHaveBeenCalledWith(
-      "file:///photos/stamp-1.jpg",
+    expect(renderStampPngFromLineArtUriMock).toHaveBeenCalledWith(
+      "file:///line-arts/stamp-1.png",
       expect.objectContaining({ color: "#ff0000", frame: "simple" }),
     );
     // 逆順だと、行だけ新しいデザインになって実際の絵と食い違う

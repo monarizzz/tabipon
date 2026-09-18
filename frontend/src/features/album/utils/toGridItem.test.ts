@@ -13,7 +13,8 @@ function stampWith(overrides: Partial<Stamp> = {}): Stamp {
   return {
     id: "abc",
     stampImagePath: "stamps/abc.png",
-    lineArtPath: "originals/abc.jpg",
+    lineArtPath: "stamp-line-arts/abc.png",
+    originalPhotoPath: "stamp-originals/abc.jpg",
     title: "東京タワー",
     memo: null,
     capturedAt: "2026-09-18T01:23:00.000Z",

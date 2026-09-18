@@ -9,10 +9,11 @@ import {
   ensureImageDirs,
   existingFileUriOf,
   fileUriOf,
+  lineArtPathOf,
   nextStampImagePathOf,
   originalPhotoPathOf,
   stampImagePathOf,
-  writeStampImage,
+  writePng,
 } from "@/src/libs/stampFile";
 import {
   DEFAULT_STAMP_FRAME,
@@ -37,7 +38,10 @@ export type Stamp = {
   id: string;
   /** documentDirectory からの相対パス。表示に使う uri は `stampImageUri()` で作る */
   stampImagePath: string;
+  /** 線画。デザイン変更はここから描き直す。uri は `lineArtUri()` で作る */
   lineArtPath: string;
+  /** 元写真。2 値の線画からは戻せないので別に持つ */
+  originalPhotoPath: string;
   title: string | null;
   memo: string | null;
   /** 表示・並び替えに使う撮影日時。利用者が編集できる */
@@ -63,9 +67,11 @@ export type Stamp = {
 export type NewStamp = {
   /** `newStampId()` で払い出した id。PNG を描くときの seed と同じものを渡す */
   id: string;
-  /** 仕上げ済みスタンプの PNG。`generateStampPngFromUri()` の戻り値 */
+  /** 仕上げ済みスタンプの PNG。`generateStampWithLineArtFromUri()` の戻り値 */
   stampPng: Uint8Array;
-  /** 元写真の uri。デザイン変更で再生成するために取っておく */
+  /** 線画の PNG。`generateStampWithLineArtFromUri()` の戻り値 */
+  lineArtPng: Uint8Array;
+  /** 元写真の uri。線画の作り方を変えたときに引き直せるよう取っておく */
   photoUri: string;
   capturedAt: string;
   location: StampLocation | null;
@@ -104,6 +110,7 @@ type ScalarStampPatch = Omit<StampPatch, "location">;
 type StampRow = {
   id: string;
   line_art_path: string;
+  original_photo_path: string;
   stamp_image_path: string;
   title: string | null;
   memo: string | null;
@@ -124,6 +131,7 @@ function toStamp(row: StampRow): Stamp {
     id: row.id,
     stampImagePath: row.stamp_image_path,
     lineArtPath: row.line_art_path,
+    originalPhotoPath: row.original_photo_path,
     title: row.title,
     memo: row.memo,
     capturedAt: row.captured_at,
@@ -148,9 +156,14 @@ export function stampImageUri(stamp: Stamp): string {
   return fileUriOf(stamp.stampImagePath);
 }
 
-/** 元写真の uri。デザイン変更の再生成に使う。失われていれば null */
-export function originalPhotoUri(stamp: Stamp): string | null {
+/** 線画の uri。デザイン変更の描き直しに使う。失われていれば null */
+export function lineArtUri(stamp: Stamp): string | null {
   return existingFileUriOf(stamp.lineArtPath);
+}
+
+/** 元写真の uri。失われていれば null */
+export function originalPhotoUri(stamp: Stamp): string | null {
+  return existingFileUriOf(stamp.originalPhotoPath);
 }
 
 /**
@@ -177,15 +190,18 @@ export async function saveStamp(input: NewStamp): Promise<Stamp> {
   const now = new Date().toISOString();
 
   const stampImagePath = stampImagePathOf(id, 1);
-  const lineArtPath = originalPhotoPathOf(id);
+  const lineArtPath = lineArtPathOf(id);
+  const originalPhotoPath = originalPhotoPathOf(id);
 
   ensureImageDirs();
-  writeStampImage(stampImagePath, input.stampPng);
-  copyOriginalPhoto(input.photoUri, lineArtPath);
+  writePng(stampImagePath, input.stampPng);
+  writePng(lineArtPath, input.lineArtPng);
+  copyOriginalPhoto(input.photoUri, originalPhotoPath);
 
   const row: StampRow = {
     id,
     line_art_path: lineArtPath,
+    original_photo_path: originalPhotoPath,
     stamp_image_path: stampImagePath,
     title: null,
     memo: null,
@@ -304,7 +320,7 @@ export async function replaceStampImage(
   const stampImagePath = nextStampImagePathOf(id, stamp.stampImagePath);
 
   ensureImageDirs();
-  writeStampImage(stampImagePath, stampPng);
+  writePng(stampImagePath, stampPng);
 
   return stampImagePath;
 }
@@ -330,7 +346,11 @@ export async function deleteStamp(id: string): Promise<void> {
   await db.runAsync("DELETE FROM stamps WHERE id = ?", id);
 
   try {
-    deleteFiles([stamp.stampImagePath, stamp.lineArtPath]);
+    deleteFiles([
+      stamp.stampImagePath,
+      stamp.lineArtPath,
+      stamp.originalPhotoPath,
+    ]);
   } catch (error) {
     console.warn("[stamps] failed to delete stamp files", error);
   }
@@ -349,10 +369,15 @@ export async function deleteOrphanFiles(): Promise<number> {
   const rows = await db.getAllAsync<{
     stamp_image_path: string;
     line_art_path: string;
-  }>("SELECT stamp_image_path, line_art_path FROM stamps");
+    original_photo_path: string;
+  }>("SELECT stamp_image_path, line_art_path, original_photo_path FROM stamps");
 
   const referenced = new Set(
-    rows.flatMap((row) => [row.stamp_image_path, row.line_art_path]),
+    rows.flatMap((row) => [
+      row.stamp_image_path,
+      row.line_art_path,
+      row.original_photo_path,
+    ]),
   );
 
   return deleteUnreferencedFiles(referenced);

@@ -1,10 +1,10 @@
-// PNG の中身（`generateStampPngFromUri()`）と保存そのもの（`stamps.test.ts`）は
+// PNG の中身（`generateStampWithLineArtFromUri()`）と保存そのもの（`stamps.test.ts`）は
 // それぞれの側で見ている。ここで確かめるのは組み立ての順序 —
 // **描く前に id が確定していること**と、seed がその id から導かれていること。
 // Skia も SQLite も要らないので、両方まるごとモックする。
 import { createStamp } from "@/src/features/camera/utils/createStamp";
 import { newStampId, saveStamp, type Stamp } from "@/src/infra/db/stamps";
-import { generateStampPngFromUri } from "@/src/utils/stamp/io";
+import { generateStampWithLineArtFromUri } from "@/src/utils/stamp/io";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
 
 jest.mock("@/src/infra/db/stamps", () => ({
@@ -12,14 +12,17 @@ jest.mock("@/src/infra/db/stamps", () => ({
   saveStamp: jest.fn(),
 }));
 jest.mock("@/src/utils/stamp/io", () => ({
-  generateStampPngFromUri: jest.fn(),
+  generateStampWithLineArtFromUri: jest.fn(),
 }));
 
 const newStampIdMock = jest.mocked(newStampId);
 const saveStampMock = jest.mocked(saveStamp);
-const generateStampPngFromUriMock = jest.mocked(generateStampPngFromUri);
+const generateStampWithLineArtFromUriMock = jest.mocked(
+  generateStampWithLineArtFromUri,
+);
 
-const PNG = new Uint8Array([1, 2, 3]);
+const STAMP_PNG = new Uint8Array([1, 2, 3]);
+const LINE_ART_PNG = new Uint8Array([4, 5, 6]);
 
 const INPUT = {
   photoUri: "file:///photos/1.jpg",
@@ -36,7 +39,10 @@ describe("createStamp", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     newStampIdMock.mockReturnValue("stamp-1");
-    generateStampPngFromUriMock.mockResolvedValue(PNG);
+    generateStampWithLineArtFromUriMock.mockResolvedValue({
+      stampPng: STAMP_PNG,
+      lineArtPng: LINE_ART_PNG,
+    });
     saveStampMock.mockImplementation(
       async (input) =>
         ({
@@ -48,7 +54,7 @@ describe("createStamp", () => {
   it("払い出した id から seed を導き、選んだデザインと演出値で PNG を描く", async () => {
     await createStamp({ ...INPUT });
 
-    expect(generateStampPngFromUriMock).toHaveBeenCalledWith(
+    expect(generateStampWithLineArtFromUriMock).toHaveBeenCalledWith(
       "file:///photos/1.jpg",
       {
         color: "#112233",
@@ -67,9 +73,9 @@ describe("createStamp", () => {
       calls.push("newStampId");
       return "stamp-1";
     });
-    generateStampPngFromUriMock.mockImplementation(async () => {
-      calls.push("generateStampPngFromUri");
-      return PNG;
+    generateStampWithLineArtFromUriMock.mockImplementation(async () => {
+      calls.push("generateStampWithLineArtFromUri");
+      return { stampPng: STAMP_PNG, lineArtPng: LINE_ART_PNG };
     });
     saveStampMock.mockImplementation(async (input) => {
       calls.push("saveStamp");
@@ -80,18 +86,19 @@ describe("createStamp", () => {
 
     expect(calls).toEqual([
       "newStampId",
-      "generateStampPngFromUri",
+      "generateStampWithLineArtFromUri",
       "saveStamp",
     ]);
   });
 
-  it("描いた PNG と元写真、位置と住所を同じ id の行として保存する", async () => {
+  it("描いた PNG と線画、元写真、位置と住所を同じ id の行として保存する", async () => {
     await createStamp({ ...INPUT });
 
     expect(saveStampMock).toHaveBeenCalledWith(
       expect.objectContaining({
         id: "stamp-1",
-        stampPng: PNG,
+        stampPng: STAMP_PNG,
+        lineArtPng: LINE_ART_PNG,
         photoUri: "file:///photos/1.jpg",
         location: { latitude: 35.6, longitude: 139.7 },
         address: "東京都港区",
@@ -125,7 +132,7 @@ describe("createStamp", () => {
   });
 
   it("PNG の生成が失敗したら保存せずに投げ返す", async () => {
-    generateStampPngFromUriMock.mockRejectedValue(new Error("boom"));
+    generateStampWithLineArtFromUriMock.mockRejectedValue(new Error("boom"));
 
     await expect(createStamp({ ...INPUT })).rejects.toThrow("boom");
     expect(saveStampMock).not.toHaveBeenCalled();

@@ -1,5 +1,5 @@
 import { newStampId, saveStamp, type Stamp } from "@/src/infra/db/stamps";
-import { generateStampPngFromUri } from "@/src/utils/stamp/io";
+import { generateStampWithLineArtFromUri } from "@/src/utils/stamp/io";
 import { seedFromStampId } from "@/src/utils/stamp/seed";
 import type { CreateStampInput } from "@/src/features/camera/types/createStampInput";
 
@@ -24,16 +24,20 @@ export async function createStamp({
   address,
 }: CreateStampInput): Promise<Stamp> {
   const id = newStampId();
-  const stampPng = await generateStampPngFromUri(photoUri, {
-    color,
-    frame: frameId,
-    scratchLevel,
-    tiltAngle,
-    seed: seedFromStampId(id),
-  });
+  const { stampPng, lineArtPng } = await generateStampWithLineArtFromUri(
+    photoUri,
+    {
+      color,
+      frame: frameId,
+      scratchLevel,
+      tiltAngle,
+      seed: seedFromStampId(id),
+    },
+  );
   return saveStamp({
     id,
     stampPng,
+    lineArtPng,
     photoUri,
     capturedAt,
     location,
