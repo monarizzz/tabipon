@@ -142,7 +142,7 @@ commons/stamp/components/DesignChangeForm/   枠 / 色 / 適用ボタン
 
 ## src/utils/shareCard/ のディレクトリ構成
 
-共有ボタンから作る 1 枚の画像。構成・体裁・ルールは [share-card.md](share-card.md) を参照。
+共有ボタンから作る 1 枚の画像（スタンプ帳のページに見立てたカード）。構成・体裁・ルールは [share-card.md](share-card.md) を参照。
 
 Skia のオフスクリーン描画と uri のデコードは、スタンプ生成と共有カードの両方が使うので
 `src/utils/skia/` に置く。

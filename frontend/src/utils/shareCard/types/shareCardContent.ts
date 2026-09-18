@@ -1,21 +1,29 @@
 import type { SkImage } from "@shopify/react-native-skia";
 
+/** 罫線 1 本に書き込む 1 項目 */
+export type ShareCardField = {
+  /** 行の左に小さく出す項目名（「日付」など） */
+  label: string;
+  /** 書き込む値。空文字の項目は呼び出し側で除く */
+  value: string;
+  /** 折り返せる行数。2 以上なら罫線もその本数を使う。省略すると 1 */
+  maxLines?: number;
+};
+
 /**
  * 共有カードに載せる中身。
  *
- * 文字列の項目は空文字を「無し」として扱い、その行ごと詰める
- * （`renderShareCard()`）。呼び出し側で「未設定」の表示文言に置き換えないこと。
+ * **文言は持たない。**項目名は `label` として受け取る。`src/utils/` は i18n を
+ * 知らないため（`docs/front-architecture.md`「文言」）。
  *
- * **アプリ名とハッシュタグは載せない。**投稿に付ける文字列は共有時に
- * クリップボードへ入れる本文が持つ（`docs/share-card.md`）
+ * **アプリ名とハッシュタグは載せない。**投稿に付ける文字列は共有シートの本文が持つ
+ * （`docs/share-card.md`）
  */
 export type ShareCardContent = {
   /** 仕上げ済みのスタンプ画像 */
   stamp: SkImage;
-  /** スポット名。未入力なら空文字 */
+  /** スポット名。1 本目の罫線にラベル無しで大きく書く。未入力なら空文字 */
   spotName: string;
-  /** `YYYY/MM/DD` に整形済みの撮影日。解釈できない値だったら空文字 */
-  date: string;
-  /** 場所（住所）の 1 行。未設定なら空文字 */
-  address: string;
+  /** スポット名の下に上から順に書き込む項目。値の無いものは含めない */
+  fields: ShareCardField[];
 };

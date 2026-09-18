@@ -35,10 +35,7 @@ export function useStampDone({ stampId, stampTop }: Params): StampDone {
     logTag: "[stamp-done]",
   });
 
-  const { share, toastMessage } = useStampShare({
-    stamp,
-    logTag: "[stamp-done]",
-  });
+  const { share } = useStampShare({ stamp, logTag: "[stamp-done]" });
 
   // 撮影フローはここで終わりなので確認は挟まない。
   // カメラへ戻るときだけ履歴を積まないよう replace する
@@ -73,7 +70,6 @@ export function useStampDone({ stampId, stampTop }: Params): StampDone {
     retakeDialogVisible,
 
     share,
-    toastMessage,
     openRetakeDialog: () => setRetakeDialogVisible(true),
     cancelRetake: () => setRetakeDialogVisible(false),
     confirmRetake: () => {

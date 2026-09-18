@@ -9,48 +9,35 @@
 export const CARD_WIDTH = 1080;
 export const CARD_HEIGHT = 1920;
 
-/**
- * チケットの外側に残す台紙の余白。
- *
- * 0 なので台紙は切り取り線の切り欠きからしか見えない。チケットは断ち切りで、
- * 角丸も付けない
- */
-export const MAT_MARGIN = 0;
+/** 紙の左右余白 */
+export const PAGE_PADDING_H = 80;
 
-/** チケットの角丸と枠線 */
-export const TICKET_RADIUS = 0;
-export const TICKET_BORDER_WIDTH = 3;
+/** 記入欄の幅 */
+export const CONTENT_WIDTH = CARD_WIDTH - PAGE_PADDING_H * 2;
 
-/** 半券（切り取り線より下）の高さ */
-export const STUB_HEIGHT = 300;
+/** スタンプを押す位置と大きさ */
+export const STAMP_TOP = 140;
+export const STAMP_SIZE = 820;
 
-/** 切り取り線の両端に食い込ませる半円の半径 */
-export const NOTCH_RADIUS = 34;
+/** 罫線の本数・間隔・太さ。1 本目はスタンプの下に置く */
+export const RULE_COUNT = 5;
+export const RULE_TOP = STAMP_TOP + STAMP_SIZE + 150;
+export const RULE_GAP = 140;
+export const RULE_WIDTH = 3;
 
-/** 切り取り線の破線。`[線, 空白]` の長さ */
-export const TEAR_DASH: readonly number[] = [18, 14];
-export const TEAR_LINE_WIDTH = 3;
+/** 罫線と、その上に乗る文字の間隔 */
+export const RULE_TO_TEXT_GAP = 14;
 
-/** チケット内側の左右余白 */
-export const TICKET_PADDING_H = 40;
-
-/** 本券に置くスタンプ画像の一辺。左右の余白を除いた幅いっぱい */
-export const STAMP_SIZE = CARD_WIDTH - TICKET_PADDING_H * 2;
-
-/** スタンプとスポット名の間隔 */
-export const STAMP_TO_SPOT_NAME_GAP = 48;
-
-/** 半券の上余白と行間 */
-export const STUB_PADDING_TOP = 72;
-export const STUB_LINE_GAP = 20;
+/** ラベルに割り当てる幅。値はこの分だけ右にずらす */
+export const LABEL_WIDTH = 150;
 
 /** 文字サイズ。`design/DESIGN.md` の階層をカードの解像度に合わせて拡大したもの */
-export const SPOT_NAME_FONT_SIZE = 64;
-export const DATE_FONT_SIZE = 44;
-export const ADDRESS_FONT_SIZE = 34;
+export const SPOT_NAME_FONT_SIZE = 56;
+export const LABEL_FONT_SIZE = 30;
+export const VALUE_FONT_SIZE = 40;
 
-/** スポット名の最大行数。超える分は省略記号に畳む */
-export const SPOT_NAME_MAX_LINES = 2;
+/** メモが折り返せる行数。1 行につき罫線 1 本を使う */
+export const MEMO_MAX_LINES = 2;
 
 /** 省略記号 */
 export const ELLIPSIS = "…";

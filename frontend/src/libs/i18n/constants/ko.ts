@@ -51,7 +51,6 @@ export const ko: Translations = {
     dialogTitle: "스탬프 공유",
     postText: "tabipon으로 스탬프를 찍었습니다! #たびぽん",
     postTextWithSpot: "%{spot}에서 스탬프를 찍었습니다! #たびぽん",
-    copied: "게시용 문구를 복사했습니다",
     unavailableTitle: "공유할 수 없습니다",
     unavailableMessage: "이 기기에서는 공유 기능을 사용할 수 없습니다.",
     failedTitle: "오류",

@@ -51,7 +51,6 @@ export const en: Translations = {
     dialogTitle: "Share stamp",
     postText: "I stamped my trip with tabipon! #たびぽん",
     postTextWithSpot: "I stamped %{spot} with tabipon! #たびぽん",
-    copied: "Copied the text for your post",
     unavailableTitle: "Sharing unavailable",
     unavailableMessage: "Sharing isn't available on this device.",
     failedTitle: "Error",

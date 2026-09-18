@@ -23,8 +23,6 @@ export type StampDetail = {
   design: StampDesignChange;
 
   deleteDialogVisible: boolean;
-  /** 下部に出す知らせ。`<Toast message={...} />` へ渡す。出していない間は null */
-  toastMessage: string | null;
 
   openDeleteDialog: () => void;
   cancelDelete: () => void;

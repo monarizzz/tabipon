@@ -42,7 +42,6 @@ const meta = {
     tabItems: [],
     headerAnchorHeight: 240,
     retakeDialogVisible: false,
-    toastMessage: null,
     share: () => {},
     openRetakeDialog: () => {},
     cancelRetake: () => {},
@@ -57,11 +56,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-
-/** 共有して投稿用の文章をコピーした直後 */
-export const Copied: Story = {
-  args: { toastMessage: "投稿用の文章をコピーしました" },
-};
 
 /** 押した位置を引き継げなかったとき。余白を固定せず全体を上下に散らす */
 export const WithoutStampPosition: Story = {

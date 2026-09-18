@@ -4,8 +4,6 @@ import type { Stamp } from "@/src/infra/db/stamps";
 export type StampShare = {
   /** 共有カードを作って共有シートを開く */
   share: () => void;
-  /** 下部に出す知らせ。`<Toast message={...} />` へ渡す。出していない間は null */
-  toastMessage: string | null;
 };
 
 /** `useStampShare()` の引数 */

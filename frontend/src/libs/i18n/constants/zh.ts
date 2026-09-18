@@ -50,7 +50,6 @@ export const zh: Translations = {
     dialogTitle: "共享印章",
     postText: "我用 tabipon 盖了一枚印章！ #たびぽん",
     postTextWithSpot: "我在%{spot}盖了一枚印章！ #たびぽん",
-    copied: "已复制用于发布的文字",
     unavailableTitle: "无法共享",
     unavailableMessage: "此设备不支持共享功能。",
     failedTitle: "错误",

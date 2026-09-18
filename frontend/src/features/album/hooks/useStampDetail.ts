@@ -54,10 +54,7 @@ export function useStampDetail(id: string | undefined): StampDetail {
     onUpdated: applyUpdated,
   });
 
-  const { share, toastMessage } = useStampShare({
-    stamp,
-    logTag: "[stamp-detail]",
-  });
+  const { share } = useStampShare({ stamp, logTag: "[stamp-detail]" });
 
   React.useEffect(() => {
     if (!id) return;
@@ -123,6 +120,5 @@ export function useStampDetail(id: string | undefined): StampDetail {
     // dismissTo は履歴のアルバムまで戻り、履歴に無ければ現在の画面を置き換える
     backToAlbum: () => router.dismissTo("/(tabs)/album"),
     share,
-    toastMessage,
   };
 }

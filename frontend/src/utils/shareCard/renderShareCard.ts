@@ -1,147 +1,141 @@
 /**
  * 共有カード 1 枚を組み立てる。
  *
- * 置き方は上から順ではなく、本券（切り取り線より上）と半券（下）で別々に決める。
- * 本券はスタンプとスポット名をひとまとまりにして縦中央へ、半券は日付と場所を置く。
+ * スタンプ帳の 1 ページに見立て、上にスタンプを押し、その下の罫線へ手書きの記入欄の
+ * ように項目を書き込む。書き込む順は「スポット名 → 渡された項目」で、値の無い項目は
+ * 呼び出し側が除いてあるので後ろの項目が繰り上がる。
  */
 import {
   FontWeight,
   Skia,
-  TextAlign,
   type SkCanvas,
   type SkImage,
 } from "@shopify/react-native-skia";
 
 import { colors } from "@/src/style/tokens";
 import {
-  ADDRESS_FONT_SIZE,
   CARD_HEIGHT,
   CARD_WIDTH,
-  DATE_FONT_SIZE,
+  CONTENT_WIDTH,
+  LABEL_FONT_SIZE,
+  LABEL_WIDTH,
+  PAGE_PADDING_H,
+  RULE_GAP,
+  RULE_TO_TEXT_GAP,
   SPOT_NAME_FONT_SIZE,
-  SPOT_NAME_MAX_LINES,
   STAMP_SIZE,
-  STAMP_TO_SPOT_NAME_GAP,
-  STUB_LINE_GAP,
-  STUB_PADDING_TOP,
+  STAMP_TOP,
+  VALUE_FONT_SIZE,
 } from "@/src/utils/shareCard/constants/constants";
+import {
+  drawNotebookPage,
+  ruleY,
+  stampLeft,
+} from "@/src/utils/shareCard/notebook";
 import {
   drawTextBlock,
   measureTextHeight,
   type TextBlock,
 } from "@/src/utils/shareCard/text";
-import { drawTicket, ticketGeometry } from "@/src/utils/shareCard/ticket";
-import type { ShareCardContent } from "@/src/utils/shareCard/types/shareCardContent";
+import type {
+  ShareCardContent,
+  ShareCardField,
+} from "@/src/utils/shareCard/types/shareCardContent";
 import { renderToImage, toRasterImage } from "@/src/utils/skia/surface";
 
-function spotNameBlock(spotName: string): TextBlock {
-  return {
-    text: spotName,
-    fontSize: SPOT_NAME_FONT_SIZE,
-    color: colors.textPrimary,
-    weight: FontWeight.Bold,
-    align: TextAlign.Center,
-    maxLines: SPOT_NAME_MAX_LINES,
-  };
+/**
+ * 罫線の上に文字を乗せる。
+ *
+ * Paragraph は左上を指定して描くので、罫線の y から文字の高さを引いて上端を出す。
+ * 折り返した行も罫線に乗るよう、行高は罫線の間隔に合わせてある
+ */
+function drawOnRule(
+  canvas: SkCanvas,
+  block: TextBlock,
+  left: number,
+  width: number,
+  bottom: number,
+): void {
+  const height = measureTextHeight(block, width);
+  drawTextBlock(canvas, block, left, bottom - height, width);
 }
 
-/** 本券。スタンプとスポット名をひとまとまりにして縦中央へ置く */
-function drawTicketBody(
-  canvas: SkCanvas,
-  stamp: SkImage,
-  spotName: string,
-  top: number,
-  tearY: number,
-  contentLeft: number,
-  contentWidth: number,
-): void {
-  const block = spotName ? spotNameBlock(spotName) : null;
-  const spotNameHeight = block ? measureTextHeight(block, contentWidth) : 0;
-  // スポット名が無ければ間隔ごと詰める
-  const totalHeight =
-    STAMP_SIZE + (block ? STAMP_TO_SPOT_NAME_GAP + spotNameHeight : 0);
-  const stampTop = top + (tearY - top - totalHeight) / 2;
+/** スポット名。1 本目の罫線にラベル無しで大きく書く */
+function drawSpotName(canvas: SkCanvas, spotName: string, index: number): void {
+  drawOnRule(
+    canvas,
+    {
+      text: spotName,
+      fontSize: SPOT_NAME_FONT_SIZE,
+      color: colors.textPrimary,
+      weight: FontWeight.Bold,
+    },
+    PAGE_PADDING_H,
+    CONTENT_WIDTH,
+    ruleY(index) - RULE_TO_TEXT_GAP,
+  );
+}
 
-  canvas.drawImageRect(
-    stamp,
-    Skia.XYWHRect(0, 0, stamp.width(), stamp.height()),
-    Skia.XYWHRect(
-      (CARD_WIDTH - STAMP_SIZE) / 2,
-      stampTop,
-      STAMP_SIZE,
-      STAMP_SIZE,
-    ),
-    Skia.Paint(),
+/** ラベル付きの 1 項目。ラベルは行の左に小さく、値はその右に書く */
+function drawField(
+  canvas: SkCanvas,
+  field: ShareCardField,
+  index: number,
+): void {
+  const bottom = ruleY(index) - RULE_TO_TEXT_GAP;
+
+  drawOnRule(
+    canvas,
+    {
+      text: field.label,
+      fontSize: LABEL_FONT_SIZE,
+      color: colors.textMuted,
+    },
+    PAGE_PADDING_H,
+    LABEL_WIDTH,
+    bottom,
   );
 
-  if (block) {
-    drawTextBlock(
-      canvas,
-      block,
-      contentLeft,
-      stampTop + STAMP_SIZE + STAMP_TO_SPOT_NAME_GAP,
-      contentWidth,
-    );
-  }
-}
-
-/** 半券。日付と場所を上から積む */
-function drawTicketStub(
-  canvas: SkCanvas,
-  content: ShareCardContent,
-  tearY: number,
-  contentLeft: number,
-  contentWidth: number,
-): void {
-  let y = tearY + STUB_PADDING_TOP;
-
-  // 値の無い項目は行ごと詰める。間隔も一緒に飛ばす
-  for (const block of [
-    content.date
-      ? {
-          text: content.date,
-          fontSize: DATE_FONT_SIZE,
-          color: colors.textPrimary,
-          align: TextAlign.Center,
-        }
-      : null,
-    content.address
-      ? {
-          text: content.address,
-          fontSize: ADDRESS_FONT_SIZE,
-          color: colors.textMuted,
-          align: TextAlign.Center,
-        }
-      : null,
-  ]) {
-    if (!block) continue;
-    y += drawTextBlock(canvas, block, contentLeft, y, contentWidth);
-    y += STUB_LINE_GAP;
-  }
+  const maxLines = field.maxLines ?? 1;
+  drawOnRule(
+    canvas,
+    {
+      text: field.value,
+      fontSize: VALUE_FONT_SIZE,
+      color: colors.textPrimary,
+      maxLines,
+      // 折り返した行を次の罫線に乗せる
+      lineHeight: maxLines > 1 ? RULE_GAP : undefined,
+    },
+    PAGE_PADDING_H + LABEL_WIDTH,
+    CONTENT_WIDTH - LABEL_WIDTH,
+    // 複数行は下の罫線まで使うので、最後の行の位置へ下げる
+    bottom + RULE_GAP * (maxLines - 1),
+  );
 }
 
 /** 共有カードを描く */
 export function renderShareCard(content: ShareCardContent): SkImage {
-  const geometry = ticketGeometry();
-
   const card = renderToImage(CARD_WIDTH, CARD_HEIGHT, (canvas) => {
-    drawTicket(canvas, geometry);
-    drawTicketBody(
-      canvas,
+    drawNotebookPage(canvas);
+
+    canvas.drawImageRect(
       content.stamp,
-      content.spotName,
-      geometry.top,
-      geometry.tearY,
-      geometry.contentLeft,
-      geometry.contentWidth,
+      Skia.XYWHRect(0, 0, content.stamp.width(), content.stamp.height()),
+      Skia.XYWHRect(stampLeft(STAMP_SIZE), STAMP_TOP, STAMP_SIZE, STAMP_SIZE),
+      Skia.Paint(),
     );
-    drawTicketStub(
-      canvas,
-      content,
-      geometry.tearY,
-      geometry.contentLeft,
-      geometry.contentWidth,
-    );
+
+    // 使った罫線の本数を数えながら上から書き込む。複数行の項目はその分だけ進める
+    let index = 0;
+    if (content.spotName) {
+      drawSpotName(canvas, content.spotName, index);
+      index += 1;
+    }
+    for (const field of content.fields) {
+      drawField(canvas, field, index);
+      index += field.maxLines ?? 1;
+    }
   });
 
   return toRasterImage(card, "共有カード");

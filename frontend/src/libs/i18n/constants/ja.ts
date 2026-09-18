@@ -50,7 +50,6 @@ export const ja = {
     dialogTitle: "スタンプを共有",
     postText: "たびぽんでスタンプを押しました！ #たびぽん",
     postTextWithSpot: "%{spot}でスタンプを押しました！ #たびぽん",
-    copied: "投稿用の文章をコピーしました",
     unavailableTitle: "共有できません",
     unavailableMessage: "この端末では共有機能を利用できません。",
     failedTitle: "エラー",
