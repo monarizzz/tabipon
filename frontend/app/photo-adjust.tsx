@@ -4,7 +4,10 @@ import { PhotoAdjustMain } from "@/src/features/camera/components/PhotoAdjustMai
 import { usePhotoAdjust } from "@/src/features/camera/hooks/usePhotoAdjust";
 
 export default function PhotoAdjustScreen() {
-  const { uri } = useLocalSearchParams<{ uri?: string }>();
+  const { uri, capturedAt } = useLocalSearchParams<{
+    uri?: string;
+    capturedAt?: string;
+  }>();
 
-  return <PhotoAdjustMain {...usePhotoAdjust(uri)} />;
+  return <PhotoAdjustMain {...usePhotoAdjust({ imageUri: uri, capturedAt })} />;
 }
