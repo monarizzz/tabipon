@@ -8,10 +8,14 @@ PR をマージする前に、Codex または Claude で同じ完了条件のレ
 
 PR の作成者が使用中の Codex または Claude が、各自の契約・認証でレビューする。対象 PR の diff と現在のコードを取得できるよう、`gh auth status` が成功する環境で実行する。
 
+- AI が PR の作成または更新を担当した場合は、リモート反映後、ユーザーから別途レビューを依頼されるのを待たずに同じセッションで開始する
+- レビューを行うのは現在のセッションを実行している AI 自身とし、別プロセスの AI を起動したり新しい API key を要求したりしない
 - Codex は `.agents/skills/ai-review-loop/SKILL.md` を使う
 - Claude は `.claude/skills/ai-review-loop/SKILL.md` を使う
 - GitHub に結果を残す場合、投稿者は `gh` で認証している GitHub アカウントになる
 - PC または AI セッションが停止している間は実行されない
+
+この自動実行は、AI が同じセッションで PR の作成または更新まで担当した場合を対象とする。人間が GitHub UI や別の端末から更新した PR を、停止中のローカル AI が検知するものではない。その場合の常時実行には GitHub AI を使う。
 
 ### GitHub AI
 
@@ -27,7 +31,7 @@ GitHub Actions の secret はリポジトリ、Organization、Environment の単
 ## 対象と provider の選択
 
 1. PR 番号が指定されていればその PR、指定がなければ現在のブランチに紐づく open PR を対象にする。特定できなければ確認して停止する。全 open PR の巡回は明示された場合だけ行う。
-2. provider が指定されていればそれを使う。指定がなければ、ローカルでは現在実行中の AI、GitHub では設定済みと確認できた provider を使う。
+2. provider が指定されていればそれを使う。指定がなく、現在の AI が PR の作成または更新を行った直後なら、その AI をローカル provider として自動的に使う。GitHub では設定済みと確認できた provider を使う。
 3. 未設定の provider、応答の無い provider、対象 commit を特定できないレビューを成功として扱わない。別 provider への無断切り替えもしない。
 
 ## 1 回のレビュー
