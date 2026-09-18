@@ -11,10 +11,15 @@ export const PRESS_GESTURE_THRESHOLDS = {
 } as const;
 
 /**
- * 押し付けの強さを掠れ量へ写す両端。
+ * 押し付けの強さを掠れ量へ写す両端。単位は `DeviceMotion` の `acceleration.z`（m/s²）。
  * 弱い押し付け(`weakPeak`)ほど掠れ、強い押し付け(`strongPeak`)ほど掠れない。
+ *
+ * `strongPeak` を深く取りすぎると、普通に振り下ろしたピークが全部 1.0 付近へ寄って
+ * **掠れが常に最大で出る**。-75 m/s² は約 7.6G で端末を叩きつける領域だった。
+ * 掠れが要らない押し方は長押し（`StampPressMain.tsx`。掠れ・傾きとも 0）が担うので、
+ * ここは振り下ろしの実用域だけを写せばよい。
  */
 export const SCRATCH_LEVEL_RANGE = {
   weakPeak: PRESS_GESTURE_THRESHOLDS.press,
-  strongPeak: -75,
+  strongPeak: -30,
 } as const;
