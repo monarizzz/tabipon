@@ -92,6 +92,10 @@ export function useStampFieldEditors({
    * 閉じてしまう。その保存が失敗しても編集欄は閉じたままなので、開き直したときに
    * `openMemo()` などが古い保存済みの値でドラフトを初期化し、入力が消える。
    *
+   * **閉じるのは、いま開いているのがその項目の編集欄のときだけ。**保存を待つあいだも
+   * シートは閉じられて別の項目を開けるので、開いているのが別の項目なら触っていない
+   * 入力を閉じることになり、同じように巻き戻る。
+   *
    * **patch は関数で受け取る。**場所の保存は書き込む前にジオコーディングを挟むので、
    * patch を先に組ませると、順番待ちに入る前の古い入力値で書き込むことになる
    *
@@ -112,7 +116,9 @@ export function useStampFieldEditors({
           onUpdated(await updateStamp(stampId, patch));
           // 自分がこの項目の待ち行列の最後なら閉じる。後ろに保存が積まれていれば、
           // その編集欄は後続の保存が自分で閉じる
-          if (saveQueues.current.get(field) === next) closeEditor();
+          if (saveQueues.current.get(field) === next) {
+            setEditingField((current) => (current === field ? null : current));
+          }
         } catch (error) {
           console.error(`${logTag} failed to update ${field}`, error);
           Alert.alert(
@@ -127,7 +133,7 @@ export function useStampFieldEditors({
       saveQueues.current.set(field, next);
       await next;
     },
-    [closeEditor, logTag, onUpdated, stampId, t],
+    [logTag, onUpdated, stampId, t],
   );
 
   return {

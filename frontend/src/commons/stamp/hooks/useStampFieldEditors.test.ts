@@ -481,6 +481,39 @@ describe("警告のあとの分岐", () => {
     expect(updateStampMock).not.toHaveBeenCalled();
   });
 
+  // 保存の完了で閉じるのは、いま開いているのがその項目の編集欄のときだけ
+  test("ジオコード中に別の項目を開いていたら、このまま保存してもそのシートは閉じない", async () => {
+    const pending = deferred<GeocodeResult>();
+    geocodeAddressMock.mockReturnValue(pending.promise);
+    const view = await setup(LOCATED_STAMP);
+
+    // 場所を保存中のまま、シートを閉じてメモを開き、本文を入れる
+    await press(view.result.current.openLocation);
+    await press(() => view.result.current.setDraftLocation("おばあちゃんち"));
+    await press(view.result.current.saveLocation);
+    await press(view.result.current.closeEditor);
+    await press(view.result.current.openMemo);
+    await press(() => view.result.current.setDraftMemo("書きかけのメモ"));
+
+    await act(async () => {
+      pending.resolve({ status: "notFound" });
+    });
+    await waitFor(() =>
+      expect(view.result.current.geocodeWarning).not.toBeNull(),
+    );
+
+    await press(view.result.current.saveLocationAnyway);
+
+    await waitFor(() =>
+      expect(updateStampMock).toHaveBeenCalledWith("stamp-1", {
+        address: "おばあちゃんち",
+      }),
+    );
+    // 住所は保存するが、開いているメモのシートは閉じない
+    expect(view.result.current.editingField).toBe("memo");
+    expect(view.result.current.draftMemo).toBe("書きかけのメモ");
+  });
+
   // 待ち時間のあいだも保存は押し直せるので、同じ住所の保存が順番待ちに並ぶ。
   // 古い保存をそのまま流すと、答えたはずの警告があとから出し直され、その
   // 「このまま保存」が新しい保存で引いた座標を残したまま古い住所を書き込む
