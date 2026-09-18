@@ -22,6 +22,8 @@ export const zh: Translations = {
     accessAllow: "允许访问相机",
     hint: "请将拍摄对象置于圆圈内",
     capturedPhoto: "[ 已拍摄的照片 ]",
+    captureFailedTitle: "拍摄失败",
+    captureFailedMessage: "请再次按下快门。",
   },
   photoAdjust: {
     title: "调整照片",
