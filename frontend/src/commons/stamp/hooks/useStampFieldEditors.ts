@@ -56,6 +56,18 @@ export function useStampFieldEditors({
   const [geocodeWarning, setGeocodeWarning] =
     React.useState<GeocodeWarning | null>(null);
 
+  /**
+   * 最新の `draftLocation`。ジオコーディングを待っているあいだに住所が打ち直され
+   * たかどうかを見るために持つ（`saveLocation`）。
+   *
+   * 待ち時間のあいだも場所のシートは開いたままで入力できるので、保存を押した
+   * 時点の値しか見ないと、警告が指す住所と画面の住所がずれる。
+   */
+  const draftLocationRef = React.useRef(draftLocation);
+  React.useEffect(() => {
+    draftLocationRef.current = draftLocation;
+  }, [draftLocation]);
+
   const closeEditor = React.useCallback(() => setEditingField(null), []);
 
   /**
@@ -169,16 +181,26 @@ export function useStampFieldEditors({
         return;
       }
       void save("location", async () => {
-        const address = normalizeOptionalText(draftLocation);
-        if (!address) {
-          return { address };
+        // 待っているあいだに住所が打ち直されていたら、引いた結果は捨てて画面に
+        // ある住所で引き直す。古い結果のまま警告を出すと、「このまま保存」が
+        // 打ち直す前の住所を書き込む
+        let address = normalizeOptionalText(draftLocation);
+        for (;;) {
+          if (!address) {
+            return { address };
+          }
+          const geocoded = await geocodeAddress(address);
+          const latest = normalizeOptionalText(draftLocationRef.current);
+          if (latest !== address) {
+            address = latest;
+            continue;
+          }
+          if (geocoded.status === "found") {
+            return { address, location: geocoded.location };
+          }
+          setGeocodeWarning({ address, reason: geocoded.status });
+          return null;
         }
-        const geocoded = await geocodeAddress(address);
-        if (geocoded.status === "found") {
-          return { address, location: geocoded.location };
-        }
-        setGeocodeWarning({ address, reason: geocoded.status });
-        return null;
       });
     },
 

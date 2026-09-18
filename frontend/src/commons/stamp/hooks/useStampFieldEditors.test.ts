@@ -311,6 +311,49 @@ describe("saveLocation", () => {
     expect(view.result.current.geocodeWarning).toBeNull();
   });
 
+  // 待ち時間のあいだもシートは開いたままで入力できる。古い結果のまま警告を出すと
+  // 「このまま保存」が打ち直す前の住所を書き込む
+  test("引いているあいだに住所を打ち直したら、打ち直した住所で引き直す", async () => {
+    let settle!: (result: GeocodeResult) => void;
+    geocodeAddressMock.mockReturnValueOnce(
+      new Promise<GeocodeResult>((resolve) => {
+        settle = resolve;
+      }),
+    );
+    geocodeAddressMock.mockResolvedValue({ status: "notFound" });
+    const view = await setup(LOCATED_STAMP);
+
+    await press(view.result.current.openLocation);
+    await press(() => view.result.current.setDraftLocation("おばあちゃんち"));
+    await press(view.result.current.saveLocation);
+    // 引いているあいだに打ち直す（保存は押し直していない）
+    await press(() => view.result.current.setDraftLocation("じいちゃんち"));
+
+    await act(async () => {
+      settle({ status: "notFound" });
+    });
+
+    await waitFor(() =>
+      expect(view.result.current.geocodeWarning).toEqual({
+        address: "じいちゃんち",
+        reason: "notFound",
+      }),
+    );
+    expect(geocodeAddressMock.mock.calls.map(([address]) => address)).toEqual([
+      "おばあちゃんち",
+      "じいちゃんち",
+    ]);
+
+    // 「このまま保存」で書き込むのは画面にある住所
+    await press(view.result.current.saveLocationAnyway);
+
+    await waitFor(() =>
+      expect(updateStampMock).toHaveBeenCalledWith("stamp-1", {
+        address: "じいちゃんち",
+      }),
+    );
+  });
+
   // 開いたまま保存を押しただけの場合。住所が変わらないので確認する対象が無い
   test("住所を変えずに保存したら座標を引かず、警告も出さずに閉じる", async () => {
     geocodeAddressMock.mockResolvedValue({ status: "unavailable" });
