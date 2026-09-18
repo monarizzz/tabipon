@@ -19,7 +19,13 @@ export const en: Translations = {
   },
   camera: {
     accessRequiredTitle: "Camera access is required",
+    accessRequiredDescription:
+      "Taking a photo is required to press a stamp. Please allow camera access.",
     accessAllow: "Allow camera access",
+    accessDeniedTitle: "Camera access is turned off",
+    accessDeniedDescription:
+      "The app can no longer ask for permission. Turn on Camera in the Settings app, then come back to this screen.",
+    accessOpenSettings: "Open the Settings app",
     hint: "Frame your subject inside the circle",
     capturedPhoto: "[ Captured photo ]",
     captureFailedTitle: "Could not take the photo",

@@ -1,6 +1,7 @@
 import React from "react";
-import { Alert } from "react-native";
+import { Alert, AppState } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
+import { openSettings } from "expo-linking";
 import {
   useCameraPermissions,
   type CameraType,
@@ -16,7 +17,7 @@ import { useTranslation } from "@/src/libs/i18n/I18nProvider";
 export function useCamera(): Camera {
   const router = useRouter();
   const { t } = useTranslation();
-  const [permission, requestPermission] = useCameraPermissions();
+  const [permission, requestPermission, getPermission] = useCameraPermissions();
   const [facing, setFacing] = React.useState<CameraType>("back");
   const [flash, setFlash] = React.useState<FlashMode>("off");
   const cameraRef = React.useRef<CameraView>(null);
@@ -62,9 +63,39 @@ export function useCamera(): Camera {
     }, [stopCapturing]),
   );
 
+  const permissionGranted = permission?.granted ?? false;
+
+  // useCameraPermissions() が自動で読むのはマウント時の 1 度だけで、
+  // 画面が残ったままだと古い拒否状態を表示し続ける。
+  // 許可済みなら読み直す必要は無いので OS への問い合わせを省く
+  const refreshPermission = React.useCallback(() => {
+    if (permissionGranted) return;
+    void getPermission();
+  }, [permissionGranted, getPermission]);
+
+  // 別のタブから戻ってきたとき
+  useFocusEffect(refreshPermission);
+
+  // 設定アプリで権限を変えてから戻ってきたとき。画面遷移は起きないので
+  // useFocusEffect は発火せず、拒否のままの表示が残る
+  // (とくに Android。iOS は権限変更でアプリ側が作り直されることが多い)
+  React.useEffect(() => {
+    const subscription = AppState.addEventListener("change", (next) => {
+      if (next !== "active") return;
+      refreshPermission();
+    });
+    return () => subscription.remove();
+  }, [refreshPermission]);
+
   return {
-    permissionGranted: permission?.granted ?? false,
+    permissionGranted,
+    // 読み込み中 (permission === null) は拒否済みと決めつけず、
+    // アプリ内で許可を求められる側に倒す
+    permissionCanAskAgain: permission?.canAskAgain ?? true,
     requestPermission,
+    openSettings: () => {
+      void openSettings();
+    },
 
     facing,
     flash,

@@ -19,7 +19,13 @@ export const ko: Translations = {
   },
   camera: {
     accessRequiredTitle: "카메라 접근 권한이 필요합니다",
+    accessRequiredDescription:
+      "스탬프를 찍으려면 사진 촬영이 필요합니다. 카메라 접근을 허용해 주세요.",
     accessAllow: "카메라 접근 허용",
+    accessDeniedTitle: "카메라 접근이 꺼져 있습니다",
+    accessDeniedDescription:
+      "앱에서는 권한을 다시 요청할 수 없습니다. 설정 앱에서 카메라를 켠 다음 이 화면으로 돌아와 주세요.",
+    accessOpenSettings: "설정 앱 열기",
     hint: "원 안에 들어오도록 촬영하세요",
     capturedPhoto: "[ 촬영한 사진 ]",
     captureFailedTitle: "촬영하지 못했습니다",

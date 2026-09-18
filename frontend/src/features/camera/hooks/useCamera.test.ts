@@ -3,7 +3,7 @@
 // あわせて、調整画面へ渡す撮影時刻がシャッターを切った瞬間のものであることも見る。
 // 写真の切り出しそのものは `cropToPreview.test.ts` で見ているのでモックする。
 import { act, renderHook } from "@testing-library/react-native";
-import { Alert } from "react-native";
+import { Alert, AppState, type AppStateStatus } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 
 import { useCamera } from "@/src/features/camera/hooks/useCamera";
@@ -16,8 +16,21 @@ jest.mock("expo-router", () => ({
   useRouter: jest.fn(),
   useFocusEffect: jest.fn(),
 }));
+// useCameraPermissions() は [現在値, 要求, 読み直し] の 3 要素を返す。
+// 第 3 要素を省くと useCamera 側の読み直しが undefined になって落ちる。
+// 返す関数は毎レンダー作り直さない。作り直すと useCamera 内の
+// useCallback の同一性が毎回変わり、latestFocusEffects() が
+// 古い分まで拾ってしまう
+const mockPermission: { current: { granted: boolean; canAskAgain: boolean } } =
+  { current: { granted: true, canAskAgain: false } };
+const mockRequestPermission = jest.fn();
+const mockGetPermission = jest.fn();
 jest.mock("expo-camera", () => ({
-  useCameraPermissions: () => [{ granted: true }, jest.fn()],
+  useCameraPermissions: () => [
+    mockPermission.current,
+    mockRequestPermission,
+    mockGetPermission,
+  ],
 }));
 jest.mock("@/src/libs/i18n/I18nProvider", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -36,6 +49,17 @@ const AFTER_CROP = new Date("2026-09-19T00:01:00.000Z");
 
 let alertSpy: jest.SpyInstance;
 let errorSpy: jest.SpyInstance;
+let appStateSpy: jest.SpyInstance;
+
+/** AppState へ登録された処理。設定アプリから戻った場面を作るのに使う */
+let appStateHandlers: ((status: AppStateStatus) => void)[] = [];
+
+/** 設定アプリなどから、このアプリの前面に戻ってくる */
+async function returnToApp(status: AppStateStatus = "active") {
+  await act(async () => {
+    for (const handler of appStateHandlers) handler(status);
+  });
+}
 
 /** シャッターを押す。中で走る Promise の解決までまとめて待つ */
 async function shutter(capture: () => Promise<void>) {
@@ -55,14 +79,28 @@ async function setup() {
 }
 
 /**
+ * これまでに useFocusEffect へ渡された処理を、同じものを除いて集める。
+ * useCamera は useFocusEffect を複数登録し、再レンダーのたびに同じ処理が
+ * 積まれるため、呼び出し履歴をそのまま使うと同じ処理を何度も呼んでしまう
+ */
+function latestFocusEffects() {
+  const effects = useFocusEffectMock.mock.calls.map(([effect]) => effect);
+  return [...new Set(effects)];
+}
+
+/**
  * カメラ画面から別のタブへ移る。
- * 実機では useFocusEffect に渡した後始末が blur で走るので、それを直に呼ぶ
+ * 実機では useFocusEffect に渡した後始末が blur で走るので、それを直に呼ぶ。
+ * useCamera は useFocusEffect を複数登録するため、1 つだけを選ばず
+ * 最後のレンダーで登録されたぶんをまとめて呼ぶ（実機の focus / blur と同じ）
  */
 async function leaveCameraScreen() {
-  const effect = useFocusEffectMock.mock.calls.at(-1)?.[0];
+  const effects = latestFocusEffects();
   await act(async () => {
-    const cleanup = effect?.();
-    if (typeof cleanup === "function") cleanup();
+    const cleanups = effects.map((effect) => effect());
+    for (const cleanup of cleanups) {
+      if (typeof cleanup === "function") cleanup();
+    }
   });
 }
 
@@ -84,16 +122,27 @@ function pendingShot() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockPermission.current = { granted: true, canAskAgain: false };
   useRouterMock.mockReturnValue({ push } as never);
   takePictureAsync.mockResolvedValue({ uri: "file:///photos/raw.jpg" });
   cropToPreviewMock.mockResolvedValue("file:///photos/cropped.jpg");
   alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {});
   errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  appStateHandlers = [];
+  appStateSpy = jest
+    .spyOn(AppState, "addEventListener")
+    .mockImplementation((type, handler) => {
+      if (type === "change") {
+        appStateHandlers.push(handler as (status: AppStateStatus) => void);
+      }
+      return { remove: () => {} } as never;
+    });
 });
 
 afterEach(() => {
   alertSpy.mockRestore();
   errorSpy.mockRestore();
+  appStateSpy.mockRestore();
 });
 
 describe("useCamera", () => {
@@ -249,6 +298,55 @@ describe("useCamera", () => {
       "camera.captureFailedTitle",
       "camera.captureFailedMessage",
     );
+  });
+
+  // 拒否画面は「設定アプリでオンにしてから戻ってください」と案内している。
+  // 設定アプリからの復帰では画面遷移が起きず useFocusEffect は発火しないので、
+  // AppState を見ていないと拒否のままの表示が残る（Issue #259）
+  describe("設定アプリから戻ってきた場合", () => {
+    /** アプリからはもう許可を求められず、設定アプリへ促している状態 */
+    function denyPermission() {
+      mockPermission.current = { granted: false, canAskAgain: false };
+    }
+
+    it("権限がまだ無ければ、前面に戻った時点で読み直す", async () => {
+      denyPermission();
+      await setup();
+      expect(mockGetPermission).not.toHaveBeenCalled();
+
+      await returnToApp();
+
+      expect(mockGetPermission).toHaveBeenCalledTimes(1);
+    });
+
+    it("前面に戻る前 (background / inactive) では読み直さない", async () => {
+      denyPermission();
+      await setup();
+
+      await returnToApp("background");
+      await returnToApp("inactive");
+
+      expect(mockGetPermission).not.toHaveBeenCalled();
+    });
+
+    it("すでに許可済みなら、前面に戻っても問い合わせ直さない", async () => {
+      await setup();
+
+      await returnToApp();
+
+      expect(mockGetPermission).not.toHaveBeenCalled();
+    });
+
+    // AppState と useFocusEffect の両方から読み直しており、
+    // 同じ復帰で二重に OS へ問い合わせないことを見る
+    it("前面へ戻った 1 回につき、読み直しも 1 回で済ませる", async () => {
+      denyPermission();
+      await setup();
+
+      await returnToApp();
+
+      expect(mockGetPermission).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("失敗したあとでもう一度押すと、撮り直せる", async () => {
