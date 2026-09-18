@@ -21,5 +21,5 @@ export const PRESS_GESTURE_THRESHOLDS = {
  */
 export const SCRATCH_LEVEL_RANGE = {
   weakPeak: PRESS_GESTURE_THRESHOLDS.press,
-  strongPeak: -20,
+  strongPeak: -30,
 } as const;
