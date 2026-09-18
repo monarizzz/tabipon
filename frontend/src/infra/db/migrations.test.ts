@@ -52,7 +52,8 @@ function userVersion(sqlite: SqliteDatabase): number {
 
 const validStamp = {
   id: "0b6f1c1e-7a3d-4c0e-9f1a-2b3c4d5e6f70",
-  line_art_path: "stamp-originals/0b6f1c1e.jpg",
+  line_art_path: "stamp-line-arts/0b6f1c1e.png",
+  original_photo_path: "stamp-originals/0b6f1c1e.jpg",
   stamp_image_path: "stamps/0b6f1c1e.png",
   title: null,
   memo: null,
@@ -231,7 +232,9 @@ describe("stamps テーブルの制約", () => {
     ["色に透明度が付いている", { color: "#DC321EFF" }],
     ["色がプリセット名", { color: "red" }],
     ["画像パスが絶対パス", { stamp_image_path: "/var/mobile/a.png" }],
-    ["画像パスが file:// URI", { line_art_path: "file:///a.jpg" }],
+    ["画像パスが file:// URI", { line_art_path: "file:///a.png" }],
+    ["元写真のパスが絶対パス", { original_photo_path: "/var/mobile/a.jpg" }],
+    ["元写真のパスが無い", { original_photo_path: null }],
     ["画像パスが無い", { stamp_image_path: null }],
     ["撮影日時がオフセット付き", { captured_at: "2026-09-14T12:00:00+09:00" }],
     ["撮影日時がミリ秒なし", { captured_at: "2026-09-14T03:00:00Z" }],

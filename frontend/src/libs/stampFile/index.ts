@@ -12,11 +12,14 @@ import { Directory, File, Paths } from "expo-file-system";
 /** スタンプ画像（PNG）の置き場。documentDirectory からの相対パス */
 const STAMP_IMAGES_DIR = "stamps";
 
-/** 元写真の置き場。v1 では `line_art_path` にこのパスが入る */
+/** 元写真の置き場 */
 const ORIGINAL_PHOTOS_DIR = "stamp-originals";
 
+/** 線画（白黒 2 値の中間画像）の置き場 */
+const LINE_ARTS_DIR = "stamp-line-arts";
+
 /** 画像を書き出す置き場すべて。`deleteUnreferencedFiles()` が掃く範囲でもある */
-const IMAGE_DIRS = [STAMP_IMAGES_DIR, ORIGINAL_PHOTOS_DIR];
+const IMAGE_DIRS = [STAMP_IMAGES_DIR, ORIGINAL_PHOTOS_DIR, LINE_ARTS_DIR];
 
 function fileOf(relativePath: string): File {
   return new File(Paths.document, relativePath);
@@ -58,6 +61,16 @@ export function originalPhotoPathOf(id: string): string {
   return `${ORIGINAL_PHOTOS_DIR}/${id}.jpg`;
 }
 
+/**
+ * スタンプ id から、線画の置き場所（相対パス）を決める。
+ *
+ * 版番号は付けない。線画は元写真だけで決まり、デザイン変更では書き換わらないので、
+ * `<Image>` のキャッシュと食い違う余地が無い（`stampImagePathOf()` の版番号と対比）。
+ */
+export function lineArtPathOf(id: string): string {
+  return `${LINE_ARTS_DIR}/${id}.png`;
+}
+
 /** 相対パスを `<Image>` などに渡せる uri にする */
 export function fileUriOf(relativePath: string): string {
   return fileOf(relativePath).uri;
@@ -76,12 +89,9 @@ export function ensureImageDirs(): void {
   }
 }
 
-/** 仕上げ済み PNG を書き出す。既にあれば上書きする */
-export function writeStampImage(
-  relativePath: string,
-  stampPng: Uint8Array,
-): void {
-  fileOf(relativePath).write(stampPng);
+/** PNG を書き出す。既にあれば上書きする */
+export function writePng(relativePath: string, png: Uint8Array): void {
+  fileOf(relativePath).write(png);
 }
 
 /** 撮影した写真を元写真の置き場へ複製する */

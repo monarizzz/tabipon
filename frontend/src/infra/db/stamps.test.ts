@@ -146,6 +146,7 @@ jest.mock("expo-file-system", () => {
 });
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+const LINE_ART_PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x48]);
 
 function newStamp(overrides: Partial<NewStamp> = {}): NewStamp {
   const photo = join(mockDocumentRoot, "source.jpg");
@@ -155,6 +156,7 @@ function newStamp(overrides: Partial<NewStamp> = {}): NewStamp {
   return {
     id: newStampId(),
     stampPng: PNG,
+    lineArtPng: LINE_ART_PNG,
     photoUri: photo,
     capturedAt: "2026-09-15T01:00:00.000Z",
     location: null,
@@ -189,6 +191,25 @@ describe("saveStamp", () => {
     expect(loaded?.color).toBe("#DC321E");
     expect(loaded?.scratchLevel).toBe(0.5);
     expect(loaded?.tiltAngle).toBe(10);
+  });
+
+  // スタンプ画像・線画・元写真の 3 つを別々の置き場へ書く。どれとどれを取り違えても
+  // ファイルは 3 つとも揃うので、存在の確認だけでは気付けない。中身まで見る
+  it("スタンプ画像・線画・元写真をそれぞれの置き場へ書き分ける", async () => {
+    const fs = jest.requireActual<typeof import("node:fs")>("node:fs");
+    const saved = await saveStamp(newStamp());
+
+    const bytesAt = (relativePath: string) =>
+      new Uint8Array(fs.readFileSync(join(mockDocumentRoot, relativePath)));
+
+    expect(saved.stampImagePath).toBe(`stamps/${saved.id}-1.png`);
+    expect(saved.lineArtPath).toBe(`stamp-line-arts/${saved.id}.png`);
+    expect(saved.originalPhotoPath).toBe(`stamp-originals/${saved.id}.jpg`);
+    expect(bytesAt(saved.stampImagePath)).toEqual(PNG);
+    expect(bytesAt(saved.lineArtPath)).toEqual(LINE_ART_PNG);
+    expect(
+      fs.readFileSync(join(mockDocumentRoot, saved.originalPhotoPath), "utf8"),
+    ).toBe("photo");
   });
 
   it("撮影日時は編集用と原本の両方に同じ値が入る", async () => {
@@ -451,6 +472,9 @@ describe("deleteStamp", () => {
     expect(fs.existsSync(join(mockDocumentRoot, saved.lineArtPath))).toBe(
       false,
     );
+    expect(fs.existsSync(join(mockDocumentRoot, saved.originalPhotoPath))).toBe(
+      false,
+    );
   });
 
   it("他のスタンプの画像は消さない", async () => {
@@ -531,15 +555,18 @@ describe("deleteOrphanFiles", () => {
     );
   });
 
-  // 元写真は `saveStamp()` が `line_art_path` に載せる行と必ず対で書かれる。
-  // DB を経由せずに `stamp-originals/` へ書く経路があると、その行が無いために
+  // 線画と元写真は `saveStamp()` が行と必ず対で書く。DB を経由せずに
+  // `stamp-line-arts/` や `stamp-originals/` へ書く経路があると、その行が無いために
   // ここで孤児と判定されて消える。書き込みを一本化した状態を固定する。
-  it("saveStamp が書いた元写真は孤児と判定されない", async () => {
+  it("saveStamp が書いた線画と元写真は孤児と判定されない", async () => {
     const fs = jest.requireActual<typeof import("node:fs")>("node:fs");
     const saved = await saveStamp(newStamp());
 
     expect(await deleteOrphanFiles()).toBe(0);
     expect(fs.existsSync(join(mockDocumentRoot, saved.lineArtPath))).toBe(true);
+    expect(fs.existsSync(join(mockDocumentRoot, saved.originalPhotoPath))).toBe(
+      true,
+    );
   });
 
   it("保存の途中で落ちて残ったファイルを拾える", async () => {
@@ -548,11 +575,14 @@ describe("deleteOrphanFiles", () => {
     // 行だけを消す = 画像を書いた後に INSERT が失敗した状態と同じ
     mockSqlite.prepare("DELETE FROM stamps").run();
 
-    expect(await deleteOrphanFiles()).toBe(2);
+    expect(await deleteOrphanFiles()).toBe(3);
     expect(fs.existsSync(join(mockDocumentRoot, saved.stampImagePath))).toBe(
       false,
     );
     expect(fs.existsSync(join(mockDocumentRoot, saved.lineArtPath))).toBe(
+      false,
+    );
+    expect(fs.existsSync(join(mockDocumentRoot, saved.originalPhotoPath))).toBe(
       false,
     );
   });
@@ -571,6 +601,9 @@ describe("deleteOrphanFiles", () => {
     );
     expect(fs.existsSync(join(mockDocumentRoot, replaced))).toBe(true);
     expect(fs.existsSync(join(mockDocumentRoot, saved.lineArtPath))).toBe(true);
+    expect(fs.existsSync(join(mockDocumentRoot, saved.originalPhotoPath))).toBe(
+      true,
+    );
   });
 
   it("画像の置き場がまだ無くても落ちない", async () => {

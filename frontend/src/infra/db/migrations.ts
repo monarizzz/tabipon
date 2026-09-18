@@ -33,8 +33,10 @@ const relativePathCheck = (column: string) =>
 const V1_CREATE_STAMPS = `
 CREATE TABLE stamps (
   id TEXT PRIMARY KEY NOT NULL CHECK (length(id) = 36),
-  -- v1 では中間画像を作れないため元写真のパスが入る
+  -- 線画（白黒2値の中間画像）。デザイン変更はここから描き直す
   line_art_path TEXT NOT NULL ${relativePathCheck("line_art_path")},
+  -- 元写真。2値の線画からは戻せないので別に持つ
+  original_photo_path TEXT NOT NULL ${relativePathCheck("original_photo_path")},
   stamp_image_path TEXT NOT NULL ${relativePathCheck("stamp_image_path")},
   title TEXT,
   memo TEXT,
@@ -51,7 +53,8 @@ CREATE TABLE stamps (
   color TEXT NOT NULL CHECK (color GLOB '#[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]'),
   -- フレームは増減するので値の一覧では縛らない（廃止済みの識別子も残り続ける）
   frame_id TEXT NOT NULL CHECK (frame_id <> ''),
-  -- 以下2列は中間画像へ移行するまでの v1 限定。撮影時の DeviceMotion でしか決まらない
+  -- 撮影時の DeviceMotion でしか決まらない。線画より後段の工程なので線画には含まれず、
+  -- デザイン変更で描き直すたびに掛け直す（工程順は docs/stamp-pipeline.md）
   scratch_level REAL NOT NULL CHECK (scratch_level BETWEEN 0 AND 1),
   tilt_angle REAL NOT NULL CHECK (tilt_angle BETWEEN -180 AND 180),
   -- 緯度と経度は両方揃うか両方無いか

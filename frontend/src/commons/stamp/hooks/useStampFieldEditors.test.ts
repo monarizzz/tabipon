@@ -29,7 +29,8 @@ const geocodeAddressMock = jest.mocked(geocodeAddress);
 const STAMP = {
   id: "stamp-1",
   stampImagePath: "stamps/stamp-1.png",
-  lineArtPath: "originals/stamp-1.jpg",
+  lineArtPath: "stamp-line-arts/stamp-1.png",
+  originalPhotoPath: "stamp-originals/stamp-1.jpg",
   title: "東京タワー",
   memo: null,
   capturedAt: "2026-09-18T01:23:00.000Z",
