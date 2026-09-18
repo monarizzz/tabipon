@@ -64,14 +64,8 @@ export const ja = {
     stampCount: "スタンプ %{count}枚",
     loadError: "スタンプを読み込めませんでした",
     empty: "スタンプを集めるとここに表示されます!",
-    filterAll: "すべて",
     stampName: "スタンプ",
     unknownSpotName: "スポット未設定",
-  },
-  collection: {
-    add: "コレクションを追加",
-    name: "コレクション名",
-    namePlaceholder: "コレクション名を入力",
   },
   stampDetail: {
     notFound: "スタンプが見つかりません",

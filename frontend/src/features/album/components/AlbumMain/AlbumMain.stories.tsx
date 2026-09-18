@@ -25,17 +25,9 @@ const meta = {
     stamps: STAMPS,
     loadFailed: false,
     refreshing: false,
-    selectedFilterId: "all",
-    collectionSheetVisible: false,
-    collectionName: "",
-    selectFilter: () => {},
     reload: () => {},
     refresh: () => {},
     pressStamp: () => {},
-    openCollectionSheet: () => {},
-    closeCollectionSheet: () => {},
-    changeCollectionName: () => {},
-    addCollection: () => {},
   },
 } satisfies Meta<typeof AlbumMain>;
 
