@@ -48,40 +48,19 @@ const SOURCE_PHOTO = require("@/assets/stamp-preview/byodoin.jpg");
  */
 const EXPECTED_BLACK_PIXEL_RATIO = 0.31;
 
-/**
- * 仕上げ（掠れ・傾き）の確認用パターン。
- *
- * ## 掠れは 0.8 あたりまでほとんど効かない
- *
- * 閾値は `1.0 - level * 0.4` を σ 単位に戻したもの（`scratch.ts` の
- * `scratchThreshold()`）。ぼかし後のノイズは平均 0.5 のほぼ正規分布なので、
- * 白抜きされる画素の割合は level に対して極端に非線形になる。
- *
- * | level | 白抜き率（全画素） | インク部分に対して |
- * | --- | --- | --- |
- * | 0.2 | 0.0000% | ほぼゼロ |
- * | 0.4 | 0.0030% | 0.0008% |
- * | 0.6 | 0.1107% | 0.031% |
- * | 0.8 | 1.7701% | 0.496% |
- * | 0.9 | 5.2022% | 1.457% |
- * | 1.0 | 12.5608% | 3.517% |
- *
- * 閾値の式がそういう曲線になっているためで、実装のずれではない
- * （`scratch.ts` の実測表と桁が合う）。
- *
- * そのため確認用のサンプルは 0.6 以上に寄せてある。0.6 は「効いていないこと」を
- * 見るために残した比較用で、実際に掠れとして見えるのは 0.9 以上。
- */
+/** 仕上げ（掠れ・傾き）の確認用パターン。掠れは 0.2 刻みで並べて効き方を見る */
 const FINISH_SAMPLES = [
   { key: "plain", label: "掠れ・傾きなし", scratchLevel: 0, tiltAngle: 0 },
-  { key: "scratch_060", label: "掠れ 0.6（ほぼ無変化）", scratchLevel: 0.6, tiltAngle: 0 }, // prettier-ignore
-  { key: "scratch_090", label: "掠れ 0.9", scratchLevel: 0.9, tiltAngle: 0 },
-  { key: "scratch_100", label: "掠れ 1.0", scratchLevel: 1.0, tiltAngle: 0 },
+  { key: "scratch_02", label: "掠れ 0.2", scratchLevel: 0.2, tiltAngle: 0 },
+  { key: "scratch_04", label: "掠れ 0.4", scratchLevel: 0.4, tiltAngle: 0 },
+  { key: "scratch_06", label: "掠れ 0.6", scratchLevel: 0.6, tiltAngle: 0 },
+  { key: "scratch_08", label: "掠れ 0.8", scratchLevel: 0.8, tiltAngle: 0 },
+  { key: "scratch_10", label: "掠れ 1.0", scratchLevel: 1.0, tiltAngle: 0 },
   { key: "tilt", label: "傾き 15°", scratchLevel: 0, tiltAngle: 15 },
   {
     key: "scratch_and_tilt",
-    label: "掠れ 1.0 + 傾き 20°",
-    scratchLevel: 1.0,
+    label: "掠れ 0.6 + 傾き 20°",
+    scratchLevel: 0.6,
     tiltAngle: 20,
   },
 ] as const;
@@ -320,9 +299,8 @@ export function StampPreview() {
         ずれるのが正常で、桁が変わるようなら線画化が壊れている。元写真は平等院（CC0
         1.0 / Wikimedia Commons / GiveMeMollusks）。
         {"\n\n"}
-        掠れは level 0.8 あたりまでほとんど効かない（0.6 で白抜きされるインクは
-        全画素の
-        0.03%）。閾値の式がそういう曲線になっているためで、実装のずれではない。
+        掠れは白抜き率が level に比例する。level 1.0 で上限の 35%
+        （上限の決め方は `docs/stamp-pipeline.md`）。
       </Text>
     </ScrollView>
   );

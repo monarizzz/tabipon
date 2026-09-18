@@ -120,6 +120,13 @@ export const en: Translations = {
       "Failed to change the design. Please wait a moment and try again.",
     saveFailedTitle: "Could not save",
     saveFailedMessage: "Please wait a moment and try again.",
+    geocodeFailedTitle: "The location won't be updated",
+    geocodeNotFoundMessage:
+      "Couldn't find coordinates for “%{address}”. If you save anyway, only the address changes and the map keeps pointing at the previous place.",
+    geocodeUnavailableMessage:
+      "Couldn't look up coordinates. This can happen depending on your connection or your location settings. If you save anyway, only the address changes and the map keeps pointing at the previous place.",
+    geocodeSaveAnyway: "Save anyway",
+    geocodeBackToEdit: "Back to editing",
     deleteFailedTitle: "Could not delete",
     deleteFailedMessage:
       "Failed to delete the stamp. Please wait a moment and try again.",

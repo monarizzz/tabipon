@@ -6,6 +6,18 @@ export type EditableField = "spotName" | "date" | "location" | "memo";
 /** いま開いている編集欄。どれも開いていないときは null */
 export type EditingField = EditableField | null;
 
+/**
+ * 場所を保存しようとしたが座標が引けなかったときの警告。
+ *
+ * 出していないあいだは null。`reason` で文言を出し分ける（`geocodeAddress()` の
+ * `GeocodeResult` に対応する）
+ */
+export type GeocodeWarning = {
+  /** 保存しようとしている住所。警告の本文に差し込む */
+  address: string;
+  reason: "notFound" | "unavailable";
+};
+
 export type StampFieldEditors = {
   /** 表示に使う値。`stamp` から導出する */
   spotName: string;
@@ -34,6 +46,13 @@ export type StampFieldEditors = {
   saveDate: () => void;
   saveLocation: () => void;
   saveMemo: () => void;
+
+  /** 座標が引けずに保存を保留している警告。出していなければ null */
+  geocodeWarning: GeocodeWarning | null;
+  /** 警告を閉じ、場所の保存をやめる。編集欄は開いたままにする */
+  cancelGeocodeWarning: () => void;
+  /** 警告を閉じ、座標を据え置いたまま住所だけ保存する */
+  saveLocationAnyway: () => void;
 };
 
 /** `useStampFieldEditors()` の引数 */
