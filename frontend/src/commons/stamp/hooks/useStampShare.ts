@@ -55,6 +55,19 @@ export function useStampShare({
   const { t } = useTranslation();
   // 合成には時間が掛かる。終わる前にもう一度押されても二重に走らせない
   const running = React.useRef(false);
+  /**
+   * 画面がまだ生きているか。
+   *
+   * 合成の間に「続けて撮影」やタブ切替で離脱できる。待っている間に画面が変わったら、
+   * 移動先の画面の上に共有シートが出てしまうので開かない
+   */
+  const mounted = React.useRef(true);
+  React.useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const shareStamp = React.useCallback(
     async (stamp: Stamp) => {
@@ -64,6 +77,7 @@ export function useStampShare({
         spotName,
         fields: fieldsOf(t, stamp),
       });
+      if (!mounted.current) return;
 
       // **`expo-sharing` ではなく React Native の Share を使う。**
       // `Sharing.shareAsync()` はファイルしか渡せず、共有シートの本文欄を
@@ -84,6 +98,8 @@ export function useStampShare({
       void shareStamp(stamp)
         .catch((error) => {
           console.error(`${logTag} failed to share stamp`, error);
+          // 離脱後は知らせる相手がいない。移動先の画面にダイアログを出さない
+          if (!mounted.current) return;
           Alert.alert(t("share.failedTitle"), t("share.failedMessage"));
         })
         .finally(() => {

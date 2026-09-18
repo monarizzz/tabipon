@@ -5,7 +5,9 @@
  * ように項目を書き込む。
  */
 import {
+  FilterMode,
   FontWeight,
+  MipmapMode,
   Skia,
   type SkCanvas,
   type SkImage,
@@ -110,11 +112,18 @@ export function renderShareCard(content: ShareCardContent): SkImage {
   const card = renderToImage(CARD_WIDTH, CARD_HEIGHT, (canvas) => {
     drawNotebookPage(canvas);
 
-    canvas.drawImageRect(
+    // 保存済みのスタンプは 512x512。カード上ではその倍近くまで引き伸ばすので、
+    // サンプリングに Linear を指定する。既定の Nearest のままだと、枠の円周や
+    // 斜めの線が階段状になる（`src/utils/stamp/rotate.ts` と同じ理由）
+    const paint = Skia.Paint();
+    paint.setAntiAlias(true);
+    canvas.drawImageRectOptions(
       content.stamp,
       Skia.XYWHRect(0, 0, content.stamp.width(), content.stamp.height()),
       Skia.XYWHRect(stampLeft(STAMP_SIZE), STAMP_TOP, STAMP_SIZE, STAMP_SIZE),
-      Skia.Paint(),
+      FilterMode.Linear,
+      MipmapMode.None,
+      paint,
     );
 
     // **値が無くても行は詰めない。**項目ごとに使う罫線を決め打ちにする。

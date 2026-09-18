@@ -122,6 +122,28 @@ it("値の無い項目も空のまま渡す。行の位置を項目ごとに決�
   );
 });
 
+it("合成の途中で画面を離れたら共有シートを開かない", async () => {
+  // 移動先の画面の上に共有シートが出てしまうため
+  let finishCompose: (png: Uint8Array) => void = () => {};
+  generateShareCardPngMock.mockReturnValue(
+    new Promise((resolve) => {
+      finishCompose = resolve;
+    }),
+  );
+  const { result, unmount } = await setup();
+
+  await press(result.current.share);
+  // 合成の解決より先に後始末を流し切るため、unmount も act で包む
+  await act(async () => {
+    unmount();
+  });
+  await act(async () => {
+    finishCompose(new Uint8Array([1]));
+  });
+
+  expect(share).not.toHaveBeenCalled();
+});
+
 it("スタンプを読み込めていなければ共有しない", async () => {
   const { result } = await setup(null);
 
