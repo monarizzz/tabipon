@@ -3,7 +3,23 @@ import * as Location from "expo-location";
 import type { StampLocation } from "@/src/infra/db/stamps";
 
 /**
- * 住所から座標を引く。引けなければ null を返す。
+ * 住所から座標を引いた結果。
+ *
+ * 引けなかった理由を分けている狙いと、呼び出し側での文言の出し分けは
+ * docs/front-architecture.md「場所の編集と座標の追従」を参照。
+ */
+export type GeocodeResult =
+  | { status: "found"; location: StampLocation }
+  /** 住所として引けない文字列だった。「おばあちゃんち」など */
+  | { status: "notFound" }
+  /**
+   * ジオコーダ自体が失敗した。通信できないときのほか、Android では位置情報の
+   * 権限が無いときにも起きる（原因は切り分けられない）
+   */
+  | { status: "unavailable" };
+
+/**
+ * 住所から座標を引く。
  *
  * 利用者が「場所」を手で直したときに、地図が前の場所を指したままにならないよう
  * 座標を追従させるために使う（#87）。
@@ -11,28 +27,26 @@ import type { StampLocation } from "@/src/infra/db/stamps";
  * **端末の順ジオコーダ（expo-location）を使う。**逆引きと同じく API キーが要らず、
  * OS のキャッシュが効く範囲ではオフラインでも引ける。
  *
- * **引けなかったときは null を返し、呼び出し側は座標を据え置く。**「おばあちゃんち」
- * のような住所として引けない文字列を入れることはあり、そこで座標を消すと
- * 地図が出なくなる。前の場所を指し続ける方がまだ情報がある。
- *
- * 失敗しても投げない。住所の保存自体は座標が引けたかどうかと無関係に通す。
+ * **引けなかったときも投げない。**座標が引けたかどうかと、住所を保存するかどうかは
+ * 別の話なので、判断は呼び出し側に委ねる
  */
-export async function geocodeAddress(
-  address: string,
-): Promise<StampLocation | null> {
+export async function geocodeAddress(address: string): Promise<GeocodeResult> {
   const query = address.trim();
   if (!query) {
-    return null;
+    return { status: "notFound" };
   }
   try {
     const [found] = await Location.geocodeAsync(query);
     if (!found) {
       // 住所として引けない文字列。失敗ではない
-      return null;
+      return { status: "notFound" };
     }
-    return { latitude: found.latitude, longitude: found.longitude };
+    return {
+      status: "found",
+      location: { latitude: found.latitude, longitude: found.longitude },
+    };
   } catch (error) {
     console.warn("[location] geocoding failed", error);
-    return null;
+    return { status: "unavailable" };
   }
 }

@@ -7,6 +7,7 @@ import { geocodeAddress } from "@/src/libs/location/geocode";
 import type {
   EditableField,
   EditingField,
+  GeocodeWarning,
   StampFieldEditors,
   StampFieldEditorsOptions,
 } from "@/src/commons/stamp/types/stampField";
@@ -52,6 +53,28 @@ export function useStampFieldEditors({
    */
   const saveQueues = React.useRef(new Map<EditableField, Promise<void>>());
 
+  const [geocodeWarning, setGeocodeWarning] =
+    React.useState<GeocodeWarning | null>(null);
+
+  /**
+   * 場所の保存の世代。保存を押すたび、警告に答えるたびに繰り上げる。
+   *
+   * 座標を引き終える前に保存を押し直せるので、順番待ちには同じ住所の保存が
+   * 複数並びうる。警告に答えたあとに古い保存が流れると、答えたはずの警告が
+   * 出し直され、その「このまま保存」が新しい保存の座標を消す。
+   * 繰り上げた時点より古い保存は、書き込みも警告もせずに降りる。
+   */
+  const locationSaveGeneration = React.useRef(0);
+
+  /**
+   * 最新の `draftLocation`。座標を引いているあいだに住所が打ち直されたかどうかを
+   * 見るために持つ（`saveLocation`）
+   */
+  const draftLocationRef = React.useRef(draftLocation);
+  React.useEffect(() => {
+    draftLocationRef.current = draftLocation;
+  }, [draftLocation]);
+
   const closeEditor = React.useCallback(() => setEditingField(null), []);
 
   /**
@@ -69,21 +92,33 @@ export function useStampFieldEditors({
    * 閉じてしまう。その保存が失敗しても編集欄は閉じたままなので、開き直したときに
    * `openMemo()` などが古い保存済みの値でドラフトを初期化し、入力が消える。
    *
+   * **閉じるのは、いま開いているのがその項目の編集欄のときだけ。**保存を待つあいだも
+   * シートは閉じられて別の項目を開けるので、開いているのが別の項目なら触っていない
+   * 入力を閉じることになり、同じように巻き戻る。
+   *
    * **patch は関数で受け取る。**場所の保存は書き込む前にジオコーディングを挟むので、
    * patch を先に組ませると、順番待ちに入る前の古い入力値で書き込むことになる
+   *
+   * **patch が null なら書き込まず、編集欄も閉じない。**場所の保存は、座標が
+   * 引けなかったときに利用者へ確認してから書き込むため、ここでいったん降りる
+   * （`saveLocation`）
    */
   const save = React.useCallback(
     async (
       field: EditableField,
-      buildPatch: () => StampPatch | Promise<StampPatch>,
+      buildPatch: () => StampPatch | null | Promise<StampPatch | null>,
     ) => {
       if (!stampId) return;
       const run = async () => {
         try {
-          onUpdated(await updateStamp(stampId, await buildPatch()));
+          const patch = await buildPatch();
+          if (!patch) return;
+          onUpdated(await updateStamp(stampId, patch));
           // 自分がこの項目の待ち行列の最後なら閉じる。後ろに保存が積まれていれば、
           // その編集欄は後続の保存が自分で閉じる
-          if (saveQueues.current.get(field) === next) closeEditor();
+          if (saveQueues.current.get(field) === next) {
+            setEditingField((current) => (current === field ? null : current));
+          }
         } catch (error) {
           console.error(`${logTag} failed to update ${field}`, error);
           Alert.alert(
@@ -98,7 +133,7 @@ export function useStampFieldEditors({
       saveQueues.current.set(field, next);
       await next;
     },
-    [closeEditor, logTag, onUpdated, stampId, t],
+    [logTag, onUpdated, stampId, t],
   );
 
   return {
@@ -146,20 +181,58 @@ export function useStampFieldEditors({
     saveDate: () => {
       void save("date", () => ({ capturedAt: draftDate.toISOString() }));
     },
-    // **住所を直したら座標も引き直す。**そうしないと地図が前の場所を指したまま
-    // 住所だけ変わり、表示が食い違う（#87）。
-    //
-    // 引けなかったときは座標を据え置く。「おばあちゃんち」のような住所として
-    // 引けない文字列は入りうるし、そこで座標を消すと地図ごと出なくなる
+    // 住所の保存と座標の追従、引けなかったときの分岐は
+    // docs/front-architecture.md「場所の編集と座標の追従」に従う
     saveLocation: () => {
+      // 住所が変わっていなければ引き直さない
+      if (
+        normalizeOptionalText(draftLocation) === normalizeOptionalText(location)
+      ) {
+        closeEditor();
+        return;
+      }
+      const generation = ++locationSaveGeneration.current;
+      // 押し直したので、前の保存が出した警告は答える対象ではなくなる
+      setGeocodeWarning(null);
       void save("location", async () => {
-        const address = normalizeOptionalText(draftLocation);
-        if (!address) {
-          return { address };
+        if (locationSaveGeneration.current !== generation) return null;
+        // 引いているあいだに打ち直されていたら、結果を捨てて引き直す
+        let address = normalizeOptionalText(draftLocation);
+        for (;;) {
+          if (!address) {
+            return { address };
+          }
+          const geocoded = await geocodeAddress(address);
+          if (locationSaveGeneration.current !== generation) return null;
+          const latest = normalizeOptionalText(draftLocationRef.current);
+          if (latest !== address) {
+            address = latest;
+            continue;
+          }
+          if (geocoded.status === "found") {
+            return { address, location: geocoded.location };
+          }
+          setGeocodeWarning({ address, reason: geocoded.status });
+          return null;
         }
-        const geocoded = await geocodeAddress(address);
-        return geocoded ? { address, location: geocoded } : { address };
       });
+    },
+
+    geocodeWarning,
+    cancelGeocodeWarning: () => {
+      // 保存をやめたので、順番待ちに残っている同じ住所の保存も流さない
+      locationSaveGeneration.current += 1;
+      setGeocodeWarning(null);
+      // 開き直すのは、どの編集欄も開いていないときだけ
+      setEditingField((current) => current ?? "location");
+    },
+    saveLocationAnyway: () => {
+      const pending = geocodeWarning;
+      locationSaveGeneration.current += 1;
+      setGeocodeWarning(null);
+      if (!pending) return;
+      // 引き直しはしない。警告を出す前に引いた結果をそのまま採用する
+      void save("location", () => ({ address: pending.address }));
     },
   };
 }

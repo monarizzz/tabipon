@@ -34,6 +34,9 @@ const mockEditors: StampFieldEditors = {
   saveDate: fn(),
   saveLocation: fn(),
   saveMemo: fn(),
+  geocodeWarning: null,
+  cancelGeocodeWarning: fn(),
+  saveLocationAnyway: fn(),
 };
 
 const meta = {
@@ -65,6 +68,28 @@ export const MemoOpen: Story = {
 
 export const DateOpen: Story = {
   args: { editors: { ...mockEditors, editingField: "date" } },
+};
+
+/** 住所として引けない文字列を保存しようとしたとき */
+export const GeocodeNotFound: Story = {
+  args: {
+    editors: {
+      ...mockEditors,
+      editingField: "location",
+      geocodeWarning: { address: "おばあちゃんち", reason: "notFound" },
+    },
+  },
+};
+
+/** ジオコーダ自体が失敗して座標を引けなかったとき。入力自体は正しいかもしれない */
+export const GeocodeUnavailable: Story = {
+  args: {
+    editors: {
+      ...mockEditors,
+      editingField: "location",
+      geocodeWarning: { address: "東京都港区芝公園", reason: "unavailable" },
+    },
+  },
 };
 
 /** 完了画面。日時の編集欄を出さないので、date を開こうとしても何も出ない */
