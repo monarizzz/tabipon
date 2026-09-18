@@ -61,7 +61,7 @@ export function useAlbum(): Album {
     // 詳細画面は id から DB を引くので、渡すのは id だけでよい
     pressStamp: (item) =>
       router.push({ pathname: "/album-stamp-detail", params: { id: item.id } }),
-    // スタンプを増やす手段は撮影しか無いので、遷移先はカメラタブに固定でよい
+    // 遷移先の根拠は docs/REQUIREMENTS.md「3. 画面定義 > 画面遷移」
     startStamp: () => router.navigate("/(tabs)"),
     openCollectionSheet: () => setCollectionSheetVisible(true),
     closeCollectionSheet: () => setCollectionSheetVisible(false),
