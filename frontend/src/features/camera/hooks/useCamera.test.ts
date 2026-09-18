@@ -21,8 +21,10 @@ jest.mock("expo-router", () => ({
 // 返す関数は毎レンダー作り直さない。作り直すと useCamera 内の
 // useCallback の同一性が毎回変わり、latestFocusEffects() が
 // 古い分まで拾ってしまう
-const mockPermission: { current: { granted: boolean; canAskAgain: boolean } } =
-  { current: { granted: true, canAskAgain: false } };
+// 第 1 要素は OS への問い合わせが終わるまで null
+const mockPermission: {
+  current: { granted: boolean; canAskAgain: boolean } | null;
+} = { current: { granted: true, canAskAgain: false } };
 const mockRequestPermission = jest.fn();
 const mockGetPermission = jest.fn();
 jest.mock("expo-camera", () => ({
@@ -298,6 +300,28 @@ describe("useCamera", () => {
       "camera.captureFailedTitle",
       "camera.captureFailedMessage",
     );
+  });
+
+  // 起動直後は権限の読み込みが終わっておらず、そこを拒否扱いにすると
+  // 許可済みの端末でも許可を求める画面が一瞬出る（Issue #299）
+  describe("権限の読み込みが終わっていない場合", () => {
+    it("拒否扱いにせず、許可済みとして扱う", async () => {
+      mockPermission.current = null;
+
+      const { result } = await setup();
+
+      expect(result.current.permissionGranted).toBe(true);
+      expect(result.current.permissionCanAskAgain).toBe(true);
+    });
+
+    it("マウント時の問い合わせと重ならないよう、読み直しは投げない", async () => {
+      mockPermission.current = null;
+      await setup();
+
+      await returnToApp();
+
+      expect(mockGetPermission).not.toHaveBeenCalled();
+    });
   });
 
   // 拒否画面は「設定アプリでオンにしてから戻ってください」と案内している。

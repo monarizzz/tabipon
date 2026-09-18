@@ -63,11 +63,14 @@ export function useCamera(): Camera {
     }, [stopCapturing]),
   );
 
-  const permissionGranted = permission?.granted ?? false;
+  // 読み込み中 (permission === null) はまだ OS に聞けていないだけで拒否ではない。
+  // false に倒すと、許可済みの端末でも起動直後の 1 フレームだけ許可を求める画面が出る
+  const permissionGranted = permission?.granted ?? true;
 
   // useCameraPermissions() が自動で読むのはマウント時の 1 度だけで、
   // 画面が残ったままだと古い拒否状態を表示し続ける。
-  // 許可済みなら読み直す必要は無いので OS への問い合わせを省く
+  // 許可済み・読み込み中は OS への問い合わせを省く
+  // (読み込み中はマウント時の問い合わせが走っている最中なので、重ねても無駄になる)
   const refreshPermission = React.useCallback(() => {
     if (permissionGranted) return;
     void getPermission();
