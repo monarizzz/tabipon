@@ -7,7 +7,7 @@ import {
   STAMP_SIZE,
 } from "@/src/utils/stamp/constants/constants";
 import { drawFrame } from "@/src/utils/stamp/frames/drawFrame";
-import { renderToSquareImage } from "@/src/utils/stamp/surface";
+import { renderToSquareImage } from "@/src/utils/skia/surface";
 import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 
 /**

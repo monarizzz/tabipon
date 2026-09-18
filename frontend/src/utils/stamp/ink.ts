@@ -18,7 +18,7 @@ import {
 
 import { STAMP_SIZE } from "@/src/utils/stamp/constants/constants";
 import { createCachedEffect } from "@/src/utils/stamp/runtimeEffect";
-import { renderToSquareImage } from "@/src/utils/stamp/surface";
+import { renderToSquareImage } from "@/src/utils/skia/surface";
 
 /** 暗い画素と判定する閾値 180（0..255 スケール）を 0..1 に直したもの */
 const DARK_PIXEL_THRESHOLD = 180 / 255;

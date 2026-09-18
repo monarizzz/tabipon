@@ -12,7 +12,7 @@ import {
   FRAME_CENTER,
   STAMP_SIZE,
 } from "@/src/utils/stamp/constants/constants";
-import { renderToSquareImage } from "@/src/utils/stamp/surface";
+import { renderToSquareImage } from "@/src/utils/skia/surface";
 
 /** 回転を掛ける下限。1 度以下は無視する */
 const MIN_TILT_ANGLE = 1.0;

@@ -11,7 +11,7 @@ import { applyInkColor } from "@/src/utils/stamp/ink";
 import { generateLineArtFromImage } from "@/src/utils/stamp/lineArt";
 import { rotateStamp } from "@/src/utils/stamp/rotate";
 import { applyScratch } from "@/src/utils/stamp/scratch";
-import { toRasterImage } from "@/src/utils/stamp/surface";
+import { toRasterImage } from "@/src/utils/skia/surface";
 import type { StampFrame } from "@/src/utils/stamp/types/stampFrame";
 import type { StampRenderOptions } from "@/src/utils/stamp/types/stampRenderOptions";
 

@@ -45,7 +45,7 @@ import {
 
 import { LINE_ART_SIZE } from "@/src/utils/stamp/constants/constants";
 import { createCachedEffect } from "@/src/utils/stamp/runtimeEffect";
-import { renderToSquareImage, toRasterImage } from "@/src/utils/stamp/surface";
+import { renderToSquareImage, toRasterImage } from "@/src/utils/skia/surface";
 
 /**
  * `cv2.GaussianBlur(gray, (5, 5), 0)` 相当の σ。

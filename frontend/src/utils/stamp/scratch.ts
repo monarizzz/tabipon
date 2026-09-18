@@ -18,7 +18,7 @@ import {
 
 import { STAMP_SIZE } from "@/src/utils/stamp/constants/constants";
 import { createCachedEffect } from "@/src/utils/stamp/runtimeEffect";
-import { renderToSquareImage } from "@/src/utils/stamp/surface";
+import { renderToSquareImage } from "@/src/utils/skia/surface";
 
 /**
  * `cv2.GaussianBlur(noise, (15, 15), 0)` 相当の σ。
