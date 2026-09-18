@@ -18,8 +18,6 @@ const meta = {
     openDesignSheet: () => {},
     closeDesignSheet: () => {},
     confirmDesign: () => {},
-    showLandmarkName: true,
-    toggleShowLandmarkName: () => {},
     helpVisible: false,
     toggleHelp: () => {},
     closeHelp: () => {},

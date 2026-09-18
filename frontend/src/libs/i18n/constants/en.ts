@@ -54,7 +54,6 @@ export const en: Translations = {
   design: {
     frame: "Frame",
     color: "Color",
-    showLandmark: "Show landmark name",
     apply: "Use this design",
     changeDesign: "Change design",
     frameClassic: "Classic",

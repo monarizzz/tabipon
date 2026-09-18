@@ -59,8 +59,6 @@ const meta = {
     longitude: 139.7454,
     editors: EDITORS,
     design: DESIGN,
-    showLandmarkName: true,
-    toggleShowLandmarkName: () => {},
     deleteDialogVisible: false,
     openDeleteDialog: () => {},
     cancelDelete: () => {},

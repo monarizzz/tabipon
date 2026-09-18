@@ -31,8 +31,6 @@ export function StampDetailMain({
   longitude,
   editors,
   design,
-  showLandmarkName,
-  toggleShowLandmarkName,
   deleteDialogVisible,
   openDeleteDialog,
   cancelDelete,
@@ -125,8 +123,6 @@ export function StampDetailMain({
           colorOptions={STAMP_INK_COLORS}
           selectedColor={design.selectedColor}
           onSelectColor={design.setSelectedColor}
-          showLandmarkName={showLandmarkName}
-          onToggleShowLandmarkName={toggleShowLandmarkName}
           onConfirm={design.confirm}
         />
       )}

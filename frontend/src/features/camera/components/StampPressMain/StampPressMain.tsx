@@ -52,8 +52,6 @@ export function StampPressMain({
   openDesignSheet,
   closeDesignSheet,
   confirmDesign,
-  showLandmarkName,
-  toggleShowLandmarkName,
   helpVisible,
   toggleHelp,
   closeHelp,
@@ -205,8 +203,6 @@ export function StampPressMain({
         colorOptions={STAMP_INK_COLORS}
         selectedColor={draftColor}
         onSelectColor={selectDraftColor}
-        showLandmarkName={showLandmarkName}
-        onToggleShowLandmarkName={toggleShowLandmarkName}
         onConfirm={confirmDesign}
       />
       <CommonDialog

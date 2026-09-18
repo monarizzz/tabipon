@@ -15,7 +15,6 @@ export function useStampDetail(id: string | undefined): StampDetail {
   const { t } = useTranslation();
   const [stamp, setStamp] = React.useState<Stamp | null>(null);
   const [unavailable, setUnavailable] = React.useState(false);
-  const [showLandmarkName, setShowLandmarkName] = React.useState(true);
   const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
 
   const editors = useStampFieldEditors({
@@ -62,9 +61,6 @@ export function useStampDetail(id: string | undefined): StampDetail {
 
     editors,
     design,
-
-    showLandmarkName,
-    toggleShowLandmarkName: setShowLandmarkName,
 
     deleteDialogVisible,
     openDeleteDialog: () => setDeleteDialogVisible(true),

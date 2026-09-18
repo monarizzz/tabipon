@@ -53,7 +53,6 @@ export const zh: Translations = {
   design: {
     frame: "边框",
     color: "颜色",
-    showLandmark: "显示地标名称",
     apply: "使用此设计",
     changeDesign: "更改设计",
     frameClassic: "经典",

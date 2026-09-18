@@ -26,9 +26,6 @@ export type StampPress = {
   closeDesignSheet: () => void;
   confirmDesign: () => void;
 
-  showLandmarkName: boolean;
-  toggleShowLandmarkName: (value: boolean) => void;
-
   helpVisible: boolean;
   toggleHelp: () => void;
   closeHelp: () => void;
