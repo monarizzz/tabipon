@@ -183,12 +183,12 @@ export function useStampFieldEditors({
     },
 
     geocodeWarning,
-    // **閉じるのではなく開き直す。**ジオコーディングを待っているあいだも場所の
-    // シートはスワイプで閉じられるので、警告が出た時点で開いているとは限らない。
-    // ドラフトは閉じても残るため、開き直せば入力内容がそのまま戻る
     cancelGeocodeWarning: () => {
       setGeocodeWarning(null);
-      setEditingField("location");
+      // 開き直すのは、どの編集欄も開いていないときだけ。待っているあいだに
+      // 別の項目を開いていたら、そのシートを閉じることになり、開き直したときに
+      // `openMemo()` などがドラフトを保存済みの値へ巻き戻して入力が消える
+      setEditingField((current) => current ?? "location");
     },
     saveLocationAnyway: () => {
       const pending = geocodeWarning;

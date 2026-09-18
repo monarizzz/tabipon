@@ -402,4 +402,39 @@ describe("警告のあとの分岐", () => {
     expect(view.result.current.draftLocation).toBe("おばあちゃんち");
     expect(updateStampMock).not.toHaveBeenCalled();
   });
+
+  // 開き直すと別の項目のシートを閉じることになり、開き直したときに
+  // `openMemo()` がドラフトを巻き戻して入力が消える
+  test("ジオコード中に別の項目を開いていたら、編集に戻ってもそのシートは閉じない", async () => {
+    let settle!: (result: GeocodeResult) => void;
+    geocodeAddressMock.mockReturnValue(
+      new Promise<GeocodeResult>((resolve) => {
+        settle = resolve;
+      }),
+    );
+    const view = await setup(LOCATED_STAMP);
+
+    // 場所を保存中のまま、シートを閉じてメモを開き、本文を入れる
+    await press(view.result.current.openLocation);
+    await press(() => view.result.current.setDraftLocation("おばあちゃんち"));
+    await press(view.result.current.saveLocation);
+    await press(view.result.current.closeEditor);
+    await press(view.result.current.openMemo);
+    await press(() => view.result.current.setDraftMemo("書きかけのメモ"));
+
+    await act(async () => {
+      settle({ status: "notFound" });
+    });
+    await waitFor(() =>
+      expect(view.result.current.geocodeWarning).not.toBeNull(),
+    );
+
+    await press(view.result.current.cancelGeocodeWarning);
+
+    expect(view.result.current.geocodeWarning).toBeNull();
+    // メモの編集を続けられる。場所のシートは開き直さない
+    expect(view.result.current.editingField).toBe("memo");
+    expect(view.result.current.draftMemo).toBe("書きかけのメモ");
+    expect(updateStampMock).not.toHaveBeenCalled();
+  });
 });
