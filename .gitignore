@@ -18,14 +18,14 @@ __pycache__/
 log/
 
 # Node / Expo
-# ルートの node_modules は Git フック（husky / lint-staged）専用
+# pnpm workspace（nodeLinker: hoisted）なので依存の大半はルートの node_modules に入る
 /node_modules/
 frontend/node_modules/
 frontend/.expo/
 frontend/dist/
 frontend/build/
 # node_modules の canvaskit-wasm からコピーしてくる 8MB の生成物。
-# `npm run setup:skia-web`（web の起動時に自動で走る）が置き直す
+# `pnpm run setup:skia-web`（web の起動時に自動で走る）が置き直す
 frontend/public/canvaskit.wasm
 
 # OS

@@ -223,7 +223,7 @@ src/infra/
 
 ### テストの置き場
 
-`cd frontend && npm test`（`jest.config.js` の `testMatch`）が拾うのは
+`cd frontend && pnpm test`（`jest.config.js` の `testMatch`）が拾うのは
 `frontend/src/**/*.test.ts(x)`。現在は次の 2 種類が入っている。
 
 - **ストーリーのスモークテスト**: `src/stories.test.tsx` の 1 本（下記）
@@ -231,7 +231,7 @@ src/infra/
 
 ### ストーリーのテスト
 
-`cd frontend && npm test` で、`src/commons/` と `src/features/` の `*.stories.tsx` を Storybook のportable stories（`composeStories`）として Jest から描画する。CI（`.github/workflows/ci.yml` の`Storybook stories` ジョブ）でも同じコマンドを実行する。
+`cd frontend && pnpm test` で、`src/commons/` と `src/features/` の `*.stories.tsx` を Storybook のportable stories（`composeStories`）として Jest から描画する。CI（`.github/workflows/ci.yml` の`Storybook stories` ジョブ）でも同じコマンドを実行する。
 
 - 検証するのは「例外を投げずに描画できること」だけ。見た目の崩れは検出できない（見た目は実機の Storybook で確認する）
 - ストーリーに `play` があれば併せて実行される。ただし React Native + Jest では`play` に `canvasElement` / `canvas` / `userEvent` が渡らない（`document` が無いため）。web の作法どおり `({ canvas, userEvent })` を分割代入する `play` は動かないので、操作は `@testing-library/react-native` の `screen` / `fireEvent` で書くこと
@@ -248,7 +248,7 @@ src/infra/
 
 ## native / web の出し分け
 
-アプリの動作対象は iOS / Android で、web は Storybook（`npm run storybook:web`）を出すためだけに動かす。そのため「native では使うが web では読み込めない依存」が出てくる。
+アプリの動作対象は iOS / Android で、web は Storybook（`pnpm run storybook:web`）を出すためだけに動かす。そのため「native では使うが web では読み込めない依存」が出てくる。
 
 **native のバンドルにしか載らない依存は、`Platform.OS` の実行時分岐ではなく `.web.tsx` / `.web.ts` のファイル分割で出し分ける。**
 import は分岐より先に評価されるので、分岐では import そのものを止められない。Metro は同じディレクトリに `<名前>.web.tsx` があれば web のバンドルでそちらを選ぶため、呼ぶ側の import 文（`./StampLocationMap`）は native / web で変えなくてよい。

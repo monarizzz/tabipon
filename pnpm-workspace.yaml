@@ -1,0 +1,12 @@
+packages:
+  - frontend
+
+allowBuilds:
+  '@shopify/react-native-skia': true
+  esbuild: true
+  unrs-resolver: true
+
+nodeLinker: hoisted
+
+overrides:
+  expo-modules-core: ~57.0.18
