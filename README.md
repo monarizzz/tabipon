@@ -47,12 +47,11 @@ Expo / React Native アプリを起動方法
 初回パッケージインストール:
 
 ```bash
-npm ci             # リポジトリルート。Git フック（husky）を有効にする
-cd frontend
-npm ci
+corepack enable    # 初回のみ。package.json の packageManager に合わせた pnpm が使われる
+pnpm install       # リポジトリルートで実行する
 ```
 
-ルートの `npm ci` は Git フックを入れるためのもので、アプリの依存とは別物です。
+pnpm workspace なので、アプリ（`frontend/`）の依存と Git フック（husky）がまとめて入ります。
 これを実行すると、コミット時に次が自動で走るようになります。
 
 - ステージした差分の整形（Prettier が自動修正して再ステージ）と Lint（ESLint）
@@ -65,19 +64,19 @@ npm ci
 
 ```bash
 cd frontend
-npm run start
+pnpm run start
 ```
 
 トンネル起動（公共Wifiなど）：
 
 ```bash
 cd frontend
-npx expo start --tunnel
+pnpm exec expo start --tunnel
 ```
 
 キャッシュクリアして起動：
 
 ```bash
 cd frontend
-npx expo start -c
+pnpm exec expo start -c
 ```

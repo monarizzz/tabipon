@@ -82,7 +82,7 @@ gh api --paginate --slurp 'repos/{owner}/{repo}/pulls?state=open&per_page=100'
 
 ## 修正と再レビュー
 
-未対応の指摘があれば、妥当性を確認できたものだけを最小差分で修正し、関連する検証を行う。フロントエンドを変更した場合は `frontend/` で `npm run typecheck` と `npm run lint` を実行し、必要に応じて `npm test` も実行する。
+未対応の指摘があれば、妥当性を確認できたものだけを最小差分で修正し、関連する検証を行う。フロントエンドを変更した場合は `frontend/` で `pnpm run typecheck` と `pnpm run lint` を実行し、必要に応じて `pnpm test` も実行する。
 
 修正対象が現在の worktree と異なる場合は、編集前に次を確認する。
 

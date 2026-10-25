@@ -54,13 +54,12 @@
 
 ## Git フック
 
-リポジトリルートで `npm ci`を実行すると `core.hooksPath` が `.husky/_` に設定される
-`frontend/` 側の `npm ci` では有効にならないため、必ずルートで実行する
+リポジトリルートで `pnpm install`を実行すると `core.hooksPath` が `.husky/_` に設定される
 
 | フック       | 実行内容                                                                                                  |
 | ------------ | --------------------------------------------------------------------------------------------------------- |
 | `pre-commit` | ステージした `frontend/` 配下の差分に `prettier --write`（自動修正して再ステージ）と `eslint`（検査のみ） |
-|              | TS / TSX / tsconfig がステージされているときだけ `npm run typecheck` を `frontend/` 全体に実行            |
+|              | TS / TSX / tsconfig がステージされているときだけ `pnpm run typecheck` を `frontend/` 全体に実行            |
 | `commit-msg` | 件名の prefix が「コミット > メッセージ」の 8 つのいずれかかを検査                                        |
 
 - 整形は**自動修正**される
@@ -137,7 +136,7 @@ git worktree list            # 消えたことを確認
 - 削除前に `git status` で未コミットの変更が無いことを確認する
 
 > [!IMPORTANT]
-> 作ったらルートで `npm ci` を実行する
+> 作ったらルートで `pnpm install` を実行する
 
 ## コメント
 
@@ -195,20 +194,19 @@ UI コードを生成する際は、`design/DESIGN.md`に定義されたビジ�
 ### 初回起動時
 
 ```bash
-npm ci
-cd frontend && npm ci
+corepack enable   # 初回のみ
+pnpm install
 ```
 
-リポジトリルートにも `package.json` があり、そちらの `npm ci` は Git フックを有効にするためのもの（「Git フック」節を参照）。
-アプリの依存とは別物なので、clone 後は両方で実行する。
+リポジトリルートで実行する。pnpm workspace なので、ルート（Git フック）と `frontend/` の依存がまとめて入る。
 
 #### パッケージの追加
 
-`npm install` ではなく `npx expo install` を使用
+`pnpm add` ではなく `pnpm exec expo install` を使用
 SDK に対応したバージョンが選ぶ必要があるため。
 
 ```bash
-npx expo install <パッケージ名>
+pnpm exec expo install <パッケージ名>
 ```
 
 ### 起動
@@ -218,27 +216,27 @@ npx expo install <パッケージ名>
 frontend配下で実行
 
 ```bash
- npm run start
+ pnpm run start
 ```
 
 - **Expo Go 57 以降、Expo CLI と Expo Go アプリの両方に、同じアカウントでログインしている必要がある**
 
 #### Storybook
 
-`STORYBOOK_ENABLED=true` が付くと、アプリの代わりに Storybook が起動する（`npm run storybook:ios` などが設定済み）
+`STORYBOOK_ENABLED=true` が付くと、アプリの代わりに Storybook が起動する（`pnpm run storybook:ios` などが設定済み）
 web は `--port 6006` で開く。
 
 ### コマンド
 
 いずれも `frontend/` で実行する。
-リポジトリルートに `tsconfig.json` は無いため、ルートから `npx tsc --noEmit` を実行すると frontend が検査されないまま**終了コード 0 で成功したように見える**
+リポジトリルートに `tsconfig.json` は無いため、ルートから `pnpm exec tsc --noEmit` を実行すると frontend が検査されないまま**終了コード 0 で成功したように見える**
 
-|              |                                                       |
-| ------------ | ----------------------------------------------------- |
-| 型チェック   | `npm run typecheck`                                   |
-| Lint         | `npm run lint`                                        |
-| フォーマット | `npm run format:check`（自動修正は `npm run format`） |
-| テスト       | `npm test`                                            |
-| Storybook    | `npm run storybook:ios` / `storybook:web`             |
+|              |                                                         |
+| ------------ | ------------------------------------------------------- |
+| 型チェック   | `pnpm run typecheck`                                    |
+| Lint         | `pnpm run lint`                                         |
+| フォーマット | `pnpm run format:check`（自動修正は `pnpm run format`） |
+| テスト       | `pnpm test`                                             |
+| Storybook    | `pnpm run storybook:ios` / `storybook:web`              |
 
 テストは `src/commons/` と `src/features/` の `*.stories.tsx` を Jest で描画するスモークテスト（詳細は `docs/front-architecture.md`）
