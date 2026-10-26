@@ -70,6 +70,20 @@
 > フックの対象： `frontend/` 配下
 > **`backend/` など新しいディレクトリを追加するときは、`.husky/pre-commit` も必ず更新する。**
 
+## 定期チェック
+
+`.github/workflows/expo-go-check.yml` が毎日 9:00（日本時間）に次を検査し、ずれていれば Issue を立てる。
+同じ種類の Issue が開いていれば、新しく作らずに本文を更新する。
+
+| 検査                   | ずれていたときの Issue                                            |
+| ---------------------- | ----------------------------------------------------------------- |
+| App Store の Expo Go   | `frontend/` の Expo SDK とメジャーが違う → SDK を上げる           |
+| `expo install --check` | 依存が SDK の推奨バージョンと違う → `expo install --fix` で揃える |
+
+- 対応手順は Issue の本文に書かれている
+- SDK がずれている間は、依存の Issue は立てない（SDK を上げる手順に `expo install --fix` が含まれるため）
+- 手動で動かすときは Actions タブから `Expo Go check` を実行する。ローカルでは `DRY_RUN=1 node .github/scripts/check-expo-go.mjs` で、Issue を作らずに本文だけ確認できる
+
 ## Issue
 
 実装方針などの意思決定を勝手に行わない
