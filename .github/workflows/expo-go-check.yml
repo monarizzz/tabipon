@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: pnpm
       # expo install --check がインストール済みの expo と各パッケージのバージョンを読むため
       - run: pnpm install --frozen-lockfile
