@@ -11,7 +11,7 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{ headerShown: false }}
-      tabBar={({ state, descriptors, navigation }) => (
+      tabBar={({ state, descriptors, emitter, navigateToTab }) => (
         <TabBar
           items={state.routes.map((route, index) => {
             const isFocused = state.index === index;
@@ -27,13 +27,13 @@ export default function TabsLayout() {
               active: isFocused,
               activeColor: definition?.activeColor,
               onPress: () => {
-                const event = navigation.emit({
+                const event = emitter.emit({
                   type: "tabPress",
                   target: route.key,
                   canPreventDefault: true,
                 });
                 if (!isFocused && !event.defaultPrevented) {
-                  navigation.navigate(route.name);
+                  navigateToTab(route.key);
                 }
               },
             };
