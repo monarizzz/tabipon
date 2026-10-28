@@ -1,5 +1,5 @@
 /**
- * @jest-environment node
+ * @jest-environment jest-expo/src/preset/nativeEnvironment
  */
 // expo-sqlite はネイティブモジュールなので Jest では動かない。
 // 制約が SQLite に本当に効くかを確かめたいので、モックではなく Node 組み込みの

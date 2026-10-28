@@ -8,7 +8,7 @@
 // 読み込みは非同期なので setup ファイルからは行えず、環境側で待つ必要がある。
 // Skia が配る `jestEnv.js` は素の node 環境を継承しており、react-native の
 // 条件付き exports が効かなくなるため、そちらではなくこのファイルを使う。
-const ReactNativeEnv = require("@react-native/jest-preset/jest/react-native-env");
+const ReactNativeEnv = require("jest-expo/src/preset/nativeEnvironment");
 const CanvasKitInit = require("canvaskit-wasm/bin/full/canvaskit");
 
 module.exports = class SkiaReactNativeEnv extends ReactNativeEnv {

@@ -4,17 +4,16 @@
 //
 // preset は jest-expo を使う。react-native の素のプリセットでは expo-* の
 // モジュールが解決できず、ストーリーを import した時点で落ちるため。
-// Expo SDK 57 系に合わせて jest-expo も 57 系を使う。
 /** @type {import('jest').Config} */
 module.exports = {
   preset: "jest-expo",
   // Skia の描画 API を使うコンポーネントのために CanvasKit を読み込む環境を使う
   // （詳細は jest.environment.js）
   testEnvironment: "<rootDir>/jest.environment.js",
-  // react-native-worklets (Reanimated 4 の基盤) は `.native.ts` 側を解決すると
-  // ネイティブモジュールを掴みに行って落ちる。公式の resolver が native 拡張子を
-  // 外してくれるので、それに委ねる
-  resolver: "react-native-worklets/jest/resolver.js",
+  // react-native-worklets (Reanimated 4 の基盤) と Reanimated の一部は `.native.ts`
+  // 側を解決するとネイティブの UI ランタイムを掴みに行って落ちる。Reanimated の
+  // 公式 resolver が両方の native 拡張子を外してくれる（worklets 用の resolver を内包）
+  resolver: "react-native-reanimated/jest/resolver.js",
   setupFilesAfterEnv: [
     "<rootDir>/jest.setup.ts",
     "<rootDir>/jest.setup.storybook.ts",

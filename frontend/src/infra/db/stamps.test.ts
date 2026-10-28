@@ -1,5 +1,5 @@
 /**
- * @jest-environment node
+ * @jest-environment jest-expo/src/preset/nativeEnvironment
  */
 // `migrations.test.ts` と同じ理由で、SQL は本物の SQLite（node:sqlite）に流す。
 // モックした DB では「スキーマに対してこの SQL が通るか」を確かめられないため。
