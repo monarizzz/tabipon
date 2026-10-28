@@ -21,8 +21,9 @@ export function applyCircularFrame(
   color: string,
   frame: StampFrame,
 ): SkImage {
-  const circle = Skia.Path.Make();
-  circle.addCircle(FRAME_CENTER, FRAME_CENTER, FRAME_RADIUS);
+  const circle = Skia.PathBuilder.Make()
+    .addCircle(FRAME_CENTER, FRAME_CENTER, FRAME_RADIUS)
+    .build();
 
   return renderToSquareImage(STAMP_SIZE, (canvas) => {
     canvas.drawColor(Skia.Color("white"));
