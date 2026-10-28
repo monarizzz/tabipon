@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Vibration,
   ActivityIndicator,
+  type HostInstance,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import Animated, {
@@ -70,7 +71,7 @@ export function StampPressMain({
   const [stampPressed, setStampPressed] = React.useState(false);
   const longPressTriggeredRef = React.useRef(false);
   const stampScale = useSharedValue(1);
-  const stampWrapRef = React.useRef<View>(null);
+  const stampWrapRef = React.useRef<HostInstance>(null);
   // 押した瞬間に決まる演出値。長押しで押した場合は 0 のまま（掠れも傾きも無し）
   const finishRef = React.useRef<PressGestureFinish>({
     scratchLevel: 0,

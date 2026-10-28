@@ -54,7 +54,7 @@ export function StampLocationMap({
   // 画面上の全タッチなので、カードの外に置いた指まで数えてしまい、地図側の指を
   // 離しても「終わり」にならない。カード外の指が離れたことはここへ届かないため、
   // 置く側が止まったままになる
-  const touchIds = React.useRef(new Set<string>());
+  const touchIds = React.useRef(new Set<number>());
 
   const handleTouchStart = (event: GestureResponderEvent) => {
     touchIds.current.add(event.nativeEvent.identifier);
