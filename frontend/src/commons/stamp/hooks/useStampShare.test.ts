@@ -61,7 +61,7 @@ beforeEach(() => {
   writeShareCardMock.mockReturnValue("file:///cache/share-cards/stamp-1.png");
   share = jest
     .spyOn(Share, "share")
-    .mockResolvedValue({ action: "sharedAction" });
+    .mockResolvedValue({ action: "sharedAction", activityType: undefined });
 });
 
 afterEach(() => {
