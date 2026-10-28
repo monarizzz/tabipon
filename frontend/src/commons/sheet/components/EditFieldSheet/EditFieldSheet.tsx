@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  type TextInputInstance,
 } from "react-native";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -45,8 +46,9 @@ export function EditFieldSheet({
   ...field
 }: Props) {
   const { t, locale } = useTranslation();
-  // react-native の TextInput ではなく BottomSheetTextInput の ref 型を使う。
-  // 後者は react-native-gesture-handler の TextInput を包んでおり、両者は別の型
+  // BottomSheetTextInput の ref 型は react-native-gesture-handler v3 の TextInput
+  // （コンポーネントの型）から作られていて focus が無い。実体は react-native の
+  // TextInput なので、呼ぶ側で TextInputInstance として扱う
   const inputRef =
     useRef<React.ComponentRef<typeof BottomSheetTextInput>>(null);
   // Android で開いているダイアログ。null は閉じている状態
@@ -70,7 +72,7 @@ export function EditFieldSheet({
       onClose={handleClose}
       onOpened={() => {
         if (field.mode === "text") {
-          inputRef.current?.focus();
+          (inputRef.current as TextInputInstance | null | undefined)?.focus();
           return;
         }
         // Android は画面内にピッカーを埋め込めないので、開いたらそのまま日付から選ばせる

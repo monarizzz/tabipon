@@ -3,6 +3,14 @@
 import "react-native-gesture-handler/jestSetup";
 import { Image } from "react-native";
 
+// gesture-handler v3 は読み込み時に Worklets.getUIRuntimeHolder() を呼ぶ。
+// worklets の Jest 用 resolver が web 実装を選ぶため、ここで例外が投げられて
+// どのテストも落ちる。公式の jestSetup は差し替えていないので、web 版と同じ何もしない実装にする
+jest.mock(
+  "react-native-gesture-handler/lib/module/handlers/gestures/installUIRuntimeBindings",
+  () => ({ installUIRuntimeBindings: () => {} }),
+);
+
 // BottomSheet は Reanimated のワークレットとレイアウト計測に強く依存しており、
 // Node 上でそのまま描画すると mapper が react-native のモジュールを
 // 走査し始めて落ちる。ライブラリ公式のモックに差し替える

@@ -30,8 +30,9 @@ export function drawDashedCircle(
     if (i % 2 === 0) {
       continue;
     }
-    const path = Skia.Path.Make();
-    path.addArc(oval, i * sweep, sweep);
+    const path = Skia.PathBuilder.Make()
+      .addArc(oval, i * sweep, sweep)
+      .build();
     canvas.drawPath(path, paint);
   }
 }

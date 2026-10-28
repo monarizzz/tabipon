@@ -5,7 +5,11 @@ import {
   fireGestureHandler,
   getByGestureTestId,
 } from "react-native-gesture-handler/jest-utils";
-import { State, type PinchGesture } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  State,
+  type LegacyPinchGesture,
+} from "react-native-gesture-handler";
 
 import {
   CameraPreview,
@@ -30,8 +34,11 @@ jest.mock("expo-camera", () => {
 const LAYOUT = { nativeEvent: { layout: { width: 320, height: 640 } } };
 
 async function renderPreview(onZoomChange: (value: number) => void) {
+  // gesture-handler v3 の GestureDetector は GestureHandlerRootView の外だと例外を投げる
   const view = await render(
-    <CameraPreview facing="back" flash="off" onZoomChange={onZoomChange} />,
+    <GestureHandlerRootView>
+      <CameraPreview facing="back" flash="off" onZoomChange={onZoomChange} />
+    </GestureHandlerRootView>,
   );
   // コンテナ幅が確定するまでプレビューは描画されない
   await fireEvent(view.getByTestId("camera-preview"), "layout", LAYOUT);
@@ -44,7 +51,7 @@ describe("CameraPreview", () => {
     const view = await renderPreview(onZoomChange);
 
     await act(async () => {
-      fireGestureHandler<PinchGesture>(getByGestureTestId("pinch"), [
+      fireGestureHandler<LegacyPinchGesture>(getByGestureTestId("pinch"), [
         { state: State.BEGAN, scale: 1 },
         { state: State.ACTIVE, scale: 1 },
         { scale: 1.5 },

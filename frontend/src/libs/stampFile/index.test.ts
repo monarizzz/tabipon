@@ -1,5 +1,5 @@
 /**
- * @jest-environment node
+ * @jest-environment jest-expo/src/preset/nativeEnvironment
  */
 // パスの組み立てだけを見る。ファイルの読み書きは expo-file-system に触るので
 // `src/infra/db/stamps.test.ts` 側（行とファイルを揃えて見る）で確かめている。
