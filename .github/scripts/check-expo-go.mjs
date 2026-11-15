@@ -77,12 +77,10 @@ function upsertIssue(kind, title, body) {
       "list",
       "--state",
       "open",
-      "--author",
-      "app/github-actions",
       "--json",
       "number,body",
       "--limit",
-      "100",
+      "1000",
     ]),
   );
   const existing = open.find((issue) => issue.body.includes(MARKERS[kind]));
